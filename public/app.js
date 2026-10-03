@@ -1,0 +1,16 @@
+let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous";
+const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
+async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render()}
+function cats(){let cs=["Tous",...new Set(products.map(p=>p.category))];document.querySelector("#cats").innerHTML=cs.map(c=>`<button class="catbtn ${c===filter?"on":""}" onclick="filterBy('${c}')">${c}</button>`).join("")}
+function filterBy(c){filter=c;cats();render()}
+function render(){let q=document.querySelector("#q").value.toLowerCase();let list=products.filter(p=>(filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));document.querySelector("#products").innerHTML=list.map(p=>`<article class="card"><div class="pic">${p.emoji}</div><div class="info"><div class="cat">${p.category}</div><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="stock">${p.stock} disponible(s)</div><button class="add" onclick="add(${p.id})">Ajouter au panier</button></div></article>`).join("")}
+function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
+function add(id){let x=cartItems.find(a=>a.id===id);x?x.qty++:cartItems.push({id,qty:1});save();cart()}
+function update(){document.querySelector("#count").textContent=cartItems.reduce((s,x)=>s+x.qty,0);document.querySelector("#items").innerHTML=cartItems.length?cartItems.map(x=>{let p=products.find(p=>p.id===x.id);return `<div class="cartItem"><div class="em">${p.emoji}</div><div><b>${p.name}</b><br><small>${money(p.price)} × ${x.qty}</small></div><div class="qty"><button onclick="chg(${p.id},-1)">−</button>${x.qty}<button onclick="chg(${p.id},1)">+</button></div></div>`}).join(""):"<p style='color:#8190a2'>Panier vide.</p>";let t=cartItems.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0);document.querySelector("#total").textContent=money(t)}
+function chg(id,n){let x=cartItems.find(a=>a.id===id);x.qty+=n;if(x.qty<=0)cartItems=cartItems.filter(a=>a.id!==id);save()}
+function cart(){document.querySelector("#drawer").classList.add("show");update()}
+function closeCart(){document.querySelector("#drawer").classList.remove("show")}
+function openCheckout(){if(!cartItems.length)return alert("Panier vide.");document.querySelector("#checkout").classList.add("show")}
+function closeCheckout(){document.querySelector("#checkout").classList.remove("show")}
+async function order(){let customer={name:document.querySelector("#name").value,phone:document.querySelector("#phone").value,address:document.querySelector("#addr").value};if(!customer.name||!customer.phone||!customer.address)return alert("Remplis les informations.");let payment=document.querySelector("#pay").value;let r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,payment,items:cartItems})});let d=await r.json();if(!r.ok)return alert(d.error||"Erreur");alert("Commande enregistrée : "+d.orderId);cartItems=[];save();closeCheckout();closeCart();load()}
+document.querySelector("#q").oninput=render;load();
