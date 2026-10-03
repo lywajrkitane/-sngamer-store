@@ -33,7 +33,10 @@ async function initDb() {
       stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
       emoji TEXT NOT NULL DEFAULT '🎮',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
+    );await db(`
+  ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS emoji TEXT NOT NULL DEFAULT '🎮';
+`);
 
     CREATE TABLE IF NOT EXISTS orders (
       id TEXT PRIMARY KEY,
