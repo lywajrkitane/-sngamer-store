@@ -108,7 +108,8 @@ app.get("/api/products", async (req, res) => {
     );
 
     res.json(r.rows);
-  } catch {
+  } catch (err) {
+  console.error("PRODUCTS_ERROR:", err);
     res.status(500).json({
       error: "Impossible de charger les produits"
     });
