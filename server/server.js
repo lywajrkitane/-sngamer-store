@@ -74,6 +74,10 @@ async function initDb() {
     ALTER TABLE orders
     ALTER COLUMN customer_name DROP NOT NULL
   `);
+  await db(`
+  ALTER TABLE orders
+  ALTER COLUMN phone DROP NOT NULL
+`);
   const countResult = await db(
     "SELECT COUNT(*)::int AS count FROM products"
   );
