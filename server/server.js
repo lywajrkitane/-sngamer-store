@@ -18,6 +18,25 @@ const upload = multer({
     files: 4
   }
 });
+function uploadToCloudinary(buffer, resourceType, folder) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: resourceType,
+        folder: folder
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+
+    stream.end(buffer);
+  });
+}
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -635,7 +654,130 @@ app.delete(
     }
   }
 );
+app.post(
+  "/api/admin/products/:id/media",
+  requireAdmin,
+  (req, res) => {
+    upload.fields([
+      { name: "image1", maxCount: 1 },
+      { name: "image2", maxCount: 1 },
+      { name: "image3", maxCount: 1 },
+      { name: "video", maxCount: 1 }
+    ])(req, res, async (uploadError) => {
+      if (uploadError) {
+        console.error("MEDIA_UPLOAD_ERROR:", uploadError);
+        return res.status(400).json({
+          error: uploadError.message || "Erreur lors de l'envoi des fichiers"
+        });
+      }
 
+      try {
+        const productId = Number(req.params.id);
+
+        if (!Number.isInteger(productId) || productId <= 0) {
+          return res.status(400).json({
+            error: "ID produit invalide"
+          });
+        }
+
+        const productResult = await db(
+          "SELECT id FROM products WHERE id = $1",
+          [productId]
+        );
+
+        if (productResult.rows.length === 0) {
+          return res.status(404).json({
+            error: "Produit introuvable"
+          });
+        }
+
+        const files = req.files || {};
+
+        const image1 = files.image1?.[0];
+        const image2 = files.image2?.[0];
+        const image3 = files.image3?.[0];
+        const video = files.video?.[0];
+
+        if (!image1 && !image2 && !image3 && !video) {
+          return res.status(400).json({
+            error: "Aucun fichier envoyé"
+          });
+        }
+
+        const uploaded = {};
+
+        if (image1) {
+          const result = await uploadToCloudinary(
+            image1.buffer,
+            "image",
+            `sngamer-store/products/${productId}`
+          );
+          uploaded.image1_url = result.secure_url;
+        }
+
+        if (image2) {
+          const result = await uploadToCloudinary(
+            image2.buffer,
+            "image",
+            `sngamer-store/products/${productId}`
+          );
+          uploaded.image2_url = result.secure_url;
+        }
+
+        if (image3) {
+          const result = await uploadToCloudinary(
+            image3.buffer,
+            "image",
+            `sngamer-store/products/${productId}`
+          );
+          uploaded.image3_url = result.secure_url;
+        }
+
+        if (video) {
+          const result = await uploadToCloudinary(
+            video.buffer,
+            "video",
+            `sngamer-store/products/${productId}`
+          );
+          uploaded.video_url = result.secure_url;
+        }
+
+        const fields = [];
+        const values = [];
+        let index = 1;
+
+        for (const [column, value] of Object.entries(uploaded)) {
+          fields.push(`${column} = $${index}`);
+          values.push(value);
+          index++;
+        }
+
+        values.push(productId);
+
+        const result = await db(
+          `
+          UPDATE products
+          SET ${fields.join(", ")}
+          WHERE id = $${index}
+          RETURNING *
+          `,
+          values
+        );
+
+        return res.json({
+          success: true,
+          product: result.rows[0]
+        });
+      } catch (error) {
+        console.error("PRODUCT_MEDIA_ERROR:", error);
+
+        return res.status(500).json({
+          error: "Impossible d'enregistrer les médias du produit"
+        });
+      }
+    });
+  }
+);
 /* =========================
    FRONTEND
 ========================= */
