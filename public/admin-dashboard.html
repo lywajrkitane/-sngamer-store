@@ -228,20 +228,47 @@
   <main id="adminBox" class="hidden">
 
     <div class="stats">
-      <div class="stat">
-        Produits
-        <strong id="productCount">0</strong>
-      </div>
 
-      <div class="stat">
-        Commandes
-        <strong id="orderCount">0</strong>
-      </div>
+  <div class="stat">
+    📦 Produits
+    <strong id="productCount">0</strong>
+  </div>
 
-      <div class="stat">
-        Chiffre d'affaires
-        <strong id="revenue">0 FCFA</strong>
-      </div>
+  <div class="stat">
+    🛒 Commandes
+    <strong id="orderCount">0</strong>
+  </div>
+
+  <div class="stat">
+    💰 Chiffre d'affaires
+    <strong id="revenue">0 FCFA</strong>
+  </div>
+
+  <div class="stat">
+    🆕 Nouvelles
+    <strong id="newOrderCount">0</strong>
+  </div>
+
+  <div class="stat">
+    ✅ Confirmées
+    <strong id="confirmedOrderCount">0</strong>
+  </div>
+
+  <div class="stat">
+    🚚 Expédiées
+    <strong id="shippedOrderCount">0</strong>
+  </div>
+
+  <div class="stat">
+    📦 Livrées
+    <strong id="deliveredOrderCount">0</strong>
+  </div>
+
+  <div class="stat">
+    ❌ Annulées
+    <strong id="cancelledOrderCount">0</strong>
+  </div>
+
     </div>
 
     <!-- PRODUITS -->
@@ -536,7 +563,17 @@
 
     const orders =
       await response.json();
+  const newOrders = orders.filter(o => o.status === "Nouvelle").length;
+  const confirmedOrders = orders.filter(o => o.status === "Confirmée").length;
+  const shippedOrders = orders.filter(o => o.status === "Expédiée").length;
+  const deliveredOrders = orders.filter(o => o.status === "Livrée").length;
+  const cancelledOrders = orders.filter(o => o.status === "Annulée").length;
 
+  document.getElementById("newOrderCount").textContent = newOrders;
+  document.getElementById("confirmedOrderCount").textContent = confirmedOrders;
+  document.getElementById("shippedOrderCount").textContent = shippedOrders;
+  document.getElementById("deliveredOrderCount").textContent = deliveredOrders;
+  document.getElementById("cancelledOrderCount").textContent = cancelledOrders;
     document.getElementById("orderCount")
       .textContent = orders.length;
 
