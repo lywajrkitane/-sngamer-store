@@ -519,52 +519,68 @@ app.patch(
    ADMIN PRODUCTS
 ========================= */
 
-app.post(
-  "/api/admin/products",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const {
-        name,
-        category,
-        price,
-        stock,
-        emoji
-      } = req.body;
+app.post("/api/admin/products", auth, async (req, res) => {
+  const {
+    name,
+    category,
+    price,
+    stock,
+    emoji,
+    description
+  } = req.body;
 
-      if (!name || price === undefined) {
-        return res.status(400).json({
-          error: "Nom et prix obligatoires"
-        });
-      }
+  const p = {
+    name: String(name || "").trim(),
+    category: String(category || "Accessoires").trim(),
+    price: Number(price),
+    stock: Number(stock),
+    emoji: emoji || "🎮",
+    description: String(description || "").trim()
+  };
 
-      const result = await db(
-        `
-        INSERT INTO products
-          (name, category, price, stock, emoji)
-        VALUES
-          ($1, $2, $3, $4, $5)
-        RETURNING *
-        `,
-        [
-          name,
-          category || "Accessoires",
-          Number(price),
-          Number(stock || 0),
-          emoji || "🎮"
-        ]
-      );
-
-      res.status(201).json(result.rows[0]);
-    } catch (error) {
-      console.error("CREATE_PRODUCT_ERROR:", error);
-
-      res.status(500).json({
-        error: "Impossible de créer le produit"
-      });
-    }
+  if (
+    !p.name ||
+    !Number.isFinite(p.price) ||
+    p.price < 0 ||
+    !Number.isInteger(p.stock) ||
+    p.stock < 0
+  ) {
+    return res.status(400).json({
+      error: "Produit invalide"
+    });
   }
-);
+
+  try {
+    const r = await db(
+      `
+      INSERT INTO products
+      (name, category, price, stock, emoji, description)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, name, category, price, stock, emoji, description
+      `,
+      [
+        p.name,
+        p.category,
+        p.price,
+        p.stock,
+        p.emoji,
+        p.description
+      ]
+    );
+
+    res.json({
+      success: true,
+      product: r.rows[0]
+    });
+
+  } catch (error) {
+    console.error("CREATE_PRODUCT_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible d'ajouter le produit"
+    });
+  }
+});
 
 app.patch(
   "/api/admin/products/:id",
