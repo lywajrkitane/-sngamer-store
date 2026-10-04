@@ -666,7 +666,10 @@
       .innerHTML = orders.map(o => {
 
         const customer = o.customer || {};
-
+const whatsappPhone = String(customer.phone || "").replace(/\D/g, "");
+const whatsappNumber = whatsappPhone.startsWith("221")
+  ? whatsappPhone
+  : "221" + whatsappPhone;
         const items = Array.isArray(o.items)
           ? o.items.map(item =>
               `${item.name} × ${item.quantity}`
@@ -688,6 +691,7 @@
               <b>${customer.name || "-"}</b><br>
               ${customer.phone || "-"}<br>
               ${customer.address || "-"}
+              <a href="https://wa.me/${whatsappNumber}" target="_blank">💬 WhatsApp</a><br>
             </td>
 
             <td>${items}</td>
