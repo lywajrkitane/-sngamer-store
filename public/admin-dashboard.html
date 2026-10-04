@@ -513,59 +513,112 @@
 
 
   async function addProduct() {
+  const name =
+    document.getElementById("pName").value.trim();
 
-    const name =
-      document.getElementById("pName").value.trim();
+  const category =
+    document.getElementById("pCategory").value.trim();
 
-    const category =
-      document.getElementById("pCategory").value.trim();
+  const price =
+    Number(document.getElementById("pPrice").value);
 
-    const price =
-      Number(document.getElementById("pPrice").value);
+  const stock =
+    Number(document.getElementById("pStock").value);
 
-    const stock =
-      Number(document.getElementById("pStock").value);
+  const description =
+    document.getElementById("pDescription").value.trim();
 
-    const emoji =
-      document.getElementById("pEmoji").value.trim() || "🎮";
+  const image1 =
+    document.getElementById("pImage1").files[0];
 
-    if (!name || !price) {
-      alert("Le nom et le prix sont obligatoires.");
-      return;
-    }
+  const image2 =
+    document.getElementById("pImage2").files[0];
 
-    const response =
-      await fetch("/api/admin/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name,
-          category,
-          price,
-          stock,
-          emoji
-        })
-      });
+  const image3 =
+    document.getElementById("pImage3").files[0];
 
-    const data =
-      await response.json();
+  const video =
+    document.getElementById("pVideo").files[0];
+
+  const emoji = "🎮";
+
+  if (!name || !price) {
+    alert("Le nom et le prix sont obligatoires.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        category,
+        price,
+        stock,
+        emoji,
+        description
+      })
+    });
+
+    const data = await response.json();
 
     if (!response.ok) {
-      alert(data.error || "Erreur");
+      alert(data.error || "Erreur lors de la création du produit.");
       return;
     }
+
+    const productId = data.product.id;
+
+    const media = new FormData();
+
+    if (image1) media.append("image1", image1);
+    if (image2) media.append("image2", image2);
+    if (image3) media.append("image3", image3);
+    if (video) media.append("video", video);
+
+    if (image1 || image2 || image3 || video) {
+      const mediaResponse = await fetch(
+        "/api/admin/products/" + productId + "/media",
+        {
+          method: "POST",
+          body: media
+        }
+      );
+
+      const mediaData = await mediaResponse.json();
+
+      if (!mediaResponse.ok) {
+        alert(
+          mediaData.error ||
+          "Le produit a été créé, mais les médias n'ont pas pu être envoyés."
+        );
+        return;
+      }
+    }
+
+    alert("Produit ajouté avec succès !");
 
     document.getElementById("pName").value = "";
     document.getElementById("pCategory").value = "";
     document.getElementById("pPrice").value = "";
     document.getElementById("pStock").value = "";
-    document.getElementById("pEmoji").value = "";
+    document.getElementById("pDescription").value = "";
+    document.getElementById("pImage1").value = "";
+    document.getElementById("pImage2").value = "";
+    document.getElementById("pImage3").value = "";
+    document.getElementById("pVideo").value = "";
+    document.getElementById("pEmoji").value = "🎮";
 
     loadProducts();
-  }
 
+  } catch (error) {
+    console.error("ADD_PRODUCT_ERROR:", error);
+    alert("Erreur de connexion au serveur.");
+  }
+  }
 
   async function deleteProduct(id) {
 
