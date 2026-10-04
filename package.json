@@ -10,6 +10,7 @@
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "bcryptjs": "^2.4.3",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "cloudinary": "^2.7.0"
   }
 }
