@@ -5,18 +5,18 @@ const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL manquante. Connecte une base PostgreSQL à Render.");
+  console.error("DATABASE_URL is missing");
   process.exit(1);
 }
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
-  max: 5,
-  idleTimeoutMillis: 30000
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 async function db(query, params = []) {
@@ -33,13 +33,17 @@ async function initDb() {
       stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
       emoji TEXT NOT NULL DEFAULT '🎮',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );await db(`
-  ALTER TABLE products
-  ADD COLUMN IF NOT EXISTS emoji TEXT NOT NULL DEFAULT '🎮';
-`);
+    );
+  `);
 
+  await db(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS emoji TEXT NOT NULL DEFAULT '🎮'
+  `);
+
+  await db(`
     CREATE TABLE IF NOT EXISTS orders (
-      id TEXT PRIMARY KEY,
+      id BIGSERIAL PRIMARY KEY,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       status TEXT NOT NULL DEFAULT 'Nouvelle',
       customer JSONB NOT NULL,
@@ -49,75 +53,122 @@ async function initDb() {
     );
   `);
 
-  const count = await db("SELECT COUNT(*)::int AS count FROM products");
+  const countResult = await db(
+    "SELECT COUNT(*)::int AS count FROM products"
+  );
 
-  if (count.rows[0].count === 0) {
-    await db(`
-      INSERT INTO products (name, category, price, stock, emoji) VALUES
-      ('Manette PS5 DualSense', 'Manettes', 45000, 12, '🎮'),
-      ('Casque Gaming RGB', 'Casques', 28000, 8, '🎧'),
-      ('Clavier mécanique RGB', 'Claviers', 35000, 6, '⌨️'),
-      ('Souris Gaming 7200 DPI', 'Souris', 18000, 15, '🖱️')
-    `);
+  if (countResult.rows[0].count === 0) {
+    await db(
+      `
+      INSERT INTO products
+        (name, category, price, stock, emoji)
+      VALUES
+        ($1, $2, $3, $4, $5),
+        ($6, $7, $8, $9, $10),
+        ($11, $12, $13, $14, $15),
+        ($16, $17, $18, $19, $20)
+      `,
+      [
+        "Manette PS5 DualSense",
+        "Manettes",
+        45000,
+        12,
+        "🎮",
+
+        "Casque Gaming RGB",
+        "Casques",
+        28000,
+        8,
+        "🎧",
+
+        "Clavier mécanique RGB",
+        "Claviers",
+        35000,
+        6,
+        "⌨️",
+
+        "Souris Gaming 7200 DPI",
+        "Souris",
+        18000,
+        15,
+        "🖱️"
+      ]
+    );
   }
+
+  console.log("Database initialized successfully");
 }
 
-const ADMIN_USER = process.env.ADMIN_USER || "admin";
-
-const ADMIN_HASH =
-  process.env.ADMIN_PASSWORD_HASH ||
-  bcrypt.hashSync(process.env.ADMIN_PASSWORD || "ChangeMe123!", 10);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.set("trust proxy", 1);
 
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true }));
-
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "CHANGE_THIS_SECRET",
+    secret: process.env.SESSION_SECRET || "sngamer-development-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 8
+      maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
 
-function auth(req, res, next) {
-  if (!req.session.admin) {
-    return res.status(401).json({ error: "Non autorisé" });
-  }
-
-  next();
-}
+/* =========================
+   HEALTH CHECK
+========================= */
 
 app.get("/healthz", async (req, res) => {
   try {
     await db("SELECT 1");
-    res.json({ ok: true });
-  } catch {
-    res.status(503).json({ ok: false });
+    res.json({
+      ok: true,
+      database: "connected"
+    });
+  } catch (error) {
+    console.error("HEALTH_ERROR:", error);
+    res.status(500).json({
+      ok: false,
+      database: "error"
+    });
   }
 });
 
+/* =========================
+   PRODUCTS
+========================= */
+
 app.get("/api/products", async (req, res) => {
   try {
-    const r = await db(
-      "SELECT id, name, category, price, stock, emoji FROM products ORDER BY id ASC"
-    );
+    const result = await db(`
+      SELECT
+        id,
+        name,
+        category,
+        price,
+        stock,
+        emoji,
+        created_at
+      FROM products
+      ORDER BY id DESC
+    `);
 
-    res.json(r.rows);
-  } catch (err) {
-  console.error("PRODUCTS_ERROR:", err);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("PRODUCTS_ERROR:", error);
+
     res.status(500).json({
       error: "Impossible de charger les produits"
     });
   }
 });
+
+/* =========================
+   CREATE ORDER
+========================= */
 
 app.post("/api/orders", async (req, res) => {
   const client = await pool.connect();
@@ -125,271 +176,443 @@ app.post("/api/orders", async (req, res) => {
   try {
     const { customer, payment, items } = req.body;
 
-    if (
-      !customer?.name ||
-      !customer?.phone ||
-      !customer?.address ||
-      !Array.isArray(items) ||
-      !items.length
-    ) {
+    if (!customer || !payment || !Array.isArray(items)) {
       return res.status(400).json({
-        error: "Commande incomplète"
+        error: "Données de commande invalides"
+      });
+    }
+
+    if (items.length === 0) {
+      return res.status(400).json({
+        error: "Le panier est vide"
       });
     }
 
     await client.query("BEGIN");
 
-    const normalized = [];
     let total = 0;
+    const finalItems = [];
 
     for (const item of items) {
-      const qty = Number(item.qty);
+      const productId = Number(item.id);
+      const quantity = Number(item.quantity);
 
-      if (!Number.isInteger(qty) || qty < 1 || qty > 99) {
+      if (!Number.isInteger(productId) || !Number.isInteger(quantity)) {
+        throw new Error("Produit ou quantité invalide");
+      }
+
+      if (quantity <= 0) {
         throw new Error("Quantité invalide");
       }
 
-      const p = await client.query(
-        "SELECT id, name, price, stock, emoji FROM products WHERE id=$1 FOR UPDATE",
-        [item.id]
+      const productResult = await client.query(
+        `
+        SELECT id, name, price, stock, emoji
+        FROM products
+        WHERE id = $1
+        FOR UPDATE
+        `,
+        [productId]
       );
 
-      if (!p.rows[0]) {
+      if (productResult.rows.length === 0) {
         throw new Error("Produit introuvable");
       }
 
-      const product = p.rows[0];
+      const product = productResult.rows[0];
 
-      if (product.stock < qty) {
-        throw new Error(`Stock insuffisant pour ${product.name}`);
+      if (product.stock < quantity) {
+        throw new Error(
+          `Stock insuffisant pour ${product.name}`
+        );
       }
 
-      await client.query(
-        "UPDATE products SET stock=stock-$1 WHERE id=$2",
-        [qty, product.id]
-      );
+      const subtotal = product.price * quantity;
+      total += subtotal;
 
-      total += product.price * qty;
-
-      normalized.push({
+      finalItems.push({
         id: product.id,
         name: product.name,
         price: product.price,
-        qty,
+        quantity,
+        subtotal,
         emoji: product.emoji
       });
+
+      await client.query(
+        `
+        UPDATE products
+        SET stock = stock - $1
+        WHERE id = $2
+        `,
+        [quantity, productId]
+      );
     }
 
-    const orderId = "SG-" + Date.now();
-
-    await client.query(
-      "INSERT INTO orders (id, status, customer, payment, items, total) VALUES ($1,'Nouvelle',$2,$3,$4,$5)",
+    const orderResult = await client.query(
+      `
+      INSERT INTO orders
+        (customer, payment, items, total)
+      VALUES
+        ($1, $2, $3, $4)
+      RETURNING id, created_at, status, total
+      `,
       [
-        orderId,
         JSON.stringify(customer),
-        payment || "À la livraison",
-        JSON.stringify(normalized),
+        payment,
+        JSON.stringify(finalItems),
         total
       ]
     );
 
     await client.query("COMMIT");
 
-    res.json({
-      ok: true,
-      orderId,
-      total
+    res.status(201).json({
+      success: true,
+      order: orderResult.rows[0]
     });
-  } catch (e) {
-    await client.query("ROLLBACK").catch(() => {});
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    console.error("ORDER_ERROR:", error);
 
     res.status(400).json({
-      error: e.message || "Erreur lors de la commande"
+      error: error.message || "Impossible de créer la commande"
     });
   } finally {
     client.release();
   }
 });
 
-app.post("/api/admin/login", async (req, res) => {
-  const { username, password } = req.body;
+/* =========================
+   ADMIN AUTH
+========================= */
 
-  if (
-    username !== ADMIN_USER ||
-    !(await bcrypt.compare(password || "", ADMIN_HASH))
-  ) {
+function requireAdmin(req, res, next) {
+  if (!req.session.admin) {
     return res.status(401).json({
-      error: "Identifiants incorrects"
+      error: "Non autorisé"
     });
   }
 
-  req.session.admin = true;
+  next();
+}
 
-  res.json({
-    ok: true
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const adminUser = process.env.ADMIN_USER;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminUser || !adminPassword) {
+      return res.status(500).json({
+        error: "Configuration administrateur manquante"
+      });
+    }
+
+    if (username !== adminUser) {
+      return res.status(401).json({
+        error: "Identifiants incorrects"
+      });
+    }
+
+    let passwordValid = false;
+
+    if (
+      adminPassword.startsWith("$2a$") ||
+      adminPassword.startsWith("$2b$") ||
+      adminPassword.startsWith("$2y$")
+    ) {
+      passwordValid = await bcrypt.compare(
+        password,
+        adminPassword
+      );
+    } else {
+      passwordValid = password === adminPassword;
+    }
+
+    if (!passwordValid) {
+      return res.status(401).json({
+        error: "Identifiants incorrects"
+      });
+    }
+
+    req.session.admin = true;
+
+    res.json({
+      success: true
+    });
+  } catch (error) {
+    console.error("LOGIN_ERROR:", error);
+
+    res.status(500).json({
+      error: "Erreur de connexion"
+    });
+  }
+});
+
+app.post("/api/admin/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.json({
+      success: true
+    });
   });
 });
 
-app.post("/api/admin/logout", auth, (req, res) =>
-  req.session.destroy(() => res.json({ ok: true }))
-);
-
-app.get("/api/admin/me", (req, res) =>
+app.get("/api/admin/me", (req, res) => {
   res.json({
-    authenticated: !!req.session.admin
-  })
+    authenticated: Boolean(req.session.admin)
+  });
+});
+
+/* =========================
+   ADMIN ORDERS
+========================= */
+
+app.get(
+  "/api/admin/orders",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const result = await db(`
+        SELECT
+          id,
+          created_at,
+          status,
+          customer,
+          payment,
+          items,
+          total
+        FROM orders
+        ORDER BY created_at DESC
+      `);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error("ADMIN_ORDERS_ERROR:", error);
+
+      res.status(500).json({
+        error: "Impossible de charger les commandes"
+      });
+    }
+  }
 );
 
-app.get("/api/admin/orders", auth, async (req, res) => {
-  try {
-    const r = await db(
-      'SELECT id, created_at AS "createdAt", status, customer, payment, items, total FROM orders ORDER BY created_at DESC'
-    );
+app.patch(
+  "/api/admin/orders/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const orderId = Number(req.params.id);
+      const { status } = req.body;
 
-    res.json(r.rows);
-  } catch {
-    res.status(500).json({
-      error: "Impossible de charger les commandes"
-    });
-  }
-});
+      const allowedStatuses = [
+        "Nouvelle",
+        "Confirmée",
+        "Expédiée",
+        "Livrée",
+        "Annulée"
+      ];
 
-app.patch("/api/admin/orders/:id", auth, async (req, res) => {
-  try {
-    const r = await db(
-      'UPDATE orders SET status=$1 WHERE id=$2 RETURNING id, created_at AS "createdAt", status, customer, payment, items, total',
-      [req.body.status || "Nouvelle", req.params.id]
-    );
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          error: "Statut invalide"
+        });
+      }
 
-    if (!r.rows[0]) {
-      return res.status(404).json({
-        error: "Commande introuvable"
+      const result = await db(
+        `
+        UPDATE orders
+        SET status = $1
+        WHERE id = $2
+        RETURNING *
+        `,
+        [status, orderId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Commande introuvable"
+        });
+      }
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("UPDATE_ORDER_ERROR:", error);
+
+      res.status(500).json({
+        error: "Impossible de modifier la commande"
       });
     }
-
-    res.json(r.rows[0]);
-  } catch {
-    res.status(500).json({
-      error: "Impossible de modifier la commande"
-    });
   }
-});
-
-app.post("/api/admin/products", auth, async (req, res) => {
-  const { name, category, price, stock, emoji } = req.body;
-
-  const p = {
-    name: String(name || "").trim(),
-    category: String(category || "Accessoires").trim(),
-    price: Number(price),
-    stock: Number(stock),
-    emoji: emoji || "🎮"
-  };
-
-  if (
-    !p.name ||
-    !Number.isFinite(p.price) ||
-    p.price < 0 ||
-    !Number.isInteger(p.stock) ||
-    p.stock < 0
-  ) {
-    return res.status(400).json({
-      error: "Produit invalide"
-    });
-  }
-
-  try {
-    const r = await db(
-      "INSERT INTO products (name, category, price, stock, emoji) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, category, price, stock, emoji",
-      [p.name, p.category, p.price, p.stock, p.emoji]
-    );
-
-    res.json(r.rows[0]);
-  } catch {
-    res.status(500).json({
-      error: "Impossible d'ajouter le produit"
-    });
-  }
-});
-
-app.patch("/api/admin/products/:id", auth, async (req, res) => {
-  try {
-    const old = await db(
-      "SELECT * FROM products WHERE id=$1",
-      [req.params.id]
-    );
-
-    if (!old.rows[0]) {
-      return res.status(404).json({
-        error: "Produit introuvable"
-      });
-    }
-
-    const p = old.rows[0];
-
-    const name = req.body.name ?? p.name;
-    const category = req.body.category ?? p.category;
-    const price =
-      req.body.price !== undefined ? Number(req.body.price) : p.price;
-    const stock =
-      req.body.stock !== undefined ? Number(req.body.stock) : p.stock;
-    const emoji = req.body.emoji ?? p.emoji;
-
-    if (
-      !name ||
-      !Number.isFinite(price) ||
-      price < 0 ||
-      !Number.isInteger(stock) ||
-      stock < 0
-    ) {
-      return res.status(400).json({
-        error: "Valeurs invalides"
-      });
-    }
-
-    const r = await db(
-      "UPDATE products SET name=$1, category=$2, price=$3, stock=$4, emoji=$5 WHERE id=$6 RETURNING id, name, category, price, stock, emoji",
-      [name, category, price, stock, emoji, req.params.id]
-    );
-
-    res.json(r.rows[0]);
-  } catch {
-    res.status(500).json({
-      error: "Impossible de modifier le produit"
-    });
-  }
-});
-
-app.delete("/api/admin/products/:id", auth, async (req, res) => {
-  try {
-    await db(
-      "DELETE FROM products WHERE id=$1",
-      [req.params.id]
-    );
-
-    res.json({
-      ok: true
-    });
-  } catch {
-    res.status(500).json({
-      error: "Impossible de supprimer le produit"
-    });
-  }
-});
-
-app.use(express.static(path.join(__dirname, "../public")));
-
-app.get("*", (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/index.html"))
 );
+
+/* =========================
+   ADMIN PRODUCTS
+========================= */
+
+app.post(
+  "/api/admin/products",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const {
+        name,
+        category,
+        price,
+        stock,
+        emoji
+      } = req.body;
+
+      if (!name || price === undefined) {
+        return res.status(400).json({
+          error: "Nom et prix obligatoires"
+        });
+      }
+
+      const result = await db(
+        `
+        INSERT INTO products
+          (name, category, price, stock, emoji)
+        VALUES
+          ($1, $2, $3, $4, $5)
+        RETURNING *
+        `,
+        [
+          name,
+          category || "Accessoires",
+          Number(price),
+          Number(stock || 0),
+          emoji || "🎮"
+        ]
+      );
+
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error("CREATE_PRODUCT_ERROR:", error);
+
+      res.status(500).json({
+        error: "Impossible de créer le produit"
+      });
+    }
+  }
+);
+
+app.patch(
+  "/api/admin/products/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const productId = Number(req.params.id);
+
+      const {
+        name,
+        category,
+        price,
+        stock,
+        emoji
+      } = req.body;
+
+      const result = await db(
+        `
+        UPDATE products
+        SET
+          name = COALESCE($1, name),
+          category = COALESCE($2, category),
+          price = COALESCE($3, price),
+          stock = COALESCE($4, stock),
+          emoji = COALESCE($5, emoji)
+        WHERE id = $6
+        RETURNING *
+        `,
+        [
+          name ?? null,
+          category ?? null,
+          price !== undefined ? Number(price) : null,
+          stock !== undefined ? Number(stock) : null,
+          emoji ?? null,
+          productId
+        ]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Produit introuvable"
+        });
+      }
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("UPDATE_PRODUCT_ERROR:", error);
+
+      res.status(500).json({
+        error: "Impossible de modifier le produit"
+      });
+    }
+  }
+);
+
+app.delete(
+  "/api/admin/products/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const productId = Number(req.params.id);
+
+      const result = await db(
+        `
+        DELETE FROM products
+        WHERE id = $1
+        RETURNING id
+        `,
+        [productId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Produit introuvable"
+        });
+      }
+
+      res.json({
+        success: true
+      });
+    } catch (error) {
+      console.error("DELETE_PRODUCT_ERROR:", error);
+
+      res.status(500).json({
+        error: "Impossible de supprimer le produit"
+      });
+    }
+  }
+);
+
+/* =========================
+   FRONTEND
+========================= */
+
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "..", "public", "index.html")
+  );
+});
+
+/* =========================
+   START SERVER
+========================= */
 
 initDb()
-  .then(() =>
-    app.listen(PORT, "0.0.0.0", () =>
-      console.log(`SNGAMER STORE V7 sur port ${PORT}`)
-    )
-  )
-  .catch(err => {
-    console.error("Erreur DB:", err);
+  .then(() => {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(
+        `SNGAMER STORE running on port ${PORT}`
+      );
+    });
+  })
+  .catch((error) => {
+    console.error("DATABASE_INITIALIZATION_ERROR:", error);
     process.exit(1);
   });
