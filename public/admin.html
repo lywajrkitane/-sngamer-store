@@ -690,8 +690,8 @@ const whatsappNumber = whatsappPhone.startsWith("221")
             <td class="customer">
               <b>${customer.name || "-"}</b><br>
               ${customer.phone || "-"}<br>
-              ${customer.address || "-"}
-              <a href="https://wa.me/${whatsappNumber}" target="_blank">💬 WhatsApp</a><br>
+              ${customer.address || "-"}<br>
+<a href="https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Bonjour " + (customer.name || "") + ", votre commande #" + o.id + " de " + money(o.total) + " a bien été reçue. Nous allons vous contacter pour la suite. Merci de faire confiance à SNGAMER STORE.")}" target="_blank">💬 WhatsApp</a><br>
             </td>
 
             <td>${items}</td>
