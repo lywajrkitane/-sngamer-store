@@ -276,15 +276,54 @@
       <h2>📦 Gestion des produits</h2>
 
       <div class="product-form">
-        <input id="pName" placeholder="Nom du produit">
-        <input id="pCategory" placeholder="Catégorie">
-        <input id="pPrice" type="number" placeholder="Prix FCFA">
-        <input id="pStock" type="number" placeholder="Stock">
-        <input id="pEmoji" placeholder="🎮">
 
-        <button onclick="addProduct()">
-          Ajouter
-        </button>
+  <input id="pName" placeholder="Nom du produit">
+
+  <input id="pCategory" placeholder="Catégorie">
+
+  <input id="pPrice" type="number" placeholder="Prix FCFA">
+
+  <input id="pStock" type="number" placeholder="Stock">
+
+  <textarea
+    id="pDescription"
+    placeholder="Description du produit"
+    rows="5"></textarea>
+
+  <label>🖼️ Image principale</label>
+  <input
+    id="pImage1"
+    type="file"
+    accept="image/*">
+
+  <label>🖼️ Image 2</label>
+  <input
+    id="pImage2"
+    type="file"
+    accept="image/*">
+
+  <label>🖼️ Image 3</label>
+  <input
+    id="pImage3"
+    type="file"
+    accept="image/*">
+
+  <label>🎥 Vidéo du produit</label>
+  <input
+    id="pVideo"
+    type="file"
+    accept="video/*">
+
+  <!-- Conservé temporairement pour l'ancien JavaScript -->
+  <input
+    id="pEmoji"
+    value="🎮"
+    type="hidden">
+
+  <button onclick="addProduct()">
+    Ajouter
+  </button>
+
       </div>
 
       <br>
