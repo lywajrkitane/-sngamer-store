@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNGAMER STORE — Administration</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0f14;
+      color: #fff;
+    }
+
+    header {
+      background: #111820;
+      padding: 18px;
+      border-bottom: 1px solid #26313d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .logout {
+      background: #e53935;
+      color: white;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .login {
+      max-width: 420px;
+      margin: 70px auto;
+      background: #111820;
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid #26313d;
+    }
+
+    .login h2 {
+      margin-top: 0;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin: 7px 0;
+      border-radius: 8px;
+      border: 1px solid #344150;
+      background: #0b0f14;
+      color: white;
+    }
+
+    .login button {
+      width: 100%;
+      margin-top: 10px;
+      background: #1e88e5;
+      color: white;
+    }
+
+    .error {
+      color: #ff6b6b;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      background: #111820;
+      border: 1px solid #26313d;
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      margin-top: 8px;
+    }
+
+    section {
+      background: #111820;
+      border: 1px solid #26313d;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    section h2 {
+      margin-top: 0;
+    }
+
+    .product-form {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+      gap: 8px;
+    }
+
+    .product-form button {
+      background: #00a86b;
+      color: white;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 8px;
+      border-bottom: 1px solid #26313d;
+    }
+
+    th {
+      color: #9eabb8;
+    }
+
+    .status {
+      padding: 6px 8px;
+      border-radius: 7px;
+      background: #26313d;
+      color: white;
+    }
+
+    .delete {
+      background: #e53935;
+      color: white;
+    }
+
+    .refresh {
+      background: #26313d;
+      color: white;
+      margin-bottom: 12px;
+    }
+
+    .customer {
+      line-height: 1.5;
+    }
+
+    @media (max-width: 700px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .product-form {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        gap: 10px;
+      }
+
+      header h1 {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🎮 SNGAMER STORE — ADMIN</h1>
+    <button class="logout hidden" id="logoutBtn" onclick="logout()">
+      Déconnexion
+    </button>
+  </header>
+
+  <!-- CONNEXION -->
+  <div id="loginBox" class="login">
+    <h2>Connexion administrateur</h2>
+
+    <input
+      id="username"
+      type="text"
+      placeholder="Nom d'utilisateur"
+    >
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Mot de passe"
+    >
+
+    <button onclick="login()">Se connecter</button>
+
+    <div id="loginError" class="error"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <main id="adminBox" class="hidden">
+
+    <div class="stats">
+      <div class="stat">
+        Produits
+        <strong id="productCount">0</strong>
+      </div>
+
+      <div class="stat">
+        Commandes
+        <strong id="orderCount">0</strong>
+      </div>
+
+      <div class="stat">
+        Chiffre d'affaires
+        <strong id="revenue">0 FCFA</strong>
+      </div>
+    </div>
+
+    <!-- PRODUITS -->
+    <section>
+      <h2>📦 Gestion des produits</h2>
+
+      <div class="product-form">
+        <input id="pName" placeholder="Nom du produit">
+        <input id="pCategory" placeholder="Catégorie">
+        <input id="pPrice" type="number" placeholder="Prix FCFA">
+        <input id="pStock" type="number" placeholder="Stock">
+        <input id="pEmoji" placeholder="🎮">
+
+        <button onclick="addProduct()">
+          Ajouter
+        </button>
+      </div>
+
+      <br>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Produit</th>
+              <th>Catégorie</th>
+              <th>Prix</th>
+              <th>Stock</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- COMMANDES -->
+    <section>
+      <h2>🛒 Commandes</h2>
+
+      <button class="refresh" onclick="loadAll()">
+        🔄 Actualiser
+      </button>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Client</th>
+              <th>Articles</th>
+              <th>Total</th>
+              <th>Paiement</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+<script>
+
+  const money = n =>
+    new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
+
+  async function login() {
+
+    const username =
+      document.getElementById("username").value.trim();
+
+    const password =
+      document.getElementById("password").value;
+
+    const error =
+      document.getElementById("loginError");
+
+    error.textContent = "";
+
+    try {
+
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username,
+          password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        error.textContent =
+          data.error || "Identifiants incorrects";
+        return;
+      }
+
+      showAdmin();
+
+    } catch (e) {
+
+      error.textContent =
+        "Erreur de connexion au serveur.";
+    }
+  }
+
+
+  async function checkLogin() {
+
+    try {
+
+      const response =
+        await fetch("/api/admin/me");
+
+      const data =
+        await response.json();
+
+      if (data.authenticated) {
+        showAdmin();
+      }
+
+    } catch (e) {}
+  }
+
+
+  function showAdmin() {
+
+    document
+      .getElementById("loginBox")
+      .classList.add("hidden");
+
+    document
+      .getElementById("adminBox")
+      .classList.remove("hidden");
+
+    document
+      .getElementById("logoutBtn")
+      .classList.remove("hidden");
+
+    loadAll();
+  }
+
+
+  async function logout() {
+
+    await fetch("/api/admin/logout", {
+      method: "POST"
+    });
+
+    location.reload();
+  }
+
+
+  async function loadProducts() {
+
+    const response =
+      await fetch("/api/products");
+
+    const products =
+      await response.json();
+
+    document.getElementById("productCount")
+      .textContent = products.length;
+
+    document.getElementById("productsTable")
+      .innerHTML = products.map(p => `
+
+        <tr>
+
+          <td>${p.id}</td>
+
+          <td>
+            ${p.emoji} ${p.name}
+          </td>
+
+          <td>${p.category}</td>
+
+          <td>${money(p.price)}</td>
+
+          <td>${p.stock}</td>
+
+          <td>
+            <button
+              class="delete"
+              onclick="deleteProduct(${p.id})">
+              Supprimer
+            </button>
+          </td>
+
+        </tr>
+
+      `).join("");
+  }
+
+
+  async function addProduct() {
+
+    const name =
+      document.getElementById("pName").value.trim();
+
+    const category =
+      document.getElementById("pCategory").value.trim();
+
+    const price =
+      Number(document.getElementById("pPrice").value);
+
+    const stock =
+      Number(document.getElementById("pStock").value);
+
+    const emoji =
+      document.getElementById("pEmoji").value.trim() || "🎮";
+
+    if (!name || !price) {
+      alert("Le nom et le prix sont obligatoires.");
+      return;
+    }
+
+    const response =
+      await fetch("/api/admin/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name,
+          category,
+          price,
+          stock,
+          emoji
+        })
+      });
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Erreur");
+      return;
+    }
+
+    document.getElementById("pName").value = "";
+    document.getElementById("pCategory").value = "";
+    document.getElementById("pPrice").value = "";
+    document.getElementById("pStock").value = "";
+    document.getElementById("pEmoji").value = "";
+
+    loadProducts();
+  }
+
+
+  async function deleteProduct(id) {
+
+    if (!confirm(
+      "Supprimer définitivement ce produit ?"
+    )) return;
+
+    const response =
+      await fetch("/api/admin/products/" + id, {
+        method: "DELETE"
+      });
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Erreur");
+      return;
+    }
+
+    loadProducts();
+  }
+
+
+  async function loadOrders() {
+
+    const response =
+      await fetch("/api/admin/orders");
+
+    if (response.status === 401) {
+      location.reload();
+      return;
+    }
+
+    const orders =
+      await response.json();
+
+    document.getElementById("orderCount")
+      .textContent = orders.length;
+
+    const revenue =
+      orders
+        .filter(o => o.status !== "Annulée")
+        .reduce((sum, o) => sum + Number(o.total || 0), 0);
+
+    document.getElementById("revenue")
+      .textContent = money(revenue);
+
+    document.getElementById("ordersTable")
+      .innerHTML = orders.map(o => {
+
+        const customer = o.customer || {};
+
+        const items = Array.isArray(o.items)
+          ? o.items.map(item =>
+              `${item.name} × ${item.quantity}`
+            ).join("<br>")
+          : "";
+
+        return `
+
+          <tr>
+
+            <td>#${o.id}</td>
+
+            <td>
+              ${new Date(o.created_at)
+                .toLocaleString("fr-FR")}
+            </td>
+
+            <td class="customer">
+              <b>${customer.name || "-"}</b><br>
+              ${customer.phone || "-"}<br>
+              ${customer.address || "-"}
+            </td>
+
+            <td>${items}</td>
+
+            <td>${money(o.total)}</td>
+
+            <td>${o.payment || "-"}</td>
+
+            <td>
+
+              <select
+                class="status"
+                onchange="changeStatus(${o.id}, this.value)">
+
+                ${[
+                  "Nouvelle",
+                  "Confirmée",
+                  "Expédiée",
+                  "Livrée",
+                  "Annulée"
+                ].map(status => `
+                  <option
+                    value="${status}"
+                    ${status === o.status ? "selected" : ""}>
+                    ${status}
+                  </option>
+                `).join("")}
+
+              </select>
+
+            </td>
+
+          </tr>
+
+        `;
+
+      }).join("");
+  }
+
+
+  async function changeStatus(id, status) {
+
+    const response =
+      await fetch("/api/admin/orders/" + id, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          status
+        })
+      });
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Impossible de modifier le statut");
+      return;
+    }
+
+    loadOrders();
+  }
+
+
+  async function loadAll() {
+
+    await loadProducts();
+    await loadOrders();
+  }
+
+
+  checkLogin();
+
+</script>
+
+</body>
+</html>
