@@ -526,7 +526,7 @@ app.patch(
    ADMIN PRODUCTS
 ========================= */
 
-app.post("/api/admin/products", auth, async (req, res) => {
+app.post("/api/admin/products", requireAdmin, async (req, res) => {
   const {
     name,
     category,
