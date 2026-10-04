@@ -51,6 +51,24 @@ async function initDb() {
       items JSONB NOT NULL,
       total INTEGER NOT NULL DEFAULT 0
     );
+  `);  await db(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS customer JSONB DEFAULT '{}'::jsonb
+  `);
+
+  await db(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS payment TEXT DEFAULT 'Paiement à la livraison'
+  `);
+
+  await db(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]'::jsonb
+  `);
+
+  await db(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS total INTEGER DEFAULT 0
   `);
 
   const countResult = await db(
