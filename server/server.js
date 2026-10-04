@@ -78,6 +78,14 @@ async function initDb() {
   ALTER TABLE orders
   ALTER COLUMN phone DROP NOT NULL
 `);
+    await db(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS image1_url TEXT,
+    ADD COLUMN IF NOT EXISTS image2_url TEXT,
+    ADD COLUMN IF NOT EXISTS image3_url TEXT,
+    ADD COLUMN IF NOT EXISTS video_url TEXT;
+  `);
   const countResult = await db(
     "SELECT COUNT(*)::int AS count FROM products"
   );
