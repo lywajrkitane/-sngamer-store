@@ -563,9 +563,10 @@
 
     const orders =
       await response.json();
-  const newOrders = orders.filter(
-  o => String(o.status || "").trim().toLowerCase() === "nouvelle"
-).length;
+  const newOrders = orders.filter(o => {
+  const status = String(o.status || "").trim().toLowerCase();
+  return status === "nouvelle" || status === "nouveau" || status.startsWith("nouvelle ");
+}).length;
   const confirmedOrders = orders.filter(o => o.status === "Confirmée").length;
   const shippedOrders = orders.filter(o => o.status === "Expédiée").length;
   const deliveredOrders = orders.filter(o => o.status === "Livrée").length;
