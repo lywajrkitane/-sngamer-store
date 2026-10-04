@@ -73,7 +73,14 @@ async function initDb() {
     ALTER TABLE products
     ADD COLUMN IF NOT EXISTS emoji TEXT NOT NULL DEFAULT '🎮'
   `);
-
+await db(`
+  ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS description TEXT,
+  ADD COLUMN IF NOT EXISTS image1_url TEXT,
+  ADD COLUMN IF NOT EXISTS image2_url TEXT,
+  ADD COLUMN IF NOT EXISTS image3_url TEXT,
+  ADD COLUMN IF NOT EXISTS video_url TEXT
+`);
   await db(`
     CREATE TABLE IF NOT EXISTS orders (
       id BIGSERIAL PRIMARY KEY,
