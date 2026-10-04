@@ -195,7 +195,7 @@ app.post("/api/orders", async (req, res) => {
 
     for (const item of items) {
       const productId = Number(item.id);
-      const quantity = Number(item.quantity);
+      const quantity = Number(item.quantity ?? item.qty);
 
       if (!Number.isInteger(productId) || !Number.isInteger(quantity)) {
         throw new Error("Produit ou quantité invalide");
@@ -268,9 +268,10 @@ app.post("/api/orders", async (req, res) => {
     await client.query("COMMIT");
 
     res.status(201).json({
-      success: true,
-      order: orderResult.rows[0]
-    });
+  success: true,
+  orderId: orderResult.rows[0].id,
+  order: orderResult.rows[0]
+});
   } catch (error) {
     await client.query("ROLLBACK");
 
