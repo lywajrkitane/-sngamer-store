@@ -6,6 +6,125 @@
   <title>SNGAMER STORE — Administration</title>
 
   <style>
+    /* =========================
+   RECADRAGE DES IMAGES
+   ========================= */
+
+.cropModal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:rgba(0,0,0,.85);
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+
+.cropBox{
+  width:min(700px,100%);
+  max-height:95vh;
+  overflow:auto;
+  background:#101820;
+  color:#fff;
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+
+.cropBox h2{
+  margin:0 0 15px;
+  text-align:center;
+  font-size:22px;
+}
+
+.cropClose{
+  float:right;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:26px;
+  cursor:pointer;
+  line-height:1;
+}
+
+.cropArea{
+  position:relative;
+  width:100%;
+  max-width:700px;
+  margin:0 auto;
+  aspect-ratio:4/3;
+  overflow:hidden;
+  background:#000;
+  border-radius:12px;
+}
+
+#cropImage{
+  position:absolute;
+  max-width:none;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+  cursor:grab;
+}
+
+.cropActions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+
+.cropActions button{
+  border:0;
+  border-radius:10px;
+  padding:11px 18px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.cropActions .primary{
+  background:#1687ff;
+  color:#fff;
+}
+
+.cropActions button:not(.primary){
+  background:#263442;
+  color:#fff;
+}
+
+.cropActions button:active{
+  transform:scale(.98);
+}
+
+#cropZoom{
+  accent-color:#1687ff;
+}
+
+@media(max-width:700px){
+  .cropModal{
+    padding:10px;
+  }
+
+  .cropBox{
+    padding:14px;
+    border-radius:14px;
+  }
+
+  .cropBox h2{
+    font-size:19px;
+  }
+
+  .cropActions{
+    flex-direction:column;
+  }
+
+  .cropActions button{
+    width:100%;
+  }
+}
     * {
       box-sizing: border-box;
     }
@@ -636,6 +755,368 @@
     alert("Erreur de connexion au serveur.");
   }
   }
+  /* =========================
+   RECADRAGE DES IMAGES
+   ========================= */
+
+let cropInput = null;
+let cropFile = null;
+let cropImage = null;
+let cropScale = 1;
+let cropX = 0;
+let cropY = 0;
+let cropStartX = 0;
+let cropStartY = 0;
+let dragStartX = 0;
+let dragStartY = 0;
+let isDraggingCrop = false;
+
+function initCrop() {
+  const ids = ["pImage1", "pImage2", "pImage3"];
+
+  ids.forEach(id => {
+    const input = document.getElementById(id);
+
+    if (input) {
+      input.addEventListener("change", function () {
+        if (this.files && this.files[0]) {
+          openCrop(this);
+        }
+      });
+    }
+  });
+}
+
+function openCrop(input) {
+  const file = input.files && input.files[0];
+
+  if (!file || !file.type.startsWith("image/")) {
+    return;
+  }
+
+  cropInput = input;
+  cropFile = file;
+
+  const modal = document.getElementById("cropModal");
+  cropImage = document.getElementById("cropImage");
+
+  if (!modal || !cropImage) {
+    alert("Erreur : fenêtre de recadrage introuvable.");
+    return;
+  }
+
+  const imageUrl = URL.createObjectURL(file);
+
+  cropImage.onload = function () {
+    cropScale = 1;
+    cropX = 0;
+    cropY = 0;
+
+    modal.style.display = "flex";
+
+    setTimeout(() => {
+      setupCrop();
+    }, 50);
+  };
+
+  cropImage.src = imageUrl;
+}
+
+function setupCrop() {
+  const area = document.querySelector(".cropArea");
+
+  if (!area || !cropImage) return;
+
+  area.style.position = "relative";
+  area.style.overflow = "hidden";
+  area.style.aspectRatio = "4 / 3";
+  area.style.width = "100%";
+  area.style.maxWidth = "700px";
+  area.style.margin = "0 auto";
+  area.style.background = "#000";
+
+  cropImage.style.position = "absolute";
+  cropImage.style.maxWidth = "none";
+  cropImage.style.width = "auto";
+  cropImage.style.height = "auto";
+  cropImage.style.userSelect = "none";
+  cropImage.style.touchAction = "none";
+  cropImage.style.cursor = "grab";
+
+  const areaWidth = area.clientWidth;
+  const areaHeight = area.clientHeight;
+
+  const imageRatio =
+    cropImage.naturalWidth / cropImage.naturalHeight;
+
+  const areaRatio = areaWidth / areaHeight;
+
+  if (imageRatio > areaRatio) {
+    cropScale = areaHeight / cropImage.naturalHeight;
+  } else {
+    cropScale = areaWidth / cropImage.naturalWidth;
+  }
+
+  cropX =
+    (areaWidth - cropImage.naturalWidth * cropScale) / 2;
+
+  cropY =
+    (areaHeight - cropImage.naturalHeight * cropScale) / 2;
+
+  updateCropImage();
+  createCropZoom();
+  addCropEvents();
+}
+
+function updateCropImage() {
+  if (!cropImage) return;
+
+  cropImage.style.transform =
+    `translate(${cropX}px, ${cropY}px) scale(${cropScale})`;
+
+  cropImage.style.transformOrigin = "0 0";
+}
+
+function createCropZoom() {
+  const actions = document.querySelector(".cropActions");
+
+  if (!actions) return;
+
+  let zoom = document.getElementById("cropZoom");
+
+  if (zoom) {
+    zoom.value = Math.round(cropScale * 100);
+    return;
+  }
+
+  const container = document.createElement("div");
+
+  container.style.margin = "12px 0";
+  container.style.display = "flex";
+  container.style.alignItems = "center";
+  container.style.gap = "10px";
+
+  const label = document.createElement("span");
+  label.textContent = "🔍 Zoom";
+
+  zoom = document.createElement("input");
+  zoom.id = "cropZoom";
+  zoom.type = "range";
+  zoom.min = "20";
+  zoom.max = "300";
+  zoom.value = Math.round(cropScale * 100);
+  zoom.step = "1";
+  zoom.style.flex = "1";
+
+  zoom.addEventListener("input", function () {
+    const area = document.querySelector(".cropArea");
+
+    if (!area || !cropImage) return;
+
+    const oldScale = cropScale;
+    const newScale = Number(this.value) / 100;
+
+    const centerX = area.clientWidth / 2;
+    const centerY = area.clientHeight / 2;
+
+    cropX =
+      centerX -
+      (centerX - cropX) *
+      (newScale / oldScale);
+
+    cropY =
+      centerY -
+      (centerY - cropY) *
+      (newScale / oldScale);
+
+    cropScale = newScale;
+
+    keepCropInside();
+    updateCropImage();
+  });
+
+  container.appendChild(label);
+  container.appendChild(zoom);
+
+  actions.parentNode.insertBefore(container, actions);
+}
+
+function addCropEvents() {
+  if (!cropImage || cropImage.dataset.eventsAdded) return;
+
+  cropImage.dataset.eventsAdded = "1";
+
+  cropImage.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+
+    isDraggingCrop = true;
+
+    cropImage.style.cursor = "grabbing";
+
+    cropStartX = cropX;
+    cropStartY = cropY;
+
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+
+    cropImage.setPointerCapture(e.pointerId);
+  });
+
+  cropImage.addEventListener("pointermove", function (e) {
+    if (!isDraggingCrop) return;
+
+    cropX =
+      cropStartX +
+      (e.clientX - dragStartX);
+
+    cropY =
+      cropStartY +
+      (e.clientY - dragStartY);
+
+    keepCropInside();
+    updateCropImage();
+  });
+
+  cropImage.addEventListener("pointerup", function () {
+    isDraggingCrop = false;
+    cropImage.style.cursor = "grab";
+  });
+
+  cropImage.addEventListener("pointercancel", function () {
+    isDraggingCrop = false;
+    cropImage.style.cursor = "grab";
+  });
+}
+
+function keepCropInside() {
+  const area = document.querySelector(".cropArea");
+
+  if (!area || !cropImage) return;
+
+  const imageWidth =
+    cropImage.naturalWidth * cropScale;
+
+  const imageHeight =
+    cropImage.naturalHeight * cropScale;
+
+  const areaWidth = area.clientWidth;
+  const areaHeight = area.clientHeight;
+
+  if (imageWidth <= areaWidth) {
+    cropX = (areaWidth - imageWidth) / 2;
+  } else {
+    if (cropX > 0) cropX = 0;
+
+    if (cropX + imageWidth < areaWidth) {
+      cropX = areaWidth - imageWidth;
+    }
+  }
+
+  if (imageHeight <= areaHeight) {
+    cropY = (areaHeight - imageHeight) / 2;
+  } else {
+    if (cropY > 0) cropY = 0;
+
+    if (cropY + imageHeight < areaHeight) {
+      cropY = areaHeight - imageHeight;
+    }
+  }
+}
+
+function applyCrop() {
+  if (!cropInput || !cropFile || !cropImage) {
+    return;
+  }
+
+  const area = document.querySelector(".cropArea");
+
+  if (!area) return;
+
+  const canvas = document.createElement("canvas");
+
+  canvas.width = 1200;
+  canvas.height = 900;
+
+  const ctx = canvas.getContext("2d");
+
+  const sourceX = -cropX / cropScale;
+  const sourceY = -cropY / cropScale;
+
+  const sourceWidth =
+    area.clientWidth / cropScale;
+
+  const sourceHeight =
+    area.clientHeight / cropScale;
+
+  ctx.drawImage(
+    cropImage,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  canvas.toBlob(function (blob) {
+    if (!blob) {
+      alert("Impossible de recadrer cette image.");
+      return;
+    }
+
+    const newFile = new File(
+      [blob],
+      cropFile.name.replace(/\.[^/.]+$/, "") + "_recadree.jpg",
+      {
+        type: "image/jpeg",
+        lastModified: Date.now()
+      }
+    );
+
+    const dataTransfer = new DataTransfer();
+
+    dataTransfer.items.add(newFile);
+
+    cropInput.files = dataTransfer.files;
+
+    closeCrop();
+
+    alert("Image recadrée avec succès ✓");
+  }, "image/jpeg", 0.92);
+}
+
+function closeCrop() {
+  const modal = document.getElementById("cropModal");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+  if (cropImage && cropImage.src.startsWith("blob:")) {
+    URL.revokeObjectURL(cropImage.src);
+  }
+
+  cropInput = null;
+  cropFile = null;
+  cropImage = null;
+}
+
+function cancelCrop() {
+  if (cropInput) {
+    cropInput.value = "";
+  }
+
+  closeCrop();
+}
+
+/* Initialisation */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCrop);
+} else {
+  initCrop();
+      }
 
   async function deleteProduct(id) {
 
