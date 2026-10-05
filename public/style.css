@@ -257,3 +257,43 @@
         height:70px;
     }
 }
+/* CADRE UNIFORME DES IMAGES PRODUITS */
+.productMainImage{
+  width:100%;
+  aspect-ratio:4/3;
+  background:#080d14;
+  border-radius:14px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.productMainImage img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.productThumb{
+  width:78px;
+  height:78px;
+  flex:0 0 78px;
+  padding:0;
+  overflow:hidden;
+  border-radius:12px;
+  background:#0d141e;
+  border:2px solid #26384f;
+}
+
+.productThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.productThumb:hover{
+  border-color:#3b95ff;
+}
