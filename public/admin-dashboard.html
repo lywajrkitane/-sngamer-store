@@ -1272,15 +1272,58 @@ if (document.readyState === "loading") {
 
     loadOrders();
   }
-  async function editProduct(id) {
+   
+    async function editProduct(id) {
 
     const response = await fetch("/api/products");
+
+    if (!response.ok) {
+        alert("Impossible de charger les produits");
+        return;
+    }
+
     const products = await response.json();
 
     const product = products.find(p => p.id === id);
 
     if (!product) {
         alert("Produit introuvable");
+        return;
+    }
+
+    const name = prompt(
+        "Modifier le nom du produit :",
+        product.name || ""
+    );
+
+    if (name === null) {
+        return;
+    }
+
+    const category = prompt(
+        "Modifier la catégorie :",
+        product.category || ""
+    );
+
+    if (category === null) {
+        return;
+    }
+
+    const price = prompt(
+        "Modifier le prix en FCFA :",
+        product.price ?? ""
+    );
+
+    if (price === null) {
+        return;
+    }
+
+    const stock = prompt(
+        "Modifier le stock :",
+        product.stock ?? ""
+    );
+
+    if (stock === null) {
         return;
     }
 
@@ -1301,6 +1344,10 @@ if (document.readyState === "loading") {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
+                name: name,
+                category: category,
+                price: Number(price),
+                stock: Number(stock),
                 description: description
             })
         }
@@ -1313,10 +1360,10 @@ if (document.readyState === "loading") {
         return;
     }
 
-    alert("Description modifiée avec succès !");
+    alert("Produit modifié avec succès !");
 
     loadProducts();
-  }
+}
 
   async function loadAll() {
 
