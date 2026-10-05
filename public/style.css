@@ -1339,3 +1339,18 @@ h1{
     padding-top:48px;
   }
 }
+/* =========================================================
+   CORRECTION — ESPACE SOUS LE BOUTON PANIER
+   ========================================================= */
+
+@media(max-width:700px){
+
+  #productModal .productBox{
+    padding-bottom:85px;
+  }
+
+  #productModal .productInfo .add,
+  #productModal .productInfo button:not(.x){
+    margin-bottom:20px;
+  }
+    }
