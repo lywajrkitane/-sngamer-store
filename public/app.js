@@ -29,28 +29,55 @@ function openProduct(id){
   if(!p)return;
 
   const images=[p.image1_url,p.image2_url,p.image3_url].filter(Boolean);
+  const inStock=Number(p.stock)>0;
+
+  window.productImages=images;
 
   document.querySelector("#productDetail").innerHTML=`
     <div class="productDetail">
+
       <div class="productGallery">
+
+        <div class="productMainImage">
+          ${
+            images.length
+            ? `<img id="productMainImage"
+                 src="${escapeHtml(images[0])}"
+                 alt="${escapeHtml(p.name)}">`
+            : `<div class="productEmoji">${escapeHtml(p.emoji || "🎮")}</div>`
+          }
+        </div>
+
         ${
-          images.length
-          ? images.map(url=>`
-              <img src="${escapeHtml(url)}"
-                   alt="${escapeHtml(p.name)}"
-                   class="productDetailImage">
-            `).join("")
-          : `<div class="productEmoji">${escapeHtml(p.emoji || "🎮")}</div>`
+          images.length>1
+          ? `
+            <div class="productThumbnails">
+              ${images.map((url,i)=>`
+                <button class="productThumb" onclick="selectProductImage(${i})">
+                  <img src="${escapeHtml(url)}"
+                       alt="${escapeHtml(p.name)}">
+                </button>
+              `).join("")}
+            </div>
+          `
+          : ""
         }
+
       </div>
 
       <div class="productInfo">
+
         <div class="cat">${escapeHtml(p.category || "Gaming")}</div>
+
         <h2>${escapeHtml(p.name)}</h2>
 
         <div class="price">${money(p.price)}</div>
 
-        <div class="stock">${p.stock} disponible(s)</div>
+        ${
+          inStock
+          ? `<div class="stock">${p.stock} disponible(s)</div>`
+          : `<div class="stock outOfStock">Rupture de stock</div>`
+        }
 
         <p class="productDescription">
           ${escapeHtml(p.description || "Aucune description disponible.").replace(/\n/g,"<br>")}
@@ -67,14 +94,35 @@ function openProduct(id){
           : ""
         }
 
-        <button class="primary full" onclick="add(${p.id});closeProduct()">
-          Ajouter au panier
-        </button>
+        ${
+          inStock
+          ? `
+            <button class="primary full" onclick="add(${p.id});closeProduct()">
+              Ajouter au panier
+            </button>
+          `
+          : `
+            <button class="primary full disabled" disabled>
+              Rupture de stock
+            </button>
+          `
+        }
+
       </div>
+
     </div>
   `;
 
   document.querySelector("#productModal").classList.add("show");
+}
+
+function selectProductImage(index){
+  const images=window.productImages||[];
+  const image=document.querySelector("#productMainImage");
+
+  if(image && images[index]){
+    image.src=images[index];
+  }
 }
 
 function closeProduct(){
