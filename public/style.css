@@ -854,3 +854,180 @@ h1{
     font-size:13px;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS PREMIUM
+   ========================================================= */
+
+.grid{
+  gap:18px;
+}
+
+.card{
+  position:relative;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(16,27,44,.98),
+      rgba(7,12,22,.98)
+    );
+  border:1px solid rgba(58,149,255,.18);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.28);
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  border-color:rgba(22,135,255,.55);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.45),
+    0 0 25px rgba(22,135,255,.12);
+}
+
+/* IMAGE */
+.card .pic{
+  position:relative;
+  height:210px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(22,135,255,.12),
+      transparent 65%
+    ),
+    #080e18;
+}
+
+.card .pic img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:transform .35s ease;
+}
+
+.card:hover .pic img{
+  transform:scale(1.05);
+}
+
+/* CONTENU */
+.card .info{
+  padding:16px;
+}
+
+.card .cat{
+  display:inline-block;
+  margin-bottom:7px;
+  color:#39a7ff;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.card .info h3{
+  margin:5px 0 10px;
+  color:#f5f7fb;
+  font-size:18px;
+  line-height:1.3;
+  font-weight:800;
+}
+
+.card .price{
+  margin:0;
+  color:#fff;
+  font-size:21px;
+  font-weight:900;
+  letter-spacing:-.3px;
+}
+
+.card .stock{
+  margin-top:6px;
+  color:#8fa1b5;
+  font-size:12px;
+}
+
+/* BOUTON VOIR LE PRODUIT */
+.card .details{
+  width:100%;
+  margin-top:14px;
+  padding:12px 14px;
+  border:1px solid rgba(58,149,255,.22);
+  border-radius:11px;
+  color:#fff;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(22,135,255,.12),
+      rgba(124,58,237,.12)
+    );
+  font-weight:800;
+  cursor:pointer;
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.card .details:hover{
+  transform:translateY(-2px);
+  border-color:rgba(22,135,255,.55);
+  background:
+    linear-gradient(
+      135deg,
+      #1687ff,
+      #7c3aed
+    );
+  box-shadow:0 8px 24px rgba(22,135,255,.18);
+}
+
+/* MOBILE */
+@media(max-width:560px){
+
+  .grid{
+    gap:12px;
+  }
+
+  .card{
+    border-radius:15px;
+  }
+
+  .card .pic{
+    height:150px;
+  }
+
+  .card .info{
+    padding:12px;
+  }
+
+  .card .cat{
+    font-size:9px;
+  }
+
+  .card .info h3{
+    font-size:15px;
+    margin-bottom:8px;
+  }
+
+  .card .price{
+    font-size:17px;
+  }
+
+  .card .stock{
+    font-size:11px;
+  }
+
+  .card .details{
+    margin-top:11px;
+    padding:10px 8px;
+    font-size:12px;
+  }
+}
