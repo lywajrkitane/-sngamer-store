@@ -218,15 +218,19 @@ app.get("/api/products", async (req, res) => {
   try {
     const result = await db(`
       SELECT
-        id,
-        name,
-        category,
-        price,
-        stock,
-        emoji,
-        created_at
-      FROM products
-      ORDER BY id DESC
+  id,
+  name,
+  category,
+  price,
+  stock,
+  emoji,
+  description,
+  image1_url,
+  image2_url,
+  image3_url,
+  video_url,
+  created_at
+FROM products
     `);
 
     res.json(result.rows);
