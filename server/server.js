@@ -601,12 +601,13 @@ app.patch(
       const productId = Number(req.params.id);
 
       const {
-        name,
-        category,
-        price,
-        stock,
-        emoji
-      } = req.body;
+  name,
+  category,
+  price,
+  stock,
+  emoji,
+  description
+} = req.body;
 
       const result = await db(
         `
@@ -616,8 +617,9 @@ app.patch(
           category = COALESCE($2, category),
           price = COALESCE($3, price),
           stock = COALESCE($4, stock),
-          emoji = COALESCE($5, emoji)
-        WHERE id = $6
+          emoji = COALESCE($5, emoji),
+description = COALESCE($6, description)
+        WHERE id = $7
         RETURNING *
         `,
         [
@@ -626,7 +628,8 @@ app.patch(
           price !== undefined ? Number(price) : null,
           stock !== undefined ? Number(stock) : null,
           emoji ?? null,
-          productId
+description ?? null,
+productId
         ]
       );
 
