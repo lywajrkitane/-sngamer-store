@@ -313,7 +313,25 @@
     id="pVideo"
     type="file"
     accept="video/*">
+<!-- Fenêtre de recadrage des images -->
+<div id="cropModal" class="cropModal">
+  <div class="cropBox">
+    <button type="button" class="cropClose" onclick="closeCrop()">×</button>
 
+    <h2>✂️ Recadrer l'image</h2>
+
+    <div class="cropArea">
+      <img id="cropImage" alt="Image à recadrer">
+    </div>
+
+    <div class="cropActions">
+      <button type="button" onclick="cancelCrop()">Annuler</button>
+      <button type="button" class="primary" onclick="applyCrop()">
+        ✓ Recadrer et utiliser
+      </button>
+    </div>
+  </div>
+</div>
   <!-- Conservé temporairement pour l'ancien JavaScript -->
   <input
     id="pEmoji"
