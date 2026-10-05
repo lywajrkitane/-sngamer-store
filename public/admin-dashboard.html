@@ -636,12 +636,17 @@
           <td>${p.stock}</td>
 
           <td>
-            <button
-              class="delete"
-              onclick="deleteProduct(${p.id})">
-              Supprimer
-            </button>
-          </td>
+    <button
+        onclick="editProduct(${p.id})">
+        ✏️ Modifier
+    </button>
+
+    <button
+        class="delete"
+        onclick="deleteProduct(${p.id})">
+        🗑️ Supprimer
+    </button>
+</td>
 
         </tr>
 
@@ -1267,7 +1272,51 @@ if (document.readyState === "loading") {
 
     loadOrders();
   }
+  async function editProduct(id) {
 
+    const response = await fetch("/api/products");
+    const products = await response.json();
+
+    const product = products.find(p => p.id === id);
+
+    if (!product) {
+        alert("Produit introuvable");
+        return;
+    }
+
+    const description = prompt(
+        "Modifier la description du produit :",
+        product.description || ""
+    );
+
+    if (description === null) {
+        return;
+    }
+
+    const updateResponse = await fetch(
+        "/api/admin/products/" + id,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                description: description
+            })
+        }
+    );
+
+    const data = await updateResponse.json();
+
+    if (!updateResponse.ok) {
+        alert(data.error || "Impossible de modifier le produit");
+        return;
+    }
+
+    alert("Description modifiée avec succès !");
+
+    loadProducts();
+  }
 
   async function loadAll() {
 
