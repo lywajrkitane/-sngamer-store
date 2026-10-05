@@ -1354,3 +1354,185 @@ h1{
     margin-bottom:20px;
   }
     }
+/* =========================================================
+   SNGAMER STORE — PANIER PREMIUM
+   ========================================================= */
+
+.drawer aside{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(8,124,255,.10), transparent 35%),
+    radial-gradient(circle at 100% 100%, rgba(231,43,157,.08), transparent 35%),
+    #070d18;
+  border-left:1px solid rgba(75,140,255,.25);
+  box-shadow:-20px 0 60px rgba(0,0,0,.45);
+}
+
+.drawer .head{
+  padding:20px 22px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.drawer .head h2{
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:-.5px;
+}
+
+.drawer .head button{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  font-size:26px;
+}
+
+.cartItem{
+  margin:0 18px;
+  padding:18px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  display:grid;
+  grid-template-columns:58px 1fr auto;
+  gap:14px;
+  align-items:center;
+}
+
+.cartItem .em{
+  width:58px;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:15px;
+  background:linear-gradient(135deg,#0b1d35,#10152a);
+  border:1px solid rgba(55,130,255,.25);
+  font-size:30px;
+}
+
+.cartItem b{
+  display:block;
+  color:#fff;
+  font-size:16px;
+  line-height:1.25;
+  margin-bottom:5px;
+}
+
+.cartItem small{
+  color:#8e9bb0;
+  font-size:13px;
+}
+
+.cartItem .qty{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#fff;
+  font-weight:700;
+  font-size:15px;
+}
+
+.cartItem .qty button{
+  width:36px;
+  height:36px;
+  padding:0;
+  border-radius:10px;
+  border:1px solid rgba(65,130,255,.30);
+  background:#101d31;
+  color:#fff;
+  font-size:21px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.20);
+}
+
+.cartItem .qty button:hover{
+  background:linear-gradient(135deg,#087cff,#6845ff);
+  border-color:transparent;
+}
+
+.drawer aside h3{
+  margin:22px 20px 16px;
+  padding:18px;
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:19px;
+  color:#fff;
+}
+
+.drawer aside h3 span{
+  color:#fff;
+  font-size:21px;
+}
+
+.drawer .primary.full{
+  margin:0 20px 24px;
+  width:calc(100% - 40px);
+  min-height:58px;
+  border:0;
+  border-radius:16px;
+  font-size:18px;
+  font-weight:800;
+  background:linear-gradient(135deg,#087cff,#6845ff 55%,#e72b9d);
+  box-shadow:
+    0 8px 25px rgba(72,68,255,.25),
+    0 0 20px rgba(231,43,157,.08);
+}
+
+.drawer .primary.full:hover{
+  transform:translateY(-2px);
+  box-shadow:
+    0 12px 30px rgba(72,68,255,.35),
+    0 0 25px rgba(231,43,157,.12);
+}
+
+@media(max-width:700px){
+
+  .drawer aside{
+    width:100%;
+    max-width:none;
+  }
+
+  .cartItem{
+    margin:0 14px;
+    padding:16px 0;
+    grid-template-columns:52px 1fr auto;
+    gap:11px;
+  }
+
+  .cartItem .em{
+    width:52px;
+    height:52px;
+    font-size:27px;
+  }
+
+  .cartItem b{
+    font-size:15px;
+  }
+
+  .cartItem small{
+    font-size:12px;
+  }
+
+  .cartItem .qty{
+    gap:5px;
+  }
+
+  .cartItem .qty button{
+    width:34px;
+    height:34px;
+  }
+
+  .drawer aside h3{
+    margin:18px 14px 14px;
+    padding:16px;
+    font-size:17px;
+  }
+
+  .drawer .primary.full{
+    margin:0 14px 20px;
+    width:calc(100% - 28px);
+  }
+}
