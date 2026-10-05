@@ -14,3 +14,69 @@ function openCheckout(){if(!cartItems.length)return alert("Panier vide.");docume
 function closeCheckout(){document.querySelector("#checkout").classList.remove("show")}
 async function order(){let customer={name:document.querySelector("#name").value,phone:document.querySelector("#phone").value,address:document.querySelector("#addr").value};if(!customer.name||!customer.phone||!customer.address)return alert("Remplis les informations.");let payment=document.querySelector("#pay").value;let r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,payment,items:cartItems})});let d=await r.json();if(!r.ok)return alert(d.error||"Erreur");alert("Commande enregistrée : "+d.orderId);cartItems=[];save();closeCheckout();closeCart();load()}
 document.querySelector("#q").oninput=render;load();
+function escapeHtml(text=""){
+  return String(text).replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  }[c]));
+}
+
+function openProduct(id){
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+
+  const images=[p.image1_url,p.image2_url,p.image3_url].filter(Boolean);
+
+  document.querySelector("#productDetail").innerHTML=`
+    <div class="productDetail">
+      <div class="productGallery">
+        ${
+          images.length
+          ? images.map(url=>`
+              <img src="${escapeHtml(url)}"
+                   alt="${escapeHtml(p.name)}"
+                   class="productDetailImage">
+            `).join("")
+          : `<div class="productEmoji">${escapeHtml(p.emoji || "🎮")}</div>`
+        }
+      </div>
+
+      <div class="productInfo">
+        <div class="cat">${escapeHtml(p.category || "Gaming")}</div>
+        <h2>${escapeHtml(p.name)}</h2>
+
+        <div class="price">${money(p.price)}</div>
+
+        <div class="stock">${p.stock} disponible(s)</div>
+
+        <p class="productDescription">
+          ${escapeHtml(p.description || "Aucune description disponible.").replace(/\n/g,"<br>")}
+        </p>
+
+        ${
+          p.video_url
+          ? `
+            <div class="productVideo">
+              <h3>Vidéo du produit</h3>
+              <video controls preload="metadata" src="${escapeHtml(p.video_url)}"></video>
+            </div>
+          `
+          : ""
+        }
+
+        <button class="primary full" onclick="add(${p.id});closeProduct()">
+          Ajouter au panier
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.querySelector("#productModal").classList.add("show");
+}
+
+function closeProduct(){
+  document.querySelector("#productModal").classList.remove("show");
+}
