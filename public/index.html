@@ -6,4 +6,10 @@
 <footer><div class="wrap">© 2026 SNGAMER STORE — Dakar, Sénégal</div></footer>
 <div id="drawer" class="drawer"><div class="shade" onclick="closeCart()"></div><aside><div class="head"><h2>Panier</h2><button onclick="closeCart()">×</button></div><div id="items"></div><h3>Total : <span id="total">0 FCFA</span></h3><button class="primary full" onclick="openCheckout()">Commander</button></aside></div>
 <div id="checkout" class="modal"><div class="box"><button class="x" onclick="closeCheckout()">×</button><h2>Finaliser la commande</h2><input id="name" placeholder="Nom complet"><input id="phone" placeholder="Téléphone"><input id="addr" placeholder="Adresse / quartier"><select id="pay"><option>Wave</option><option>Orange Money</option><option>Paiement à la livraison</option></select><button class="primary full" onclick="order()">Confirmer</button><p class="hint">Le paiement réel sera activé après connexion des comptes marchands.</p></div></div>
+  <div id="productModal" class="modal">
+  <div class="box productBox">
+    <button class="x" onclick="closeProduct()">×</button>
+    <div id="productDetail"></div>
+  </div>
+  </div>
 <script src="app.js"></script></body></html>
