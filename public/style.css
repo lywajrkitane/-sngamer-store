@@ -227,3 +227,33 @@
     padding:9px;
   }
 }
+@media(max-width:700px){
+    .productGallery{
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .productMainImage{
+        width:100%;
+    }
+
+    .productMainImage img{
+        width:100%;
+        height:320px;
+        object-fit:contain;
+    }
+
+    .productThumbs{
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        overflow-x:auto;
+    }
+
+    .productThumb{
+        flex:0 0 70px;
+        width:70px;
+        height:70px;
+    }
+}
