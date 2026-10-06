@@ -1536,22 +1536,4 @@ h1{
     width:calc(100% - 28px);
   }
 }
-/* Correction affichage du panier au-dessus du header */
 
-.drawer{
-  z-index:2000 !important;
-}
-
-.drawer aside{
-  padding-top:12px;
-}
-
-@media(max-width:700px){
-  .drawer aside{
-    padding-top:18px;
-  }
-
-  .drawer .head{
-    padding-top:14px;
-  }
-}
