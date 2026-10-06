@@ -1671,15 +1671,23 @@ h1{
     font-size:19px;
   }
 }
-/* =========================================================
-   SNGAMER STORE — CHECKOUT MOBILE SCROLL
-   ========================================================= */
+
+/* =========================================
+   SNGAMER STORE — CHECKOUT PROPRE & MOBILE
+   ========================================= */
 
 #checkout{
+  position:fixed;
+  top:76px;
+  left:0;
+  right:0;
+  height:calc(100% - 76px);
+  box-sizing:border-box;
+  padding:24px 16px 30px;
   overflow-y:auto;
   overflow-x:hidden;
   align-items:flex-start;
-  padding:90px 16px 30px;
+  justify-content:center;
   -webkit-overflow-scrolling:touch;
 }
 
@@ -1687,34 +1695,23 @@ h1{
   width:min(500px,100%);
   max-height:none;
   margin:0 auto;
-}
-
-@media(max-width:700px){
-
-  #checkout{
-    padding:135px 14px 30px;
-  }
-
-  #checkout .box{
-    width:100%;
-  }
-}
-/* =========================================================
-   SNGAMER STORE — CHECKOUT SOUS LE HEADER
-   ========================================================= */
-
-#checkout{
-  position:fixed;
-  top:76px;
-  height:calc(100% - 76px);
   box-sizing:border-box;
-  padding:24px 16px 30px;
 }
 
+/* MOBILE */
 @media(max-width:700px){
+
   #checkout{
     top:120px;
     height:calc(100% - 120px);
     padding:20px 14px 30px;
+    align-items:flex-start;
+    justify-content:center;
   }
+
+  #checkout .box{
+    width:100%;
+    max-width:100%;
+  }
+
 }
