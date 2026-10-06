@@ -1799,6 +1799,58 @@ function closeOrderDetails() {
 
 }
   </style>
+  <style>
+/* =========================================================
+   SNGAMER STORE — MODAL MODIFICATION PRODUIT
+   ========================================================= */
+
+.edit-product-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:3000;
+  padding:24px;
+  background:rgba(3,7,12,.78);
+  backdrop-filter:blur(8px);
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+
+.edit-product-modal.show{
+  display:flex;
+}
+
+.edit-product-box{
+  position:relative;
+  width:100%;
+  max-width:620px;
+  max-height:90vh;
+  overflow-y:auto;
+  padding:28px;
+  border-radius:22px;
+  background:linear-gradient(145deg,#111c29,#0a111a);
+  border:1px solid rgba(75,140,255,.28);
+  box-shadow:0 25px 70px rgba(0,0,0,.55);
+  color:#fff;
+  box-sizing:border-box;
+}
+
+@media(max-width:700px){
+
+  .edit-product-modal{
+    padding:14px;
+    align-items:flex-end;
+  }
+
+  .edit-product-box{
+    max-height:88vh;
+    padding:22px 16px;
+    border-radius:20px 20px 0 0;
+  }
+
+}
+  </style>
   <div id="editProductModal" class="edit-product-modal">
 
   <div class="edit-product-box">
