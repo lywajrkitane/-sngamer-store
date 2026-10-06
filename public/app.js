@@ -1,6 +1,6 @@
 let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous";
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
-async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render()}
+async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render();update()}
 function cats(){let cs=["Tous",...new Set(products.map(p=>p.category))];document.querySelector("#cats").innerHTML=cs.map(c=>`<button class="catbtn ${c===filter?"on":""}" onclick="filterBy('${c}')">${c}</button>`).join("")}
 function filterBy(c){filter=c;cats();render()}
 function render(){let q=document.querySelector("#q").value.toLowerCase();let list=products.filter(p=>(filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));document.querySelector("#products").innerHTML=list.map(p=>`<article class="card"><div class="pic">${p.image1_url ? '<img src="' + p.image1_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" loading="lazy">' : p.emoji}</div><div class="info"><div class="cat">${p.category}</div><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="stock">${p.stock} disponible(s)</div><button class="add" onclick="add(${p.id})">Ajouter au panier</button><button class="details" onclick="openProduct(${p.id})">Voir le produit</button></div></article>`).join("")}
