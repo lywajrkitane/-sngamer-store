@@ -372,7 +372,12 @@
     ✅ Confirmées
     <strong id="confirmedOrderCount">0</strong>
   </div>
-
+      
+  <div class="stat">
+  🟣 En préparation
+  <strong id="preparedOrderCount">0</strong>
+  </div>
+      
   <div class="stat">
     🚚 Expédiées
     <strong id="shippedOrderCount">0</strong>
@@ -1163,12 +1168,14 @@ if (document.readyState === "loading") {
   return status === "nouvelle" || status === "nouveau" || status.startsWith("nouvelle ");
 }).length;
   const confirmedOrders = orders.filter(o => o.status === "Confirmée").length;
+  const preparedOrders = orders.filter(o => o.status === "En préparation").length;
   const shippedOrders = orders.filter(o => o.status === "Expédiée").length;
   const deliveredOrders = orders.filter(o => o.status === "Livrée").length;
   const cancelledOrders = orders.filter(o => o.status === "Annulée").length;
 
   document.getElementById("newOrderCount").textContent = newOrders;
   document.getElementById("confirmedOrderCount").textContent = confirmedOrders;
+  document.getElementById("preparedOrderCount").textContent = preparedOrders;
   document.getElementById("shippedOrderCount").textContent = shippedOrders;
   document.getElementById("deliveredOrderCount").textContent = deliveredOrders;
   document.getElementById("cancelledOrderCount").textContent = cancelledOrders;
