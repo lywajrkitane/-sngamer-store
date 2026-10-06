@@ -1404,38 +1404,101 @@ if (document.readyState === "loading") {
    SNGAMER STORE — COMMANDES MOBILE
    ========================================================= */
 
-@media (max-width: 700px){
+@media (max-width:700px){
 
   .table-wrap{
     width:100%;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    border-radius:14px;
+    overflow:visible;
   }
 
   .table-wrap table{
-    min-width:760px;
+    width:100%;
+    min-width:0;
+    border-collapse:separate;
+    border-spacing:0 14px;
+  }
+
+  .table-wrap thead{
+    display:none;
+  }
+
+  .table-wrap tbody{
+    display:block;
     width:100%;
   }
 
-  .table-wrap th,
+  .table-wrap tr{
+    display:block;
+    width:100%;
+    padding:16px;
+    margin-bottom:14px;
+    box-sizing:border-box;
+    border-radius:18px;
+    background:linear-gradient(145deg,#101820,#0c131d);
+    border:1px solid rgba(75,140,255,.20);
+    box-shadow:0 8px 25px rgba(0,0,0,.18);
+  }
+
   .table-wrap td{
+    display:grid;
+    grid-template-columns:95px 1fr;
+    gap:12px;
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:11px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    text-align:left;
     white-space:normal;
     vertical-align:middle;
   }
 
-  .table-wrap .status{
-    min-width:145px;
-    max-width:145px;
-    font-size:13px;
+  .table-wrap td:last-child{
+    border-bottom:0;
+  }
+
+  .table-wrap td::before{
+    font-weight:700;
+    color:#8fa0b5;
+  }
+
+  .table-wrap td:nth-child(1)::before{
+    content:"🆔 ID";
+  }
+
+  .table-wrap td:nth-child(2)::before{
+    content:"📅 Date";
+  }
+
+  .table-wrap td:nth-child(3)::before{
+    content:"👤 Client";
+  }
+
+  .table-wrap td:nth-child(4)::before{
+    content:"📦 Articles";
+  }
+
+  .table-wrap td:nth-child(5)::before{
+    content:"💰 Total";
+  }
+
+  .table-wrap td:nth-child(6)::before{
+    content:"💳 Paiement";
+  }
+
+  .table-wrap td:nth-child(7)::before{
+    content:"🔄 Statut";
   }
 
   .table-wrap .customer{
-    min-width:160px;
+    min-width:0;
   }
 
-  .table-wrap td{
-    padding:14px 10px;
+  .table-wrap .status{
+    width:100%;
+    min-width:0;
+    max-width:none;
+    box-sizing:border-box;
   }
 }
 </style>
