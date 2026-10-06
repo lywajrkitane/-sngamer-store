@@ -272,11 +272,27 @@
     }
 
     .status {
-      padding: 6px 8px;
-      border-radius: 7px;
-      background: #26313d;
-      color: white;
-    }
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #101d31, #172944);
+    color: #ffffff;
+    border: 1px solid rgba(75, 140, 255, 0.35);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.status:hover {
+    border-color: #087cff;
+    box-shadow: 0 0 12px rgba(8, 124, 255, 0.18);
+}
+
+.status:focus {
+    border-color: #087cff;
+    box-shadow: 0 0 0 3px rgba(8, 124, 255, 0.12);
+}
 
     .delete {
       background: #e53935;
