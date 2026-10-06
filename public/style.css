@@ -1699,3 +1699,22 @@ h1{
     width:100%;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CHECKOUT SOUS LE HEADER
+   ========================================================= */
+
+#checkout{
+  position:fixed;
+  top:76px;
+  height:calc(100% - 76px);
+  box-sizing:border-box;
+  padding:24px 16px 30px;
+}
+
+@media(max-width:700px){
+  #checkout{
+    top:120px;
+    height:calc(100% - 120px);
+    padding:20px 14px 30px;
+  }
+}
