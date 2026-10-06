@@ -1524,58 +1524,87 @@ function closeEditProduct() {
   document.getElementById("editProductModal").classList.remove("show");
 }
 
-document.getElementById("editProductForm").addEventListener("submit", async function(event) {
-  event.preventDefault();
+document.addEventListener("DOMContentLoaded", function () {
 
-  const id = document.getElementById("editProductId").value;
-  const name = document.getElementById("editProductName").value.trim();
-  const category = document.getElementById("editProductCategory").value.trim();
-  const price = Number(document.getElementById("editProductPrice").value);
-  const stock = Number(document.getElementById("editProductStock").value);
-  const description = document.getElementById("editProductDescription").value.trim();
+  document.getElementById("editProductForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-  if (
-    !name ||
-    !category ||
-    !Number.isFinite(price) ||
-    price < 0 ||
-    !Number.isInteger(stock) ||
-    stock < 0
-  ) {
-    alert("Veuillez vérifier les informations du produit.");
-    return;
-  }
+    const id =
+      document.getElementById("editProductId").value;
 
-  try {
-    const updateResponse = await fetch("/api/admin/products/" + id, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name,
-        category,
-        price,
-        stock,
-        description
-      })
-    });
+    const name =
+      document.getElementById("editProductName").value.trim();
 
-    const data = await updateResponse.json();
+    const category =
+      document.getElementById("editProductCategory").value.trim();
 
-    if (!updateResponse.ok) {
-      alert(data.error || "Impossible de modifier le produit.");
+    const price =
+      Number(document.getElementById("editProductPrice").value);
+
+    const stock =
+      Number(document.getElementById("editProductStock").value);
+
+    const description =
+      document.getElementById("editProductDescription").value.trim();
+
+    if (
+      !name ||
+      !category ||
+      !Number.isFinite(price) ||
+      price < 0 ||
+      !Number.isInteger(stock) ||
+      stock < 0
+    ) {
+      alert("Veuillez vérifier les informations du produit.");
       return;
     }
 
-    closeEditProduct();
-    alert("Produit modifié avec succès !");
-    loadProducts();
+    try {
+      const updateResponse = await fetch(
+        "/api/admin/products/" + id,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            category,
+            price,
+            stock,
+            description
+          })
+        }
+      );
 
-  } catch (error) {
-    console.error("UPDATE_PRODUCT_ERROR:", error);
-    alert("Erreur de connexion au serveur.");
-  }
+      const data = await updateResponse.json();
+
+      if (!updateResponse.ok) {
+        alert(
+          data.error ||
+          "Impossible de modifier le produit"
+        );
+        return;
+      }
+
+      closeEditProduct();
+
+      alert("Produit modifié avec succès !");
+
+      loadProducts();
+
+    } catch (error) {
+      console.error(
+        "UPDATE_PRODUCT_ERROR:",
+        error
+      );
+
+      alert(
+        "Erreur de connexion au serveur."
+      );
+    }
+  });
+
 });
 
   async function loadAll() {
