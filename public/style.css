@@ -1582,3 +1582,92 @@ h1{
     height:calc(100% - 120px);
   }
 }
+/* =========================================================
+   SNGAMER STORE — RÉSUMÉ DE COMMANDE
+   ========================================================= */
+
+#checkoutSummary{
+  margin:0 0 24px;
+  padding:20px;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(75,140,255,.20);
+  box-shadow:0 8px 30px rgba(0,0,0,.18);
+}
+
+#checkoutSummary h3{
+  margin:0 0 18px;
+  color:#fff;
+  font-size:21px;
+  font-weight:800;
+}
+
+.checkoutItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  color:#aeb9ca;
+  font-size:15px;
+}
+
+.checkoutItem span{
+  flex:1;
+}
+
+.checkoutItem b{
+  color:#fff;
+  white-space:nowrap;
+  font-size:15px;
+}
+
+.checkoutTotal{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.12);
+}
+
+.checkoutTotal span{
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+}
+
+.checkoutTotal b{
+  color:#fff;
+  font-size:21px;
+  font-weight:800;
+}
+
+@media(max-width:700px){
+  #checkoutSummary{
+    padding:16px;
+    margin-bottom:20px;
+  }
+
+  #checkoutSummary h3{
+    font-size:19px;
+  }
+
+  .checkoutItem{
+    font-size:14px;
+    gap:10px;
+  }
+
+  .checkoutItem b{
+    font-size:14px;
+  }
+
+  .checkoutTotal span{
+    font-size:17px;
+  }
+
+  .checkoutTotal b{
+    font-size:19px;
+  }
+}
