@@ -310,21 +310,55 @@
     }
 
     @media (max-width: 700px) {
-      .stats {
-        grid-template-columns: 1fr;
-      }
 
-      .product-form {
-        grid-template-columns: 1fr;
-      }
+  /* ================================
+     STATISTIQUES ADMIN — MOBILE
+     ================================ */
 
-      header {
-        gap: 10px;
-      }
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
 
-      header h1 {
-        font-size: 16px;
-      }
+  .stat {
+    min-width: 0;
+    min-height: 100px;
+    padding: 15px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
+
+  .stat strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Chiffre d'affaires sur toute la largeur */
+  .stats .stat:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  /* Formulaire produit */
+  .product-form {
+    grid-template-columns: 1fr;
+  }
+
+  /* Header */
+  header {
+    gap: 10px;
+  }
+
+  header h1 {
+    font-size: 16px;
+  }
+
     }
   </style>
 </head>
