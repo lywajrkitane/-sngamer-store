@@ -1727,3 +1727,36 @@ h1{
   }
 
 }
+/* =========================================================
+   SNGAMER STORE — RECHERCHE MOBILE PREMIUM
+   ========================================================= */
+
+@media (max-width:700px){
+
+  .siteHeader .nav{
+    flex-wrap:wrap;
+    row-gap:10px;
+  }
+
+  .siteHeader .logo{
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  .siteHeader .cartButton{
+    flex:0 0 42px;
+  }
+
+  .siteHeader .search{
+    order:3;
+    flex:0 0 100%;
+    width:100%;
+    max-width:none;
+    margin-left:0;
+  }
+
+  .siteHeader .search input{
+    width:100%;
+  }
+
+}
