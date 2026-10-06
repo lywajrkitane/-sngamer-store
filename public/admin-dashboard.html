@@ -1489,96 +1489,94 @@ function closeOrderDetails() {
     .classList.remove("show");
                                           }
     async function editProduct(id) {
-
+  try {
     const response = await fetch("/api/products");
 
     if (!response.ok) {
-        alert("Impossible de charger les produits");
-        return;
+      alert("Impossible de charger les produits.");
+      return;
     }
 
     const products = await response.json();
-
     const product = products.find(p => p.id === id);
 
     if (!product) {
-        alert("Produit introuvable");
-        return;
+      alert("Produit introuvable.");
+      return;
     }
 
-    const name = prompt(
-        "Modifier le nom du produit :",
-        product.name || ""
-    );
+    document.getElementById("editProductId").value = product.id;
+    document.getElementById("editProductName").value = product.name || "";
+    document.getElementById("editProductCategory").value = product.category || "";
+    document.getElementById("editProductPrice").value = product.price ?? "";
+    document.getElementById("editProductStock").value = product.stock ?? "";
+    document.getElementById("editProductDescription").value = product.description || "";
 
-    if (name === null) {
-        return;
-    }
+    document.getElementById("editProductModal").classList.add("show");
 
-    const category = prompt(
-        "Modifier la catégorie :",
-        product.category || ""
-    );
+  } catch (error) {
+    console.error("EDIT_PRODUCT_ERROR:", error);
+    alert("Erreur de connexion au serveur.");
+  }
+}
 
-    if (category === null) {
-        return;
-    }
+function closeEditProduct() {
+  document.getElementById("editProductModal").classList.remove("show");
+}
 
-    const price = prompt(
-        "Modifier le prix en FCFA :",
-        product.price ?? ""
-    );
+document.getElementById("editProductForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
 
-    if (price === null) {
-        return;
-    }
+  const id = document.getElementById("editProductId").value;
+  const name = document.getElementById("editProductName").value.trim();
+  const category = document.getElementById("editProductCategory").value.trim();
+  const price = Number(document.getElementById("editProductPrice").value);
+  const stock = Number(document.getElementById("editProductStock").value);
+  const description = document.getElementById("editProductDescription").value.trim();
 
-    const stock = prompt(
-        "Modifier le stock :",
-        product.stock ?? ""
-    );
+  if (
+    !name ||
+    !category ||
+    !Number.isFinite(price) ||
+    price < 0 ||
+    !Number.isInteger(stock) ||
+    stock < 0
+  ) {
+    alert("Veuillez vérifier les informations du produit.");
+    return;
+  }
 
-    if (stock === null) {
-        return;
-    }
-
-    const description = prompt(
-        "Modifier la description du produit :",
-        product.description || ""
-    );
-
-    if (description === null) {
-        return;
-    }
-
-    const updateResponse = await fetch(
-        "/api/admin/products/" + id,
-        {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name: name,
-                category: category,
-                price: Number(price),
-                stock: Number(stock),
-                description: description
-            })
-        }
-    );
+  try {
+    const updateResponse = await fetch("/api/admin/products/" + id, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        category,
+        price,
+        stock,
+        description
+      })
+    });
 
     const data = await updateResponse.json();
 
     if (!updateResponse.ok) {
-        alert(data.error || "Impossible de modifier le produit");
-        return;
+      alert(data.error || "Impossible de modifier le produit.");
+      return;
     }
 
+    closeEditProduct();
     alert("Produit modifié avec succès !");
-
     loadProducts();
-}
+
+  } catch (error) {
+    console.error("UPDATE_PRODUCT_ERROR:", error);
+    alert("Erreur de connexion au serveur.");
+  }
+});
 
   async function loadAll() {
 
