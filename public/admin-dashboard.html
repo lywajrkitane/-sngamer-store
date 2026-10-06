@@ -512,7 +512,7 @@
         🔄 Actualiser
       </button>
 
-      <div class="table-wrap">
+      <div class="table-wrap orders-table-wrap">
         <table>
           <thead>
             <tr>
@@ -1406,28 +1406,28 @@ if (document.readyState === "loading") {
 
 @media (max-width:700px){
 
-  .table-wrap{
+  .orders-table-wrap{
     width:100%;
     overflow:visible;
   }
 
-  .table-wrap table{
+  .orders-table-wrap table{
     width:100%;
     min-width:0;
     border-collapse:separate;
     border-spacing:0 14px;
   }
 
-  .table-wrap thead{
+  .orders-table-wrap thead{
     display:none;
   }
 
-  .table-wrap tbody{
+  .orders-table-wrap tbody{
     display:block;
     width:100%;
   }
 
-  .table-wrap tr{
+  .orders-table-wrap tr{
     display:block;
     width:100%;
     padding:16px;
@@ -1439,7 +1439,7 @@ if (document.readyState === "loading") {
     box-shadow:0 8px 25px rgba(0,0,0,.18);
   }
 
-  .table-wrap td{
+  .orders-table-wrap td{
     display:grid;
     grid-template-columns:95px 1fr;
     gap:12px;
@@ -1453,53 +1453,54 @@ if (document.readyState === "loading") {
     vertical-align:middle;
   }
 
-  .table-wrap td:last-child{
+  .orders-table-wrap td:last-child{
     border-bottom:0;
   }
 
-  .table-wrap td::before{
+  .orders-table-wrap td::before{
     font-weight:700;
     color:#8fa0b5;
   }
 
-  .table-wrap td:nth-child(1)::before{
+  .orders-table-wrap td:nth-child(1)::before{
     content:"🆔 ID";
   }
 
-  .table-wrap td:nth-child(2)::before{
+  .orders-table-wrap td:nth-child(2)::before{
     content:"📅 Date";
   }
 
-  .table-wrap td:nth-child(3)::before{
+  .orders-table-wrap td:nth-child(3)::before{
     content:"👤 Client";
   }
 
-  .table-wrap td:nth-child(4)::before{
+  .orders-table-wrap td:nth-child(4)::before{
     content:"📦 Articles";
   }
 
-  .table-wrap td:nth-child(5)::before{
+  .orders-table-wrap td:nth-child(5)::before{
     content:"💰 Total";
   }
 
-  .table-wrap td:nth-child(6)::before{
+  .orders-table-wrap td:nth-child(6)::before{
     content:"💳 Paiement";
   }
 
-  .table-wrap td:nth-child(7)::before{
+  .orders-table-wrap td:nth-child(7)::before{
     content:"🔄 Statut";
   }
 
-  .table-wrap .customer{
+  .orders-table-wrap .customer{
     min-width:0;
   }
 
-  .table-wrap .status{
+  .orders-table-wrap .status{
     width:100%;
     min-width:0;
     max-width:none;
     box-sizing:border-box;
   }
+
 }
 </style>
 </body>
