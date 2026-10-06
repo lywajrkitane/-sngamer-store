@@ -1563,3 +1563,22 @@ h1{
     flex-basis:52px;
   }
 }
+/* =========================================================
+   SNGAMER STORE — PANIER SOUS LE HEADER
+   ========================================================= */
+
+.drawer{
+  top:76px;
+  height:calc(100% - 76px);
+}
+
+.drawer aside{
+  height:100%;
+}
+
+@media(max-width:700px){
+  .drawer{
+    top:120px;
+    height:calc(100% - 120px);
+  }
+}
