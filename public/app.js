@@ -182,3 +182,50 @@ function selectProductImage(index){
 function closeProduct(){
   document.querySelector("#productModal").classList.remove("show");
 }
+/* =================================
+   HERO — CARROUSEL PROMOTIONNEL
+   ================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const carousel = document.getElementById("promoCarousel");
+  const dots = document.querySelectorAll("#promoDots button");
+
+  if (!carousel || !dots.length) return;
+
+  function updatePromoDot() {
+    const slideWidth = carousel.clientWidth;
+
+    if (!slideWidth) return;
+
+    const index = Math.round(
+      carousel.scrollLeft / slideWidth
+    );
+
+    dots.forEach(function (dot, i) {
+      dot.classList.toggle("active", i === index);
+    });
+  }
+
+  carousel.addEventListener(
+    "scroll",
+    updatePromoDot,
+    { passive: true }
+  );
+
+  dots.forEach(function (dot, index) {
+
+    dot.addEventListener("click", function () {
+
+      carousel.scrollTo({
+        left: index * carousel.clientWidth,
+        behavior: "smooth"
+      });
+
+    });
+
+  });
+
+  updatePromoDot();
+
+});
