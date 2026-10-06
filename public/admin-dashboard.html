@@ -1224,12 +1224,13 @@ if (document.readyState === "loading") {
                 onchange="changeStatus(${o.id}, this.value)">
 
                 ${[
-                  "Nouvelle",
-                  "Confirmée",
-                  "Expédiée",
-                  "Livrée",
-                  "Annulée"
-                ].map(status => `
+  "Nouvelle",
+  "Confirmée",
+  "En préparation",
+  "Expédiée",
+  "Livrée",
+  "Annulée"
+].map(status => `
                   <option
                     value="${status}"
                     ${status === o.status ? "selected" : ""}>
