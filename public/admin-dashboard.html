@@ -1799,6 +1799,111 @@ function closeOrderDetails() {
 
 }
   </style>
+  <div id="editProductModal" class="edit-product-modal">
+
+  <div class="edit-product-box">
+
+    <button
+      type="button"
+      class="edit-product-close"
+      onclick="closeEditProduct()"
+      aria-label="Fermer"
+    >
+      ×
+    </button>
+
+    <div class="edit-product-header">
+      <span class="edit-product-icon">✏️</span>
+
+      <div>
+        <h2>Modifier le produit</h2>
+        <p>Modifiez les informations de votre produit</p>
+      </div>
+    </div>
+
+    <form id="editProductForm">
+
+      <input type="hidden" id="editProductId">
+
+      <div class="edit-product-field">
+        <label for="editProductName">🎮 Nom du produit</label>
+        <input
+          type="text"
+          id="editProductName"
+          placeholder="Nom du produit"
+          required
+        >
+      </div>
+
+      <div class="edit-product-field">
+        <label for="editProductCategory">🗂️ Catégorie</label>
+        <input
+          type="text"
+          id="editProductCategory"
+          placeholder="Catégorie"
+          required
+        >
+      </div>
+
+      <div class="edit-product-grid">
+
+        <div class="edit-product-field">
+          <label for="editProductPrice">💰 Prix (FCFA)</label>
+          <input
+            type="number"
+            id="editProductPrice"
+            min="0"
+            placeholder="Prix"
+            required
+          >
+        </div>
+
+        <div class="edit-product-field">
+          <label for="editProductStock">📦 Stock</label>
+          <input
+            type="number"
+            id="editProductStock"
+            min="0"
+            placeholder="Stock"
+            required
+          >
+        </div>
+
+      </div>
+
+      <div class="edit-product-field">
+        <label for="editProductDescription">📝 Description</label>
+        <textarea
+          id="editProductDescription"
+          rows="5"
+          placeholder="Description du produit"
+        ></textarea>
+      </div>
+
+      <div class="edit-product-actions">
+
+        <button
+          type="button"
+          class="edit-product-cancel"
+          onclick="closeEditProduct()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="edit-product-save"
+        >
+          💾 Enregistrer les modifications
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  </div>
   <div id="orderDetailsModal" class="order-details-modal">
 
   <div class="order-details-box">
