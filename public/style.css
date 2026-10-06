@@ -1671,3 +1671,31 @@ h1{
     font-size:19px;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CHECKOUT MOBILE SCROLL
+   ========================================================= */
+
+#checkout{
+  overflow-y:auto;
+  overflow-x:hidden;
+  align-items:flex-start;
+  padding:90px 16px 30px;
+  -webkit-overflow-scrolling:touch;
+}
+
+#checkout .box{
+  width:min(500px,100%);
+  max-height:none;
+  margin:0 auto;
+}
+
+@media(max-width:700px){
+
+  #checkout{
+    padding:135px 14px 30px;
+  }
+
+  #checkout .box{
+    width:100%;
+  }
+}
