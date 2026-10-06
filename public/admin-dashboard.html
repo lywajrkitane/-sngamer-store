@@ -486,7 +486,7 @@
 
       <br>
 
-      <div class="table-wrap">
+      <div class="table-wrap products-table-wrap">
         <table>
           <thead>
             <tr>
@@ -1503,5 +1503,110 @@ if (document.readyState === "loading") {
 
 }
 </style>
+  <style>
+/* =========================================================
+   SNGAMER STORE — PRODUITS MOBILE
+   ========================================================= */
+
+@media (max-width:700px){
+
+  .products-table-wrap{
+    width:100%;
+    overflow:visible;
+  }
+
+  .products-table-wrap table{
+    width:100%;
+    min-width:0;
+    border-collapse:separate;
+    border-spacing:0 14px;
+  }
+
+  .products-table-wrap thead{
+    display:none;
+  }
+
+  .products-table-wrap tbody{
+    display:block;
+    width:100%;
+  }
+
+  .products-table-wrap tr{
+    display:block;
+    width:100%;
+    padding:16px;
+    margin-bottom:14px;
+    box-sizing:border-box;
+    border-radius:18px;
+    background:linear-gradient(145deg,#101820,#0c131d);
+    border:1px solid rgba(75,140,255,.20);
+    box-shadow:0 8px 25px rgba(0,0,0,.18);
+  }
+
+  .products-table-wrap td{
+    display:grid;
+    grid-template-columns:95px 1fr;
+    gap:12px;
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:11px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    text-align:left;
+    white-space:normal;
+    vertical-align:middle;
+  }
+
+  .products-table-wrap td:last-child{
+    border-bottom:0;
+  }
+
+  .products-table-wrap td::before{
+    font-weight:700;
+    color:#8fa0b5;
+  }
+
+  .products-table-wrap td:nth-child(1)::before{
+    content:"🆔 ID";
+  }
+
+  .products-table-wrap td:nth-child(2)::before{
+    content:"🎮 Produit";
+  }
+
+  .products-table-wrap td:nth-child(3)::before{
+    content:"🗂️ Catégorie";
+  }
+
+  .products-table-wrap td:nth-child(4)::before{
+    content:"💰 Prix";
+  }
+
+  .products-table-wrap td:nth-child(5)::before{
+    content:"📦 Stock";
+  }
+
+  .products-table-wrap td:nth-child(6){
+    display:block;
+  }
+
+  .products-table-wrap td:nth-child(6)::before{
+    content:"⚙️ Actions";
+    display:block;
+    margin-bottom:10px;
+  }
+
+  .products-table-wrap td:nth-child(6) button{
+    width:100%;
+    box-sizing:border-box;
+    margin:0 0 8px;
+  }
+
+  .products-table-wrap td:nth-child(6) button:last-child{
+    margin-bottom:0;
+  }
+
+}
+  </style>
 </body>
 </html>
