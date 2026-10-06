@@ -6,7 +6,61 @@ function filterBy(c){filter=c;cats();render()}
 function render(){let q=document.querySelector("#q").value.toLowerCase();let list=products.filter(p=>(filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));document.querySelector("#products").innerHTML=list.map(p=>`<article class="card"><div class="pic">${p.image1_url ? '<img src="' + p.image1_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" loading="lazy">' : p.emoji}</div><div class="info"><div class="cat">${p.category}</div><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="stock">${p.stock} disponible(s)</div><button class="add" onclick="add(${p.id})">Ajouter au panier</button><button class="details" onclick="openProduct(${p.id})">Voir le produit</button></div></article>`).join("")}
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
 function add(id){let x=cartItems.find(a=>a.id===id);x?x.qty++:cartItems.push({id,qty:1});save();cart()}
-function update(){document.querySelector("#count").textContent=cartItems.reduce((s,x)=>s+x.qty,0);document.querySelector("#items").innerHTML=cartItems.length?cartItems.map(x=>{let p=products.find(p=>p.id===x.id);return `<div class="cartItem"><div class="em">${p.image1_url ? `<img src="${p.image1_url}" alt="${escapeHtml(p.name)}">` : p.emoji}</div><div><b>${p.name}</b><br><small>${money(p.price)} × ${x.qty}</small></div><div class="qty"><button onclick="chg(${p.id},-1)">−</button>${x.qty}<button onclick="chg(${p.id},1)">+</button></div></div>`}).join(""):"<p style='color:#8190a2'>Panier vide.</p>";let t=cartItems.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0);document.querySelector("#total").textContent=money(t)}
+function update(){
+  const validItems = cartItems.filter(x =>
+    products.some(p => Number(p.id) === Number(x.id))
+  );
+
+  if (validItems.length !== cartItems.length) {
+    cartItems = validItems;
+    localStorage.setItem("sg_cart", JSON.stringify(cartItems));
+  }
+
+  document.querySelector("#count").textContent =
+    cartItems.reduce((s,x) => s + x.qty, 0);
+
+  document.querySelector("#items").innerHTML =
+    cartItems.length
+      ? cartItems.map(x => {
+          const p = products.find(
+            p => Number(p.id) === Number(x.id)
+          );
+
+          return `
+            <div class="cartItem">
+              <div class="em">
+                ${
+                  p.image1_url
+                    ? `<img src="${p.image1_url}" alt="${escapeHtml(p.name)}">`
+                    : p.emoji
+                }
+              </div>
+
+              <div>
+                <b>${escapeHtml(p.name)}</b><br>
+                <small>${money(p.price)} × ${x.qty}</small>
+              </div>
+
+              <div class="qty">
+                <button onclick="chg(${p.id},-1)">−</button>
+                ${x.qty}
+                <button onclick="chg(${p.id},1)">+</button>
+              </div>
+            </div>
+          `;
+        }).join("")
+      : "<p style='color:#8190a2'>Panier vide.</p>";
+
+  const total = cartItems.reduce((s,x) => {
+    const p = products.find(
+      p => Number(p.id) === Number(x.id)
+    );
+
+    return s + (p ? p.price * x.qty : 0);
+  }, 0);
+
+  document.querySelector("#total").textContent = money(total);
+}
 function chg(id,n){let x=cartItems.find(a=>a.id===id);x.qty+=n;if(x.qty<=0)cartItems=cartItems.filter(a=>a.id!==id);save()}
 function cart(){document.querySelector("#drawer").classList.add("show");update()}
 function closeCart(){document.querySelector("#drawer").classList.remove("show")}
