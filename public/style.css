@@ -792,16 +792,17 @@ h1{
 }
 
 #cats button{
+#cats button{
   flex:0 0 auto;
-  min-height:42px;
-  padding:0 18px;
+  min-height:44px;
+  padding:0 20px;
   border:1px solid rgba(255,255,255,.10);
-  border-radius:12px;
-  color:#cfd5e6;
-  background:rgba(255,255,255,.055);
+  border-radius:14px;
+  color:#cfd8e6;
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.025));
   font-family:inherit;
   font-size:14px;
-  font-weight:700;
+  font-weight:750;
   cursor:pointer;
   white-space:nowrap;
   transition:
@@ -810,6 +811,7 @@ h1{
     border-color .2s ease,
     background .2s ease,
     box-shadow .2s ease;
+  -webkit-tap-highlight-color:transparent;
 }
 
 #cats button:hover{
@@ -817,10 +819,16 @@ h1{
   color:#fff;
   border-color:rgba(0,217,255,.45);
   background:rgba(0,217,255,.10);
-  box-shadow:0 6px 20px rgba(0,217,255,.10);
+  box-shadow:
+    0 8px 22px rgba(72,68,255,.25),
+    0 0 18px rgba(231,43,157,.10);
 }
 
-#cats button.active{
+#cats button:active{
+  transform:scale(.97);
+}
+
+#cats button.on{
   color:#fff;
   border-color:transparent;
   background:linear-gradient(
@@ -834,24 +842,29 @@ h1{
     0 0 18px rgba(231,43,157,.10);
 }
 
-#cats button:active{
-  transform:scale(.97);
-}
-
 /* MOBILE */
 @media (max-width:700px){
 
   #cats{
-    gap:8px;
-    padding-top:4px;
+    gap:9px;
+    padding-top:5px;
     padding-bottom:14px;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
   }
 
   #cats button{
-    min-height:40px;
-    padding:0 15px;
-    border-radius:11px;
-    font-size:13px;
+    min-height:42px;
+    padding:0 16px;
+    border-radius:12px;
+    font-size:14px;
+    scroll-snap-align:start;
+  }
+
+  #cats button:active{
+    transform:scale(.96);
   }
 }
 /* =========================================================
