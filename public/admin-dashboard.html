@@ -360,6 +360,53 @@
   }
 
     }
+    /* =========================================================
+   SNGAMER STORE — STATUTS COMMANDES PREMIUM
+   ========================================================= */
+
+.orders-table-wrap .status {
+  width: 100%;
+  min-width: 145px;
+  padding: 10px 34px 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(75,140,255,.30);
+  background: linear-gradient(145deg,#121d2a,#0c141e);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  transition: .2s ease;
+  box-sizing: border-box;
+}
+
+.orders-table-wrap .status:hover {
+  border-color: rgba(75,140,255,.65);
+  transform: translateY(-1px);
+}
+
+.orders-table-wrap .status:focus {
+  border-color: rgba(75,140,255,.90);
+  box-shadow: 0 0 0 3px rgba(75,140,255,.14);
+}
+
+.orders-table-wrap .status option {
+  background: #101820;
+  color: #fff;
+  font-weight: 600;
+}
+
+@media (max-width:700px) {
+
+  .orders-table-wrap .status {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 34px 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+    }
   </style>
 </head>
 
