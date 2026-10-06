@@ -18,8 +18,37 @@
     </button>
   </div>
 </header>
-  <section class="hero"><div class="wrap heroIn"><div><label>SNGAMER GAMING SHOP</label><h1>ÉQUIPE-TOI.<br><span>JOUE. GAGNE.</span></h1><p>Accessoires et équipements gaming sélectionnés pour la communauté SNGAMER au Sénégal.</p><button class="primary" onclick="document.querySelector('#shop').scrollIntoView({behavior:'smooth'})">Voir la boutique</button></div><div class="heroVisual">🎮<i>150K+</i></div></div></section>
-<main id="shop" class="wrap"><div class="bar"><h2>Nos produits</h2><div id="cats"></div></div><div id="products" class="grid"></div></main>
+<section class="hero">
+  <div class="wrap heroIn">
+
+    <div>
+      <label>SNGAMER GAMING SHOP</label>
+
+      <h1>
+        ÉQUIPE-TOI.<br>
+        <span>JOUE. GAGNE.</span>
+      </h1>
+
+      <p>
+        Accessoires et équipements gaming sélectionnés pour les gamers.
+      </p>
+
+      <button
+        class="primary"
+        onclick="document.querySelector('#shop').scrollIntoView({behavior:'smooth'})">
+        Voir la boutique
+      </button>
+    </div>
+
+    <div class="heroVisual">
+      <div class="promoPlaceholder">
+        <span>IMAGE PROMOTIONNELLE</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+  <main id="shop" class="wrap"><div class="bar"><h2>Nos produits</h2><div id="cats"></div></div><div id="products" class="grid"></div></main>
 <section class="wrap banner"><div><label>SNGAMER STORE</label><h2>Une boutique pensée pour les gamers sénégalais.</h2><p>Commande en ligne, contact WhatsApp et livraison à organiser selon ta zone.</p></div><button class="primary" onclick="cart()">Mon panier</button></section>
 <footer><div class="wrap">© 2026 SNGAMER STORE — Dakar, Sénégal</div></footer>
 <div id="drawer" class="drawer"><div class="shade" onclick="closeCart()"></div><aside><div class="head"><h2>Panier</h2><button onclick="closeCart()">×</button></div><div id="items"></div><h3>Total : <span id="total">0 FCFA</span></h3><button class="primary full" onclick="openCheckout()">Commander</button></aside></div>
