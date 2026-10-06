@@ -486,12 +486,13 @@ app.patch(
       const { status } = req.body;
 
       const allowedStatuses = [
-        "Nouvelle",
-        "Confirmée",
-        "Expédiée",
-        "Livrée",
-        "Annulée"
-      ];
+  "Nouvelle",
+  "Confirmée",
+  "En préparation",
+  "Expédiée",
+  "Livrée",
+  "Annulée"
+];
 
       if (!allowedStatuses.includes(status)) {
         return res.status(400).json({
