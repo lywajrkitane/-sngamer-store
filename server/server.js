@@ -841,56 +841,256 @@ app.patch(
   "/api/admin/products/:id",
   requireAdmin,
   async (req, res) => {
+
     try {
+
       const productId = Number(req.params.id);
 
+      if (!Number.isInteger(productId)) {
+
+        return res.status(400).json({
+          error: "ID produit invalide"
+        });
+
+      }
+
       const {
-  name,
-  category,
-  price,
-  stock,
-  emoji,
-  description
-} = req.body;
+        name,
+        category,
+        price,
+        stock,
+        emoji,
+        description,
+        promo_price,
+        promo_active,
+        campaign_id
+      } = req.body;
+
+
+      /*
+       * =========================================
+       * VALIDATION DES PROMOTIONS
+       * =========================================
+       */
+
+      const promoPriceProvided =
+        promo_price !== undefined;
+
+      const promoActiveProvided =
+        promo_active !== undefined;
+
+      const campaignIdProvided =
+        campaign_id !== undefined;
+
+
+      let promoPriceValue = null;
+
+      if (promoPriceProvided) {
+
+        if (
+          promo_price !== null &&
+          promo_price !== ""
+        ) {
+
+          promoPriceValue = Number(promo_price);
+
+          if (
+            !Number.isFinite(promoPriceValue) ||
+            promoPriceValue < 0
+          ) {
+
+            return res.status(400).json({
+              error: "Prix promotionnel invalide"
+            });
+
+          }
+
+        }
+
+      }
+
+
+      let campaignIdValue = null;
+
+      if (campaignIdProvided) {
+
+        if (
+          campaign_id !== null &&
+          campaign_id !== ""
+        ) {
+
+          campaignIdValue = Number(campaign_id);
+
+          if (
+            !Number.isInteger(campaignIdValue) ||
+            campaignIdValue <= 0
+          ) {
+
+            return res.status(400).json({
+              error: "Campagne invalide"
+            });
+
+          }
+
+        }
+
+      }
+
+
+      /*
+       * =========================================
+       * VÉRIFICATION DE LA CAMPAGNE
+       * =========================================
+       */
+
+      if (
+        campaignIdProvided &&
+        campaignIdValue !== null
+      ) {
+
+        const campaign = await db(
+          `
+          SELECT id
+          FROM campaigns
+          WHERE id = $1
+          `,
+          [campaignIdValue]
+        );
+
+        if (!campaign.rows.length) {
+
+          return res.status(404).json({
+            error: "Campagne introuvable"
+          });
+
+        }
+
+      }
+
+
+      /*
+       * =========================================
+       * MISE À JOUR DU PRODUIT
+       * =========================================
+       */
 
       const result = await db(
         `
         UPDATE products
         SET
+
           name = COALESCE($1, name),
+
           category = COALESCE($2, category),
+
           price = COALESCE($3, price),
+
           stock = COALESCE($4, stock),
+
           emoji = COALESCE($5, emoji),
-description = COALESCE($6, description)
-        WHERE id = $7
+
+          description = COALESCE($6, description),
+
+          promo_price =
+            CASE
+              WHEN $7 = true
+              THEN $8
+              ELSE promo_price
+            END,
+
+          promo_active =
+            CASE
+              WHEN $9 = true
+              THEN $10
+              ELSE promo_active
+            END,
+
+          campaign_id =
+            CASE
+              WHEN $11 = true
+              THEN $12
+              ELSE campaign_id
+            END
+
+        WHERE id = $13
+
         RETURNING *
         `,
         [
+
           name ?? null,
+
           category ?? null,
-          price !== undefined ? Number(price) : null,
-          stock !== undefined ? Number(stock) : null,
+
+          price !== undefined
+            ? Number(price)
+            : null,
+
+          stock !== undefined
+            ? Number(stock)
+            : null,
+
           emoji ?? null,
-description ?? null,
-productId
+
+          description ?? null,
+
+          promoPriceProvided,
+
+          promoPriceValue,
+
+          promoActiveProvided,
+
+          promo_active !== undefined
+            ? Boolean(promo_active)
+            : null,
+
+          campaignIdProvided,
+
+          campaignIdValue,
+
+          productId
+
         ]
       );
 
+
+      /*
+       * =========================================
+       * PRODUIT INTROUVABLE
+       * =========================================
+       */
+
       if (result.rows.length === 0) {
+
         return res.status(404).json({
           error: "Produit introuvable"
         });
+
       }
 
+
+      /*
+       * =========================================
+       * RÉPONSE
+       * =========================================
+       */
+
       res.json(result.rows[0]);
+
+
     } catch (error) {
-      console.error("UPDATE_PRODUCT_ERROR:", error);
+
+      console.error(
+        "UPDATE_PRODUCT_ERROR:",
+        error
+      );
 
       res.status(500).json({
         error: "Impossible de modifier le produit"
       });
+
     }
+
   }
 );
 
