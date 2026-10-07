@@ -183,8 +183,9 @@ function closeProduct(){
   document.querySelector("#productModal").classList.remove("show");
 }
 /* =================================
+/* =================================
    HERO — CARROUSEL PROMOTIONNEL
-   ================================= */
+================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -193,7 +194,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!carousel || !dots.length) return;
 
+  let autoplayTimer = null;
+
   function updatePromoDot() {
+
     const slideWidth = carousel.clientWidth;
 
     if (!slideWidth) return;
@@ -203,8 +207,50 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     dots.forEach(function (dot, i) {
-      dot.classList.toggle("active", i === index);
+
+      dot.classList.toggle(
+        "active",
+        i === index
+      );
+
     });
+
+  }
+
+  function goToSlide(index) {
+
+    const slideWidth = carousel.clientWidth;
+
+    if (!slideWidth) return;
+
+    carousel.scrollTo({
+      left: index * slideWidth,
+      behavior: "smooth"
+    });
+
+  }
+
+  function startAutoplay() {
+
+    clearInterval(autoplayTimer);
+
+    autoplayTimer = setInterval(function () {
+
+      const slideWidth = carousel.clientWidth;
+
+      if (!slideWidth) return;
+
+      const currentIndex = Math.round(
+        carousel.scrollLeft / slideWidth
+      );
+
+      const nextIndex =
+        (currentIndex + 1) % dots.length;
+
+      goToSlide(nextIndex);
+
+    }, 4000);
+
   }
 
   carousel.addEventListener(
@@ -217,15 +263,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     dot.addEventListener("click", function () {
 
-      carousel.scrollTo({
-        left: index * carousel.clientWidth,
-        behavior: "smooth"
-      });
+      goToSlide(index);
+
+      startAutoplay();
 
     });
 
   });
 
   updatePromoDot();
+
+  startAutoplay();
 
 });
