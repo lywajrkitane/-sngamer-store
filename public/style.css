@@ -2123,31 +2123,117 @@ h1{
   }
 }
 /* =========================================
-   HERO — CENTRAGE FINAL DES INDICATEURS
+   HERO — INDICATEURS DU CARROUSEL
    ========================================= */
 
 .heroVisual{
-  position:relative;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
 }
 
-.heroVisual .promoDots{
-  position:absolute;
-  left:50%;
-  bottom:-34px;
-  transform:translateX(-50%);
-  width:auto;
+.promoCarousel{
+  width:100%;
   display:flex;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  border-radius:24px;
+}
+
+.promoCarousel::-webkit-scrollbar{
+  display:none;
+}
+
+.promoSlide{
+  flex:0 0 100%;
+  width:100%;
+  min-width:100%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  overflow:hidden;
+  border-radius:24px;
+}
+
+.promoSlide img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+}
+
+.promoDots{
+  position:static !important;
+  left:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  width:100% !important;
+  display:flex !important;
   align-items:center;
   justify-content:center;
   gap:8px;
+  margin:12px 0 0;
+  padding:4px 0 8px;
+  z-index:auto;
+}
+
+.promoDots button{
+  display:block !important;
+  width:8px !important;
+  height:8px !important;
+  min-width:8px;
+  min-height:8px;
+  padding:0 !important;
   margin:0;
-  z-index:5;
+  border:0 !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,.35) !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.promoDots button.active{
+  width:24px !important;
+  min-width:24px;
+  height:8px !important;
+  border-radius:10px !important;
+  background:linear-gradient(
+    90deg,
+    #2f8cff,
+    #c62cff
+  ) !important;
 }
 
 @media(max-width:700px){
-  .heroVisual .promoDots{
-    bottom:-34px;
-    width:auto;
-    gap:8px;
+
+  .promoCarousel{
+    width:100%;
+    border-radius:24px;
+  }
+
+  .promoSlide{
+    flex:0 0 100%;
+    width:100%;
+    min-width:100%;
+    border-radius:24px;
+  }
+
+  .promoSlide img{
+    width:100%;
+    height:auto;
+    border-radius:24px;
+  }
+
+  .promoDots{
+    position:static !important;
+    width:100% !important;
+    margin-top:12px;
+    padding-bottom:10px;
   }
 }
