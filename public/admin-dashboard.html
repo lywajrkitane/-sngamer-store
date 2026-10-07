@@ -1722,11 +1722,306 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-  async function loadAll() {
+  /* =========================================
+   CAMPAGNES — ADMIN DASHBOARD
+========================================= */
 
-    await loadProducts();
-    await loadOrders();
+async function loadCampaigns() {
+
+  const table = document.getElementById("campaignsTable");
+
+  if (!table) return;
+
+  try {
+
+    const response = await fetch("/api/admin/campaigns");
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error || "Impossible de charger les campagnes"
+      );
+
+    }
+
+    if (!Array.isArray(data) || !data.length) {
+
+      table.innerHTML = `
+        <tr>
+          <td colspan="6">
+            Aucune campagne créée.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    table.innerHTML = data.map(campaign => {
+
+      const status = campaign.active
+        ? `<span class="status-badge status-active">Active</span>`
+        : `<span class="status-badge status-inactive">Inactive</span>`;
+
+      return `
+        <tr>
+
+          <td>#${campaign.id}</td>
+
+          <td>
+            <strong>
+              ${campaign.sticker || ""} ${campaign.name}
+            </strong>
+          </td>
+
+          <td>
+            ${campaign.sticker || "—"}
+          </td>
+
+          <td>
+            ${status}
+          </td>
+
+          <td>
+            ${campaign.products_count || 0}
+          </td>
+
+          <td>
+
+            <button
+              type="button"
+              class="refresh"
+              onclick="toggleCampaign(
+                ${campaign.id},
+                ${!campaign.active}
+              )"
+            >
+              ${campaign.active ? "⏸️ Désactiver" : "▶️ Activer"}
+            </button>
+
+            <button
+              type="button"
+              class="refresh"
+              onclick="deleteCampaign(${campaign.id})"
+            >
+              🗑️
+            </button>
+
+          </td>
+
+        </tr>
+      `;
+
+    }).join("");
+
+  } catch (error) {
+
+    console.error("LOAD_CAMPAIGNS_ERROR:", error);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">
+          Impossible de charger les campagnes.
+        </td>
+      </tr>
+    `;
+
   }
+
+}
+
+
+/* =========================================
+   CRÉER UNE CAMPAGNE
+========================================= */
+
+async function createCampaign() {
+
+  const name =
+    document.getElementById("campaignName").value.trim();
+
+  const sticker =
+    document.getElementById("campaignSticker").value.trim();
+
+  const description =
+    document.getElementById("campaignDescription").value.trim();
+
+  const active =
+    document.getElementById("campaignActive").checked;
+
+  if (!name) {
+
+    alert("Veuillez saisir le nom de la campagne.");
+
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/campaigns",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          name,
+          sticker,
+          description,
+          active
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error || "Impossible de créer la campagne"
+      );
+
+    }
+
+    alert("Campagne créée avec succès !");
+
+    document.getElementById("campaignName").value = "";
+    document.getElementById("campaignSticker").value = "";
+    document.getElementById("campaignDescription").value = "";
+    document.getElementById("campaignActive").checked = false;
+
+    await loadCampaigns();
+
+  } catch (error) {
+
+    console.error("CREATE_CAMPAIGN_ERROR:", error);
+
+    alert(
+      error.message ||
+      "Erreur lors de la création de la campagne."
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   ACTIVER / DÉSACTIVER UNE CAMPAGNE
+========================================= */
+
+async function toggleCampaign(id, active) {
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/campaigns/" + id,
+      {
+        method: "PATCH",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          active
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error || "Impossible de modifier la campagne"
+      );
+
+    }
+
+    await loadCampaigns();
+
+  } catch (error) {
+
+    console.error("TOGGLE_CAMPAIGN_ERROR:", error);
+
+    alert(
+      error.message ||
+      "Erreur lors de la modification de la campagne."
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   SUPPRIMER UNE CAMPAGNE
+========================================= */
+
+async function deleteCampaign(id) {
+
+  const confirmed = confirm(
+    "Voulez-vous vraiment supprimer cette campagne ?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/campaigns/" + id,
+      {
+        method: "DELETE"
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error || "Impossible de supprimer la campagne"
+      );
+
+    }
+
+    alert("Campagne supprimée avec succès !");
+
+    await loadCampaigns();
+
+  } catch (error) {
+
+    console.error("DELETE_CAMPAIGN_ERROR:", error);
+
+    alert(
+      error.message ||
+      "Erreur lors de la suppression de la campagne."
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   CHARGEMENT GLOBAL DU DASHBOARD
+========================================= */
+
+async function loadAll() {
+
+  await loadProducts();
+
+  await loadOrders();
+
+  await loadCampaigns();
+
+        }
 
 
   checkLogin();
