@@ -2358,3 +2358,54 @@ h1{
   object-position:center;
   border-radius:24px;
 }
+/* =========================================
+   PHASE 2 — MÉDIAS PROMOTIONNELS UNIFORMES
+   Format 16:9
+   ========================================= */
+
+.promoArea .promoCarousel{
+  width:100% !important;
+  aspect-ratio:16 / 9 !important;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+.promoArea .promoSlide{
+  flex:0 0 100% !important;
+  width:100% !important;
+  min-width:100% !important;
+  height:100% !important;
+  aspect-ratio:16 / 9 !important;
+  overflow:hidden;
+  border-radius:24px;
+}
+
+.promoArea .promoSlide img,
+.promoArea .promoSlide video{
+  width:100% !important;
+  height:100% !important;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+}
+
+@media(max-width:700px){
+
+  .promoArea .promoCarousel{
+    width:100% !important;
+    max-width:100%;
+    aspect-ratio:16 / 9 !important;
+  }
+
+  .promoArea .promoSlide{
+    aspect-ratio:16 / 9 !important;
+    border-radius:20px;
+  }
+
+  .promoArea .promoSlide img,
+  .promoArea .promoSlide video{
+    border-radius:20px;
+  }
+
+}
