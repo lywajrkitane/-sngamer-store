@@ -2289,39 +2289,44 @@ h1{
 }
 
 .promoArea .promoDots{
-  position:static !important;
+  position:relative !important;
+  z-index:5;
   width:100% !important;
   max-width:520px;
   min-height:24px;
-  flex:0 0 auto;
+  flex:0 0 auto !important;
   display:flex !important;
-  align-items:center;
+  align-items:center !important;
   justify-content:center !important;
   gap:8px;
   margin:12px 0 0 !important;
-  padding:4px 0 8px;
+  padding:4px 0 8px !important;
   box-sizing:border-box;
+  overflow:visible !important;
 }
 
 .promoArea .promoDots button{
   display:block !important;
+  position:relative;
   width:8px !important;
+  min-width:8px !important;
   height:8px !important;
-  min-width:8px;
-  min-height:8px;
+  min-height:8px !important;
   padding:0 !important;
-  margin:0;
+  margin:0 !important;
   border:0 !important;
   border-radius:50% !important;
   background:rgba(255,255,255,.35) !important;
   opacity:1 !important;
   visibility:visible !important;
+  box-sizing:border-box;
 }
 
 .promoArea .promoDots button.active{
   width:24px !important;
-  min-width:24px;
+  min-width:24px !important;
   height:8px !important;
+  min-height:8px !important;
   border-radius:10px !important;
   background:linear-gradient(
     90deg,
@@ -2332,20 +2337,14 @@ h1{
 
 @media(max-width:700px){
 
-  .promoArea{
-    width:100%;
-    max-width:100%;
-  }
-
-  .promoArea .promoCarousel{
-    width:100% !important;
-    max-width:100%;
-  }
-
   .promoArea .promoDots{
     width:100% !important;
     max-width:100%;
+    min-height:24px;
+    margin:12px 0 0 !important;
+    padding:4px 0 8px !important;
   }
+
 }
 /* =========================================
    HERO — VIDÉO PROMOTIONNELLE
