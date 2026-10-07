@@ -168,7 +168,33 @@ await db(`
       ]
     );
   }
+  /* =================================
+     CAMPAIGNS + PROMOTIONS
+  ================================= */
 
+  await db(`
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id BIGSERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      sticker TEXT DEFAULT '',
+      description TEXT DEFAULT '',
+      active BOOLEAN NOT NULL DEFAULT false,
+      start_date TIMESTAMPTZ,
+      end_date TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await db(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS promo_price INTEGER
+      CHECK (promo_price >= 0),
+    ADD COLUMN IF NOT EXISTS promo_active BOOLEAN
+      NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS campaign_id BIGINT
+      REFERENCES campaigns(id)
+      ON DELETE SET NULL;
+  `);
   console.log("Database initialized successfully");
 }
 
