@@ -611,7 +611,122 @@
         </table>
       </div>
     </section>
+<!-- =========================================
+     CAMPAGNES & PROMOTIONS
+========================================= -->
+<section class="campaignsSection">
 
+  <div class="campaignsHeader">
+    <div>
+      <h2>🎉 Campagnes & Promotions</h2>
+      <p>Créez et gérez vos campagnes promotionnelles SNGAMER STORE.</p>
+    </div>
+  </div>
+
+  <div class="campaignsGrid">
+
+    <!-- CRÉATION D'UNE CAMPAGNE -->
+    <div class="campaignCard">
+
+      <h3>➕ Nouvelle campagne</h3>
+
+      <div class="campaignForm">
+
+        <label>
+          Nom de la campagne
+          <input
+            type="text"
+            id="campaignName"
+            placeholder="Ex : Black Friday"
+          >
+        </label>
+
+        <label>
+          Sticker / Emoji
+          <input
+            type="text"
+            id="campaignSticker"
+            placeholder="🔥"
+            maxlength="10"
+          >
+        </label>
+
+        <label>
+          Description
+          <textarea
+            id="campaignDescription"
+            placeholder="Ex : Promotions exceptionnelles sur une sélection de produits gaming."
+          ></textarea>
+        </label>
+
+        <label class="campaignToggle">
+          <input
+            type="checkbox"
+            id="campaignActive"
+          >
+          <span>Campagne active</span>
+        </label>
+
+        <button
+          type="button"
+          class="campaignCreateBtn"
+          onclick="createCampaign()"
+        >
+          🎉 Créer la campagne
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- CAMPAGNES EXISTANTES -->
+    <div class="campaignCard">
+
+      <div class="campaignListHeader">
+        <h3>📋 Campagnes existantes</h3>
+
+        <button
+          type="button"
+          class="refresh"
+          onclick="loadCampaigns()"
+        >
+          🔄 Actualiser
+        </button>
+      </div>
+
+      <div class="table-wrap campaignTableWrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Campagne</th>
+              <th>Sticker</th>
+              <th>Statut</th>
+              <th>Produits</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="campaignsTable">
+            <tr>
+              <td colspan="6">
+                Aucune campagne chargée.
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
   </main>
 
 <script>
