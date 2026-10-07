@@ -2091,3 +2091,34 @@ h1{
     padding-bottom:10px;
   }
     }
+/* =========================================
+   HERO — POSITION DES INDICATEURS
+   ========================================= */
+
+.heroVisual{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.heroVisual .promoCarousel{
+  width:100%;
+}
+
+.heroVisual .promoDots{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:12px;
+}
+
+@media(max-width:700px){
+  .heroVisual .promoDots{
+    width:100%;
+    justify-content:center;
+    margin-top:12px;
+    gap:8px;
+  }
+}
