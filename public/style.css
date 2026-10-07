@@ -2122,3 +2122,32 @@ h1{
     gap:8px;
   }
 }
+/* =========================================
+   HERO — CENTRAGE FINAL DES INDICATEURS
+   ========================================= */
+
+.heroVisual{
+  position:relative;
+}
+
+.heroVisual .promoDots{
+  position:absolute;
+  left:50%;
+  bottom:-34px;
+  transform:translateX(-50%);
+  width:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin:0;
+  z-index:5;
+}
+
+@media(max-width:700px){
+  .heroVisual .promoDots{
+    bottom:-34px;
+    width:auto;
+    gap:8px;
+  }
+}
