@@ -619,7 +619,224 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
     });
   }
 });
+/* =========================================
+   CAMPAGNES — ADMIN API
+========================================= */
 
+// Récupérer toutes les campagnes
+app.get("/api/admin/campaigns", requireAdmin, async (req, res) => {
+  try {
+    const result = await db(`
+      SELECT
+        c.id,
+        c.name,
+        c.sticker,
+        c.description,
+        c.active,
+        c.start_date,
+        c.end_date,
+        c.created_at,
+        COUNT(p.id)::int AS products_count
+      FROM campaigns c
+      LEFT JOIN products p
+        ON p.campaign_id = c.id
+      GROUP BY c.id
+      ORDER BY c.created_at DESC
+    `);
+
+    res.json(result.rows);
+
+  } catch (error) {
+
+    console.error("GET_CAMPAIGNS_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de charger les campagnes"
+    });
+
+  }
+});
+
+
+// Créer une campagne
+app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
+
+  const {
+    name,
+    sticker = "",
+    description = "",
+    active = false,
+    start_date = null,
+    end_date = null
+  } = req.body;
+
+  if (!name || !name.trim()) {
+
+    return res.status(400).json({
+      error: "Le nom de la campagne est obligatoire"
+    });
+
+  }
+
+  try {
+
+    const result = await db(
+      `
+      INSERT INTO campaigns
+        (name, sticker, description, active, start_date, end_date)
+      VALUES
+        ($1, $2, $3, $4, $5, $6)
+      RETURNING
+        id,
+        name,
+        sticker,
+        description,
+        active,
+        start_date,
+        end_date,
+        created_at
+      `,
+      [
+        name.trim(),
+        sticker,
+        description,
+        Boolean(active),
+        start_date || null,
+        end_date || null
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      campaign: result.rows[0]
+    });
+
+  } catch (error) {
+
+    console.error("CREATE_CAMPAIGN_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de créer la campagne"
+    });
+
+  }
+
+});
+
+
+// Modifier une campagne
+app.patch("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
+
+  const { id } = req.params;
+
+  const {
+    name,
+    sticker,
+    description,
+    active,
+    start_date,
+    end_date
+  } = req.body;
+
+  try {
+
+    const result = await db(
+      `
+      UPDATE campaigns
+      SET
+        name = COALESCE($1, name),
+        sticker = COALESCE($2, sticker),
+        description = COALESCE($3, description),
+        active = COALESCE($4, active),
+        start_date = $5,
+        end_date = $6
+      WHERE id = $7
+      RETURNING
+        id,
+        name,
+        sticker,
+        description,
+        active,
+        start_date,
+        end_date,
+        created_at
+      `,
+      [
+        name !== undefined ? name.trim() : null,
+        sticker !== undefined ? sticker : null,
+        description !== undefined ? description : null,
+        active !== undefined ? Boolean(active) : null,
+        start_date || null,
+        end_date || null,
+        id
+      ]
+    );
+
+    if (!result.rows.length) {
+
+      return res.status(404).json({
+        error: "Campagne introuvable"
+      });
+
+    }
+
+    res.json({
+      success: true,
+      campaign: result.rows[0]
+    });
+
+  } catch (error) {
+
+    console.error("UPDATE_CAMPAIGN_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de modifier la campagne"
+    });
+
+  }
+
+});
+
+
+// Supprimer une campagne
+app.delete("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+
+    const result = await db(
+      `
+      DELETE FROM campaigns
+      WHERE id = $1
+      RETURNING id
+      `,
+      [id]
+    );
+
+    if (!result.rows.length) {
+
+      return res.status(404).json({
+        error: "Campagne introuvable"
+      });
+
+    }
+
+    res.json({
+      success: true
+    });
+
+  } catch (error) {
+
+    console.error("DELETE_CAMPAIGN_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de supprimer la campagne"
+    });
+
+  }
+
+});
 app.patch(
   "/api/admin/products/:id",
   requireAdmin,
