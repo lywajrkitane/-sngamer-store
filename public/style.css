@@ -1975,3 +1975,91 @@ h1{
     border-radius:20px;
   }
 }
+/* =========================================
+   HERO — CORRECTION DES POINTS DU CARROUSEL
+   ========================================= */
+
+.heroVisual{
+  height:auto !important;
+  overflow:visible !important;
+}
+
+.promoCarousel{
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+.promoDots{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  min-height:24px;
+  margin-top:12px;
+  padding:4px 0;
+  visibility:visible !important;
+  opacity:1 !important;
+  position:relative;
+  z-index:20;
+}
+
+.promoDots button{
+  display:block !important;
+  width:8px !important;
+  height:8px !important;
+  min-width:8px;
+  min-height:8px;
+  padding:0 !important;
+  margin:0;
+  border:0 !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,.35) !important;
+  box-shadow:none;
+  opacity:1 !important;
+  visibility:visible !important;
+  cursor:pointer;
+}
+
+.promoDots button.active{
+  width:24px !important;
+  height:8px !important;
+  min-width:24px;
+  border-radius:10px !important;
+  background:linear-gradient(90deg,#2f8cff,#c62cff) !important;
+}
+
+@media(max-width:700px){
+
+  .heroVisual{
+    height:auto !important;
+    overflow:visible !important;
+  }
+
+  .promoCarousel{
+    width:100%;
+    height:auto !important;
+    overflow-x:auto;
+    overflow-y:hidden;
+  }
+
+  .promoSlide{
+    height:auto !important;
+  }
+
+  .promoSlide img{
+    width:100%;
+    height:auto !important;
+    aspect-ratio:auto;
+    display:block;
+    object-fit:cover;
+    border-radius:24px;
+  }
+
+  .promoDots{
+    display:flex !important;
+    margin-top:12px;
+    padding:4px 0 8px;
+  }
+}
