@@ -735,47 +735,62 @@
     new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
 
   async function login() {
+async function login() {
 
-    const username =
-      document.getElementById("username").value.trim();
+  const username =
+    document.getElementById("username").value.trim();
 
-    const password =
-      document.getElementById("password").value;
+  const password =
+    document.getElementById("password").value;
 
-    const error =
-      document.getElementById("loginError");
+  const error =
+    document.getElementById("loginError");
 
-    error.textContent = "";
+  error.textContent = "Connexion en cours...";
 
-    try {
+  try {
 
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username,
-          password
-        })
-      });
+    const controller = new AbortController();
 
-      const data = await response.json();
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 10000);
 
-      if (!response.ok) {
-        error.textContent =
-          data.error || "Identifiants incorrects";
-        return;
-      }
+    const response = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username,
+        password
+      }),
+      signal: controller.signal
+    });
 
-      showAdmin();
+    clearTimeout(timeout);
 
-    } catch (e) {
+    const text = await response.text();
 
+    error.textContent =
+      "Réponse serveur : " +
+      response.status +
+      " — " +
+      text;
+
+  } catch (e) {
+
+    if (e.name === "AbortError") {
       error.textContent =
-        "Erreur de connexion au serveur.";
+        "Le serveur ne répond pas après 10 secondes.";
+    } else {
+      error.textContent =
+        "Erreur : " + e.message;
     }
+
   }
+
+}
 
 
   async function checkLogin() {
