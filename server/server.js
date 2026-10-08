@@ -255,6 +255,9 @@ app.get("/api/products", async (req, res) => {
   image2_url,
   image3_url,
   video_url,
+  promo_price,
+  promo_active,
+  campaign_id,
   created_at
 FROM products
     `);
