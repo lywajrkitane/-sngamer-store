@@ -195,6 +195,14 @@ await db(`
       REFERENCES campaigns(id)
       ON DELETE SET NULL;
   `);
+    await db(`
+    CREATE TABLE IF NOT EXISTS promo_media (
+      slot INTEGER PRIMARY KEY CHECK (slot IN (1, 2, 3)),
+      media_type TEXT NOT NULL,
+      url TEXT NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
   console.log("Database initialized successfully");
 }
 
