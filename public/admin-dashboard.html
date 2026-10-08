@@ -735,75 +735,45 @@
     new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
 
 async function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const loginError = document.getElementById("loginError");
 
-  if (!username || !password) {
-    alert("Veuillez remplir le nom d'utilisateur et le mot de passe.");
-    return;
-  }
+    loginError.textContent = "";
 
-  alert("1/3 — Le bouton et la fonction login fonctionnent.");
-
-  try {
-    const controller = new AbortController();
-
-    const timeout = setTimeout(() => {
-      controller.abort();
-    }, 15000);
-
-    const response = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username,
-        password
-      }),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeout);
-
-    const text = await response.text();
-
-    alert(
-      "2/3 — Réponse du serveur\n\n" +
-      "HTTP : " + response.status +
-      "\n\nRéponse :\n" + text
-    );
-
-    if (!response.ok) {
-      return;
+    if (!username || !password) {
+        loginError.textContent = "Veuillez remplir tous les champs.";
+        return;
     }
 
     try {
-      const data = JSON.parse(text);
+        const response = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
 
-      if (data.success === true) {
-        alert("3/3 — Connexion réussie !");
+        const data = await response.json();
+
+        if (!response.ok || data.success !== true) {
+            loginError.textContent =
+                data.message || "Identifiants incorrects.";
+            return;
+        }
+
         showAdmin();
-      }
-    } catch (e) {
-      alert("Le serveur a répondu, mais la réponse n'est pas un JSON valide.");
-    }
 
-  } catch (error) {
-
-    if (error.name === "AbortError") {
-      alert(
-        "ERREUR : le serveur n'a pas répondu après 15 secondes."
-      );
-    } else {
-      alert(
-        "ERREUR JAVASCRIPT / RÉSEAU :\n\n" +
-        error.message
-      );
+    } catch (error) {
+        console.error(error);
+        loginError.textContent =
+            "Impossible de contacter le serveur.";
     }
-  }
 }
-window.login = login;
 
   async function checkLogin() {
 
