@@ -1449,6 +1449,31 @@ app.post(
     });
   }
 );
+// =========================================
+// RÉCUPÉRER LES MÉDIAS PROMOTIONNELS
+// =========================================
+
+app.get("/api/promo-media", async (req, res) => {
+  try {
+    const result = await db(`
+      SELECT slot, media_type, url, updated_at
+      FROM promo_media
+      ORDER BY slot ASC
+    `);
+
+    return res.json({
+      success: true,
+      promos: result.rows
+    });
+
+  } catch (error) {
+    console.error("PROMO_MEDIA_GET_ERROR:", error);
+
+    return res.status(500).json({
+      error: "Impossible de récupérer les médias promotionnels."
+    });
+  }
+});
 /* =========================
    FRONTEND
 ========================= */
