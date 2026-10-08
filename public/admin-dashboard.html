@@ -909,6 +909,54 @@ async function savePromoMedia(slot) {
         alert(error.message || "Erreur lors de l'enregistrement.");
     }
 }
+  // =========================================
+// CHARGER LES MÉDIAS PROMOTIONNELS
+// =========================================
+
+async function loadPromoMedia() {
+    try {
+        const response = await fetch("/api/promo-media");
+
+        if (!response.ok) {
+            throw new Error("Impossible de récupérer les médias promotionnels.");
+        }
+
+        const data = await response.json();
+
+        if (!data.success || !Array.isArray(data.promos)) {
+            return;
+        }
+
+        data.promos.forEach(promo => {
+            const preview = document.getElementById(`promoPreview${promo.slot}`);
+
+            if (!preview) {
+                return;
+            }
+
+            if (promo.media_type === "image") {
+                preview.innerHTML = `
+                    <img
+                        src="${promo.url}"
+                        alt="Promotion ${promo.slot}"
+                        style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;"
+                    >
+                `;
+            } else if (promo.media_type === "video") {
+                preview.innerHTML = `
+                    <video
+                        src="${promo.url}"
+                        controls
+                        style="width:100%;max-height:220px;border-radius:12px;"
+                    ></video>
+                `;
+            }
+        });
+
+    } catch (error) {
+        console.error("PROMO_MEDIA_LOAD_ERROR:", error);
+    }
+}
 async function login() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
