@@ -2311,85 +2311,128 @@ async function loadAll() {
     </div>
 
     <form id="editProductForm">
+<form id="editProductForm">
 
-      <input type="hidden" id="editProductId">
+  <input type="hidden" id="editProductId">
 
-      <div class="edit-product-field">
-        <label for="editProductName">🎮 Nom du produit</label>
-        <input
-          type="text"
-          id="editProductName"
-          placeholder="Nom du produit"
-          required
-        >
-      </div>
+  <div class="edit-product-field">
+    <label for="editProductName">🎮 Nom du produit</label>
+    <input
+      type="text"
+      id="editProductName"
+      placeholder="Nom du produit"
+      required
+    >
+  </div>
 
-      <div class="edit-product-field">
-        <label for="editProductCategory">🗂️ Catégorie</label>
-        <input
-          type="text"
-          id="editProductCategory"
-          placeholder="Catégorie"
-          required
-        >
-      </div>
+  <div class="edit-product-field">
+    <label for="editProductCategory">📦 Catégorie</label>
+    <input
+      type="text"
+      id="editProductCategory"
+      placeholder="Catégorie"
+      required
+    >
+  </div>
 
-      <div class="edit-product-grid">
+  <div class="edit-product-grid">
 
-        <div class="edit-product-field">
-          <label for="editProductPrice">💰 Prix (FCFA)</label>
-          <input
-            type="number"
-            id="editProductPrice"
-            min="0"
-            placeholder="Prix"
-            required
-          >
-        </div>
+    <div class="edit-product-field">
+      <label for="editProductPrice">💰 Prix normal (FCFA)</label>
+      <input
+        type="number"
+        id="editProductPrice"
+        min="0"
+        placeholder="Prix normal"
+        required
+      >
+    </div>
 
-        <div class="edit-product-field">
-          <label for="editProductStock">📦 Stock</label>
-          <input
-            type="number"
-            id="editProductStock"
-            min="0"
-            placeholder="Stock"
-            required
-          >
-        </div>
+    <div class="edit-product-field">
+      <label for="editProductStock">📦 Stock</label>
+      <input
+        type="number"
+        id="editProductStock"
+        min="0"
+        placeholder="Stock"
+        required
+      >
+    </div>
 
-      </div>
+    <div class="edit-product-field">
+      <label for="editProductPromoPrice">🔥 Prix promotionnel (FCFA)</label>
+      <input
+        type="number"
+        id="editProductPromoPrice"
+        min="0"
+        placeholder="Prix promo"
+      >
+    </div>
 
-      <div class="edit-product-field">
-        <label for="editProductDescription">📝 Description</label>
-        <textarea
-          id="editProductDescription"
-          rows="5"
-          placeholder="Description du produit"
-        ></textarea>
-      </div>
+    <div class="edit-product-field">
+      <label for="editProductDiscount">🏷️ Réduction</label>
+      <input
+        type="text"
+        id="editProductDiscount"
+        placeholder="Calcul automatique"
+        readonly
+      >
+    </div>
 
-      <div class="edit-product-actions">
+  </div>
 
-        <button
-          type="button"
-          class="edit-product-cancel"
-          onclick="closeEditProduct()"
-        >
-          Annuler
-        </button>
+  <div class="edit-product-field">
+    <label
+      for="editProductPromoActive"
+      style="display:flex;align-items:center;gap:10px;cursor:pointer;"
+    >
+      <input
+        type="checkbox"
+        id="editProductPromoActive"
+        style="width:auto;"
+      >
+      🔥 Activer la promotion
+    </label>
+  </div>
 
-        <button
-          type="submit"
-          class="edit-product-save"
-        >
-          💾 Enregistrer les modifications
-        </button>
+  <div class="edit-product-field">
+    <label for="editProductCampaign">🎉 Campagne</label>
 
-      </div>
+    <select id="editProductCampaign">
+      <option value="">Aucune campagne</option>
+    </select>
+  </div>
 
-    </form>
+  <div class="edit-product-field">
+    <label for="editProductDescription">📝 Description</label>
 
+    <textarea
+      id="editProductDescription"
+      rows="5"
+      placeholder="Description du produit"
+    ></textarea>
+  </div>
+
+  <div class="edit-product-actions">
+
+    <button
+      type="button"
+      class="edit-product-cancel"
+      onclick="closeEditProduct()"
+    >
+      Annuler
+    </button>
+
+    <button
+      type="submit"
+      class="edit-product-save"
+    >
+      💾 Enregistrer les modifications
+    </button>
+
+  </div>
+
+</form>
   </div>
 
   </div>
