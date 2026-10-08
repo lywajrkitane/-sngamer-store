@@ -3,7 +3,35 @@ const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
 async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render();update()}
 function cats(){let cs=["Tous",...new Set(products.map(p=>p.category))];document.querySelector("#cats").innerHTML=cs.map(c=>`<button class="catbtn ${c===filter?"on":""}" onclick="filterBy('${c}')">${c}</button>`).join("")}
 function filterBy(c){filter=c;cats();render()}
-function render(){let q=document.querySelector("#q").value.toLowerCase();let list=products.filter(p=>(filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));document.querySelector("#products").innerHTML=list.map(p=>`<article class="card"><div class="pic">${p.image1_url ? '<img src="' + p.image1_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" loading="lazy">' : p.emoji}</div><div class="info"><div class="cat">${p.category}</div><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="stock">${p.stock} disponible(s)</div><button class="add" onclick="add(${p.id})">Ajouter au panier</button><button class="details" onclick="openProduct(${p.id})">Voir le produit</button></div></article>`).join("")}
+function render(){
+let q=document.querySelector("#q").value.toLowerCase();
+let list=products.filter(p=>(filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));
+
+document.querySelector("#products").innerHTML=list.map(p=>{
+const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
+const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
+
+const priceHtml=promoActive
+?`<div class="price" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<span style="text-decoration:line-through;color:#8190a2;font-size:.9em">${money(p.price)}</span>
+<strong style="color:#ff4d6d">${money(p.promo_price)}</strong>
+<span style="background:#ff4d6d;color:white;padding:2px 7px;border-radius:6px;font-size:.75em;font-weight:700">-${discount}%</span>
+</div>`
+:`<div class="price">${money(p.price)}</div>`;
+
+return `<article class="card">
+<div class="pic">${p.image1_url ? '<img src="' + p.image1_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" loading="lazy">' : p.emoji}</div>
+<div class="info">
+<div class="cat">${p.category}</div>
+<h3>${p.name}</h3>
+${priceHtml}
+<div class="stock">${p.stock} disponible(s)</div>
+<button class="add" onclick="add(${p.id})">Ajouter au panier</button>
+<button class="details" onclick="openProduct(${p.id})">Voir le produit</button>
+</div>
+</article>`;
+}).join("");
+}
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
 function add(id){let x=cartItems.find(a=>a.id===id);x?x.qty++:cartItems.push({id,qty:1});save();cart()}
 function update(){
