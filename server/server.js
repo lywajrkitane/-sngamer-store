@@ -1362,6 +1362,93 @@ app.post(
     });
   }
 );
+// =========================================
+// MÉDIAS PROMOTIONNELS DU CARROUSEL
+// =========================================
+
+app.post(
+  "/api/admin/promo-media",
+  requireAdmin,
+  (req, res) => {
+    upload.single("media")(req, res, async (uploadError) => {
+
+      if (uploadError) {
+        console.error("PROMO_MEDIA_UPLOAD_ERROR:", uploadError);
+
+        return res.status(400).json({
+          error: uploadError.message || "Erreur lors de l'upload."
+        });
+      }
+
+      try {
+        const slot = Number(req.body.slot);
+        const file = req.file;
+
+        if (![1, 2, 3].includes(slot)) {
+          return res.status(400).json({
+            error: "Slot promotionnel invalide."
+          });
+        }
+
+        if (!file) {
+          return res.status(400).json({
+            error: "Aucun fichier sélectionné."
+          });
+        }
+
+        let mediaType;
+
+        if (file.mimetype.startsWith("image/")) {
+          mediaType = "image";
+        } else if (file.mimetype.startsWith("video/")) {
+          mediaType = "video";
+        } else {
+          return res.status(400).json({
+            error: "Format de média non autorisé."
+          });
+        }
+
+        const result = await uploadToCloudinary(
+          file.buffer,
+          mediaType,
+          "sngamer-store/promotions"
+        );
+
+        const promoResult = await db(
+          `
+          INSERT INTO promo_media
+            (slot, media_type, url, updated_at)
+          VALUES
+            ($1, $2, $3, NOW())
+          ON CONFLICT (slot)
+          DO UPDATE SET
+            media_type = $2,
+            url = $3,
+            updated_at = NOW()
+          RETURNING *
+          `,
+          [
+            slot,
+            mediaType,
+            result.secure_url
+          ]
+        );
+
+        return res.json({
+          success: true,
+          promo: promoResult.rows[0]
+        });
+
+      } catch (error) {
+        console.error("PROMO_MEDIA_ERROR:", error);
+
+        return res.status(500).json({
+          error: "Impossible d'enregistrer le média promotionnel."
+        });
+      }
+    });
+  }
+);
 /* =========================
    FRONTEND
 ========================= */
