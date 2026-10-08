@@ -611,6 +611,101 @@
         </table>
       </div>
     </section>
+    <!-- =========================================
+     ESPACE PROMOTIONNEL
+========================================= -->
+<section class="promoAdminSection">
+
+    <div class="campaignsHeader">
+        <div>
+            <h2>🎬 Espace promotionnel</h2>
+            <p>Gérez les images et la vidéo affichées dans le carrousel promotionnel de la boutique.</p>
+        </div>
+    </div>
+
+    <div class="campaignsGrid">
+
+        <!-- PROMOTION 1 -->
+        <div class="campaignCard">
+            <h3>🖼️ Promotion 1</h3>
+
+            <label>
+                Image promotionnelle
+                <input
+                    type="file"
+                    id="promoMedia1"
+                    accept="image/*"
+                >
+            </label>
+
+            <div id="promoPreview1" style="margin-top:12px;">
+                <p style="color:#8190a2;">Aucune image sélectionnée.</p>
+            </div>
+
+            <button
+                type="button"
+                class="campaignCreateBtn"
+                onclick="savePromoMedia(1)"
+            >
+                💾 Enregistrer
+            </button>
+        </div>
+
+        <!-- PROMOTION 2 -->
+        <div class="campaignCard">
+            <h3>🖼️ Promotion 2</h3>
+
+            <label>
+                Image promotionnelle
+                <input
+                    type="file"
+                    id="promoMedia2"
+                    accept="image/*"
+                >
+            </label>
+
+            <div id="promoPreview2" style="margin-top:12px;">
+                <p style="color:#8190a2;">Aucune image sélectionnée.</p>
+            </div>
+
+            <button
+                type="button"
+                class="campaignCreateBtn"
+                onclick="savePromoMedia(2)"
+            >
+                💾 Enregistrer
+            </button>
+        </div>
+
+        <!-- PROMOTION 3 -->
+        <div class="campaignCard">
+            <h3>🎥 Promotion 3</h3>
+
+            <label>
+                Vidéo promotionnelle
+                <input
+                    type="file"
+                    id="promoMedia3"
+                    accept="video/*"
+                >
+            </label>
+
+            <div id="promoPreview3" style="margin-top:12px;">
+                <p style="color:#8190a2;">Aucune vidéo sélectionnée.</p>
+            </div>
+
+            <button
+                type="button"
+                class="campaignCreateBtn"
+                onclick="savePromoMedia(3)"
+            >
+                💾 Enregistrer
+            </button>
+        </div>
+
+    </div>
+
+</section>
 <!-- =========================================
      CAMPAGNES & PROMOTIONS
 ========================================= -->
