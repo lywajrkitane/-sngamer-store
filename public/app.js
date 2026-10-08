@@ -304,3 +304,73 @@ document.addEventListener("DOMContentLoaded", function () {
   startAutoplay();
 
 });
+// =========================================
+// CHARGER LES MÉDIAS PROMOTIONNELS DEPUIS L'ADMIN
+// =========================================
+
+async function loadHomepagePromoMedia() {
+    try {
+        const response = await fetch("/api/promo-media");
+
+        if (!response.ok) {
+            throw new Error("Impossible de récupérer les médias promotionnels.");
+        }
+
+        const data = await response.json();
+
+        if (!data.success || !Array.isArray(data.promos)) {
+            return;
+        }
+
+        const slides = document.querySelectorAll("#promoCarousel .promoSlide");
+
+        if (!slides.length) {
+            return;
+        }
+
+        data.promos.forEach(promo => {
+            const index = Number(promo.slot) - 1;
+            const slide = slides[index];
+
+            if (!slide) {
+                return;
+            }
+
+            if (promo.media_type === "image") {
+                slide.innerHTML = "";
+
+                const img = document.createElement("img");
+                img.src = promo.url;
+                img.alt = `Promotion SNGAMER ${promo.slot}`;
+
+                slide.appendChild(img);
+            }
+
+            if (promo.media_type === "video") {
+                slide.innerHTML = "";
+
+                const video = document.createElement("video");
+
+                video.src = promo.url;
+                video.autoplay = true;
+                video.muted = true;
+                video.loop = true;
+                video.playsInline = true;
+                video.preload = "metadata";
+                video.setAttribute(
+                    "aria-label",
+                    "Vidéo promotionnelle SNGAMER"
+                );
+
+                slide.appendChild(video);
+            }
+        });
+
+    } catch (error) {
+        console.error("PROMO_MEDIA_HOME_ERROR:", error);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    loadHomepagePromoMedia();
+});
