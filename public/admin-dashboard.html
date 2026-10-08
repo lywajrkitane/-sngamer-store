@@ -1604,7 +1604,13 @@ function closeOrderDetails() {
     .classList.remove("show");
                                           }
     async function editProduct(id) {
+  trasync function editProduct(id) {
   try {
+
+    /* ===============================
+       CHARGER LE PRODUIT
+    =============================== */
+
     const response = await fetch("/api/products");
 
     if (!response.ok) {
@@ -1613,27 +1619,190 @@ function closeOrderDetails() {
     }
 
     const products = await response.json();
-    const product = products.find(p => p.id === id);
+
+    const product = products.find(
+      p => p.id === id
+    );
 
     if (!product) {
       alert("Produit introuvable.");
       return;
     }
 
-    document.getElementById("editProductId").value = product.id;
-    document.getElementById("editProductName").value = product.name || "";
-    document.getElementById("editProductCategory").value = product.category || "";
-    document.getElementById("editProductPrice").value = product.price ?? "";
-    document.getElementById("editProductStock").value = product.stock ?? "";
-    document.getElementById("editProductDescription").value = product.description || "";
 
-    document.getElementById("editProductModal").classList.add("show");
+    /* ===============================
+       REMPLIR LES INFORMATIONS
+       DU PRODUIT
+    =============================== */
+
+    document.getElementById("editProductId").value =
+      product.id;
+
+    document.getElementById("editProductName").value =
+      product.name || "";
+
+    document.getElementById("editProductCategory").value =
+      product.category || "";
+
+    document.getElementById("editProductPrice").value =
+      product.price ?? "";
+
+    document.getElementById("editProductStock").value =
+      product.stock ?? "";
+
+    document.getElementById("editProductDescription").value =
+      product.description || "";
+
+
+    /* ===============================
+       PROMOTION
+    =============================== */
+
+    const promoPriceInput =
+      document.getElementById("editProductPromoPrice");
+
+    const promoActiveInput =
+      document.getElementById("editProductPromoActive");
+
+    const discountInput =
+      document.getElementById("editProductDiscount");
+
+
+    promoPriceInput.value =
+      product.promo_price ?? "";
+
+    promoActiveInput.checked =
+      Boolean(product.promo_active);
+
+
+    function updateEditDiscount() {
+
+      const normalPrice =
+        Number(
+          document.getElementById("editProductPrice").value
+        );
+
+      const promoPrice =
+        Number(promoPriceInput.value);
+
+
+      if (
+        normalPrice > 0 &&
+        promoPrice > 0 &&
+        promoPrice < normalPrice
+      ) {
+
+        const discount =
+          Math.round(
+            ((normalPrice - promoPrice) / normalPrice) * 100
+          );
+
+        discountInput.value =
+          discount + "%";
+
+      } else {
+
+        discountInput.value = "";
+
+      }
+    }
+
+
+    promoPriceInput.oninput =
+      updateEditDiscount;
+
+    document.getElementById("editProductPrice").oninput =
+      updateEditDiscount;
+
+
+    updateEditDiscount();
+
+
+    /* ===============================
+       CHARGER LES CAMPAGNES
+    =============================== */
+
+    const campaignSelect =
+      document.getElementById("editProductCampaign");
+
+    campaignSelect.innerHTML =
+      '<option value="">Aucune campagne</option>';
+
+
+    try {
+
+      const campaignResponse =
+        await fetch("/api/admin/campaigns");
+
+
+      if (campaignResponse.ok) {
+
+        const campaigns =
+          await campaignResponse.json();
+
+
+        campaigns.forEach(function (campaign) {
+
+          const option =
+            document.createElement("option");
+
+          option.value =
+            campaign.id;
+
+          option.textContent =
+            campaign.sticker
+              ? campaign.sticker + " " + campaign.name
+              : campaign.name;
+
+
+          campaignSelect.appendChild(option);
+
+        });
+
+
+        /* Sélectionner la campagne actuelle */
+
+        if (product.campaign_id) {
+
+          campaignSelect.value =
+            String(product.campaign_id);
+
+        }
+
+      }
+
+    } catch (campaignError) {
+
+      console.error(
+        "LOAD_CAMPAIGNS_ERROR:",
+        campaignError
+      );
+
+    }
+
+
+    /* ===============================
+       OUVRIR LA FENÊTRE
+       DE MODIFICATION
+    =============================== */
+
+    document
+      .getElementById("editProductModal")
+      .classList.add("show");
 
   } catch (error) {
-    console.error("EDIT_PRODUCT_ERROR:", error);
-    alert("Erreur de connexion au serveur.");
+
+    console.error(
+      "EDIT_PRODUCT_ERROR:",
+      error
+    );
+
+    alert(
+      "Erreur de connexion au serveur."
+    );
+
   }
-}
+  }
 
 function closeEditProduct() {
   document.getElementById("editProductModal").classList.remove("show");
