@@ -828,7 +828,87 @@
 
   const money = n =>
     new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
+  
+// =========================================
+// ESPACE PROMOTIONNEL
+// =========================================
 
+function previewPromoMedia(slot) {
+    const input = document.getElementById(`promoMedia${slot}`);
+    const preview = document.getElementById(`promoPreview${slot}`);
+
+    if (!input || !preview || !input.files.length) {
+        return;
+    }
+
+    const file = input.files[0];
+    const url = URL.createObjectURL(file);
+
+    if (file.type.startsWith("image/")) {
+        preview.innerHTML = `
+            <img
+                src="${url}"
+                alt="Aperçu promotion"
+                style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;"
+            >
+        `;
+    } else if (file.type.startsWith("video/")) {
+        preview.innerHTML = `
+            <video
+                src="${url}"
+                controls
+                style="width:100%;max-height:220px;border-radius:12px;"
+            ></video>
+        `;
+    }
+}
+
+document.addEventListener("change", function(event) {
+    if (event.target.id === "promoMedia1") {
+        previewPromoMedia(1);
+    }
+
+    if (event.target.id === "promoMedia2") {
+        previewPromoMedia(2);
+    }
+
+    if (event.target.id === "promoMedia3") {
+        previewPromoMedia(3);
+    }
+});
+
+async function savePromoMedia(slot) {
+    const input = document.getElementById(`promoMedia${slot}`);
+
+    if (!input || !input.files.length) {
+        alert("Veuillez sélectionner un fichier.");
+        return;
+    }
+
+    const file = input.files[0];
+
+    const formData = new FormData();
+    formData.append("slot", slot);
+    formData.append("media", file);
+
+    try {
+        const response = await fetch("/api/admin/promo-media", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Impossible d'enregistrer le média.");
+        }
+
+        alert("Média promotionnel enregistré avec succès.");
+    } catch (error) {
+        console.error("PROMO_MEDIA_ERROR:", error);
+        alert(error.message || "Erreur lors de l'enregistrement.");
+    }
+}
 async function login() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
