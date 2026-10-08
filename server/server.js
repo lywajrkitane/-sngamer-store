@@ -406,23 +406,52 @@ function requireAdmin(req, res, next) {
 }
 
 app.post("/api/admin/login", async (req, res) => {
+  const diagnosticStart = Date.now();
+
+  console.log("LOGIN_DIAGNOSTIC: route atteinte");
+
   try {
-    const { username, password } = req.body;
+    const { username, password } = req.body || {};
+
+    console.log(
+      "LOGIN_DIAGNOSTIC: username reçu =",
+      username || "(vide)"
+    );
 
     const adminUser = process.env.ADMIN_USER;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
+    console.log(
+      "LOGIN_DIAGNOSTIC: ADMIN_USER présent =",
+      Boolean(adminUser)
+    );
+
+    console.log(
+      "LOGIN_DIAGNOSTIC: ADMIN_PASSWORD présent =",
+      Boolean(adminPassword)
+    );
+
     if (!adminUser || !adminPassword) {
+      console.log(
+        "LOGIN_DIAGNOSTIC: configuration administrateur manquante"
+      );
+
       return res.status(500).json({
         error: "Configuration administrateur manquante"
       });
     }
 
     if (username !== adminUser) {
+      console.log("LOGIN_DIAGNOSTIC: mauvais nom utilisateur");
+
       return res.status(401).json({
         error: "Identifiants incorrects"
       });
     }
+
+    console.log(
+      "LOGIN_DIAGNOSTIC: nom utilisateur correct"
+    );
 
     let passwordValid = false;
 
@@ -431,27 +460,97 @@ app.post("/api/admin/login", async (req, res) => {
       adminPassword.startsWith("$2b$") ||
       adminPassword.startsWith("$2y$")
     ) {
-      passwordValid = await bcrypt.compare(
-        password,
+      console.log(
+        "LOGIN_DIAGNOSTIC: vérification bcrypt démarrée"
+      );
+
+      const bcryptTimeout = new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("TIMEOUT");
+        }, 8000);
+      });
+
+      const bcryptCheck = bcrypt.compare(
+        password || "",
         adminPassword
       );
+
+      const bcryptResult = await Promise.race([
+        bcryptCheck,
+        bcryptTimeout
+      ]);
+
+      if (bcryptResult === "TIMEOUT") {
+        console.log(
+          "LOGIN_DIAGNOSTIC: bcrypt dépasse 8 secondes"
+        );
+
+        return res.status(500).json({
+          error: "La vérification du mot de passe prend trop de temps."
+        });
+      }
+
+      passwordValid = Boolean(bcryptResult);
+
+      console.log(
+        "LOGIN_DIAGNOSTIC: bcrypt terminé =",
+        passwordValid
+      );
+
     } else {
-      passwordValid = password === adminPassword;
+      console.log(
+        "LOGIN_DIAGNOSTIC: comparaison directe du mot de passe"
+      );
+
+      passwordValid =
+        password === adminPassword;
+
+      console.log(
+        "LOGIN_DIAGNOSTIC: comparaison terminée =",
+        passwordValid
+      );
     }
 
     if (!passwordValid) {
+      console.log(
+        "LOGIN_DIAGNOSTIC: mot de passe incorrect"
+      );
+
       return res.status(401).json({
         error: "Identifiants incorrects"
       });
     }
 
+    console.log(
+      "LOGIN_DIAGNOSTIC: mot de passe correct"
+    );
+
+    console.log(
+      "LOGIN_DIAGNOSTIC: création de session"
+    );
+
     req.session.admin = true;
+
+    console.log(
+      "LOGIN_DIAGNOSTIC: session créée"
+    );
 
     res.json({
       success: true
     });
+
+    console.log(
+      "LOGIN_DIAGNOSTIC: réponse envoyée en",
+      Date.now() - diagnosticStart,
+      "ms"
+    );
+
   } catch (error) {
-    console.error("LOGIN_ERROR:", error);
+
+    console.error(
+      "LOGIN_DIAGNOSTIC_ERROR:",
+      error
+    );
 
     res.status(500).json({
       error: "Erreur de connexion"
