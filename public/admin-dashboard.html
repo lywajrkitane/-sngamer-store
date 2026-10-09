@@ -642,83 +642,101 @@
 
     <div class="campaignsGrid">
 
-        <!-- PROMOTION 1 -->
-        <div class="campaignCard">
-            <h3>🖼️ Promotion 1</h3>
+  <!-- PROMOTION 1 -->
+  <div class="campaignCard">
+    <h3>🖼️ Promotion 1</h3>
 
-            <label>
-                Image promotionnelle
-                <input
-                    type="file"
-                    id="promoMedia1"
-                    accept="image/*"
-                >
-            </label>
+    <label>
+      Image promotionnelle
+      <input type="file"
+             id="promoMedia1"
+             accept="image/*">
+    </label>
 
-            <div id="promoPreview1" style="margin-top:12px;">
-                <p style="color:#8190a2;">Aucune image sélectionnée.</p>
-            </div>
+    <label for="promoCampaign1">Campagne associée</label>
+    <select id="promoCampaign1">
+      <option value="">Choisir une campagne</option>
+    </select>
 
-            <button
-                type="button"
-                class="campaignCreateBtn"
-                onclick="savePromoMedia(1)"
-            >
-                💾 Enregistrer
-            </button>
-        </div>
+    <label for="promoProduct1">Produit associé</label>
+    <select id="promoProduct1">
+      <option value="">Choisir un produit</option>
+    </select>
 
-        <!-- PROMOTION 2 -->
-        <div class="campaignCard">
-            <h3>🖼️ Promotion 2</h3>
+    <div id="promoPreview1">
+      <p style="color:#8190a2;">Aucun média chargé.</p>
+    </div>
 
-            <label>
-                Image promotionnelle
-                <input
-                    type="file"
-                    id="promoMedia2"
-                    accept="image/*"
-                >
-            </label>
+    <button type="button"
+            class="campaignCreateBtn"
+            onclick="savePromoMedia(1)">
+      💾 Enregistrer
+    </button>
+  </div>
 
-            <div id="promoPreview2" style="margin-top:12px;">
-                <p style="color:#8190a2;">Aucune image sélectionnée.</p>
-            </div>
+  <!-- PROMOTION 2 -->
+  <div class="campaignCard">
+    <h3>🖼️ Promotion 2</h3>
 
-            <button
-                type="button"
-                class="campaignCreateBtn"
-                onclick="savePromoMedia(2)"
-            >
-                💾 Enregistrer
-            </button>
-        </div>
+    <label>
+      Image promotionnelle
+      <input type="file"
+             id="promoMedia2"
+             accept="image/*">
+    </label>
 
-        <!-- PROMOTION 3 -->
-        <div class="campaignCard">
-            <h3>🎥 Promotion 3</h3>
+    <label for="promoCampaign2">Campagne associée</label>
+    <select id="promoCampaign2">
+      <option value="">Choisir une campagne</option>
+    </select>
 
-            <label>
-                Vidéo promotionnelle
-                <input
-                    type="file"
-                    id="promoMedia3"
-                    accept="video/*"
-                >
-            </label>
+    <label for="promoProduct2">Produit associé</label>
+    <select id="promoProduct2">
+      <option value="">Choisir un produit</option>
+    </select>
 
-            <div id="promoPreview3" style="margin-top:12px;">
-                <p style="color:#8190a2;">Aucune vidéo sélectionnée.</p>
-            </div>
+    <div id="promoPreview2">
+      <p style="color:#8190a2;">Aucun média chargé.</p>
+    </div>
 
-            <button
-                type="button"
-                class="campaignCreateBtn"
-                onclick="savePromoMedia(3)"
-            >
-                💾 Enregistrer
-            </button>
-        </div>
+    <button type="button"
+            class="campaignCreateBtn"
+            onclick="savePromoMedia(2)">
+      💾 Enregistrer
+    </button>
+  </div>
+
+  <!-- PROMOTION 3 -->
+  <div class="campaignCard">
+    <h3>🎬 Promotion 3</h3>
+
+    <label>
+      Vidéo promotionnelle
+      <input type="file"
+             id="promoMedia3"
+             accept="video/*">
+    </label>
+
+    <label for="promoCampaign3">Campagne associée</label>
+    <select id="promoCampaign3">
+      <option value="">Choisir une campagne</option>
+    </select>
+
+    <label for="promoProduct3">Produit associé</label>
+    <select id="promoProduct3">
+      <option value="">Choisir un produit</option>
+    </select>
+
+    <div id="promoPreview3">
+      <p style="color:#8190a2;">Aucun média chargé.</p>
+    </div>
+
+    <button type="button"
+            class="campaignCreateBtn"
+            onclick="savePromoMedia(3)">
+      💾 Enregistrer
+    </button>
+  </div>
 
     </div>
 
@@ -895,37 +913,54 @@ document.addEventListener("change", function(event) {
 });
 
 async function savePromoMedia(slot) {
-    const input = document.getElementById(`promoMedia${slot}`);
+  const input = document.getElementById(`promoMedia${slot}`);
 
-    if (!input || !input.files.length) {
-        alert("Veuillez sélectionner un fichier.");
-        return;
+  if (!input || !input.files || !input.files.length) {
+    alert("Veuillez sélectionner un fichier.");
+    return;
+  }
+
+  const file = input.files[0];
+  const campaignSelect = document.getElementById(`promoCampaign${slot}`);
+  const productSelect = document.getElementById(`promoProduct${slot}`);
+
+  const formData = new FormData();
+  formData.append("slot", slot);
+  formData.append("media", file);
+  formData.append(
+    "campaign_id",
+    campaignSelect ? campaignSelect.value : ""
+  );
+  formData.append(
+    "product_id",
+    productSelect ? productSelect.value : ""
+  );
+
+  try {
+    const response = await fetch("/api/admin/promo-media", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Erreur lors de l'enregistrement."
+      );
     }
 
-    const file = input.files[0];
+    alert("Média promotionnel enregistré avec succès.");
 
-    const formData = new FormData();
-    formData.append("slot", slot);
-    formData.append("media", file);
-
-    try {
-        const response = await fetch("/api/admin/promo-media", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || "Impossible d'enregistrer le média.");
-        }
-
-        alert("Média promotionnel enregistré avec succès.");
-    } catch (error) {
-        console.error("PROMO_MEDIA_ERROR:", error);
-        alert(error.message || "Erreur lors de l'enregistrement.");
+    if (typeof loadPromoMedia === "function") {
+      await loadPromoMedia();
     }
+  } catch (error) {
+    console.error("PROMO_MEDIA_ERROR:", error);
+    alert(error.message || "Erreur lors de l'enregistrement.");
+  }
 }
+
   // =========================================
 // CHARGER LES MÉDIAS PROMOTIONNELS
 // =========================================
