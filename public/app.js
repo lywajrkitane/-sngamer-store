@@ -26,6 +26,7 @@ return `<article class="card">
 <h3>${p.name}</h3>
 ${priceHtml}
 <div class="stock">${p.stock} disponible(s)</div>
+<button class="add" onclick="buyNow(${p.id})">🛒 ACHETER</button>
 <button class="add" onclick="add(${p.id})">Ajouter au panier</button>
 <button class="details" onclick="openProduct(${p.id})">Voir le produit</button>
 </div>
@@ -34,6 +35,7 @@ ${priceHtml}
 }
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
 function add(id){let x=cartItems.find(a=>a.id===id);x?x.qty++:cartItems.push({id,qty:1});save();cart()}
+function buyNow(id){add(id);cart()}
 function update(){
   const validItems = cartItems.filter(x =>
     products.some(p => Number(p.id) === Number(x.id))
