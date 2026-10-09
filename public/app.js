@@ -153,7 +153,19 @@ function openProduct(id){
 
         <h2>${escapeHtml(p.name)}</h2>
 
-        <div class="price">${money(p.price)}</div>
+        
+${
+  Boolean(p.promo_active) &&
+  Number(p.promo_price) > 0 &&
+  Number(p.promo_price) < Number(p.price)
+    ? `<div class="price" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="text-decoration:line-through;color:#8190a2;font-size:.9em">${money(p.price)}</span>
+        <strong style="color:#ff4d6d">${money(p.promo_price)}</strong>
+        <span style="background:#ff4d6d;color:white;padding:3px 8px;border-radius:6px;font-size:.8em;font-weight:700">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span>
+      </div>`
+    : `<div class="price">${money(p.price)}</div>`
+}
+
 
         ${
           inStock
