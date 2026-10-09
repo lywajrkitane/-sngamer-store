@@ -669,21 +669,33 @@ app.patch(
 
 app.post("/api/admin/products", requireAdmin, async (req, res) => {
   const {
-    name,
-    category,
-    price,
-    stock,
-    emoji,
-    description
-  } = req.body;
+  name,
+  category,
+  price,
+  stock,
+  emoji,
+  description,
+  promo_price,
+  promo_active,
+  campaign_id
+} = req.body;
 
   const p = {
-    name: String(name || "").trim(),
-    category: String(category || "Accessoires").trim(),
-    price: Number(price),
-    stock: Number(stock),
-    emoji: emoji || "🎮",
-    description: String(description || "").trim()
+  name: String(name || "").trim(),
+  category: String(category || "Accessoires").trim(),
+  price: Number(price),
+  stock: Number(stock),
+  emoji: emoji || "🎮",
+  description: String(description || "").trim(),
+  promo_price:
+    promo_price !== null && promo_price !== undefined && promo_price !== ""
+      ? Number(promo_price)
+      : null,
+  promo_active: Boolean(promo_active),
+  campaign_id:
+    campaign_id !== null && campaign_id !== undefined && campaign_id !== ""
+      ? Number(campaign_id)
+      : null
   };
 
   if (
@@ -697,23 +709,57 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
       error: "Produit invalide"
     });
   }
+  if (
+  p.promo_price !== null &&
+  (
+    !Number.isFinite(p.promo_price) ||
+    p.promo_price <= 0 ||
+    p.promo_price >= p.price
+  )
+) {
+  return res.status(400).json({
+    error: "Le prix promotionnel doit être positif et inférieur au prix normal."
+  });
+}
+
+if (
+  p.promo_active &&
+  p.promo_price === null
+) {
+  return res.status(400).json({
+    error: "Indiquez un prix promotionnel pour activer la promotion."
+  });
+}
 
   try {
     const r = await db(
-      `
-      INSERT INTO products
-      (name, category, price, stock, emoji, description)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, name, category, price, stock, emoji, description
-      `,
-      [
-        p.name,
-        p.category,
-        p.price,
-        p.stock,
-        p.emoji,
-        p.description
-      ]
+  `
+  INSERT INTO products
+    (
+      name,
+      category,
+      price,
+      stock,
+      emoji,
+      description,
+      promo_price,
+      promo_active,
+      campaign_id
+    )
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  RETURNING *
+  `,
+  [
+    p.name,
+    p.category,
+    p.price,
+    p.stock,
+    p.emoji,
+    p.description,
+    p.promo_price,
+    p.promo_active,
+    p.campaign_id
+  ]
     );
 
     res.json({
