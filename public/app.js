@@ -66,7 +66,7 @@ function update(){
 
               <div>
                 <b>${escapeHtml(p.name)}</b><br>
-                <small>${money(p.price)} × ${x.qty}</small>
+                <small>${money(Boolean(p.promo_active) && Number(p.promo_price) > 0 && Number(p.promo_price) < Number(p.price) ? Number(p.promo_price) : Number(p.price))} × ${x.qty}</small>
               </div>
 
               <div class="qty">
@@ -84,7 +84,7 @@ function update(){
       p => Number(p.id) === Number(x.id)
     );
 
-    return s + (p ? p.price * x.qty : 0);
+   return s + (p ? (Boolean(p.promo_active) && Number(p.promo_price) > 0 && Number(p.promo_price) < Number(p.price) ? Number(p.promo_price) : Number(p.price)) * x.qty : 0);
   }, 0);
 
   document.querySelector("#total").textContent = money(total);
@@ -92,7 +92,7 @@ function update(){
 function chg(id,n){let x=cartItems.find(a=>a.id===id);x.qty+=n;if(x.qty<=0)cartItems=cartItems.filter(a=>a.id!==id);save()}
 function cart(){document.querySelector("#drawer").classList.add("show");update()}
 function closeCart(){document.querySelector("#drawer").classList.remove("show")}
-function openCheckout(){if(!cartItems.length)return alert("Panier vide.");document.querySelector("#checkoutSummary")?.remove();let summary=cartItems.map(x=>{let p=products.find(p=>p.id===x.id);return `<div class="checkoutItem"><span>${p.name} × ${x.qty}</span><b>${money(p.price*x.qty)}</b></div>`}).join("");let total=cartItems.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0);document.querySelector("#checkout .box").classList.add("hasSummary");document.querySelector("#checkout .box").insertAdjacentHTML("afterbegin",`<div id="checkoutSummary"><h3>Votre commande</h3>${summary}<div class="checkoutTotal"><span>Total</span><b>${money(total)}</b></div></div>`);document.querySelector("#checkout").classList.add("show")}
+function openCheckout(){if(!cartItems.length)return alert("Panier vide.");document.querySelector("#checkoutSummary")?.remove();let summary=cartItems.map(x=>{let p=products.find(p=>p.id===x.id);return `<div class="checkoutItem"><span>${p.name} × ${x.qty}</span><b>${money((Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?Number(p.promo_price):Number(p.price))*x.qty)}</b></div>`}).join("");let total=cartItems.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0);document.querySelector("#checkout .box").classList.add("hasSummary");document.querySelector("#checkout .box").insertAdjacentHTML("afterbegin",`<div id="checkoutSummary"><h3>Votre commande</h3>${summary}<div class="checkoutTotal"><span>Total</span><b>${money(total)}</b></div></div>`);document.querySelector("#checkout").classList.add("show")}
 function closeCheckout(){document.querySelector("#checkout").classList.remove("show")}
 async function order(){let customer={name:document.querySelector("#name").value,phone:document.querySelector("#phone").value,address:document.querySelector("#addr").value};if(!customer.name||!customer.phone||!customer.address)return alert("Remplis les informations.");let payment=document.querySelector("#pay").value;let r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,payment,items:cartItems})});let d=await r.json();if(!r.ok)return alert(d.error||"Erreur");alert("Commande enregistrée : "+d.orderId);cartItems=[];save();closeCheckout();closeCart();load()}
 document.querySelector("#q").oninput=render;load();
