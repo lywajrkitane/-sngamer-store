@@ -203,6 +203,15 @@ await db(`
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+  
+await db(`
+  ALTER TABLE promo_media
+  ADD COLUMN IF NOT EXISTS campaign_id BIGINT
+    REFERENCES campaigns(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS product_id BIGINT
+    REFERENCES products(id) ON DELETE SET NULL;
+`);
+
   console.log("Database initialized successfully");
 }
 
