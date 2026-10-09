@@ -61,7 +61,11 @@ ${priceHtml}
 }).join("");
 }
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
-function add(id){let x=cartItems.find(a=>a.id===id);x?x.qty++:cartItems.push({id,qty:1});save();cart()}
+function add(id){
+  let x=cartItems.find(a=>a.id===id);
+  x ? x.qty++ : cartItems.push({id,qty:1});
+  save();
+}
 function buyNow(id){add(id);cart()}
 function update(){
   const validItems = cartItems.filter(x =>
