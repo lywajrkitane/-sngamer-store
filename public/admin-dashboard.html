@@ -1137,6 +1137,13 @@ loadPromoMedia();
     document.getElementById("pVideo").files[0];
 
   const emoji = "🎮";
+    const promoPriceInput = document.getElementById("pPromoPrice").value;
+const promoPrice = promoPriceInput === "" ? null : Number(promoPriceInput);
+
+const promoActive = document.getElementById("pPromoActive").checked;
+
+const campaignValue = document.getElementById("pCampaign").value;
+const campaignId = campaignValue ? Number(campaignValue) : null;
 
   if (!name || !price) {
     alert("Le nom et le prix sont obligatoires.");
@@ -1150,12 +1157,15 @@ loadPromoMedia();
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        name,
-        category,
-        price,
-        stock,
-        emoji,
-        description
+    name,
+    category,
+    price,
+    stock,
+    emoji,
+    description,
+    promo_price: promoPrice,
+    promo_active: promoActive,
+    campaign_id: campaignId
       })
     });
 
