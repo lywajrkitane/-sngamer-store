@@ -1480,25 +1480,39 @@ app.post(
           "sngamer-store/promotions"
         );
 
-        const promoResult = await db(
-          `
-          INSERT INTO promo_media
-            (slot, media_type, url, updated_at)
-          VALUES
-            ($1, $2, $3, NOW())
-          ON CONFLICT (slot)
-          DO UPDATE SET
-            media_type = $2,
-            url = $3,
-            updated_at = NOW()
-          RETURNING *
-          `,
-          [
-            slot,
-            mediaType,
-            result.secure_url
-          ]
-        );
+        
+const campaignId = req.body.campaign_id
+  ? Number(req.body.campaign_id)
+  : null;
+
+const productId = req.body.product_id
+  ? Number(req.body.product_id)
+  : null;
+
+const promoResult = await db(
+  `
+  INSERT INTO promo_media
+    (slot, media_type, url, campaign_id, product_id, updated_at)
+  VALUES
+    ($1, $2, $3, $4, $5, NOW())
+  ON CONFLICT (slot)
+  DO UPDATE SET
+    media_type = EXCLUDED.media_type,
+    url = EXCLUDED.url,
+    campaign_id = EXCLUDED.campaign_id,
+    product_id = EXCLUDED.product_id,
+    updated_at = NOW()
+  RETURNING *
+  `,
+  [
+    slot,
+    mediaType,
+    result.secure_url,
+    campaignId,
+    productId
+  ]
+);
+
 
         return res.json({
           success: true,
