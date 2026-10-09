@@ -26,9 +26,32 @@ return `<article class="card">
 <h3>${p.name}</h3>
 ${priceHtml}
 <div class="stock">${p.stock} disponible(s)</div>
-<button class="add" onclick="buyNow(${p.id})">🛒 ACHETER</button>
-<button class="add" onclick="add(${p.id})">Ajouter au panier</button>
-<button class="details" onclick="openProduct(${p.id})">Voir le produit</button>
+
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+  <button
+    class="add"
+    style="width:100%;box-sizing:border-box;"
+    onclick="buyNow(${p.id})">
+    🛒 ACHETER
+  </button>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;">
+    <button
+      class="add"
+      style="width:100%;box-sizing:border-box;font-size:14px;padding:12px 5px;"
+      onclick="add(${p.id})">
+      Ajouter au panier
+    </button>
+
+    <button
+      class="details"
+      style="width:100%;box-sizing:border-box;font-size:14px;padding:12px 5px;"
+      onclick="openProduct(${p.id})">
+      Voir le produit
+    </button>
+  </div>
+</div>
+
 </div>
 </article>`;
 }).join("");
