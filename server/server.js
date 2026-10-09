@@ -321,10 +321,10 @@ app.post("/api/orders", async (req, res) => {
 
       const productResult = await client.query(
         `
-        SELECT id, name, price, stock, emoji
-        FROM products
-        WHERE id = $1
-        FOR UPDATE
+        SELECT id, name, price, promo_price, promo_active, stock, emoji
+FROM products
+WHERE id = $1
+FOR UPDATE
         `,
         [productId]
       );
@@ -341,13 +341,24 @@ app.post("/api/orders", async (req, res) => {
         );
       }
 
-      const subtotal = product.price * quantity;
+      
+const promoActive =
+  Boolean(product.promo_active) &&
+  Number(product.promo_price) > 0 &&
+  Number(product.promo_price) < Number(product.price);
+
+const unitPrice = promoActive
+  ? Number(product.promo_price)
+  : Number(product.price);
+
+const subtotal = unitPrice * quantity;
+
       total += subtotal;
 
       finalItems.push({
         id: product.id,
         name: product.name,
-        price: product.price,
+        price: unitPrice,
         quantity,
         subtotal,
         emoji: product.emoji
