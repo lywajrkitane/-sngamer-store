@@ -27,30 +27,34 @@ return `<article class="card">
 ${priceHtml}
 <div class="stock">${p.stock} disponible(s)</div>
 
-<div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
   <button
     class="add"
-    style="width:100%;box-sizing:border-box;"
-    onclick="buyNow(${p.id})">
-    🛒 ACHETER
+    style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid #478bff;background:linear-gradient(100deg,#1677ff,#713cff);color:#fff;border-radius:12px;font-weight:800;box-shadow:0 0 12px rgba(55,115,255,.28);transition:transform .15s,box-shadow .15s;"
+    onclick="buyNow(${p.id})"
+    onpointerdown="this.style.boxShadow='0 0 24px rgba(75,125,255,.9)';this.style.transform='scale(.98)'"
+    onpointerup="this.style.boxShadow='0 0 12px rgba(55,115,255,.28)';this.style.transform='scale(1)'"
+    onpointerleave="this.style.boxShadow='0 0 12px rgba(55,115,255,.28)';this.style.transform='scale(1)'">
+    ACHETER
   </button>
 
-  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
     <button
       class="add"
-      style="width:100%;box-sizing:border-box;font-size:14px;padding:12px 5px;"
+      style="width:100%;box-sizing:border-box;padding:10px 4px;font-size:13px;border-radius:10px;"
       onclick="add(${p.id})">
-      Ajouter au panier
+      🛒 Panier
     </button>
 
     <button
       class="details"
-      style="width:100%;box-sizing:border-box;font-size:14px;padding:12px 5px;"
+      style="width:100%;box-sizing:border-box;padding:10px 4px;font-size:13px;border-radius:10px;"
       onclick="openProduct(${p.id})">
-      Voir le produit
+      👁 Voir
     </button>
   </div>
 </div>
+
 
 </div>
 </article>`;
