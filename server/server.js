@@ -1536,9 +1536,27 @@ const promoResult = await db(
 app.get("/api/promo-media", async (req, res) => {
   try {
     const result = await db(`
-      SELECT slot, media_type, url, updated_at
-      FROM promo_media
-      ORDER BY slot ASC
+      
+SELECT
+    pm.slot,
+    pm.media_type,
+    pm.url,
+    pm.updated_at,
+    pm.campaign_id,
+    pm.product_id,
+    c.name AS campaign_name,
+    c.sticker AS campaign_sticker,
+    c.active AS campaign_active,
+    p.name AS product_name,
+    p.price AS product_price,
+    p.promo_price AS product_promo_price,
+    p.promo_active AS product_promo_active,
+    p.emoji AS product_emoji
+FROM promo_media pm
+LEFT JOIN campaigns c ON c.id = pm.campaign_id
+LEFT JOIN products p ON p.id = pm.product_id
+ORDER BY pm.slot ASC
+
     `);
 
     return res.json({
