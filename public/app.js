@@ -493,9 +493,10 @@ async function loadHomepagePromoMedia() {
                 const info = document.createElement("div");
                 info.className = "promoProductInfo";
                 info.style.cssText =
-                    "position:absolute;bottom:12px;left:12px;right:12px;" +
-                    "z-index:5;background:rgba(0,0,0,.82);color:white;" +
-                    "padding:12px;border-radius:10px;box-sizing:border-box;";
+    "position:absolute;bottom:10px;left:10px;right:10px;" +
+    "z-index:5;background:rgba(0,0,0,.88);color:white;" +
+    "padding:8px;border-radius:10px;box-sizing:border-box;" +
+    "max-height:42%;overflow:auto;text-align:center;";
 
                 const name = document.createElement("div");
                 name.textContent =
@@ -506,20 +507,30 @@ async function loadHomepagePromoMedia() {
                 const price = document.createElement("div");
                 const regular = Number(promo.product_price || 0);
                 const special = Number(promo.product_promo_price || 0);
-                const hasPromo =
-                    promo.product_promo_active === true &&
-                    special > 0 &&
-                    special < regular;
+                
+              const hasPromo =
+    (promo.product_promo_active === true ||
+     promo.product_promo_active === "true" ||
+     promo.product_promo_active === 1) &&
+    special > 0 &&
+    regular > special;
+              if (hasPromo) {
 
-                if (hasPromo) {
-                    const discount = Math.round((1 - special / regular) * 100);
-                    price.innerHTML =
-                        '<span style="text-decoration:line-through;color:#ccc">' +
-                        regular.toLocaleString("fr-FR") + ' FCFA</span> ' +
-                        '<strong style="color:#ff4d6d">' +
-                        special.toLocaleString("fr-FR") + ' FCFA</strong> ' +
-                        '<span>-' + discount + '%</span>';
-                } else {
+                const discount = Math.round((1 - special / regular) * 100);
+
+price.innerHTML =
+    '<div style="display:flex;justify-content:center;align-items:center;' +
+    'gap:8px;flex-wrap:wrap;margin-top:5px">' +
+    '<span style="text-decoration:line-through;color:#ccc;font-size:13px">' +
+    regular.toLocaleString("fr-FR") + ' FCFA</span>' +
+    '<strong style="color:#ff4d6d;font-size:19px">' +
+    special.toLocaleString("fr-FR") + ' FCFA</strong>' +
+    '</div>' +
+    '<div style="display:inline-block;margin-top:6px;background:#ff4d6d;' +
+    'color:white;font-size:20px;font-weight:900;padding:5px 12px;' +
+    'border-radius:8px">-' + discount + '%</div>';
+              
+              } else {
                     price.textContent = regular.toLocaleString("fr-FR") + " FCFA";
                 }
 
