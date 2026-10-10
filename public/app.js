@@ -427,68 +427,148 @@ document.addEventListener("DOMContentLoaded", function () {
 // CHARGER LES MÉDIAS PROMOTIONNELS DEPUIS L'ADMIN
 // =========================================
 
+
 async function loadHomepagePromoMedia() {
     try {
         const response = await fetch("/api/promo-media");
 
         if (!response.ok) {
-            throw new Error("Impossible de récupérer les médias promotionnels.");
+            throw new Error("Impossible de récupérer les médias promotionnels");
         }
 
         const data = await response.json();
 
-        if (!data.success || !Array.isArray(data.promos)) {
-            return;
-        }
+        if (!data.success || !Array.isArray(data.promos)) return;
 
         const slides = document.querySelectorAll("#promoCarousel .promoSlide");
+        if (!slides.length) return;
 
-        if (!slides.length) {
-            return;
-        }
+        let campaignTitle = "";
 
         data.promos.forEach(promo => {
             const index = Number(promo.slot) - 1;
             const slide = slides[index];
 
-            if (!slide) {
+            if (!slide) return;
+
+            // Masquer la campagne si elle est inactive
+            if (promo.campaign_id && promo.campaign_active !== true) {
+                slide.style.display = "none";
                 return;
             }
 
-            if (promo.media_type === "image") {
-                slide.innerHTML = "";
+            slide.style.display = "";
 
+            // Afficher le média promotionnel
+            slide.innerHTML = "";
+
+            if (promo.media_type === "image") {
                 const img = document.createElement("img");
                 img.src = promo.url;
-                img.alt = `Promotion SNGAMER ${promo.slot}`;
-
+                img.alt = promo.campaign_name || "Promotion SNGAMER";
+                img.style.width = "100%";
+                img.style.height = "100%";
+                img.style.objectFit = "cover";
                 slide.appendChild(img);
-            }
-
-            if (promo.media_type === "video") {
-                slide.innerHTML = "";
-
+            } else if (promo.media_type === "video") {
                 const video = document.createElement("video");
-
                 video.src = promo.url;
                 video.autoplay = true;
                 video.muted = true;
                 video.loop = true;
                 video.playsInline = true;
                 video.preload = "metadata";
-                video.setAttribute(
-                    "aria-label",
-                    "Vidéo promotionnelle SNGAMER"
-                );
-
+                video.style.width = "100%";
+                video.style.height = "100%";
+                video.style.objectFit = "cover";
                 slide.appendChild(video);
+            }
+
+            if (promo.campaign_name) {
+                campaignTitle = promo.campaign_name;
+            }
+
+            // Informations du produit associé
+            if (promo.product_id && promo.product_name) {
+                const info = document.createElement("div");
+                info.className = "promoProductInfo";
+                info.style.cssText =
+                    "position:absolute;bottom:12px;left:12px;right:12px;" +
+                    "z-index:5;background:rgba(0,0,0,.82);color:white;" +
+                    "padding:12px;border-radius:10px;box-sizing:border-box;";
+
+                const name = document.createElement("div");
+                name.textContent =
+                    (promo.product_emoji || "🛍️") + " " + promo.product_name;
+                name.style.fontWeight = "bold";
+                info.appendChild(name);
+
+                const price = document.createElement("div");
+                const regular = Number(promo.product_price || 0);
+                const special = Number(promo.product_promo_price || 0);
+                const hasPromo =
+                    promo.product_promo_active === true &&
+                    special > 0 &&
+                    special < regular;
+
+                if (hasPromo) {
+                    const discount = Math.round((1 - special / regular) * 100);
+                    price.innerHTML =
+                        '<span style="text-decoration:line-through;color:#ccc">' +
+                        regular.toLocaleString("fr-FR") + ' FCFA</span> ' +
+                        '<strong style="color:#ff4d6d">' +
+                        special.toLocaleString("fr-FR") + ' FCFA</strong> ' +
+                        '<span>-' + discount + '%</span>';
+                } else {
+                    price.textContent = regular.toLocaleString("fr-FR") + " FCFA";
+                }
+
+                info.appendChild(price);
+
+                const buy = document.createElement("button");
+                buy.type = "button";
+                buy.textContent = "ACHETER";
+                buy.style.cssText =
+                    "margin-top:8px;padding:9px 16px;border:0;" +
+                    "border-radius:6px;background:#ff4d6d;color:white;" +
+                    "font-weight:bold;cursor:pointer;";
+
+                buy.addEventListener("click", event => {
+                    event.stopPropagation();
+                    if (typeof buyNow === "function") {
+                        buyNow(Number(promo.product_id));
+                    }
+                });
+
+                info.appendChild(buy);
+                slide.style.position = "relative";
+                slide.appendChild(info);
             }
         });
 
+        // Titre de campagne affiché au-dessus du carrousel
+        let title = document.getElementById("promoCampaignTitle");
+
+        if (!title) {
+            title = document.createElement("div");
+            title.id = "promoCampaignTitle";
+            title.style.cssText =
+                "text-align:center;font-size:20px;font-weight:bold;" +
+                "margin:0 0 12px;color:#ff4d6d;";
+            const carousel = document.getElementById("promoCarousel");
+            if (carousel && carousel.parentNode) {
+                carousel.parentNode.insertBefore(title, carousel);
+            }
+        }
+
+        title.textContent = campaignTitle;
+        title.style.display = campaignTitle ? "block" : "none";
+
     } catch (error) {
-        console.error("PROMO_MEDIA_HOME_ERROR:", error);
+        console.error("PROMO_MEDIA_HOME_ERROR", error);
     }
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
     loadHomepagePromoMedia();
