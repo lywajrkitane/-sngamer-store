@@ -627,7 +627,7 @@ campaignName.style.cssText =
 textBlock.append(eyebrow, campaignName);
 
 const rightIcon = document.createElement("div");
-rightIcon.textContent = "ϟ";
+rightIcon.textContent = window.promoCampaignRightSticker || "ϟ";
 rightIcon.style.cssText =
   "flex:0 0 54px;height:54px;display:flex;align-items:center;" +
   "justify-content:center;background:#2b1742;color:#c084fc;" +
