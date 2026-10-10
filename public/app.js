@@ -484,9 +484,13 @@ async function loadHomepagePromoMedia() {
                 slide.appendChild(video);
             }
 
-            if (promo.campaign_name) {
-                campaignTitle = promo.campaign_name;
-            }
+            
+if (promo.campaign_name) {
+    campaignTitle = promo.campaign_name;
+    window.promoCampaignSticker = promo.campaign_sticker || "";
+}
+
+            
 
             // Informations du produit associé
             if (promo.product_id && promo.product_name) {
@@ -598,7 +602,7 @@ title.style.cssText =
 title.replaceChildren();
 
 const leftIcon = document.createElement("div");
-leftIcon.textContent = "✧";
+leftIcon.textContent = window.promoCampaignSticker || "✧";
 leftIcon.style.cssText =
   "flex:0 0 54px;height:54px;display:flex;align-items:center;" +
   "justify-content:center;background:#142847;color:#60a5fa;" +
