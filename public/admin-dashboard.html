@@ -780,6 +780,15 @@
             maxlength="10"
           >
         </label>
+        <label>
+          Emoji de droite
+          <input
+            type="text"
+            id="campaignRightSticker"
+            placeholder="🎮"
+            maxlength="10"
+          >
+        </label>
 
         <label>
           Description
@@ -2450,6 +2459,8 @@ async function createCampaign() {
 
   const sticker =
     document.getElementById("campaignSticker").value.trim();
+  const rightSticker =
+    document.getElementById("campaignRightSticker").value.trim();
 
   const description =
     document.getElementById("campaignDescription").value.trim();
@@ -2475,12 +2486,14 @@ async function createCampaign() {
           "Content-Type": "application/json"
         },
 
-        body: JSON.stringify({
-          name,
-          sticker,
-          description,
-          active
-        })
+body: JSON.stringify({
+  name,
+  sticker,
+  rightSticker,
+  description,
+  active
+})
+
       }
     );
 
@@ -2498,6 +2511,7 @@ async function createCampaign() {
 
     document.getElementById("campaignName").value = "";
     document.getElementById("campaignSticker").value = "";
+    document.getElementById("campaignRightSticker").value = "";
     document.getElementById("campaignDescription").value = "";
     document.getElementById("campaignActive").checked = false;
 
