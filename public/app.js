@@ -496,7 +496,7 @@ async function loadHomepagePromoMedia() {
   "position:absolute;bottom:10px;left:10px;right:10px;" +
   "background:rgba(5,10,20,.88);color:white;" +
   "padding:12px;border-radius:14px;box-sizing:border-box;" +
-  "max-height:48%;overflow:auto;text-align:center;";
+  "max-height:48%;overflow:hidden;text-align:center;";
 
                 const name = document.createElement("div");
                 name.textContent =
