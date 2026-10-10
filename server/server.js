@@ -813,6 +813,7 @@ app.get("/api/admin/campaigns", requireAdmin, async (req, res) => {
         c.id,
         c.name,
         c.sticker,
+        c.right_sticker,
         c.description,
         c.active,
         c.start_date,
