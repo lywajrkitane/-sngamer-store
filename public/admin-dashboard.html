@@ -2303,109 +2303,98 @@ document.addEventListener("DOMContentLoaded", function () {
 ========================================= */
 
 async function loadCampaigns() {
-
   const table = document.getElementById("campaignsTable");
 
-  if (!table) return;
-
   try {
-
     const response = await fetch("/api/admin/campaigns");
-
     const data = await response.json();
 
-    if (!response.ok) {
-
-      throw new Error(
-        data.error || "Impossible de charger les campagnes"
-      );
-
+    if (!response.ok || !Array.isArray(data)) {
+      throw new Error("Impossible de charger les campagnes.");
     }
 
-    if (!Array.isArray(data) || !data.length) {
+    // Alimenter les 3 sélecteurs de l'espace promotionnel
+    [1, 2, 3].forEach(slot => {
+      const select = document.getElementById(`promoCampaign${slot}`);
+      if (!select) return;
 
-      table.innerHTML = `
-        <tr>
-          <td colspan="6">
-            Aucune campagne créée.
-          </td>
-        </tr>
-      `;
+      const previousValue = select.value;
+      select.innerHTML =
+        '<option value="">Choisir une campagne</option>';
 
+      data.forEach(campaign => {
+        const option = document.createElement("option");
+        option.value = String(campaign.id);
+        option.textContent =
+          `${campaign.sticker || ""} ${campaign.name}`.trim();
+        select.appendChild(option);
+      });
+
+      select.value = previousValue;
+    });
+
+    // Alimenter aussi le sélecteur du formulaire produit
+    const productCampaignSelect = document.getElementById("pCampaign");
+
+    if (productCampaignSelect) {
+      const previousValue = productCampaignSelect.value;
+      productCampaignSelect.innerHTML =
+        '<option value="">Aucune campagne</option>';
+
+      data.forEach(campaign => {
+        const option = document.createElement("option");
+        option.value = String(campaign.id);
+        option.textContent =
+          `${campaign.sticker || ""} ${campaign.name}`.trim();
+        productCampaignSelect.appendChild(option);
+      });
+
+      productCampaignSelect.value = previousValue;
+    }
+
+    if (!table) return;
+
+    if (!data.length) {
+      table.innerHTML =
+        '<tr><td colspan="6">Aucune campagne créée.</td></tr>';
       return;
     }
 
     table.innerHTML = data.map(campaign => {
-
-      const status = campaign.active
-        ? `<span class="status-badge status-active">Active</span>`
-        : `<span class="status-badge status-inactive">Inactive</span>`;
+      const active = Boolean(campaign.active);
 
       return `
         <tr>
-
           <td>#${campaign.id}</td>
-
+          <td><strong>${campaign.sticker || ""} ${campaign.name}</strong></td>
+          <td>${campaign.sticker || "—"}</td>
           <td>
-            <strong>
-              ${campaign.sticker || ""} ${campaign.name}
-            </strong>
+            <span class="status-badge ${active ? "status-active" : "status-inactive"}">
+              ${active ? "Active" : "Inactive"}
+            </span>
           </td>
-
+          <td>${campaign.products_count || 0}</td>
           <td>
-            ${campaign.sticker || "—"}
-          </td>
-
-          <td>
-            ${status}
-          </td>
-
-          <td>
-            ${campaign.products_count || 0}
-          </td>
-
-          <td>
-
-            <button
-              type="button"
-              class="refresh"
-              onclick="toggleCampaign(
-                ${campaign.id},
-                ${!campaign.active}
-              )"
-            >
-              ${campaign.active ? "⏸️ Désactiver" : "▶️ Activer"}
+            <button type="button" class="refresh"
+              onclick="toggleCampaign(${campaign.id}, ${!active})">
+              ${active ? "⏸️ Désactiver" : "▶️ Activer"}
             </button>
-
-            <button
-              type="button"
-              class="refresh"
-              onclick="deleteCampaign(${campaign.id})"
-            >
+            <button type="button" class="refresh"
+              onclick="deleteCampaign(${campaign.id})">
               🗑️
             </button>
-
           </td>
-
         </tr>
       `;
-
     }).join("");
 
   } catch (error) {
-
     console.error("LOAD_CAMPAIGNS_ERROR:", error);
-
-    table.innerHTML = `
-      <tr>
-        <td colspan="6">
-          Impossible de charger les campagnes.
-        </td>
-      </tr>
-    `;
-
+    if (table) {
+      table.innerHTML =
+        '<tr><td colspan="6">Impossible de charger les campagnes.</td></tr>';
+    }
   }
-
 }
 
 
