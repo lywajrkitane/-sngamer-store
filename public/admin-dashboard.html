@@ -1009,6 +1009,46 @@ async function loadPromoMedia() {
         console.error("PROMO_MEDIA_LOAD_ERROR:", error);
     }
 }
+  async function loadPromoProductSelectors() {
+try {
+const response = await fetch("/api/products");
+
+if (!response.ok) {
+  throw new Error("Impossible de charger les produits");
+}
+
+const products = await response.json();
+
+[1, 2, 3].forEach(slot => {
+  const select = document.getElementById("promoProduct" + slot);
+
+  if (!select) return;
+
+  const selectedValue = select.value;
+
+  select.innerHTML =
+    '<option value="">Choisir un produit</option>';
+
+  products.forEach(product => {
+    const option = document.createElement("option");
+    option.value = String(product.id);
+    option.textContent = product.emoji
+      ? product.emoji + " " + product.name
+      : product.name;
+
+    select.appendChild(option);
+  });
+
+  select.value = selectedValue;
+});
+
+} catch (error) {
+console.error(
+"Erreur de chargement des produits promotionnels :",
+error
+);
+}
+  }
 async function login() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
@@ -1084,6 +1124,7 @@ async function login() {
 
     loadAll();
 loadPromoMedia();
+    loadPromoProductSelectors();
   }
 
   async function logout() {
