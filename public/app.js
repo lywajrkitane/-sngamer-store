@@ -493,10 +493,10 @@ async function loadHomepagePromoMedia() {
                 const info = document.createElement("div");
                 info.className = "promoProductInfo";
                 info.style.cssText =
-    "position:absolute;bottom:10px;left:10px;right:10px;" +
-    "z-index:5;background:rgba(0,0,0,.88);color:white;" +
-    "padding:8px;border-radius:10px;box-sizing:border-box;" +
-    "max-height:42%;overflow:auto;text-align:center;";
+  "position:absolute;bottom:10px;left:10px;right:10px;" +
+  "background:rgba(5,10,20,.88);color:white;" +
+  "padding:12px;border-radius:14px;box-sizing:border-box;" +
+  "max-height:48%;overflow:auto;text-align:center;";
 
                 const name = document.createElement("div");
                 name.textContent =
@@ -534,15 +534,27 @@ price.innerHTML =
                     price.textContent = regular.toLocaleString("fr-FR") + " FCFA";
                 }
 
-                info.appendChild(price);
+                const purchaseRow = document.createElement("div");
+purchaseRow.style.cssText =
+  "display:flex;align-items:center;justify-content:space-between;" +
+  "gap:10px;flex-wrap:nowrap;margin-top:8px;width:100%;";
+
+price.style.cssText =
+  "flex:1;min-width:0;text-align:left;font-size:14px;";
+
+purchaseRow.appendChild(price);
 
                 const buy = document.createElement("button");
                 buy.type = "button";
                 buy.textContent = "ACHETER";
-                buy.style.cssText =
-                    "margin-top:8px;padding:9px 16px;border:0;" +
-                    "border-radius:6px;background:#ff4d6d;color:white;" +
-                    "font-weight:bold;cursor:pointer;";
+                
+buy.style.cssText =
+  "display:inline-flex;align-items:center;justify-content:center;" +
+  "margin:0;padding:11px 16px;border:1px solid #a855f7;" +
+  "border-radius:10px;background:linear-gradient(135deg,#2563eb,#9333ea);" +
+  "color:#fff;font-size:13px;font-weight:800;letter-spacing:.5px;" +
+  "cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(147,51,234,.3);";
+
 
                 buy.addEventListener("click", event => {
                     event.stopPropagation();
@@ -551,7 +563,8 @@ price.innerHTML =
                     }
                 });
 
-                info.appendChild(buy);
+                purchaseRow.appendChild(buy);
+info.appendChild(purchaseRow);
                 slide.style.position = "relative";
                 slide.appendChild(info);
             }
