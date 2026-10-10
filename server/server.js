@@ -845,13 +845,14 @@ app.get("/api/admin/campaigns", requireAdmin, async (req, res) => {
 app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
 
   const {
-    name,
-    sticker = "",
-    description = "",
-    active = false,
-    start_date = null,
-    end_date = null
-  } = req.body;
+  name,
+  sticker = "",
+  right_sticker: rightSticker = "",
+  description = "",
+  active = false,
+  start_date = null,
+  end_date = null
+} = req.body;
 
   if (!name || !name.trim()) {
 
@@ -918,45 +919,51 @@ app.patch("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
   const {
     name,
     sticker,
+    right_sticker,
     description,
     active,
     start_date,
     end_date
-  } = req.body;
+} = req.body;
 
   try {
 
-    const result = await db(
-      `
-      UPDATE campaigns
-      SET
-        name = COALESCE($1, name),
-        sticker = COALESCE($2, sticker),
-        description = COALESCE($3, description),
-        active = COALESCE($4, active),
-        start_date = $5,
-        end_date = $6
-      WHERE id = $7
-      RETURNING
-        id,
-        name,
-        sticker,
-        description,
-        active,
-        start_date,
-        end_date,
-        created_at
-      `,
-      [
-        name !== undefined ? name.trim() : null,
-        sticker !== undefined ? sticker : null,
-        description !== undefined ? description : null,
-        active !== undefined ? Boolean(active) : null,
-        start_date || null,
-        end_date || null,
-        id
-      ]
-    );
+    
+const result = await db(
+  `
+    UPDATE campaigns
+    SET
+      name = COALESCE($1, name),
+      sticker = COALESCE($2, sticker),
+      right_sticker = COALESCE($3, right_sticker),
+      description = COALESCE($4, description),
+      active = COALESCE($5, active),
+      start_date = $6,
+      end_date = $7
+    WHERE id = $8
+    RETURNING
+      id,
+      name,
+      sticker,
+      right_sticker,
+      description,
+      active,
+      start_date,
+      end_date,
+      created_at
+  `,
+  [
+    name !== undefined ? name.trim() : null,
+    sticker !== undefined ? sticker : null,
+    right_sticker !== undefined ? right_sticker : null,
+    description !== undefined ? description : null,
+    active !== undefined ? Boolean(active) : null,
+    start_date || null,
+    end_date || null,
+    id
+  ]
+);
+
 
     if (!result.rows.length) {
 
