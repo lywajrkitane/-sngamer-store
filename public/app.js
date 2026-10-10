@@ -577,15 +577,16 @@ info.appendChild(purchaseRow);
             title = document.createElement("div");
             title.id = "promoCampaignTitle";
             
+
 title.style.cssText =
-  "text-align:center;font-size:clamp(16px,4.5vw,23px);" +
-  "font-weight:900;letter-spacing:2px;text-transform:uppercase;" +
-  "margin:0 auto 16px;padding:10px 18px;width:fit-content;" +
-  "max-width:100%;box-sizing:border-box;color:#ffffff;" +
-  "background:linear-gradient(135deg,rgba(37,99,235,.18),rgba(147,51,234,.18));" +
-  "border:1px solid rgba(96,165,250,.45);border-radius:12px;" +
-  "text-shadow:0 0 12px rgba(96,165,250,.35);" +
-  "box-shadow:0 5px 20px rgba(0,0,0,.2);";
+  "display:flex;align-items:center;gap:14px;width:100%;" +
+  "text-align:left;font-size:clamp(16px,4.5vw,23px);" +
+  "font-weight:900;letter-spacing:1.5px;text-transform:uppercase;" +
+  "margin:0 auto 20px;padding:16px 18px;box-sizing:border-box;" +
+  "color:#ffffff;background:#080d18;" +
+  "border:1px solid rgba(96,165,250,.3);border-radius:18px;" +
+  "box-shadow:0 8px 28px rgba(0,0,0,.22);";
+
 
             const carousel = document.getElementById("promoCarousel");
             if (carousel && carousel.parentNode) {
@@ -593,8 +594,44 @@ title.style.cssText =
             }
         }
 
-        title.textContent = campaignTitle;
-        title.style.display = campaignTitle ? "block" : "none";
+        
+title.replaceChildren();
+
+const leftIcon = document.createElement("div");
+leftIcon.textContent = "✧";
+leftIcon.style.cssText =
+  "flex:0 0 54px;height:54px;display:flex;align-items:center;" +
+  "justify-content:center;background:#142847;color:#60a5fa;" +
+  "border-radius:14px;font-size:36px;";
+
+const textBlock = document.createElement("div");
+textBlock.style.cssText =
+  "flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;";
+
+const eyebrow = document.createElement("div");
+eyebrow.textContent = "OFFRE EXCLUSIVE";
+eyebrow.style.cssText =
+  "font-size:12px;font-weight:800;letter-spacing:1.5px;" +
+  "color:#8ba9d9;";
+
+const campaignName = document.createElement("div");
+campaignName.textContent = campaignTitle;
+campaignName.style.cssText =
+  "font-size:clamp(16px,4.5vw,24px);font-weight:900;" +
+  "letter-spacing:.5px;color:#fff;overflow-wrap:anywhere;";
+
+textBlock.append(eyebrow, campaignName);
+
+const rightIcon = document.createElement("div");
+rightIcon.textContent = "ϟ";
+rightIcon.style.cssText =
+  "flex:0 0 54px;height:54px;display:flex;align-items:center;" +
+  "justify-content:center;background:#2b1742;color:#c084fc;" +
+  "border-radius:14px;font-size:36px;";
+
+title.append(leftIcon, textBlock, rightIcon);
+title.style.display = campaignTitle ? "flex" : "none";
+
 
     } catch (error) {
         console.error("PROMO_MEDIA_HOME_ERROR", error);
