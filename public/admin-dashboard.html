@@ -2424,15 +2424,20 @@ async function loadCampaigns() {
             </span>
           </td>
           <td>${campaign.products_count || 0}</td>
-          <td>
-            <button type="button" class="refresh"
-              onclick="toggleCampaign(${campaign.id}, ${!active})">
-              ${active ? "⏸️ Désactiver" : "▶️ Activer"}
-            </button>
-            <button type="button" class="refresh"
-              onclick="deleteCampaign(${campaign.id})">
-              🗑️
-            </button>
+          <td>       
+<button type="button" class="refresh"
+  onclick="editCampaign(${campaign.id})">
+  ✏️ Modifier
+</button>
+<button type="button" class="refresh"
+  onclick="toggleCampaign(${campaign.id}, ${!active})">
+  ${active ? "⏸️ Désactiver" : "▶️ Activer"}
+</button>
+<button type="button" class="refresh"
+  onclick="deleteCampaign(${campaign.id})">
+  🗑️
+</button>
+
           </td>
         </tr>
       `;
