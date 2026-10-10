@@ -195,6 +195,12 @@ await db(`
       REFERENCES campaigns(id)
       ON DELETE SET NULL;
   `);
+  
+await db(`
+  ALTER TABLE campaigns
+  ADD COLUMN IF NOT EXISTS right_sticker TEXT DEFAULT '';
+`);
+
     await db(`
     CREATE TABLE IF NOT EXISTS promo_media (
       slot INTEGER PRIMARY KEY CHECK (slot IN (1, 2, 3)),
