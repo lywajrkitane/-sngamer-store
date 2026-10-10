@@ -576,9 +576,17 @@ info.appendChild(purchaseRow);
         if (!title) {
             title = document.createElement("div");
             title.id = "promoCampaignTitle";
-            title.style.cssText =
-                "text-align:center;font-size:20px;font-weight:bold;" +
-                "margin:0 0 12px;color:#ff4d6d;";
+            
+title.style.cssText =
+  "text-align:center;font-size:clamp(16px,4.5vw,23px);" +
+  "font-weight:900;letter-spacing:2px;text-transform:uppercase;" +
+  "margin:0 auto 16px;padding:10px 18px;width:fit-content;" +
+  "max-width:100%;box-sizing:border-box;color:#ffffff;" +
+  "background:linear-gradient(135deg,rgba(37,99,235,.18),rgba(147,51,234,.18));" +
+  "border:1px solid rgba(96,165,250,.45);border-radius:12px;" +
+  "text-shadow:0 0 12px rgba(96,165,250,.35);" +
+  "box-shadow:0 5px 20px rgba(0,0,0,.2);";
+
             const carousel = document.getElementById("promoCarousel");
             if (carousel && carousel.parentNode) {
                 carousel.parentNode.insertBefore(title, carousel);
