@@ -487,7 +487,8 @@ async function loadHomepagePromoMedia() {
             
 if (promo.campaign_name) {
     campaignTitle = promo.campaign_name;
-    window.promoCampaignSticker = promo.campaign_sticker || "";
+    window.promoCampaignSticker = promo.campaign_sticker || "✧";
+    window.promoCampaignRightSticker = promo.campaign_right_sticker || "✦";
 }
 
             
