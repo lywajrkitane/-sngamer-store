@@ -859,28 +859,31 @@ app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
     const result = await db(
       `
       INSERT INTO campaigns
-        (name, sticker, description, active, start_date, end_date)
+        (name, sticker, right_sticker, description, active, start_date, end_date)
       VALUES
-        ($1, $2, $3, $4, $5, $6)
+        ($1, $2, $3, $4, $5, $6, $7)
       RETURNING
         id,
         name,
         sticker,
+        right_sticker,
         description,
         active,
         start_date,
         end_date,
         created_at
-      `,
-      [
-        name.trim(),
-        sticker,
-        description,
-        Boolean(active),
-        start_date || null,
-        end_date || null
-      ]
-    );
+    `,
+    [
+      name.trim(),
+      sticker,
+      rightSticker,
+      description,
+      Boolean(active),
+      start_date || null,
+      end_date || null
+    ]
+  );
+
 
     res.status(201).json({
       success: true,
