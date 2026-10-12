@@ -2603,3 +2603,28 @@ h1 {
     font-size: 15px !important;
   }
 }
+/* SNGAMER — NAVIGATION MOBILE PREMIUM */
+
+.mobileBottomNav {
+  background: rgba(8, 12, 24, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(85, 184, 255, 0.18);
+}
+
+.mobileBottomNav .bottomNavItem {
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.mobileBottomNav .bottomNavIcon {
+  transition: transform 0.25s ease;
+  filter: grayscale(1);
+}
+
+.mobileBottomNav .bottomNavItem.active {
+  color: #55b8ff;
+}
+
+.mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+  transform: translateY(-4px);
+}
