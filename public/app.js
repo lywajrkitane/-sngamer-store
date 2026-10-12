@@ -30,7 +30,7 @@ ${priceHtml}
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
   <button
     class="add"
-    style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid #478bff;background:linear-gradient(100deg,#1677ff,#713cff);color:#fff;border-radius:12px;font-weight:800;box-shadow:0 0 12px rgba(55,115,255,.28);transition:transform .15s,box-shadow .15s;"
+    style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid #478bff;background:linear-gradient(100deg,#1677ff,#713cff);color:#fff;border-radius:12px;font-weight:900;font-size:17px;box-shadow:0 0 12px rgba(55,115,255,.28);transition:transform .15s,box-shadow .15s;"
     onclick="buyNow(${p.id})"
     onpointerdown="this.style.boxShadow='0 0 24px rgba(75,125,255,.9)';this.style.transform='scale(.98)'"
     onpointerup="this.style.boxShadow='0 0 12px rgba(55,115,255,.28)';this.style.transform='scale(1)'"
