@@ -2711,3 +2711,153 @@ h1 {
     display: none !important;
   }
 }
+/* SNGAMER — NAVIGATION PREMIUM V2 */
+
+@media (max-width: 700px) {
+  body {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .mobileBottomNav {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: calc(78px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+
+    padding: 0 5px calc(5px + env(safe-area-inset-bottom)) !important;
+
+    overflow: visible !important;
+    background: rgba(6, 11, 22, 0.98) !important;
+    border-top: 1px solid rgba(77, 190, 255, 0.25) !important;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .mobileBottomNav .bottomNavItem {
+    position: relative !important;
+    overflow: visible !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    box-sizing: border-box !important;
+
+    display: grid !important;
+    grid-template-rows: 34px 14px !important;
+    align-content: end !important;
+    justify-items: center !important;
+    align-items: center !important;
+    gap: 4px !important;
+
+    padding: 0 1px 3px !important;
+    margin: 0 !important;
+
+    color: #8794aa !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+
+    font-family: "Space Grotesk", sans-serif !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    line-height: 14px !important;
+    white-space: nowrap !important;
+
+    transform: none !important;
+    transition: color 0.25s ease !important;
+  }
+
+  .mobileBottomNav .bottomNavIcon {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 46px !important;
+    height: 34px !important;
+
+    display: grid !important;
+    place-items: center !important;
+
+    margin: 0 !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    filter: grayscale(1) !important;
+    transform: translateY(0) !important;
+    transition: transform 0.25s ease !important;
+  }
+
+  .mobileBottomNav .bottomNavItem > span:last-child {
+    display: block !important;
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    height: 14px !important;
+    line-height: 14px !important;
+    text-align: center !important;
+    font-size: 9px !important;
+    letter-spacing: -0.2px !important;
+    white-space: nowrap !important;
+  }
+
+  .mobileBottomNav .bottomNavItem::before {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 0 !important;
+    top: -14px !important;
+    left: 50% !important;
+    width: 44px !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
+
+    border: 2px solid rgba(74, 199, 255, 0.95) !important;
+    border-radius: 50% !important;
+    background: radial-gradient(
+      circle,
+      rgba(36, 151, 220, 0.32),
+      rgba(8, 20, 39, 0.98) 72%
+    ) !important;
+
+    box-shadow:
+      0 0 10px rgba(55, 190, 255, 0.65),
+      0 0 24px rgba(55, 190, 255, 0.32),
+      inset 0 0 12px rgba(55, 190, 255, 0.2) !important;
+
+    opacity: 0 !important;
+    transform: translateX(-50%) scale(0.65) !important;
+    pointer-events: none !important;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active {
+    color: #55c9ff !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    transform: none !important;
+    text-shadow: 0 0 12px rgba(65, 190, 255, 0.25) !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active::before {
+    opacity: 1 !important;
+    transform: translateX(-50%) scale(1) !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+    transform: translateY(-8px) !important;
+  }
+}
+
+@media (min-width: 701px) {
+  .mobileBottomNav {
+    display: none !important;
+  }
+}
