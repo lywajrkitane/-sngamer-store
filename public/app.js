@@ -864,27 +864,103 @@ function navigateStore(section) {
 function filterCoinProducts(platform) {
   selectedCoinPlatform = platform;
 
-  const subcategories = document.getElementById("navSubcategories");
   const productsArea = document.getElementById("products");
   const title = document.getElementById("sectionTitle");
 
-  // Fermer les deux cartes de sélection
-  subcategories.hidden = true;
-  subcategories.style.display = "none";
-
-  // Afficher le titre de la plateforme choisie
   title.textContent =
     platform === "iphone" ? "Coins iPhone" : "Coins Android";
 
-  // Afficher uniquement les produits de la plateforme choisie
   productsArea.style.display = "";
+
+  // Afficher les produits de la plateforme choisie
   render();
 
-  // Faire apparaître les produits à l'écran
+  // Remplacer les deux cartes par un bouton compact
+  showCoinPlatformSwitch();
+
   document.getElementById("shop").scrollIntoView({
     behavior: "smooth",
     block: "start"
   });
+}
+
+function showCoinPlatformSwitch() {
+  const area = document.getElementById("navSubcategories");
+  const name =
+    selectedCoinPlatform === "iphone"
+      ? "Coins iPhone"
+      : "Coins Android";
+
+  area.classList.remove("coinPickerOpen");
+  area.hidden = false;
+  area.style.display = "block";
+
+  area.innerHTML = `
+    <button type="button"
+      class="coinPlatformCurrent"
+      onclick="openCoinPlatformPicker()">
+      <span class="coinPlatformCurrentIcon">⇄</span>
+      <span class="coinPlatformCurrentText">
+        <strong>${name}</strong>
+        <small>Plateforme sélectionnée</small>
+      </span>
+      <span class="coinPlatformChange">
+        Changer ↗
+      </span>
+    </button>
+  `;
+}
+
+function openCoinPlatformPicker() {
+  const area = document.getElementById("navSubcategories");
+
+  area.hidden = false;
+  area.style.display = "block";
+  area.classList.add("coinPickerOpen");
+
+  area.innerHTML = `
+    <div class="coinPickerBackdrop"
+      onclick="closeCoinPlatformPicker()"></div>
+
+    <section class="coinPickerDialog" role="dialog"
+      aria-modal="true" aria-label="Choisir une plateforme">
+
+      <button type="button" class="coinPickerClose"
+        onclick="closeCoinPlatformPicker()"
+        aria-label="Fermer">×</button>
+
+      <span class="coinCategoryEyebrow">
+        SNGAMER STORE · COINS
+      </span>
+
+      <h3>Changer de plateforme</h3>
+      <p>Choisis la plateforme pour afficher ses produits.</p>
+
+      <button type="button" class="coinCategoryCard"
+        onclick="filterCoinProducts('iphone')">
+        <span class="coinCategoryIcon">iOS</span>
+        <span class="coinCategoryText">
+          <strong>Coins iPhone</strong>
+          <small>iOS · Apple App Store</small>
+        </span>
+        <span class="coinCategoryArrow">↗</span>
+      </button>
+
+      <button type="button" class="coinCategoryCard"
+        onclick="filterCoinProducts('android')">
+        <span class="coinCategoryIcon">AND</span>
+        <span class="coinCategoryText">
+          <strong>Coins Android</strong>
+          <small>Google Play · Android</small>
+        </span>
+        <span class="coinCategoryArrow">↗</span>
+      </button>
+    </section>
+  `;
+}
+
+function closeCoinPlatformPicker() {
+  showCoinPlatformSwitch();
 }
 
 function updateNavigationRing() {
