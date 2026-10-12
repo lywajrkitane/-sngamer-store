@@ -2861,3 +2861,36 @@ h1 {
     display: none !important;
   }
 }
+/* SNGAMER — CERCLE LUMINEUX ANIMÉ */
+
+@keyframes sngamerActiveRingRotate {
+  from {
+    transform: translateX(-50%) rotate(0deg) scale(1);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg) scale(1);
+  }
+}
+
+.mobileBottomNav .bottomNavItem::before {
+  background: conic-gradient(
+    from 0deg,
+    #43d9ff,
+    #3677ff,
+    #a34dff,
+    transparent 65%,
+    transparent 82%,
+    #43d9ff
+  ) !important;
+
+  border: 2px solid rgba(67, 217, 255, 0.8) !important;
+
+  box-shadow:
+    0 0 12px rgba(67, 217, 255, 0.65),
+    0 0 26px rgba(67, 130, 255, 0.35),
+    inset 0 0 10px rgba(67, 217, 255, 0.25) !important;
+}
+
+.mobileBottomNav .bottomNavItem.active::before {
+  animation: sngamerActiveRingRotate 3s linear infinite !important;
+}
