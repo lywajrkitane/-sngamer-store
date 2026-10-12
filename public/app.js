@@ -647,3 +647,45 @@ title.style.display = campaignTitle ? "flex" : "none";
 document.addEventListener("DOMContentLoaded", function () {
     loadHomepagePromoMedia();
 });
+/* SNGAMER — NAVIGATION ET CERCLE ACTIF */
+
+function navigateStore(section) {
+  const nav = document.getElementById("mobileBottomNav");
+  if (!nav) return;
+
+  const buttons = nav.querySelectorAll(".bottomNavItem");
+
+  buttons.forEach(function (button) {
+    const selected = button.dataset.nav === section;
+
+    button.classList.toggle("active", selected);
+
+    if (selected) {
+      button.setAttribute("aria-current", "page");
+    } else {
+      button.removeAttribute("aria-current");
+    }
+  });
+
+  updateNavigationRing();
+}
+
+function updateNavigationRing() {
+  const nav = document.getElementById("mobileBottomNav");
+  if (!nav) return;
+
+  const activeButton = nav.querySelector(".bottomNavItem.active");
+  if (!activeButton) return;
+
+  const center =
+    activeButton.offsetLeft + activeButton.offsetWidth / 2;
+
+  nav.style.setProperty("--ring-x", center + "px");
+  nav.classList.add("has-active-ring");
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  navigateStore("home");
+});
+
+window.addEventListener("resize", updateNavigationRing);
