@@ -2535,6 +2535,89 @@ body: JSON.stringify({
 
 }
 
+async function editCampaign(id) {
+  try {
+    const response = await fetch("/api/admin/campaigns");
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Impossible de charger les campagnes.");
+    }
+
+    const campaigns = Array.isArray(data)
+      ? data
+      : data.campaigns || data.data || [];
+
+    const campaign = campaigns.find(
+      item => Number(item.id) === Number(id)
+    );
+
+    if (!campaign) {
+      throw new Error("Campagne introuvable.");
+    }
+
+    const name = prompt("Nom de la campagne :", campaign.name || "");
+    if (name === null) return;
+    if (!name.trim()) {
+      alert("Le nom de la campagne est obligatoire.");
+      return;
+    }
+
+    const sticker = prompt(
+      "Autocollant gauche :", campaign.sticker || ""
+    );
+    if (sticker === null) return;
+
+    const rightSticker = prompt(
+      "Autocollant droit :", campaign.right_sticker || ""
+    );
+    if (rightSticker === null) return;
+
+    const description = prompt(
+      "Description :", campaign.description || ""
+    );
+    if (description === null) return;
+
+    const confirmed = confirm(
+      "Enregistrer les modifications de cette campagne ?"
+    );
+    if (!confirmed) return;
+
+    const updateResponse = await fetch(
+      `/api/admin/campaigns/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          sticker,
+          right_sticker: rightSticker,
+          description,
+          active: Boolean(campaign.active),
+          start_date: campaign.start_date || null,
+          end_date: campaign.end_date || null
+        })
+      }
+    );
+
+    const result = await updateResponse.json();
+
+    if (!updateResponse.ok) {
+      throw new Error(
+        result.error || "Impossible de modifier la campagne."
+      );
+    }
+
+    alert("Campagne modifiée avec succès !");
+    await loadCampaigns();
+
+  } catch (error) {
+    console.error("EDIT_CAMPAIGN_ERROR:", error);
+    alert(error.message || "Erreur lors de la modification.");
+  }
+}
 
 /* =========================================
    ACTIVER / DÉSACTIVER UNE CAMPAGNE
