@@ -70,7 +70,7 @@ ${priceHtml}
       <p>Aucun produit dans cette rubrique pour le moment.</p>
     </div>
   `;
-  
+  }
 }
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
 function add(id){
