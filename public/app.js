@@ -864,19 +864,27 @@ function navigateStore(section) {
 function filterCoinProducts(platform) {
   selectedCoinPlatform = platform;
 
-  document.querySelectorAll("#navSubcategories button")
-    .forEach(function(button) {
-      const selected = button.dataset.platform === platform;
+  const subcategories = document.getElementById("navSubcategories");
+  const productsArea = document.getElementById("products");
+  const title = document.getElementById("sectionTitle");
 
-      button.style.background = selected
-        ? "linear-gradient(100deg,#1677ff,#713cff)"
-        : "#142238";
+  // Fermer les deux cartes de sélection
+  subcategories.hidden = true;
+  subcategories.style.display = "none";
 
-      button.style.borderColor = selected ? "#55b8ff" : "#2b4260";
-    });
+  // Afficher le titre de la plateforme choisie
+  title.textContent =
+    platform === "iphone" ? "Coins iPhone" : "Coins Android";
 
-  document.getElementById("products").style.display = "";
+  // Afficher uniquement les produits de la plateforme choisie
+  productsArea.style.display = "";
   render();
+
+  // Faire apparaître les produits à l'écran
+  document.getElementById("shop").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 
 function updateNavigationRing() {
