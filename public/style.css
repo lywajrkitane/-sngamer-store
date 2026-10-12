@@ -2558,3 +2558,45 @@ h1 {
   letter-spacing: 1.5px !important;
   text-transform: uppercase !important;
 }
+/* SNGAMER — TYPOGRAPHIE GAMING DES PRODUITS */
+#products .card .info .cat {
+  font-family: "Arial Narrow", "Trebuchet MS", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.4px !important;
+  text-transform: uppercase !important;
+  color: #55b8ff !important;
+}
+
+#products .card .info h3 {
+  font-family: "Arial Narrow", "Trebuchet MS", sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.25px !important;
+  line-height: 1.25 !important;
+  color: #f5f7ff !important;
+}
+
+#products .card .info .price,
+#products .card .info .price strong {
+  font-family: "Trebuchet MS", Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+@media (max-width: 560px) {
+  #products .card .info .cat {
+    font-size: 10px !important;
+  }
+
+  #products .card .info h3 {
+    font-size: 15px !important;
+  }
+
+  #products .card .info .price,
+  #products .card .info .price strong {
+    font-size: 14px !important;
+  }
+}
