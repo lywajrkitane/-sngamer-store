@@ -2571,7 +2571,7 @@ h1 {
 }
 
 #products .card .info h3 {
-  font-family: 'Rajdhani', sans-serif !important;
+  font-family: 'Space Grotesk', sans-serif !important;
   font-size: 20px !important;
   font-weight: 700 !important;
   letter-spacing: 0.3px !important;
@@ -2581,7 +2581,7 @@ h1 {
 
 #products .card .info .price,
 #products .card .info .price strong {
-  font-family: 'Orbitron', sans-serif !important;
+  font-family: 'Space Mono', monospace !important;
   font-size: 15px !important;
   font-weight: 800 !important;
   letter-spacing: 0 !important;
