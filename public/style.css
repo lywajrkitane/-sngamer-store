@@ -2421,3 +2421,38 @@ h1{
   }
 
 }
+/* SNGAMER — Cartes produits plus compactes sur mobile */
+@media (max-width: 700px) {
+  #products .productCard,
+  #products .product-card {
+    padding-bottom: 10px !important;
+  }
+
+  #products .productCard button,
+  #products .product-card button {
+    min-height: 38px !important;
+    padding: 9px 10px !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    border-radius: 12px !important;
+  }
+
+  #products .productCard .primary,
+  #products .product-card .primary {
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+    font-size: 15px !important;
+  }
+
+  #products .productCard h3,
+  #products .product-card h3 {
+    font-size: 17px !important;
+    line-height: 1.3 !important;
+    margin: 8px 0 !important;
+  }
+
+  #products .productCard p,
+  #products .product-card p {
+    margin: 6px 0 !important;
+  }
+}
