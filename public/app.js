@@ -1,12 +1,11 @@
-let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous";
+let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous",activeStoreSection="home",selectedCoinPlatform=null;
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
 async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render();update()}
 function cats(){let cs=["Tous",...new Set(products.map(p=>p.category))];document.querySelector("#cats").innerHTML=cs.map(c=>`<button class="catbtn ${c===filter?"on":""}" onclick="filterBy('${c}')">${c}</button>`).join("")}
 function filterBy(c){filter=c;cats();render()}
 function render(){
 let q=document.querySelector("#q").value.toLowerCase();
-let list=products.filter(p=>(filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));
-
+let list=products.filter(p=>matchesStoreSection(p)&&(activeStoreSection!=="home"||filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));
 document.querySelector("#products").innerHTML=list.map(p=>{
 const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
 const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
@@ -59,6 +58,19 @@ ${priceHtml}
 </div>
 </article>`;
 }).join("");
+  if (
+  list.length === 0 &&
+  activeStoreSection !== "home" &&
+  activeStoreSection !== "profile" &&
+  !(activeStoreSection === "coins" && !selectedCoinPlatform)
+) {
+  document.querySelector("#products").innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca;border:1px dashed #2a4262;border-radius:16px">
+      <div style="font-size:32px">🎮</div>
+      <p>Aucun produit dans cette rubrique pour le moment.</p>
+    </div>
+  `;
+  
 }
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
 function add(id){
@@ -647,17 +659,72 @@ title.style.display = campaignTitle ? "flex" : "none";
 document.addEventListener("DOMContentLoaded", function () {
     loadHomepagePromoMedia();
 });
-/* SNGAMER — NAVIGATION ET CERCLE ACTIF */
+/* SNGAMER — RUBRIQUES ET NAVIGATION */
+
+function productText(p) {
+  return [p.name, p.category, p.description]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function isCoinProduct(p) {
+  return /(coins?|e-?football|fc mobile|fc points|mobile legends|diamants?|diamonds?|gems?|myclub|top[- ]?up|recharge de jeu)/i.test(productText(p));
+}
+
+function isPhoneProduct(p) {
+  return !isCoinProduct(p) &&
+    /(gaming phone|téléphone|telephone|smartphone|phone|iphone|samsung galaxy|redmi note|poco|rog phone|nubia|redmagic|red magic|infinix gt|tecno pova|black shark)/i.test(productText(p));
+}
+
+function isAccessoryProduct(p) {
+  return !isCoinProduct(p) &&
+    !isPhoneProduct(p) &&
+    /(accessoire|accessory|accessories|clavier|keyboard|manette|controller|gamepad|casque|headset|écouteur|ecouteur|souris|mouse|refroidisseur|cooler|ventilateur|chargeur|charger|câble|cable|support|stand|coque|étui|etui|microphone|adaptateur|hub usb|gâchette|gachette|trigger|tapis|mousepad|power bank|batterie|joystick|webcam|dock|carte mémoire|carte memoire)/i.test(productText(p));
+}
+
+function matchesStoreSection(p) {
+  if (activeStoreSection === "home") {
+    return true;
+  }
+
+  if (activeStoreSection === "accessories") {
+    return isAccessoryProduct(p);
+  }
+
+  if (activeStoreSection === "phones") {
+    return isPhoneProduct(p);
+  }
+
+  if (activeStoreSection === "coins") {
+    if (!selectedCoinPlatform || !isCoinProduct(p)) {
+      return false;
+    }
+
+    const text = productText(p);
+
+    if (selectedCoinPlatform === "iphone") {
+      return /(iphone|ios|apple|app store)/i.test(text);
+    }
+
+    return /(android|google play|samsung|xiaomi|redmi|poco|pixel)/i.test(text);
+  }
+
+  return false;
+}
 
 function navigateStore(section) {
+  activeStoreSection = section;
+
   const nav = document.getElementById("mobileBottomNav");
-  if (!nav) return;
+  const title = document.getElementById("sectionTitle");
+  const catsArea = document.getElementById("cats");
+  const subcategories = document.getElementById("navSubcategories");
+  const profileArea = document.getElementById("profileArea");
+  const productsArea = document.getElementById("products");
 
-  const buttons = nav.querySelectorAll(".bottomNavItem");
-
-  buttons.forEach(function (button) {
+  nav.querySelectorAll(".bottomNavItem").forEach(function(button) {
     const selected = button.dataset.nav === section;
-
     button.classList.toggle("active", selected);
 
     if (selected) {
@@ -668,6 +735,100 @@ function navigateStore(section) {
   });
 
   updateNavigationRing();
+
+  const home = section === "home";
+
+  document.querySelector(".hero").style.display = home ? "" : "none";
+  document.querySelector(".banner").style.display = home ? "" : "none";
+  document.querySelector("footer").style.display = home ? "" : "none";
+
+  const titles = {
+    home: "Nos produits",
+    accessories: "Accessoires",
+    phones: "Gaming Phone",
+    coins: "Coins",
+    profile: "Mon profil"
+  };
+
+  title.textContent = titles[section] || "Nos produits";
+
+  catsArea.style.display = home ? "" : "none";
+  subcategories.style.display = "none";
+  subcategories.hidden = true;
+  profileArea.hidden = section !== "profile";
+
+  selectedCoinPlatform = null;
+  filter = "Tous";
+  cats();
+
+  if (section === "coins") {
+    subcategories.hidden = false;
+    subcategories.style.display = "grid";
+
+    subcategories.innerHTML = `
+      <button data-platform="iphone"
+        onclick="filterCoinProducts('iphone')">
+        🍎 Coins iPhone
+      </button>
+      <button data-platform="android"
+        onclick="filterCoinProducts('android')">
+        🤖 Coins Android
+      </button>
+    `;
+  }
+
+  if (section === "profile") {
+    productsArea.style.display = "none";
+
+    profileArea.innerHTML = `
+      <div style="padding:26px 20px;background:linear-gradient(145deg,#111e30,#080d16);border:1px solid #2a4262;border-radius:20px;text-align:center">
+        <div style="font-size:42px;color:#55c9ff">♙</div>
+        <p style="color:#55b8ff;font-weight:800;letter-spacing:2px">SNGAMER STORE</p>
+        <h3>Espace client</h3>
+        <p style="color:#aab8ca;line-height:1.6">
+          Ton futur espace personnel réunira tes informations,
+          tes commandes et leur suivi.
+        </p>
+        <p style="color:#8794aa;font-size:12px">
+          La connexion sécurisée sera activée dans l’étape suivante.
+        </p>
+      </div>
+    `;
+
+  } else {
+    profileArea.innerHTML = "";
+    productsArea.style.display =
+      section === "coins" ? "none" : "";
+
+    render();
+  }
+
+  if (home) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    document.getElementById("shop").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+}
+
+function filterCoinProducts(platform) {
+  selectedCoinPlatform = platform;
+
+  document.querySelectorAll("#navSubcategories button")
+    .forEach(function(button) {
+      const selected = button.dataset.platform === platform;
+
+      button.style.background = selected
+        ? "linear-gradient(100deg,#1677ff,#713cff)"
+        : "#142238";
+
+      button.style.borderColor = selected ? "#55b8ff" : "#2b4260";
+    });
+
+  document.getElementById("products").style.display = "";
+  render();
 }
 
 function updateNavigationRing() {
@@ -684,7 +845,7 @@ function updateNavigationRing() {
   nav.classList.add("has-active-ring");
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   navigateStore("home");
 });
 
