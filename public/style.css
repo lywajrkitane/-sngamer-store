@@ -2894,3 +2894,91 @@ h1 {
 .mobileBottomNav .bottomNavItem.active::before {
   animation: sngamerActiveRingRotate 3s linear infinite !important;
 }
+/* SNGAMER — CERCLE UNIQUE, MOBILE PREMIUM */
+
+@keyframes sngamerMovingRingSpin {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+@media (max-width: 700px) {
+  .mobileBottomNav {
+    position: fixed !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+  }
+
+  /* Un seul cercle partagé par les cinq icônes */
+  .mobileBottomNav::before {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 0 !important;
+
+    top: 4px !important;
+    left: var(--ring-x, 10%) !important;
+    width: 44px !important;
+    height: 44px !important;
+
+    border-radius: 50% !important;
+    background: conic-gradient(
+      from 0deg,
+      #43d9ff,
+      #3677ff,
+      #a34dff,
+      transparent 75%,
+      #43d9ff
+    ) !important;
+
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 3px),
+      #000 calc(100% - 2px)
+    );
+    mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 3px),
+      #000 calc(100% - 2px)
+    );
+
+    box-shadow:
+      0 0 12px rgba(67, 217, 255, 0.7),
+      0 0 25px rgba(67, 130, 255, 0.4) !important;
+
+    opacity: 0 !important;
+    pointer-events: none !important;
+
+    transition:
+      left 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s ease !important;
+  }
+
+  .mobileBottomNav.has-active-ring::before {
+    opacity: 1 !important;
+    animation: sngamerMovingRingSpin 3s linear infinite !important;
+  }
+
+  /* Supprime les anciens cercles individuels */
+  .mobileBottomNav .bottomNavItem::before {
+    content: none !important;
+  }
+
+  .mobileBottomNav .bottomNavItem {
+    position: relative !important;
+    z-index: 1 !important;
+    transform: none !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+    transform: translateY(-8px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobileBottomNav.has-active-ring::before {
+    animation-duration: 8s !important;
+  }
+}
