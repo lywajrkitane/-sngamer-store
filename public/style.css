@@ -514,17 +514,40 @@ a:hover{
     0 18px 40px rgba(0,0,0,.45),
     0 0 25px rgba(22,135,255,.08);
 }
-/* SNGAMER — cartes produits plus compactes sur mobile */
+/* SNGAMER — cartes produits compactes sur mobile */
 @media (max-width: 600px) {
-  #products .productCard,
-  #products .product-card {
-    padding-bottom: 10px;
+  #products > * {
+    padding-bottom: 10px !important;
   }
 
-  #products .productCard img,
-  #products .product-card img {
-    max-height: 220px;
-    object-fit: cover;
+  #products > * button {
+    box-sizing: border-box !important;
+    height: auto !important;
+    min-height: 38px !important;
+    padding: 7px 9px !important;
+    margin-top: 6px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    border-radius: 12px !important;
+  }
+
+  #products > * button.primary {
+    min-height: 42px !important;
+    padding: 9px 10px !important;
+    font-size: 13px !important;
+  }
+
+  #products > * h2,
+  #products > * h3,
+  #products > * h4 {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.25 !important;
+  }
+
+  #products > * p {
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
   }
 }
 
