@@ -2001,7 +2001,12 @@ function closeOrderDetails() {
       product.name || "";
 
     document.getElementById("editProductCategory").value =
-      product.category || "";
+  product.category || "";
+
+document.getElementById("editProductPlatform").value =
+  product.platform || "";
+
+toggleEditCoinPlatform();
 
     document.getElementById("editProductPrice").value =
       product.price ?? "";
@@ -2205,7 +2210,15 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("editProductName").value.trim();
 
       const category =
-        document.getElementById("editProductCategory").value.trim();
+  document.getElementById("editProductCategory").value.trim();
+
+const platform =
+  document.getElementById("editProductPlatform").value;
+
+if (category === "Coins" && !platform) {
+  alert("Choisis Coins Android ou Coins iPhone.");
+  return;
+}
 
       const price =
         Number(
@@ -2327,23 +2340,16 @@ document.addEventListener("DOMContentLoaded", function () {
               },
 
               body: JSON.stringify({
-
-                name,
-                category,
-                price,
-                stock,
-                description,
-
-                promo_price:
-                  promoPriceValue,
-
-                promo_active:
-                  promoActive,
-
-                campaign_id:
-                  campaignValue
-
-              })
+  name,
+  category,
+  platform: category === "Coins" ? platform : null,
+  price,
+  stock,
+  description,
+  promo_price: promoPriceValue,
+  promo_active: promoActive,
+  campaign_id: campaignValue
+})
             }
           );
 
