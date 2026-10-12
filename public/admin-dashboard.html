@@ -1252,9 +1252,14 @@ const campaignValue = document.getElementById("pCampaign").value;
 const campaignId = campaignValue ? Number(campaignValue) : null;
 
   if (!name || !price) {
-    alert("Le nom et le prix sont obligatoires.");
-    return;
-  }
+  alert("Le nom et le prix sont obligatoires.");
+  return;
+}
+
+if (category === "Coins" && !platform) {
+  alert("Choisis Coins Android ou Coins iPhone.");
+  return;
+    }
 
   try {
     const response = await fetch("/api/admin/products", {
@@ -1265,6 +1270,7 @@ const campaignId = campaignValue ? Number(campaignValue) : null;
       body: JSON.stringify({
     name,
     category,
+    platform, 
     price,
     stock,
     emoji,
