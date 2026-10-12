@@ -697,6 +697,7 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   const {
   name,
   category,
+  platform,
   price,
   stock,
   emoji,
@@ -709,6 +710,7 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   const p = {
   name: String(name || "").trim(),
   category: String(category || "Accessoires").trim(),
+  platform: category === "Coins" ? String(platform || "").trim() : null,
   price: Number(price),
   stock: Number(stock),
   emoji: emoji || "🎮",
