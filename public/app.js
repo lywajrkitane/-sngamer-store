@@ -759,19 +759,7 @@ function matchesStoreSection(p) {
 }
 
 
-    const text = productText(p);
-
-    if (selectedCoinPlatform === "iphone") {
-      return /(iphone|ios|apple|app store)/i.test(text);
-    }
-
-    return /(android|google play|samsung|xiaomi|redmi|poco|pixel)/i.test(text);
-  }
-
-  return false;
-}
-
-function navigateStore(section) {
+    function navigateStore(section) {
   activeStoreSection = section;
 
   const nav = document.getElementById("mobileBottomNav");
