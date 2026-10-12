@@ -724,17 +724,40 @@ function matchesStoreSection(p) {
   }
 
   if (activeStoreSection === "accessories") {
-    return isAccessoryProduct(p);
+    return storeCategory(p) === "Accessoires";
   }
 
   if (activeStoreSection === "phones") {
-    return isPhoneProduct(p);
+    return storeCategory(p) === "Gaming Phone";
   }
 
   if (activeStoreSection === "coins") {
-    if (!selectedCoinPlatform || !isCoinProduct(p)) {
+    if (storeCategory(p) !== "Coins" || !selectedCoinPlatform) {
       return false;
     }
+
+    const platform = (p.platform || "").toLowerCase();
+
+    // Utiliser la plateforme enregistrée dans l'administration
+    if (platform) {
+      return selectedCoinPlatform === "iphone"
+        ? platform === "iphone"
+        : platform === "android";
+    }
+
+    // Compatibilité avec les anciens produits sans plateforme enregistrée
+    const text = productText(p);
+
+    if (selectedCoinPlatform === "iphone") {
+      return /(iphone|ios|apple|app store)/i.test(text);
+    }
+
+    return /(android|google play|samsung|xiaomi|redmi|poco|pixel)/i.test(text);
+  }
+
+  return false;
+}
+
 
     const text = productText(p);
 
