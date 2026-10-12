@@ -2479,3 +2479,30 @@ h1{
     margin: 6px 0 !important;
   }
 }
+/* SNGAMER — Animation premium des produits */
+@keyframes sngamerProductEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#products > * {
+  animation: sngamerProductEnter 420ms ease-out backwards;
+}
+
+#products > *:nth-child(2) { animation-delay: 50ms; }
+#products > *:nth-child(3) { animation-delay: 100ms; }
+#products > *:nth-child(4) { animation-delay: 150ms; }
+#products > *:nth-child(5) { animation-delay: 200ms; }
+#products > *:nth-child(6) { animation-delay: 250ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  #products > * {
+    animation: none !important;
+  }
+}
