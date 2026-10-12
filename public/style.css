@@ -2995,3 +2995,128 @@ h1 {
   stroke: currentColor;
   flex-shrink: 0;
 }
+/* SNGAMER — CARTES COINS PREMIUM */
+
+#navSubcategories {
+  gap: 16px !important;
+  margin-top: 22px !important;
+}
+
+#navSubcategories .coinCategoryIntro {
+  grid-column: 1 / -1;
+  padding: 4px 2px 8px;
+}
+
+#navSubcategories .coinCategoryEyebrow {
+  color: #58c8ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2.2px;
+}
+
+#navSubcategories .coinCategoryIntro h3 {
+  margin: 9px 0 7px;
+  color: #f5f8ff;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+#navSubcategories .coinCategoryIntro p {
+  margin: 0;
+  color: #96a8c0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#navSubcategories .coinCategoryCard {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  min-height: 94px !important;
+  box-sizing: border-box !important;
+  padding: 17px !important;
+  color: #f4f7ff !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(40,120,255,.15), transparent 55%),
+    linear-gradient(145deg, #101c2e, #080e19) !important;
+  border: 1px solid #263a57 !important;
+  border-radius: 20px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 10px 26px rgba(0,0,0,.18) !important;
+  transition: border-color .25s ease, box-shadow .25s ease,
+    transform .25s ease !important;
+}
+
+#navSubcategories .coinCategoryCard:active {
+  transform: scale(.98) !important;
+}
+
+#navSubcategories .coinCategoryIcon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 54px !important;
+  width: 54px !important;
+  height: 54px !important;
+  color: #6bcaff !important;
+  background: linear-gradient(145deg, #172f50, #101d33) !important;
+  border: 1px solid rgba(88,190,255,.22) !important;
+  border-radius: 16px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+#navSubcategories .coinCategoryIcon svg {
+  display: block !important;
+  width: 27px !important;
+  height: 27px !important;
+}
+
+#navSubcategories .coinCategoryText {
+  display: flex !important;
+  flex: 1 !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+
+#navSubcategories .coinCategoryText strong {
+  color: #f5f7ff !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.2px !important;
+}
+
+#navSubcategories .coinCategoryText small {
+  color: #91a5bf !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+#navSubcategories .coinCategoryArrow {
+  color: #58c8ff !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+}
+
+#navSubcategories .coinCategoryCard[aria-pressed="true"] {
+  border-color: #45c7ff !important;
+  box-shadow:
+    0 0 0 1px rgba(69,199,255,.2),
+    0 0 22px rgba(42,139,255,.14),
+    inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+@media (max-width: 560px) {
+  #navSubcategories .coinCategoryCard {
+    min-height: 86px !important;
+    padding: 14px !important;
+  }
+
+  #navSubcategories .coinCategoryIntro h3 {
+    font-size: 23px;
+  }
+}
