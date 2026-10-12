@@ -2586,6 +2586,7 @@ h1 {
   font-weight: 800 !important;
   letter-spacing: 0 !important;
   font-variant-numeric: tabular-nums !important;
+  color: #E7C77A !important;
 }
 
 @media (max-width: 560px) {
