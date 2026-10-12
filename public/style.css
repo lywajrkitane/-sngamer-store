@@ -535,7 +535,7 @@ a:hover{
   #products > * button.primary {
     min-height: 42px !important;
     padding: 9px 10px !important;
-    font-size: 13px !important;
+    font-size: 15px !important;
   }
 
   #products > * h2,
@@ -2582,7 +2582,7 @@ h1 {
 #products .card .info .price,
 #products .card .info .price strong {
   font-family: 'Space Mono', monospace !important;
-  font-size: 15px !important;
+  font-size: 17px !important;
   font-weight: 800 !important;
   letter-spacing: 0 !important;
   font-variant-numeric: tabular-nums !important;
@@ -2600,6 +2600,6 @@ h1 {
 
   #products .card .info .price,
   #products .card .info .price strong {
-    font-size: 13px !important;
+    font-size: 15px !important;
   }
 }
