@@ -514,7 +514,11 @@ a:hover{
     0 18px 40px rgba(0,0,0,.45),
     0 0 25px rgba(22,135,255,.08);
 }
-
+/* SNGAMER — finition premium des cartes produits */
+#products .productCard,
+#products .product-card {
+  padding-bottom: 14px;
+}
 
 /* =========================
    TITRES
