@@ -938,8 +938,8 @@ const result = await db(
       right_sticker = COALESCE($3, right_sticker),
       description = COALESCE($4, description),
       active = COALESCE($5, active),
-      start_date = $6,
-      end_date = $7
+      start_date = COALESCE($6, start_date),
+end_date = COALESCE($7, end_date)
     WHERE id = $8
     RETURNING
       id,
