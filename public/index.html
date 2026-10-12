@@ -78,7 +78,18 @@
 
     </div>
 </section>
-  <main id="shop" class="wrap"><div class="bar"><h2>Nos produits</h2><div id="cats"></div></div><div id="products" class="grid"></div></main>
+  <main id="shop" class="wrap">
+  <div class="bar">
+    <h2 id="sectionTitle">Nos produits</h2>
+    <div id="cats"></div>
+  </div>
+
+  <div id="navSubcategories" class="navSubcategories" hidden></div>
+
+  <div id="profileArea" class="profileArea" hidden></div>
+
+  <div id="products" class="grid"></div>
+  </main>
 <section class="wrap banner"><div><label>SNGAMER STORE</label><h2>Une boutique pensée pour les gamers sénégalais.</h2><p>Commande en ligne, contact WhatsApp et livraison à organiser selon ta zone.</p></div><button class="primary" onclick="cart()">Mon panier</button></section>
 <footer><div class="wrap">© 2026 SNGAMER STORE — Dakar, Sénégal</div></footer>
 <div id="drawer" class="drawer"><div class="shade" onclick="closeCart()"></div><aside><div class="head"><h2>Panier</h2><button onclick="closeCart()">×</button></div><div id="items"></div><h3>Total : <span id="total">0 FCFA</span></h3><button class="primary full" onclick="openCheckout()">Commander</button></aside></div>
