@@ -500,7 +500,18 @@
 
   <input id="pName" placeholder="Nom du produit">
 
-  <input id="pCategory" placeholder="Catégorie">
+  <select id="pCategory" required>
+  <option value="">Choisir une catégorie</option>
+  <option value="Accessoires">Accessoires</option>
+  <option value="Gaming Phone">Gaming Phone</option>
+  <option value="Coins">Coins</option>
+</select>
+
+<select id="pPlatform" style="display:none;">
+  <option value="">Choisir la plateforme</option>
+  <option value="Android">Coins Android</option>
+  <option value="iPhone">Coins iPhone</option>
+</select>
 
   <input id="pPrice" type="number" placeholder="Prix FCFA">
 
