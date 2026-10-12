@@ -766,15 +766,63 @@ function navigateStore(section) {
     subcategories.style.display = "grid";
 
     subcategories.innerHTML = `
-      <button data-platform="iphone"
-        onclick="filterCoinProducts('iphone')">
-        🍎 Coins iPhone
-      </button>
-      <button data-platform="android"
-        onclick="filterCoinProducts('android')">
-        🤖 Coins Android
-      </button>
-    `;
+  <div class="coinCategoryIntro">
+    <span class="coinCategoryEyebrow">SNGAMER STORE · COINS</span>
+    <h3>Choisis ta plateforme</h3>
+    <p>Sélectionne ton système pour découvrir les recharges disponibles.</p>
+  </div>
+
+  <button class="coinCategoryCard"
+    type="button"
+    data-platform="iphone"
+    aria-pressed="false"
+    onclick="filterCoinProducts('iphone')">
+
+    <span class="coinCategoryIcon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="2" width="12" height="20" rx="2.5"/>
+        <path d="M10 5h4"/>
+        <path d="M10 18.5h4"/>
+      </svg>
+    </span>
+
+    <span class="coinCategoryText">
+      <strong>Coins iPhone</strong>
+      <small>iOS · Apple App Store</small>
+    </span>
+
+    <span class="coinCategoryArrow" aria-hidden="true">↗</span>
+  </button>
+
+  <button class="coinCategoryCard"
+    type="button"
+    data-platform="android"
+    aria-pressed="false"
+    onclick="filterCoinProducts('android')">
+
+    <span class="coinCategoryIcon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="m7 6-2-3M17 6l2-3"/>
+        <path d="M5 11a7 7 0 0 1 14 0"/>
+        <path d="M4 11h16v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/>
+        <path d="M8 19v2M16 19v2"/>
+        <circle cx="9" cy="8" r=".7" fill="currentColor"/>
+        <circle cx="15" cy="8" r=".7" fill="currentColor"/>
+      </svg>
+    </span>
+
+    <span class="coinCategoryText">
+      <strong>Coins Android</strong>
+      <small>Google Play · Android</small>
+    </span>
+
+    <span class="coinCategoryArrow" aria-hidden="true">↗</span>
+  </button>
+`;
   }
 
   if (section === "profile") {
