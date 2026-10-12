@@ -3120,3 +3120,164 @@ h1 {
     font-size: 23px;
   }
 }
+/* SNGAMER — BOUTON CHANGER DE PLATEFORME PREMIUM */
+
+#navSubcategories .coinPlatformCurrent {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 76px !important;
+  box-sizing: border-box !important;
+  padding: 14px !important;
+
+  color: #f5f7ff !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 0 0, rgba(45,140,255,.18), transparent 58%),
+    linear-gradient(145deg, #101d30, #080e19) !important;
+
+  border: 1px solid #2c4668 !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 8px 24px rgba(0,0,0,.22) !important;
+
+  font-family: "Space Grotesk", sans-serif !important;
+  transition: border-color .25s ease, box-shadow .25s ease,
+    transform .2s ease !important;
+}
+
+#navSubcategories .coinPlatformCurrent:active {
+  transform: scale(.985) !important;
+}
+
+#navSubcategories .coinPlatformCurrentIcon {
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+
+  color: #65d1ff !important;
+  background: linear-gradient(145deg, #18365a, #101c32) !important;
+  border: 1px solid rgba(85,184,255,.3) !important;
+  border-radius: 13px !important;
+  font-size: 23px !important;
+}
+
+#navSubcategories .coinPlatformCurrentText {
+  display: flex !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+#navSubcategories .coinPlatformCurrentText strong {
+  color: #f5f7ff !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+#navSubcategories .coinPlatformCurrentText small {
+  color: #91a5bf !important;
+  font-size: 11px !important;
+}
+
+#navSubcategories .coinPlatformChange {
+  color: #65d1ff !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+#navSubcategories .coinPlatformCurrent:hover {
+  border-color: #49bfff !important;
+  box-shadow:
+    0 0 0 1px rgba(73,191,255,.12),
+    0 0 24px rgba(43,130,255,.16) !important;
+}
+
+/* FENÊTRE DE CHANGEMENT DE PLATEFORME */
+
+#navSubcategories.coinPickerOpen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10020 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 18px !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.coinPickerBackdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10020 !important;
+  background: rgba(2,6,15,.78) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  pointer-events: auto !important;
+}
+
+.coinPickerDialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%,-50%) !important;
+  z-index: 10021 !important;
+
+  width: calc(100% - 36px) !important;
+  max-width: 440px !important;
+  box-sizing: border-box !important;
+  padding: 25px 18px 20px !important;
+
+  background:
+    radial-gradient(circle at 100% 0, rgba(115,65,255,.13), transparent 48%),
+    linear-gradient(145deg, #111e31, #070c16) !important;
+
+  border: 1px solid #304968 !important;
+  border-radius: 24px !important;
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.55),
+    0 0 30px rgba(49,137,255,.1) !important;
+
+  pointer-events: auto !important;
+}
+
+.coinPickerDialog h3 {
+  margin: 12px 0 8px !important;
+  color: #f5f7ff !important;
+  font-size: 23px !important;
+  font-weight: 800 !important;
+}
+
+.coinPickerDialog p {
+  margin: 0 0 20px !important;
+  color: #96a8c0 !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+
+.coinPickerDialog .coinCategoryCard {
+  margin-top: 12px !important;
+}
+
+.coinPickerClose {
+  display: grid !important;
+  place-items: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  margin: 0 0 18px auto !important;
+
+  color: #dceaff !important;
+  background: #17253a !important;
+  border: 1px solid #304968 !important;
+  border-radius: 12px !important;
+  font-size: 23px !important;
+}
