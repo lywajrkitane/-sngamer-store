@@ -2162,7 +2162,25 @@ function closeOrderDetails() {
 
   }
   }
+function toggleEditCoinPlatform() {
+  const category =
+    document.getElementById("editProductCategory").value;
 
+  const field =
+    document.getElementById("editPlatformField");
+
+  const platform =
+    document.getElementById("editProductPlatform");
+
+  field.style.display =
+    category === "Coins" ? "block" : "none";
+
+  platform.required = category === "Coins";
+
+  if (category !== "Coins") {
+    platform.value = "";
+  }
+      }
 function closeEditProduct() {
   document.getElementById("editProductModal").classList.remove("show");
 }
@@ -3061,14 +3079,27 @@ async function loadAll() {
   </div>
 
   <div class="edit-product-field">
-    <label for="editProductCategory">📦 Catégorie</label>
-    <input
-      type="text"
-      id="editProductCategory"
-      placeholder="Catégorie"
-      required
-    >
-  </div>
+  <label for="editProductCategory">📦 Catégorie</label>
+  <select
+    id="editProductCategory"
+    required
+    onchange="toggleEditCoinPlatform()"
+  >
+    <option value="">Choisir une catégorie</option>
+    <option value="Accessoires">Accessoires</option>
+    <option value="Gaming Phone">Gaming Phone</option>
+    <option value="Coins">Coins</option>
+  </select>
+</div>
+
+<div class="edit-product-field" id="editPlatformField" style="display:none;">
+  <label for="editProductPlatform">📱 Plateforme Coins</label>
+  <select id="editProductPlatform">
+    <option value="">Choisir la plateforme</option>
+    <option value="Android">Coins Android</option>
+    <option value="iPhone">Coins iPhone</option>
+  </select>
+</div>
 
   <div class="edit-product-grid">
 
