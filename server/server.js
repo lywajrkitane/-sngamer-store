@@ -1060,16 +1060,17 @@ app.patch(
       }
 
       const {
-        name,
-        category,
-        price,
-        stock,
-        emoji,
-        description,
-        promo_price,
-        promo_active,
-        campaign_id
-      } = req.body;
+  name,
+  category,
+  platform,
+  price,
+  stock,
+  emoji,
+  description,
+  promo_price,
+  promo_active,
+  campaign_id
+} = req.body;
 
 
       /*
@@ -1181,80 +1182,54 @@ app.patch(
 
       const result = await db(
         `
-        UPDATE products
+                UPDATE products
         SET
-
           name = COALESCE($1, name),
-
           category = COALESCE($2, category),
-
-          price = COALESCE($3, price),
-
-          stock = COALESCE($4, stock),
-
-          emoji = COALESCE($5, emoji),
-
-          description = COALESCE($6, description),
+          platform = COALESCE($3, platform),
+          price = COALESCE($4, price),
+          stock = COALESCE($5, stock),
+          emoji = COALESCE($6, emoji),
+          description = COALESCE($7, description),
 
           promo_price =
             CASE
-              WHEN $7 = true
-              THEN $8
+              WHEN $8 = true THEN $9
               ELSE promo_price
             END,
 
           promo_active =
             CASE
-              WHEN $9 = true
-              THEN $10
+              WHEN $10 = true THEN $11
               ELSE promo_active
             END,
 
           campaign_id =
             CASE
-              WHEN $11 = true
-              THEN $12
+              WHEN $12 = true THEN $13
               ELSE campaign_id
             END
 
-        WHERE id = $13
-
+        WHERE id = $14
         RETURNING *
         `,
         [
-
           name ?? null,
-
           category ?? null,
-
-          price !== undefined
-            ? Number(price)
+          platform !== undefined
+            ? (category === "Coins" ? String(platform || "").trim() || null : null)
             : null,
-
-          stock !== undefined
-            ? Number(stock)
-            : null,
-
+          price !== undefined ? Number(price) : null,
+          stock !== undefined ? Number(stock) : null,
           emoji ?? null,
-
           description ?? null,
-
           promoPriceProvided,
-
           promoPriceValue,
-
           promoActiveProvided,
-
-          promo_active !== undefined
-            ? Boolean(promo_active)
-            : null,
-
+          promo_active !== undefined ? Boolean(promo_active) : null,
           campaignIdProvided,
-
           campaignIdValue,
-
           productId
-
         ]
       );
 
