@@ -2982,3 +2982,16 @@ h1 {
     animation-duration: 8s !important;
   }
 }
+/* SNGAMER — ICÔNES VECTORIELLES PREMIUM */
+.mobileBottomNav .bottomNavIcon {
+  filter: none !important;
+}
+
+.mobileBottomNav .bottomNavIcon svg {
+  display: block;
+  width: 25px;
+  height: 25px;
+  color: currentColor;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
