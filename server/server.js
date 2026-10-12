@@ -62,7 +62,8 @@ async function initDb() {
       id BIGSERIAL PRIMARY KEY,
       name TEXT NOT NULL,
       category TEXT NOT NULL DEFAULT 'Accessoires',
-      price INTEGER NOT NULL CHECK (price >= 0),
+platform TEXT DEFAULT NULL,
+price INTEGER NOT NULL CHECK (price >= 0),
       stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
       emoji TEXT NOT NULL DEFAULT '🎮',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -73,6 +74,12 @@ async function initDb() {
     ALTER TABLE products
     ADD COLUMN IF NOT EXISTS emoji TEXT NOT NULL DEFAULT '🎮'
   `);
+
+  await db(`
+  ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS platform TEXT DEFAULT NULL
+`);
+  
 await db(`
   ALTER TABLE products
   ADD COLUMN IF NOT EXISTS description TEXT,
@@ -761,11 +768,12 @@ if (
 
   try {
     const r = await db(
-  `
+   `
   INSERT INTO products
     (
       name,
       category,
+      platform,
       price,
       stock,
       emoji,
@@ -774,12 +782,13 @@ if (
       promo_active,
       campaign_id
     )
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
   RETURNING *
   `,
   [
     p.name,
     p.category,
+    p.platform,
     p.price,
     p.stock,
     p.emoji,
