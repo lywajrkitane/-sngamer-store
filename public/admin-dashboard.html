@@ -500,7 +500,7 @@
 
   <input id="pName" placeholder="Nom du produit">
 
-  <select id="pCategory" required>
+  <select id="pCategory" required onchange="toggleCoinPlatform()">
   <option value="">Choisir une catégorie</option>
   <option value="Accessoires">Accessoires</option>
   <option value="Gaming Phone">Gaming Phone</option>
@@ -1202,7 +1202,17 @@ loadPromoMedia();
 
       `).join("");
   }
+ function toggleCoinPlatform() {
+  const category = document.getElementById("pCategory").value;
+  const platform = document.getElementById("pPlatform");
 
+  platform.style.display = category === "Coins" ? "block" : "none";
+  platform.required = category === "Coins";
+
+  if (category !== "Coins") {
+    platform.value = "";
+  }
+ }
 
   async function addProduct() {
   const name =
