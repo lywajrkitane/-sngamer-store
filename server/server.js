@@ -277,6 +277,7 @@ app.get("/api/products", async (req, res) => {
   id,
   name,
   category,
+  platform,
   price,
   stock,
   emoji,
