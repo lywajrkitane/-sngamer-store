@@ -1,12 +1,47 @@
 let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous",activeStoreSection="home",selectedCoinPlatform=null;
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
 async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render();update()}
-function cats(){let cs=["Tous",...new Set(products.map(p=>p.category))];document.querySelector("#cats").innerHTML=cs.map(c=>`<button class="catbtn ${c===filter?"on":""}" onclick="filterBy('${c}')">${c}</button>`).join("")}
+function storeCategory(p) {
+  const category = (p.category || "").trim().toLowerCase();
+
+  if (category === "coins" || isCoinProduct(p)) {
+    return "Coins";
+  }
+
+  if (category === "gaming phone" || isPhoneProduct(p)) {
+    return "Gaming Phone";
+  }
+
+  if (category === "accessoires" || isAccessoryProduct(p)) {
+    return "Accessoires";
+  }
+
+  return p.category || "Accessoires";
+}
+
+function cats() {
+  const categories = [
+    "Tous",
+    ...new Set(products.map(p => storeCategory(p)))
+  ];
+
+  document.querySelector("#cats").innerHTML =
+    categories.map(c =>
+      `<button class="catbtn ${c === filter ? "on" : ""}"
+      onclick="filterBy('${c}')">${c}</button>`
+    ).join("");
+}
 function filterBy(c){filter=c;cats();render()}
 function render(){
 let q=document.querySelector("#q").value.toLowerCase();
-let list=products.filter(p=>matchesStoreSection(p)&&(activeStoreSection!=="home"||filter==="Tous"||p.category===filter)&&p.name.toLowerCase().includes(q));
-document.querySelector("#products").innerHTML=list.map(p=>{
+let list = products.filter(p =>
+  matchesStoreSection(p) &&
+  (activeStoreSection !== "home" ||
+    filter === "Tous" ||
+    storeCategory(p) === filter) &&
+  p.name.toLowerCase().includes(q)
+);
+  document.querySelector("#products").innerHTML=list.map(p=>{
 const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
 const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
 
@@ -21,7 +56,7 @@ const priceHtml=promoActive
 return `<article class="card">
 <div class="pic">${p.image1_url ? '<img src="' + p.image1_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" loading="lazy">' : p.emoji}</div>
 <div class="info">
-<div class="cat">${p.category}</div>
+<div class="cat">${storeCategory(p)}${storeCategory(p) === "Coins" && p.platform ? " " + p.platform : ""}</div>
 <h3>${p.name}</h3>
 ${priceHtml}
 <div class="stock">${p.stock} disponible(s)</div>
