@@ -647,3 +647,27 @@ title.style.display = campaignTitle ? "flex" : "none";
 document.addEventListener("DOMContentLoaded", function () {
     loadHomepagePromoMedia();
 });
+/* SNGAMER — Animation d'apparition des produits */
+@keyframes sngamerProductEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#products .productCard,
+#products .product-card {
+  animation: sngamerProductEnter 0.45s ease both;
+}
+
+/* Respecter les préférences de mouvement */
+@media (prefers-reduced-motion: reduce) {
+  #products .productCard,
+  #products .product-card {
+    animation: none;
+  }
+}
