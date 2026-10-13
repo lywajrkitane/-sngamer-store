@@ -44,7 +44,7 @@ let list = products.filter(p =>
   document.querySelector("#products").innerHTML=list.map(p=>{
 const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
 const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
-
+const inStock = Number(p.stock) > 0;
 const priceHtml=promoActive
 ?`<div class="price" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
 <span style="text-decoration:line-through;color:#8190a2;font-size:.9em">${money(p.price)}</span>
@@ -59,11 +59,12 @@ return `<article class="card">
 <div class="cat">${storeCategory(p)}${storeCategory(p) === "Coins" && p.platform ? " " + p.platform : ""}</div>
 <h3>${p.name}</h3>
 ${priceHtml}
-<div class="stock">${p.stock} disponible(s)</div>
+<div class="stock">${inStock ? p.stock + " disponible(s)" : "Rupture de stock"}</div>
 
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
   <button
     class="add"
+    ${!inStock ? 'disabled' : ''}
     style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid #478bff;background:linear-gradient(100deg,#1677ff,#713cff);color:#fff;border-radius:12px;font-weight:900;font-size:17px;box-shadow:0 0 12px rgba(55,115,255,.28);transition:transform .15s,box-shadow .15s;"
     onclick="buyNow(${p.id})"
     onpointerdown="this.style.boxShadow='0 0 24px rgba(75,125,255,.9)';this.style.transform='scale(.98)'"
@@ -75,6 +76,7 @@ ${priceHtml}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
     <button
       class="add"
+      ${!inStock ? 'disabled' : ''}
       style="width:100%;box-sizing:border-box;padding:10px 4px;font-size:13px;border-radius:10px;"
       onclick="add(${p.id})">
       🛒 Panier
@@ -176,7 +178,18 @@ function openCheckout() {
     if (!cartItems.length) {
         return alert("Panier vide.");
     }
+for (const item of cartItems) {
+    const product = products.find(
+        p => Number(p.id) === Number(item.id)
+    );
 
+    if (!product || Number(product.stock) < Number(item.qty)) {
+        alert(
+            "Stock insuffisant pour un produit de ton panier. Actualise la boutique et corrige la quantité."
+        );
+        return;
+    }
+}
     document.querySelector("#checkoutSummary")?.remove();
 
     const summary = cartItems.map(x => {
