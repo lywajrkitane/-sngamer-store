@@ -835,7 +835,7 @@ function matchesStoreSection(p) {
     </span>
 
     <span class="coinCategoryText">
-      <strong>eFootball Coins iPhone</strong>
+      <strong>eFootball Pièces iPhone</strong>
       <small>iOS · Apple App Store</small>
     </span>
 
@@ -862,7 +862,7 @@ function matchesStoreSection(p) {
     </span>
 
     <span class="coinCategoryText">
-      <strong>eFootball Coins Android</strong>
+      <strong>eFootball Pièces Android</strong>
       <small>Google Play · Android</small>
     </span>
 
@@ -914,7 +914,9 @@ function filterCoinProducts(platform) {
   const title = document.getElementById("sectionTitle");
 
   title.textContent =
-    platform === "iphone" ? "Coins iPhone" : "Coins Android";
+  platform === "iphone"
+    ? "eFootball Pièces iPhone"
+    : "eFootball Pièces Android";
 
   productsArea.style.display = "";
 
@@ -934,8 +936,8 @@ function showCoinPlatformSwitch() {
   const area = document.getElementById("navSubcategories");
   const name =
     selectedCoinPlatform === "iphone"
-      ? "Coins iPhone"
-      : "Coins Android";
+      ? "eFootball Pièces iPhone"
+      : "eFootball Pièces Android";
 
   area.classList.remove("coinPickerOpen");
   area.hidden = false;
