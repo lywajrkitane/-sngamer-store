@@ -1409,8 +1409,13 @@ h1 {
 
 /* =========================================================
    CORRECTION — FICHE PRODUIT MOBILE
-   ESPACE SOUS LE BOUTON ET TYPOGRAPHIE
+   AFFICHAGE, ESPACE ET TYPOGRAPHIE
    ========================================================= */
+
+#productModal {
+  z-index: 10030 !important;
+  font-family: 'Space Grotesk', Arial, sans-serif;
+}
 
 #productModal .productBox,
 #productModal .productBox button,
@@ -1423,15 +1428,21 @@ h1 {
 
 @media (max-width: 700px) {
   #productModal {
-    padding-bottom: 20px;
+    position: fixed;
+    inset: 0;
+    padding: 76px 10px 20px;
+    align-items: flex-start;
+    overflow-y: auto;
+    box-sizing: border-box;
   }
 
   #productModal .productBox {
     box-sizing: border-box;
-    max-height: calc(100dvh - 96px);
-    padding-bottom: 130px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    width: 100%;
+    max-height: none;
+    margin-bottom: 20px;
+    padding: 15px 15px 40px;
+    overflow: visible;
   }
 
   #productModal .productInfo .add,
@@ -1439,7 +1450,7 @@ h1 {
     display: block;
     width: 100%;
     min-height: 54px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     font-family: 'Space Grotesk', Arial, sans-serif;
   }
 }
