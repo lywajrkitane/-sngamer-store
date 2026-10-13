@@ -1320,10 +1320,12 @@ if (category === "Coins" && !platform) {
       }
     }
 
-    alert("Produit ajouté avec succès !");
+        alert("Produit ajouté avec succès !");
 
     document.getElementById("pName").value = "";
     document.getElementById("pCategory").value = "";
+    document.getElementById("pPlatform").value = "";
+    toggleCoinPlatform();
     document.getElementById("pPrice").value = "";
     document.getElementById("pStock").value = "";
     document.getElementById("pDescription").value = "";
