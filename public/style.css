@@ -3542,3 +3542,25 @@ footer {
     min-height: 2.6em;
   }
 }
+/* CORRECTION PANIER MOBILE — SNGAMER STORE */
+@media (max-width: 700px) {
+  .drawer {
+    top: 120px !important;
+    bottom: 90px !important;
+    height: auto !important;
+  }
+
+  .drawer aside {
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding-bottom: 20px !important;
+    box-sizing: border-box !important;
+  }
+
+  .drawer .primary.full {
+    display: block !important;
+    position: relative !important;
+    margin-bottom: 20px !important;
+    width: calc(100% - 28px) !important;
+  }
+}
