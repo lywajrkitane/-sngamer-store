@@ -110,12 +110,36 @@ ${priceHtml}
   }
 }
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
-function add(id){
-  let x=cartItems.find(a=>a.id===id);
-  x ? x.qty++ : cartItems.push({id,qty:1});
+function add(id) {
+  const product = products.find(p => Number(p.id) === Number(id));
+
+  if (!product || Number(product.stock) <= 0) {
+    alert("Ce produit est en rupture de stock.");
+    return false;
+  }
+
+  const item = cartItems.find(x => Number(x.id) === Number(id));
+
+  if (item && Number(item.qty) >= Number(product.stock)) {
+    alert("La quantité demandée dépasse le stock disponible.");
+    return false;
+  }
+
+  if (item) {
+    item.qty++;
+  } else {
+    cartItems.push({ id: product.id, qty: 1 });
+  }
+
   save();
+  return true;
 }
-function buyNow(id){add(id);cart()}
+
+function buyNow(id) {
+  if (add(id)) {
+    cart();
+  }
+}
 function update(){
   const validItems = cartItems.filter(x =>
     products.some(p => Number(p.id) === Number(x.id))
@@ -171,7 +195,26 @@ function update(){
 
   document.querySelector("#total").textContent = money(total);
 }
-function chg(id,n){let x=cartItems.find(a=>a.id===id);x.qty+=n;if(x.qty<=0)cartItems=cartItems.filter(a=>a.id!==id);save()}
+function chg(id, n) {
+  const item = cartItems.find(x => Number(x.id) === Number(id));
+  if (!item) return;
+
+  const product = products.find(p => Number(p.id) === Number(id));
+  if (!product) return;
+
+  if (n > 0 && Number(item.qty) >= Number(product.stock)) {
+    alert("Stock maximum atteint pour ce produit.");
+    return;
+  }
+
+  item.qty += n;
+
+  if (item.qty <= 0) {
+    cartItems = cartItems.filter(x => Number(x.id) !== Number(id));
+  }
+
+  save();
+}
 function cart(){document.querySelector("#drawer").classList.add("show");update()}
 function closeCart(){document.querySelector("#drawer").classList.remove("show")}
 function openCheckout() {
