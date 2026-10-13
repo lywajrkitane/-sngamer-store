@@ -835,7 +835,7 @@ function matchesStoreSection(p) {
     </span>
 
     <span class="coinCategoryText">
-      <strong>Coins iPhone</strong>
+      <strong>eFootball Coins iPhone</strong>
       <small>iOS · Apple App Store</small>
     </span>
 
@@ -862,7 +862,7 @@ function matchesStoreSection(p) {
     </span>
 
     <span class="coinCategoryText">
-      <strong>Coins Android</strong>
+      <strong>eFootball Coins Android</strong>
       <small>Google Play · Android</small>
     </span>
 
