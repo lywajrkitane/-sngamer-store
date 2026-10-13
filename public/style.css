@@ -1406,21 +1406,43 @@ h1 {
     padding-top:48px;
   }
 }
+
 /* =========================================================
-   CORRECTION — ESPACE SOUS LE BOUTON PANIER
+   CORRECTION — FICHE PRODUIT MOBILE
+   ESPACE SOUS LE BOUTON ET TYPOGRAPHIE
    ========================================================= */
 
-@media(max-width:700px){
+#productModal .productBox,
+#productModal .productBox button,
+#productModal .productBox h2,
+#productModal .productBox h3,
+#productModal .productBox p,
+#productModal .productBox span {
+  font-family: 'Space Grotesk', Arial, sans-serif;
+}
 
-  #productModal .productBox{
-    padding-bottom:85px;
+@media (max-width: 700px) {
+  #productModal {
+    padding-bottom: 20px;
+  }
+
+  #productModal .productBox {
+    box-sizing: border-box;
+    max-height: calc(100dvh - 96px);
+    padding-bottom: 130px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   #productModal .productInfo .add,
-  #productModal .productInfo button:not(.x){
-    margin-bottom:20px;
+  #productModal .productInfo button:not(.x) {
+    display: block;
+    width: 100%;
+    min-height: 54px;
+    margin-bottom: 24px;
+    font-family: 'Space Grotesk', Arial, sans-serif;
   }
-    }
+}
 /* =========================================================
    SNGAMER STORE — PANIER PREMIUM
    ========================================================= */
