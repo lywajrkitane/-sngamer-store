@@ -792,7 +792,7 @@ function matchesStoreSection(p) {
     home: "Nos produits",
     accessories: "Accessoires",
     phones: "Gaming Phone",
-    coins: "Coins",
+    coins: "Pièces eFootball",
     profile: "Mon profil"
   };
 
@@ -813,7 +813,7 @@ function matchesStoreSection(p) {
 
     subcategories.innerHTML = `
   <div class="coinCategoryIntro">
-    <span class="coinCategoryEyebrow">SNGAMER STORE · COINS</span>
+    <span class="coinCategoryEyebrow">SNGAMER STORE · PIÈCES eFOOTBALL</span>
     <h3>Choisis ta plateforme</h3>
     <p>Sélectionne ton système pour découvrir les recharges disponibles.</p>
   </div>
