@@ -387,39 +387,15 @@ const subtotal = unitPrice * quantity;
         emoji: product.emoji
       });
 
-      await client.query(
-        `
-        UPDATE products
-        SET stock = stock - $1
-        WHERE id = $2
-        `,
-        [quantity, productId]
-      );
+            // Le stock est uniquement vérifié ici.
+      // Il ne doit être déduit qu'après confirmation réelle du paiement.
     }
 
-    const orderResult = await client.query(
-      `
-      INSERT INTO orders
-        (customer, payment, items, total)
-      VALUES
-        ($1, $2, $3, $4)
-      RETURNING id, created_at, status, total
-      `,
-      [
-        JSON.stringify(customer),
-        payment,
-        JSON.stringify(finalItems),
-        total
-      ]
-    );
+        await client.query("ROLLBACK");
 
-    await client.query("COMMIT");
-
-    res.status(201).json({
-  success: true,
-  orderId: orderResult.rows[0].id,
-  order: orderResult.rows[0]
-});
+    return res.status(503).json({
+      error: "Le paiement en ligne n'est pas encore activé. Aucune commande n'a été validée et le stock n'a pas été modifié."
+     });
   } catch (error) {
     await client.query("ROLLBACK");
 
