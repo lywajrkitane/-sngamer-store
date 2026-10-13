@@ -90,8 +90,107 @@
 
   <div id="products" class="grid"></div>
   </main>
-<section class="wrap banner"><div><label>SNGAMER STORE</label><h2>Une boutique pensée pour les gamers sénégalais.</h2><p>Commande en ligne, contact WhatsApp et livraison à organiser selon ta zone.</p></div><button class="primary" onclick="cart()">Mon panier</button></section>
-<footer><div class="wrap">© 2026 SNGAMER STORE — Dakar, Sénégal</div></footer>
+<section class="wrap banner store-footer-content">
+  <div class="store-about">
+    <label>SNGAMER STORE · À PROPOS</label>
+    <h2>L’univers gaming, sans frontières.</h2>
+    <p>
+      SNGAMER Store est une boutique en ligne dédiée aux passionnés
+      de jeux vidéo. Découvre nos accessoires gaming, nos équipements
+      pour jouer sur mobile et nos pièces eFootball.
+    </p>
+    <p>
+      Choisis tes produits, passe ta commande en ligne et contacte
+      notre équipe pour obtenir de l’aide sur ta commande et sa livraison.
+    </p>
+    <button class="primary" onclick="cart()">Découvrir mon panier</button>
+  </div>
+
+  <div class="store-order-guide">
+    <label>COMMENT COMMANDER ?</label>
+    <h2>4 étapes simples</h2>
+
+    <div class="store-order-steps">
+      <div class="store-step">
+        <span>01</span>
+        <div>
+          <h3>Choisis ton produit</h3>
+          <p>Parcours les catégories et consulte les prix et disponibilités.</p>
+        </div>
+      </div>
+
+      <div class="store-step">
+        <span>02</span>
+        <div>
+          <h3>Ajoute au panier</h3>
+          <p>Sélectionne les articles souhaités et vérifie le montant total.</p>
+        </div>
+      </div>
+
+      <div class="store-step">
+        <span>03</span>
+        <div>
+          <h3>Confirme ta commande</h3>
+          <p>Renseigne tes coordonnées, ton adresse et le mode de paiement proposé.</p>
+        </div>
+      </div>
+
+      <div class="store-step">
+        <span>04</span>
+        <div>
+          <h3>Confirmation et livraison</h3>
+          <p>Notre équipe te contacte pour confirmer le traitement et les modalités de livraison.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="store-contact">
+    <label>RESTONS EN CONTACT</label>
+    <h2>Contacte-nous et suis SNGAMER</h2>
+    <p>Une question ou besoin d’assistance ? Retrouve-nous sur nos réseaux officiels.</p>
+
+    <div class="store-social-links">
+      <a class="store-social whatsapp"
+         href="https://wa.me/221786127985"
+         target="_blank" rel="noopener noreferrer">
+        <span class="store-social-icon">✆</span>
+        <span><strong>WhatsApp</strong><small>Nous contacter</small></span>
+        <span class="store-social-arrow">↗</span>
+      </a>
+
+      <a class="store-social facebook"
+         href="https://www.facebook.com/profile.php?id=61581284860925"
+         target="_blank" rel="noopener noreferrer">
+        <span class="store-social-icon">f</span>
+        <span><strong>Facebook</strong><small>Notre page officielle</small></span>
+        <span class="store-social-arrow">↗</span>
+      </a>
+
+      <a class="store-social tiktok"
+         href="https://www.tiktok.com/@sngamer.sn?_r=1&_t=ZN-9AWO8eKq8ko"
+         target="_blank" rel="noopener noreferrer">
+        <span class="store-social-icon">♪</span>
+        <span><strong>TikTok</strong><small>Nos vidéos gaming</small></span>
+        <span class="store-social-arrow">↗</span>
+      </a>
+
+      <a class="store-social youtube"
+         href="https://www.youtube.com/@sngamer-ytb"
+         target="_blank" rel="noopener noreferrer">
+        <span class="store-social-icon">▶</span>
+        <span><strong>YouTube</strong><small>Notre chaîne</small></span>
+        <span class="store-social-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    © 2026 SNGAMER STORE — Boutique gaming en ligne
+  </div>
+</footer>
 <div id="drawer" class="drawer"><div class="shade" onclick="closeCart()"></div><aside><div class="head"><h2>Panier</h2><button onclick="closeCart()">×</button></div><div id="items"></div><h3>Total : <span id="total">0 FCFA</span></h3><button class="primary full" onclick="openCheckout()">Commander</button></aside></div>
 <div id="checkout" class="modal"><div class="box"><button class="x" onclick="closeCheckout()">×</button><h2>Finaliser la commande</h2><input id="name" placeholder="Nom complet"><input id="phone" placeholder="Téléphone"><input id="addr" placeholder="Adresse / quartier"><select id="pay"><option>Wave</option><option>Orange Money</option><option>Paiement à la livraison</option></select><button class="primary full" onclick="order()">Confirmer</button><p class="hint">Le paiement réel sera activé après connexion des comptes marchands.</p></div></div>
   <div id="productModal" class="modal">
