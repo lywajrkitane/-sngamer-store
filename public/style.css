@@ -3509,3 +3509,36 @@ footer {
     padding: 14px;
   }
 }
+/* SNGAMER — ALIGNEMENT DES CARTES PRODUITS */
+
+#products.grid {
+  align-items: stretch;
+}
+
+#products .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#products .card .info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+#products .card .info h3 {
+  min-height: 2.6em;
+  line-height: 1.3;
+}
+
+#products .card .info > div[style*="flex-direction:column"] {
+  margin-top: auto !important;
+  padding-top: 12px;
+}
+
+@media (max-width: 560px) {
+  #products .card .info h3 {
+    min-height: 2.6em;
+  }
+}
