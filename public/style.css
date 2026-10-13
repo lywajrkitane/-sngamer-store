@@ -1417,6 +1417,12 @@ h1 {
   font-family: 'Space Grotesk', Arial, sans-serif;
 }
 
+.siteHeader {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10040 !important;
+}
+
 #productModal .productBox,
 #productModal .productBox button,
 #productModal .productBox h2,
