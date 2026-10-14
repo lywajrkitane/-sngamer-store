@@ -3564,3 +3564,241 @@ footer {
     width: calc(100% - 28px) !important;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS PREMIUM V1
+   Ne modifie aucune logique JavaScript
+   ========================================================= */
+
+.card{
+  position:relative;
+  background:
+    linear-gradient(180deg,#101827 0%,#0b111b 100%) !important;
+  border:1px solid rgba(91,157,255,.16) !important;
+  border-radius:18px !important;
+  overflow:hidden;
+  box-shadow:0 8px 28px rgba(0,0,0,.25);
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+  border-color:rgba(57,167,255,.55) !important;
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.40),
+    0 0 25px rgba(22,135,255,.10);
+}
+
+/* IMAGE PRODUIT */
+
+.card .pic{
+  height:205px !important;
+  position:relative;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(42,130,255,.13),
+      transparent 55%
+    ),
+    #080e17 !important;
+  border-bottom:1px solid rgba(91,157,255,.10);
+  overflow:hidden;
+}
+
+.card .pic img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  padding:12px;
+  transition:transform .35s ease;
+}
+
+.card:hover .pic img{
+  transform:scale(1.05);
+}
+
+/* EMOJI SI AUCUNE IMAGE */
+
+.card .pic{
+  font-size:72px;
+}
+
+/* INFORMATIONS */
+
+.card .info{
+  padding:17px !important;
+}
+
+/* CATÉGORIE */
+
+.card .cat{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:5px 9px;
+  border-radius:7px;
+  background:rgba(22,135,255,.10);
+  border:1px solid rgba(22,135,255,.16);
+  color:#55aaff !important;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.1px;
+}
+
+/* NOM DU PRODUIT */
+
+.card .info h3{
+  margin:12px 0 9px !important;
+  color:#f7f9fc;
+  font-size:18px !important;
+  font-weight:700;
+  line-height:1.3;
+  min-height:47px;
+}
+
+/* PRIX */
+
+.card .price{
+  margin:8px 0 7px !important;
+  color:#ffffff;
+  font-size:21px !important;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+/* STOCK */
+
+.card .stock{
+  display:inline-flex;
+  align-items:center;
+  min-height:27px;
+  margin:3px 0 10px !important;
+  padding:5px 9px;
+  border-radius:7px;
+  background:rgba(67,210,137,.08);
+  border:1px solid rgba(67,210,137,.15);
+  color:#72d9a0 !important;
+  font-size:11px !important;
+  font-weight:700;
+}
+
+/* RUPTURE DE STOCK */
+
+.card .stock.outOfStock{
+  background:rgba(255,77,109,.08);
+  border-color:rgba(255,77,109,.18);
+  color:#ff7188 !important;
+}
+
+/* BOUTON ACHETER */
+
+.card .add{
+  min-height:45px;
+  border-radius:11px !important;
+  font-weight:800 !important;
+  border:1px solid rgba(71,139,255,.55) !important;
+  background:
+    linear-gradient(
+      100deg,
+      #1677ff,
+      #713cff
+    ) !important;
+  box-shadow:0 5px 18px rgba(55,115,255,.20);
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    filter .2s ease;
+}
+
+.card .add:hover:not(:disabled){
+  transform:translateY(-2px);
+  filter:brightness(1.08);
+  box-shadow:
+    0 8px 24px rgba(55,115,255,.32);
+}
+
+.card .add:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  filter:grayscale(.25);
+  box-shadow:none;
+}
+
+/* BOUTON VOIR */
+
+.card .details{
+  min-height:43px;
+  border-radius:11px !important;
+  background:#111c2b !important;
+  border:1px solid rgba(91,157,255,.18) !important;
+  color:#dce7f5 !important;
+  font-weight:700;
+}
+
+.card .details:hover{
+  background:#18283d !important;
+  border-color:rgba(91,157,255,.45) !important;
+}
+
+/* PANIER */
+
+.card .add + div .add{
+  background:#111c2b !important;
+  border:1px solid rgba(91,157,255,.18) !important;
+  box-shadow:none;
+  font-size:13px !important;
+}
+
+.card .add + div .add:hover:not(:disabled){
+  background:#18283d !important;
+  border-color:rgba(91,157,255,.45) !important;
+}
+
+/* MOBILE */
+
+@media(max-width:560px){
+
+  .card{
+    border-radius:15px !important;
+  }
+
+  .card .pic{
+    height:155px !important;
+  }
+
+  .card .pic img{
+    padding:9px;
+  }
+
+  .card .info{
+    padding:12px !important;
+  }
+
+  .card .info h3{
+    font-size:15px !important;
+    min-height:39px;
+  }
+
+  .card .price{
+    font-size:17px !important;
+  }
+
+  .card .stock{
+    font-size:10px !important;
+  }
+
+  .card .add{
+    min-height:40px;
+    font-size:14px !important;
+  }
+
+  .card .details{
+    min-height:40px;
+    font-size:12px !important;
+  }
+  }
