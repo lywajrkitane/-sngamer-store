@@ -46,51 +46,58 @@ const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.pro
 const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
 const inStock = Number(p.stock) > 0;
 const priceHtml=promoActive
-?`<div class="price" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-<span style="text-decoration:line-through;color:#8190a2;font-size:.9em">${money(p.price)}</span>
-<strong style="color:#ff4d6d">${money(p.promo_price)}</strong>
-<span style="background:#ff4d6d;color:white;padding:2px 7px;border-radius:6px;font-size:.75em;font-weight:700">-${discount}%</span>
+?`<div class="price price--promo">
+  <span class="priceOld">${money(p.price)}</span>
+  <strong class="priceCurrent">${money(p.promo_price)}</strong>
+  <span class="discountBadge">-${discount}%</span>
 </div>`
 :`<div class="price">${money(p.price)}</div>`;
 
 return `<article class="card">
-<div class="pic">${p.image1_url ? '<img src="' + p.image1_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" loading="lazy">' : p.emoji}</div>
+<div class="pic">
+  ${p.image1_url
+    ? '<img class="productCardImage" src="' + p.image1_url + '" alt="' + p.name + '" loading="lazy">'
+    : '<div class="productCardEmoji">' + p.emoji + '</div>'}
+</div>
+
 <div class="info">
 <div class="cat">${storeCategory(p)}${storeCategory(p) === "Coins" && p.platform ? " " + p.platform : ""}</div>
-<h3>${p.name}</h3>
-${priceHtml}
-<div class="stock">${inStock ? p.stock + " disponible(s)" : "Rupture de stock"}</div>
 
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+<h3>${p.name}</h3>
+
+${priceHtml}
+
+<div class="stock ${!inStock ? 'outOfStock' : ''}">
+  ${inStock ? p.stock + " disponible(s)" : "Rupture de stock"}
+</div>
+
+<div class="productActions">
+
   <button
-    class="add"
+    class="add buyButton"
     ${!inStock ? 'disabled' : ''}
-    style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid #478bff;background:linear-gradient(100deg,#1677ff,#713cff);color:#fff;border-radius:12px;font-weight:900;font-size:17px;box-shadow:0 0 12px rgba(55,115,255,.28);transition:transform .15s,box-shadow .15s;"
-    onclick="buyNow(${p.id})"
-    onpointerdown="this.style.boxShadow='0 0 24px rgba(75,125,255,.9)';this.style.transform='scale(.98)'"
-    onpointerup="this.style.boxShadow='0 0 12px rgba(55,115,255,.28)';this.style.transform='scale(1)'"
-    onpointerleave="this.style.boxShadow='0 0 12px rgba(55,115,255,.28)';this.style.transform='scale(1)'">
+    onclick="buyNow(${p.id})">
     ACHETER
   </button>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+  <div class="secondaryActions">
+
     <button
-      class="add"
+      class="add cartButton"
       ${!inStock ? 'disabled' : ''}
-      style="width:100%;box-sizing:border-box;padding:10px 4px;font-size:13px;border-radius:10px;"
       onclick="add(${p.id})">
       🛒 Panier
     </button>
 
     <button
-      class="details"
-      style="width:100%;box-sizing:border-box;padding:10px 4px;font-size:13px;border-radius:10px;"
+      class="details viewButton"
       onclick="openProduct(${p.id})">
       👁 Voir
     </button>
-  </div>
-</div>
 
+  </div>
+
+</div>
 
 </div>
 </article>`;
