@@ -3802,3 +3802,273 @@ footer {
     font-size:12px !important;
   }
   }
+/* =========================================================
+   SNGAMER STORE — PRODUCT CARD PREMIUM
+   ========================================================= */
+
+#products .card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(145deg, rgba(17, 28, 45, .98), rgba(7, 13, 23, .98));
+  border: 1px solid rgba(70, 117, 180, .28);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.03);
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+#products .card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(63, 145, 255, .65);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.42),
+    0 0 24px rgba(49,148,255,.10);
+}
+
+#products .card .pic {
+  position: relative;
+  height: 190px;
+  min-height: 190px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 30%, #16263d, #080e17 72%);
+}
+
+#products .productCardImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+
+#products .card:hover .productCardImage {
+  transform: scale(1.045);
+}
+
+#products .productCardEmoji {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 76px;
+}
+
+#products .card .info {
+  display: flex;
+  flex-direction: column;
+  padding: 17px;
+}
+
+#products .card .cat {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  min-height: 25px;
+  padding: 5px 9px;
+  margin-bottom: 7px;
+  border: 1px solid rgba(71, 139, 255, .25);
+  border-radius: 999px;
+  background: rgba(49,148,255,.08);
+  color: #63a9ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+#products .card .info h3 {
+  margin: 5px 0 9px;
+  color: #f7faff;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+#products .card .price {
+  margin: 3px 0 7px;
+  color: #ffd866;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+#products .card .price--promo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#products .card .priceOld {
+  color: #75859a;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
+#products .card .priceCurrent {
+  color: #ffd866;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+#products .card .discountBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: rgba(255,77,109,.14);
+  border: 1px solid rgba(255,77,109,.28);
+  color: #ff7188;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+#products .card .stock {
+  margin: 1px 0 10px;
+  color: #8292a7;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#products .card .stock.outOfStock {
+  color: #ff6b6b;
+  font-weight: 800;
+}
+
+#products .productActions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 5px;
+}
+
+#products .buyButton {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(104,159,255,.65);
+  border-radius: 12px;
+  background: linear-gradient(105deg, #1677ff, #713cff);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  box-shadow: 0 7px 18px rgba(44,105,255,.20);
+  cursor: pointer;
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    opacity .16s ease;
+}
+
+#products .buyButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(65,115,255,.34);
+}
+
+#products .buyButton:active:not(:disabled) {
+  transform: scale(.985);
+}
+
+#products .buyButton:disabled,
+#products .cartButton:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#products .secondaryActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+#products .cartButton,
+#products .viewButton {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 0;
+  padding: 10px 7px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#products .cartButton {
+  background: rgba(21,36,57,.9);
+  border: 1px solid rgba(66,93,124,.7);
+}
+
+#products .cartButton:hover:not(:disabled) {
+  background: rgba(37,62,91,.95);
+  border-color: rgba(72,139,255,.65);
+}
+
+#products .viewButton {
+  background: rgba(19,29,41,.95);
+  border: 1px solid rgba(66,83,105,.75);
+  color: #f3f7fc;
+}
+
+#products .viewButton:hover {
+  background: rgba(31,48,69,.95);
+  border-color: rgba(72,139,255,.65);
+}
+
+@media(max-width:560px) {
+
+  #products .card .pic {
+    height: 145px;
+    min-height: 145px;
+  }
+
+  #products .card .info {
+    padding: 12px;
+  }
+
+  #products .card .cat {
+    min-height: 22px;
+    padding: 4px 7px;
+    font-size: 9px;
+  }
+
+  #products .card .info h3 {
+    font-size: 15px;
+    margin-bottom: 7px;
+  }
+
+  #products .card .price,
+  #products .card .priceCurrent {
+    font-size: 17px;
+  }
+
+  #products .card .priceOld {
+    font-size: 11px;
+  }
+
+  #products .card .stock {
+    font-size: 11px;
+  }
+
+  #products .buyButton {
+    min-height: 42px;
+    font-size: 14px;
+  }
+
+  #products .cartButton,
+  #products .viewButton {
+    min-height: 38px;
+    font-size: 12px;
+  }
+}
