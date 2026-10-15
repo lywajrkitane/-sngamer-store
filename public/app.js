@@ -63,26 +63,32 @@ function render(){
     const inStock = Number(p.stock) > 0;
 
     const priceHtml = promoActive
-      ? `
-        <div class="price price--promo">
-          <span class="priceOld">
-            ${new Intl.NumberFormat("fr-FR").format(p.price)}
-          </span>
+  ? `
+    <div class="price price--promo">
+      <div class="pricePromoTop">
+        <span class="priceOld">
+          ${new Intl.NumberFormat("fr-FR").format(p.price)} FCFA
+        </span>
 
-          <strong class="priceCurrent">
-            ${new Intl.NumberFormat("fr-FR").format(p.promo_price)}
-          </strong>
+        <span class="discountBadge">
+          -${discount}%
+        </span>
+      </div>
 
-          <span class="discountBadge">
-            -${discount}%
-          </span>
-        </div>
-      `
-      : `
-        <div class="price">
-          ${new Intl.NumberFormat("fr-FR").format(p.price)}
-        </div>
-      `;
+      <strong class="priceCurrent">
+        ${new Intl.NumberFormat("fr-FR").format(p.promo_price)}
+        <small>FCFA</small>
+      </strong>
+    </div>
+  `
+  : `
+    <div class="price price--regular">
+      <strong class="priceCurrent">
+        ${new Intl.NumberFormat("fr-FR").format(p.price)}
+        <small>FCFA</small>
+      </strong>
+    </div>
+  `;
 
     const category = storeCategory(p);
 
