@@ -71,36 +71,48 @@ ${priceHtml}
   ${inStock ? p.stock + " disponible(s)" : "Rupture de stock"}
 </div>
 
-<div class="productActions">
+return `<article
+  class="card productCardClickable"
+  onclick="openProduct(${p.id})"
+  role="button"
+  tabindex="0"
+  onkeydown="if(event.key==='Enter' || event.key===' ') openProduct(${p.id})">
 
-  <button
-    class="add buyButton"
-    ${!inStock ? 'disabled' : ''}
-    onclick="buyNow(${p.id})">
-    ACHETER
-  </button>
+  <div class="pic">
+    ${p.image1_url
+      ? '<img class="productCardImage" src="' + p.image1_url + '" alt="' + p.name + '" loading="lazy">'
+      : '<div class="productCardEmoji">' + p.emoji + '</div>'}
+  </div>
 
-  <div class="secondaryActions">
+  <div class="info">
 
-    <button
-      class="add cartButton"
-      ${!inStock ? 'disabled' : ''}
-      onclick="add(${p.id})">
-      🛒 Panier
-    </button>
+    <div class="cat">
+      ${storeCategory(p)}${storeCategory(p) === "Coins" && p.platform ? " " + p.platform : ""}
+    </div>
 
-    <button
-      class="details viewButton"
-      onclick="openProduct(${p.id})">
-      👁 Voir
-    </button>
+    <h3>${p.name}</h3>
+
+    ${priceHtml}
+
+    <div class="stock ${!inStock ? 'outOfStock' : ''}">
+      ${inStock ? p.stock + " disponible(s)" : "Rupture de stock"}
+    </div>
+
+    ${inStock ? `
+      <div class="productCardBottom">
+        <button
+          class="addToCartIcon"
+          aria-label="Ajouter au panier"
+          onclick="event.stopPropagation(); add(${p.id})">
+          ＋
+        </button>
+      </div>
+    ` : ''}
 
   </div>
 
-</div>
-
-</div>
 </article>`;
+  
 }).join("");
   if (
   list.length === 0 &&
