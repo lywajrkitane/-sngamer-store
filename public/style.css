@@ -4250,3 +4250,148 @@ footer {
     font-size: 22px;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS COMPACTES
+   ========================================================= */
+
+.productCardClickable{
+  cursor:pointer;
+  min-width:0;
+}
+
+.productCardClickable .pic{
+  height:110px !important;
+  min-height:110px !important;
+  padding:0 !important;
+}
+
+.productCardClickable .pic img,
+.productCardImage{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.productCardEmoji{
+  font-size:48px;
+}
+
+.productCardClickable .info{
+  padding:9px !important;
+}
+
+.productCardClickable .cat{
+  font-size:8px !important;
+  line-height:1.2;
+  margin-bottom:3px;
+}
+
+.productCardClickable .info h3{
+  font-size:13px !important;
+  line-height:1.2;
+  margin:4px 0 !important;
+}
+
+.productCardClickable .price{
+  font-size:16px !important;
+  margin:5px 0 !important;
+}
+
+.productCardClickable .priceCurrent{
+  font-size:16px !important;
+}
+
+.productCardClickable .priceOld{
+  font-size:10px !important;
+}
+
+.productCardClickable .discountBadge{
+  font-size:8px !important;
+  padding:2px 4px !important;
+}
+
+/* DISPONIBLE : texte simple, sans cadre */
+.productCardClickable .stock{
+  margin:3px 0 5px !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  color:#55d98b !important;
+  font-size:9px !important;
+  font-weight:700;
+}
+
+.productCardClickable .stock.outOfStock{
+  color:#ff6b6b !important;
+}
+
+/* BOUTON + */
+.productCardBottom{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  margin-top:3px;
+}
+
+.addToCartIcon{
+  width:30px !important;
+  height:30px !important;
+  min-width:30px;
+  padding:0 !important;
+  margin:0 !important;
+  border-radius:50% !important;
+  border:1px solid rgba(58,149,255,.5) !important;
+  background:var(--sng-gradient) !important;
+  color:#fff !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:21px !important;
+  line-height:1 !important;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(22,135,255,.25);
+}
+
+.addToCartIcon:hover{
+  transform:scale(1.08);
+}
+
+/* MOBILE */
+@media(max-width:560px){
+
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:8px !important;
+  }
+
+  .productCardClickable .pic{
+    height:100px !important;
+    min-height:100px !important;
+  }
+
+  .productCardClickable .info{
+    padding:8px !important;
+  }
+
+  .productCardClickable .info h3{
+    font-size:12px !important;
+  }
+
+  .productCardClickable .price,
+  .productCardClickable .priceCurrent{
+    font-size:14px !important;
+  }
+
+  .productCardClickable .stock{
+    font-size:8px !important;
+  }
+
+  .addToCartIcon{
+    width:28px !important;
+    height:28px !important;
+    min-width:28px;
+    font-size:20px !important;
+  }
+}
