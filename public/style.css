@@ -4819,3 +4819,132 @@ footer {
 #productModal.show .shade {
   opacity: 1;
 }
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS : IMAGE + PRIX PREMIUM
+   ========================================================= */
+
+#products .card .pic {
+  height: 210px;
+  padding: 12px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(58,149,255,.16);
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(22,135,255,.14),
+      transparent 68%
+    ),
+    #080e18;
+}
+
+#products .card .pic img,
+#products .productCardImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 8px 22px rgba(0,0,0,.16);
+}
+
+#products .card:hover .pic img {
+  transform: scale(1.025);
+}
+
+/* PRIX PROMOTIONNEL */
+#products .price--promo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+#products .pricePromoTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+#products .priceOld {
+  color: #7f8b9d;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+#products .discountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 7px;
+  color: #fff;
+  background: linear-gradient(135deg,#e72b9d,#ff3d71);
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 5px 14px rgba(231,43,157,.20);
+}
+
+#products .priceCurrent {
+  display: block;
+  margin-top: 1px;
+  color: #f3d477;
+  font-size: 25px;
+  line-height: 1.15;
+  font-weight: 950;
+  letter-spacing: -.5px;
+}
+
+#products .priceCurrent small {
+  color: #aeb9ca;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+
+#products .price--regular .priceCurrent {
+  margin-top: 8px;
+}
+
+/* MOBILE */
+@media(max-width:560px) {
+  #products .card .pic {
+    height: 150px;
+    padding: 9px;
+  }
+
+  #products .card .pic img,
+  #products .productCardImage {
+    border-radius: 10px;
+  }
+
+  #products .price--promo {
+    margin-top: 10px;
+  }
+
+  #products .priceOld {
+    font-size: 11px;
+  }
+
+  #products .discountBadge {
+    min-height: 21px;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+
+  #products .priceCurrent {
+    font-size: 21px;
+  }
+
+  #products .priceCurrent small {
+    font-size: 10px;
+  }
+}
