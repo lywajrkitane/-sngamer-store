@@ -2048,9 +2048,9 @@ mediaFields.forEach(([inputId, previewId, url, type]) => {
 
   preview.innerHTML = type === "image"
     ? `<img src="${url}" alt="Média actuel"
-         style="width:100%;max-height:150px;object-fit:contain;border-radius:10px;">`
+         style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;">`
     : `<video src="${url}" controls preload="metadata"
-         style="width:100%;max-height:150px;border-radius:10px;"></video>`;
+         style="width:100%;max-height:220px;border-radius:10px;"></video>`;
 });
 
 
