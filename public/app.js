@@ -154,11 +154,6 @@ function add(id) {
   return true;
 }
 
-function buyNow(id) {
-  if (add(id)) {
-    cart();
-  }
-}
 function update(){
   const validItems = cartItems.filter(x =>
     products.some(p => Number(p.id) === Number(x.id))
