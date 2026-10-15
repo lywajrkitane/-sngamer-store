@@ -33,80 +33,21 @@ function cats() {
 }
 function filterBy(c){filter=c;cats();render()}
 function render(){
-let q=document.querySelector("#q").value.toLowerCase();
-let list = products.filter(p =>
-  matchesStoreSection(p) &&
-  (activeStoreSection !== "home" ||
-    filter === "Tous" ||
-    storeCategory(p) === filter) &&
-  p.name.toLowerCase().includes(q)
-);
-  document.querySelector("#products").innerHTML=list.map(p=>{
-const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
-const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
-const inStock = Number(p.stock) > 0;
-const priceHtml=promoActive
-?`<div class="price price--promo">
-  <span class="priceOld">${new Intl.NumberFormat("fr-FR").format(p.price)}</span>
-  <strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.promo_price)}</strong>
-  <span class="discountBadge">-${discount}%</span>
-</div>`
-:`<div class="price">${new Intl.NumberFormat("fr-FR").format(p.price)}</div>`;
+  const q = (document.querySelector("#q")?.value || "").toLowerCase();
 
-return `<article class="card">
-<div class="pic">
-  ${p.image1_url
-    ? '<img class="productCardImage" src="' + p.image1_url + '" alt="' + p.name + '" loading="lazy">'
-    : '<div class="productCardEmoji">' + p.emoji + '</div>'}
-</div>
-
-<div class="info">
-<div class="cat">${storeCategory(p)}${storeCategory(p) === "Coins" && p.platform ? " " + p.platform : ""}</div>
-
-<h3>${p.name}</h3>
-
-${priceHtml}
-
-<div class="stock ${!inStock ? 'outOfStock' : ''}">
-  ${inStock ? p.stock + " disponible(s)" : "Rupture de stock"}
-</div>
-
-return `<article
-  class="card productCardClickable"
-  onclick="openProduct(${p.id})"
-  role="button"
-  tabindex="0"
-  onkeydown="if(event.key==='Enter' || event.key===' ') openProduct(${p.id})">
-
-  <div class="pic">
-    ${p.image1_url
-      ? '<img class="productCardImage" src="' + p.image1_url + '" alt="' + p.name + '" loading="lazy">'
-      : '<div class="productCardEmoji">' + p.emoji + '</div>'}
-  </div>
-
-  <div class="info">
-
-    <div class="cat">
-      ${storeCategory(p)}${storeCategory(p) === "Coins" && p.platform ? " " + p.platform : ""}
-    </div>
-
-    <h3>${p.name}</h3>
-
-    ${priceHtml}
-function render(){
-  let q = document.querySelector("#q").value.toLowerCase();
-
-  let list = products.filter(p =>
+  const list = products.filter(p =>
     matchesStoreSection(p) &&
     (
       activeStoreSection !== "home" ||
       filter === "Tous" ||
       storeCategory(p) === filter
     ) &&
-    p.name.toLowerCase().includes(q)
+    (p.name || "").toLowerCase().includes(q)
   );
 
-  document.querySelector("#products").innerHTML = list.map(p => {
+  const productGrid = document.querySelector("#products");
+
+  productGrid.innerHTML = list.map(p => {
 
     const promoActive =
       Boolean(p.promo_active) &&
@@ -114,7 +55,9 @@ function render(){
       Number(p.promo_price) < Number(p.price);
 
     const discount = promoActive
-      ? Math.round((1 - Number(p.promo_price) / Number(p.price)) * 100)
+      ? Math.round(
+          (1 - Number(p.promo_price) / Number(p.price)) * 100
+        )
       : 0;
 
     const inStock = Number(p.stock) > 0;
@@ -141,13 +84,25 @@ function render(){
         </div>
       `;
 
+    const category = storeCategory(p);
+
+    const categoryLabel =
+      category === "Coins" && p.platform
+        ? `${category} ${p.platform}`
+        : category;
+
     return `
       <article
         class="card productCardClickable"
-        onclick="openProduct(${p.id})"
+        onclick="openProduct(${Number(p.id)})"
         role="button"
         tabindex="0"
-        onkeydown="if(event.key==='Enter' || event.key===' ') openProduct(${p.id})"
+        onkeydown="
+          if(event.key==='Enter' || event.key===' '){
+            event.preventDefault();
+            openProduct(${Number(p.id)});
+          }
+        "
       >
 
         <div class="pic">
@@ -156,14 +111,14 @@ function render(){
               ? `
                 <img
                   class="productCardImage"
-                  src="${p.image1_url}"
-                  alt="${p.name}"
+                  src="${escapeHtml(p.image1_url)}"
+                  alt="${escapeHtml(p.name || "")}"
                   loading="lazy"
                 >
               `
               : `
                 <div class="productCardEmoji">
-                  ${p.emoji}
+                  ${escapeHtml(p.emoji || "🎮")}
                 </div>
               `
           }
@@ -172,22 +127,19 @@ function render(){
         <div class="info">
 
           <div class="cat">
-            ${storeCategory(p)}
-            ${
-              storeCategory(p) === "Coins" && p.platform
-                ? " " + p.platform
-                : ""
-            }
+            ${escapeHtml(categoryLabel || "")}
           </div>
 
-          <h3>${p.name}</h3>
+          <h3>
+            ${escapeHtml(p.name || "")}
+          </h3>
 
           ${priceHtml}
 
           <div class="stock ${!inStock ? "outOfStock" : ""}">
             ${
               inStock
-                ? p.stock + " disponible(s)"
+                ? `${p.stock} disponible(s)`
                 : "Rupture de stock"
             }
           </div>
@@ -197,9 +149,13 @@ function render(){
               ? `
                 <div class="productCardBottom">
                   <button
+                    type="button"
                     class="addToCartIcon"
                     aria-label="Ajouter au panier"
-                    onclick="event.stopPropagation(); add(${p.id})"
+                    onclick="
+                      event.stopPropagation();
+                      add(${Number(p.id)});
+                    "
                   >
                     ＋
                   </button>
@@ -220,7 +176,7 @@ function render(){
     activeStoreSection !== "profile" &&
     !(activeStoreSection === "coins" && !selectedCoinPlatform)
   ) {
-    document.querySelector("#products").innerHTML = `
+    productGrid.innerHTML = `
       <div
         style="
           grid-column:1/-1;
@@ -228,7 +184,7 @@ function render(){
           padding:35px 15px;
           color:#aab8ca;
           border:1px dashed #2a4262;
-          border-radius:16px
+          border-radius:16px;
         "
       >
         <div style="font-size:32px">🎮</div>
@@ -236,7 +192,9 @@ function render(){
       </div>
     `;
   }
-            }
+    }
+
+
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
 function add(id) {
   const product = products.find(p => Number(p.id) === Number(id));
