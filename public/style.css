@@ -7191,3 +7191,425 @@ min-height:44px !important;
     transform: none !important;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CORRECTION FINALE DES CARTES PRODUITS
+   Ne pas supprimer les anciennes règles.
+   Ce bloc les surcharge proprement.
+   ========================================================= */
+
+/* ---------- GRILLE ---------- */
+
+#products.grid {
+  grid-auto-rows: auto !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+/* ---------- CARTE ---------- */
+
+#products .card.productCardClickable {
+  display: flex !important;
+  flex-direction: column !important;
+
+  width: 100% !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  align-self: stretch !important;
+
+  overflow: hidden !important;
+  border-radius: 15px !important;
+}
+
+/* ---------- IMAGE ---------- */
+
+#products .card.productCardClickable > .pic {
+  width: 100% !important;
+
+  height: 180px !important;
+  min-height: 180px !important;
+  max-height: 180px !important;
+
+  aspect-ratio: auto !important;
+
+  flex: 0 0 180px !important;
+
+  overflow: hidden !important;
+}
+
+#products .card.productCardClickable > .pic img,
+#products .card.productCardClickable .productCardImage {
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: cover !important;
+  object-position: center !important;
+
+  display: block !important;
+}
+
+/* ---------- BLOC INFORMATIONS ---------- */
+
+#products .card.productCardClickable > .info {
+  display: grid !important;
+
+  grid-template-columns: minmax(0, 1fr) 42px !important;
+
+  grid-template-areas:
+    "cat cat"
+    "title title"
+    "stock stock"
+    "price action" !important;
+
+  align-content: start !important;
+
+  padding: 10px !important;
+
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+/* ---------- CATÉGORIE ---------- */
+
+#products .card.productCardClickable > .info > .cat {
+  grid-area: cat !important;
+
+  width: max-content !important;
+  max-width: 100% !important;
+
+  min-width: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 5px 10px !important;
+
+  margin: 0 0 6px 0 !important;
+
+  border: 1px solid rgba(70,150,255,.35) !important;
+  border-radius: 999px !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+}
+
+/* ---------- NOM DU PRODUIT ---------- */
+
+#products .card.productCardClickable > .info > h3 {
+  grid-area: title !important;
+
+  margin: 0 0 5px 0 !important;
+
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+
+  min-height: 0 !important;
+  max-height: 36px !important;
+
+  overflow: hidden !important;
+
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+/* ---------- STOCK ---------- */
+
+#products .card.productCardClickable > .info > .stock {
+  grid-area: stock !important;
+
+  min-height: 0 !important;
+
+  margin: 0 0 7px 0 !important;
+  padding: 0 !important;
+
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+
+  color: #55d98b !important;
+}
+
+#products .card.productCardClickable > .info > .stock.outOfStock {
+  color: #ff5c70 !important;
+  font-weight: 800 !important;
+}
+
+/* ---------- PRIX ---------- */
+
+#products .card.productCardClickable > .info > .price {
+  grid-area: price !important;
+
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  align-self: end !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+
+  gap: 3px !important;
+}
+
+/* Prix normal */
+
+#products .card.productCardClickable .price--regular {
+  justify-content: flex-end !important;
+}
+
+#products .card.productCardClickable .priceCurrent {
+  display: block !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 17px !important;
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+
+  color: #f1d477 !important;
+}
+
+#products .card.productCardClickable .priceCurrent small {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+
+  color: #aeb7c5 !important;
+}
+
+/* ---------- PROMOTION ---------- */
+
+#products .card.productCardClickable .price--promo {
+  display: flex !important;
+  flex-direction: column !important;
+
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+
+  gap: 3px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ancien prix + réduction */
+
+#products .card.productCardClickable .pricePromoTop {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: flex-start !important;
+
+  gap: 6px !important;
+
+  width: auto !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ancien prix */
+
+#products .card.productCardClickable .priceOld {
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+
+  color: #778294 !important;
+
+  text-decoration: line-through !important;
+
+  white-space: nowrap !important;
+}
+
+/* Badge réduction */
+
+#products .card.productCardClickable .discountBadge {
+  position: static !important;
+
+  display: inline-flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  margin: 0 !important;
+
+  padding: 3px 6px !important;
+
+  border-radius: 7px !important;
+
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+}
+
+/* Nouveau prix */
+
+#products .card.productCardClickable .price--promo .priceCurrent {
+  font-size: 17px !important;
+  line-height: 1.1 !important;
+}
+
+/* ---------- BOUTON + ---------- */
+
+#products .card.productCardClickable > .info > .productCardBottom {
+  grid-area: action !important;
+
+  display: flex !important;
+
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+
+  width: 100% !important;
+
+  min-height: 0 !important;
+  height: auto !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  align-self: end !important;
+}
+
+/* Petit bouton carré */
+
+#products .card.productCardClickable .addToCartIcon {
+  width: 40px !important;
+  height: 40px !important;
+
+  min-width: 40px !important;
+  min-height: 40px !important;
+
+  max-width: 40px !important;
+  max-height: 40px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 12px !important;
+
+  font-size: 25px !important;
+  line-height: 1 !important;
+
+  flex-shrink: 0 !important;
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 560px) {
+
+  #products.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+
+    grid-auto-rows: auto !important;
+
+    gap: 10px !important;
+
+    align-items: stretch !important;
+  }
+
+  #products .card.productCardClickable {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    width: 100% !important;
+  }
+
+  /* Image beaucoup plus compacte */
+  #products .card.productCardClickable > .pic {
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+
+    flex: 0 0 150px !important;
+
+    aspect-ratio: auto !important;
+  }
+
+  #products .card.productCardClickable > .info {
+    padding: 9px !important;
+
+    grid-template-columns: minmax(0, 1fr) 40px !important;
+  }
+
+  #products .card.productCardClickable > .info > .cat {
+    padding: 4px 9px !important;
+
+    margin-bottom: 5px !important;
+
+    font-size: 9px !important;
+  }
+
+  #products .card.productCardClickable > .info > h3 {
+    font-size: 14px !important;
+    line-height: 1.18 !important;
+
+    max-height: 34px !important;
+
+    margin-bottom: 4px !important;
+  }
+
+  #products .card.productCardClickable > .info > .stock {
+    font-size: 10px !important;
+
+    margin-bottom: 6px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent {
+    font-size: 16px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small {
+    font-size: 9px !important;
+  }
+
+  #products .card.productCardClickable .priceOld {
+    font-size: 10px !important;
+  }
+
+  #products .card.productCardClickable .discountBadge {
+    font-size: 8px !important;
+
+    padding: 3px 5px !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon {
+    width: 38px !important;
+    height: 38px !important;
+
+    min-width: 38px !important;
+    min-height: 38px !important;
+
+    max-width: 38px !important;
+    max-height: 38px !important;
+
+    border-radius: 11px !important;
+
+    font-size: 23px !important;
+  }
+}
