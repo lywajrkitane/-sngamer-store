@@ -4427,7 +4427,7 @@ footer {
 
 /* INFORMATIONS */
 #products .productCardClickable .info {
-  padding: 7px !important;
+  padding: 4px !important;
 }
 
 #products .productCardClickable .cat {
@@ -4438,9 +4438,9 @@ footer {
 }
 
 #products .productCardClickable .info h3 {
-  font-size: 12px !important;
-  line-height: 1.15;
-  margin: 3px 0 4px;
+  font-size: 11px !important;
+  line-height: 1.1;
+  margin: 2px 0 3px;
 }
 
 /* PRIX */
