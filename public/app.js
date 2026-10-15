@@ -112,7 +112,7 @@ function render(){
 
         <div class="pic">
           ${
-            p.image1_url
+            (p.main_image_url || p.image1_url)
               ? `
                 <img
                   class="productCardImage"
