@@ -4446,15 +4446,15 @@ footer {
 /* PRIX */
 #products .productCardClickable .price,
 #products .productCardClickable .priceCurrent {
-  font-size: 14px !important;
-  margin: 3px 0 4px !important;
+  font-size: 12px !important;
+  margin: 1px 0 2px !important;
 }
 
 /* STOCK : VERT, SANS CADRE */
 #products .stock,
 #products .stock.outOfStock,
 #products .stock.stock-out {
-  margin: 2px 0 4px !important;
+  margin: 1px 0 2px !important;
   padding: 0 !important;
   color: #35d07f !important;
   font-size: 8px !important;
