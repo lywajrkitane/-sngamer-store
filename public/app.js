@@ -192,7 +192,7 @@ function render(){
       </div>
     `;
   }
-    }
+    
 
 
 function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update()}
