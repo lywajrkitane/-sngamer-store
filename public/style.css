@@ -5711,3 +5711,232 @@ min-height:44px !important;
     font-size:25px !important;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CARTES COMPACTES ET ALIGNÉES
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  /* Toutes les cartes conservent une structure uniforme */
+  #products.grid {
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  #products .card.productCardClickable {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    height: 100% !important;
+  }
+
+  /* IMAGE : hauteur réduite et identique */
+  #products .card.productCardClickable > .pic {
+    height: 155px !important;
+    min-height: 155px !important;
+    flex: 0 0 155px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+
+  #products .card.productCardClickable > .pic img,
+  #products .card.productCardClickable > .pic .productCardImage {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: inherit !important;
+  }
+
+  /* ESPACE INFORMATIONS */
+  #products .card.productCardClickable > .info {
+    display: grid !important;
+
+    grid-template-columns: minmax(0, 1fr) 40px !important;
+
+    grid-template-areas:
+      "cat cat"
+      "title title"
+      "stock stock"
+      "price action" !important;
+
+    grid-template-rows: auto auto auto 1fr !important;
+
+    flex: 1 1 auto !important;
+    min-height: 140px !important;
+
+    padding: 10px !important;
+    column-gap: 7px !important;
+    row-gap: 0 !important;
+  }
+
+  /* CATÉGORIE : cadre adapté à la longueur du texte */
+  #products .card.productCardClickable > .info > .cat {
+    grid-area: cat !important;
+
+    display: inline-block !important;
+    justify-self: start !important;
+
+    width: max-content !important;
+    max-width: 100% !important;
+
+    margin: 0 0 6px !important;
+    padding: 5px 9px !important;
+
+    font-size: 9px !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0.6px !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+
+    border-radius: 999px !important;
+  }
+
+  /* NOM : deux lignes maximum */
+  #products .card.productCardClickable > .info > h3 {
+    grid-area: title !important;
+
+    min-width: 0 !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* DISPONIBILITÉ : toujours après le nom */
+  #products .card.productCardClickable > .info > .stock {
+    grid-area: stock !important;
+
+    display: block !important;
+
+    min-height: 16px !important;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+  }
+
+  /* PRIX : zone basse de la carte */
+  #products .card.productCardClickable > .info > .price {
+    grid-area: price !important;
+
+    align-self: end !important;
+
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 15px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Les deux prix restent empilés en promotion */
+  #products .card.productCardClickable .price--regular,
+  #products .card.productCardClickable .price--promo {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+
+  /* Ancien prix barré et réduction */
+  #products .card.productCardClickable .pricePromoTop {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px 5px !important;
+  }
+
+  #products .card.productCardClickable .priceOld {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  #products .card.productCardClickable .discountBadge {
+    padding: 2px 5px !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Prix actuel, bien visible */
+  #products .card.productCardClickable .priceCurrent {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+
+    font-size: clamp(13px, 3.8vw, 16px) !important;
+    line-height: 1.05 !important;
+
+    white-space: nowrap !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small {
+    font-size: 9px !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* BOUTON + : petit, aligné à droite */
+  #products .card.productCardClickable > .info > .productCardBottom {
+    grid-area: action !important;
+
+    align-self: end !important;
+    justify-self: end !important;
+
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+
+    width: 40px !important;
+    min-width: 40px !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon {
+    width: 38px !important;
+    height: 38px !important;
+
+    min-width: 38px !important;
+    min-height: 38px !important;
+
+    flex: 0 0 38px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 11px !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+  }
+}
