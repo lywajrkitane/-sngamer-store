@@ -5940,3 +5940,391 @@ min-height:44px !important;
     line-height: 1 !important;
   }
 }
+/* =========================================================
+   SNGAMER STORE — PRODUCT CARDS FINAL
+   STRUCTURE UNIFORME + MOBILE COMPACT
+   ========================================================= */
+
+/* CARTE */
+#products .card.productCardClickable {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 390px !important;
+  min-height: 390px !important;
+  overflow: hidden !important;
+}
+
+/* IMAGE */
+#products .card.productCardClickable > .pic {
+  width: 100% !important;
+  height: 210px !important;
+  min-height: 210px !important;
+  flex: 0 0 210px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  background: #080d14 !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+#products .card.productCardClickable > .pic img,
+#products .card.productCardClickable > .pic .productCardImage {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* CONTENU */
+#products .card.productCardClickable > .info {
+  position: relative !important;
+
+  display: grid !important;
+
+  grid-template-columns: minmax(0, 1fr) 46px !important;
+
+  grid-template-areas:
+    "cat cat"
+    "title title"
+    "stock stock"
+    "price action" !important;
+
+  grid-template-rows:
+    auto
+    auto
+    auto
+    1fr !important;
+
+  flex: 1 1 auto !important;
+
+  min-height: 180px !important;
+
+  padding: 11px 12px 12px !important;
+
+  column-gap: 8px !important;
+  row-gap: 0 !important;
+}
+
+/* CATÉGORIE
+   Le cadre épouse automatiquement le texte */
+#products .card.productCardClickable > .info > .cat {
+  grid-area: cat !important;
+
+  display: inline-flex !important;
+
+  justify-self: start !important;
+  align-self: start !important;
+
+  width: max-content !important;
+  max-width: 100% !important;
+
+  min-height: 0 !important;
+
+  margin: 0 0 5px !important;
+
+  padding: 4px 9px !important;
+
+  border-radius: 999px !important;
+
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+  letter-spacing: .7px !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* NOM DU PRODUIT */
+#products .card.productCardClickable > .info > h3 {
+  grid-area: title !important;
+
+  min-width: 0 !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+
+  overflow: hidden !important;
+}
+
+/* STOCK
+   TOUJOURS juste après le nom */
+#products .card.productCardClickable > .info > .stock {
+  grid-area: stock !important;
+
+  display: block !important;
+
+  min-height: 16px !important;
+
+  margin: 5px 0 0 !important;
+  padding: 0 !important;
+
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#products .card.productCardClickable > .info > .stock:not(.outOfStock) {
+  color: #55d98b !important;
+}
+
+#products .card.productCardClickable > .info > .stock.outOfStock {
+  color: #ff626c !important;
+}
+
+/* PRIX
+   TOUJOURS EN BAS À GAUCHE */
+#products .card.productCardClickable > .info > .price {
+  grid-area: price !important;
+
+  align-self: end !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+
+  font-size: 19px !important;
+  line-height: 1 !important;
+}
+
+/* PRIX NORMAL */
+#products .card.productCardClickable .price--regular {
+  min-height: 30px !important;
+}
+
+/* PRIX PROMOTIONNEL */
+#products .card.productCardClickable .price--promo {
+  min-height: 54px !important;
+  gap: 4px !important;
+}
+
+/* ANCIEN PRIX + RÉDUCTION */
+#products .card.productCardClickable .pricePromoTop {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-height: 18px !important;
+}
+
+#products .card.productCardClickable .priceOld {
+  color: #7f8da2 !important;
+
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+
+  text-decoration: line-through !important;
+
+  white-space: nowrap !important;
+}
+
+#products .card.productCardClickable .discountBadge {
+  min-height: 20px !important;
+
+  padding: 2px 6px !important;
+
+  border-radius: 6px !important;
+
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+/* PRIX ACTUEL */
+#products .card.productCardClickable .priceCurrent {
+  display: inline-flex !important;
+  align-items: baseline !important;
+
+  gap: 5px !important;
+
+  margin: 0 !important;
+
+  color: #f4c95d !important;
+
+  font-size: 19px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+}
+
+#products .card.productCardClickable .priceCurrent small {
+  margin: 0 !important;
+
+  color: #aeb9ca !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+/* BOUTON +
+   MÊME NIVEAU QUE LE PRIX */
+#products .card.productCardClickable > .info > .productCardBottom {
+  grid-area: action !important;
+
+  align-self: end !important;
+  justify-self: end !important;
+
+  width: 38px !important;
+  min-width: 38px !important;
+
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+}
+
+/* BOUTON + PETIT */
+#products .card.productCardClickable .addToCartIcon {
+  width: 38px !important;
+  height: 38px !important;
+
+  min-width: 38px !important;
+  min-height: 38px !important;
+
+  flex: 0 0 38px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border-radius: 11px !important;
+
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  #products.grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 10px !important;
+
+    align-items: stretch !important;
+  }
+
+  /* TOUTES LES CARTES : MÊME TAILLE */
+  #products .card.productCardClickable {
+    height: 320px !important;
+    min-height: 320px !important;
+  }
+
+  /* IMAGE PLUS PETITE */
+  #products .card.productCardClickable > .pic {
+    height: 140px !important;
+    min-height: 140px !important;
+    flex-basis: 140px !important;
+
+    border-radius:
+      14px 14px 0 0 !important;
+  }
+
+  /* CONTENU */
+  #products .card.productCardClickable > .info {
+    min-height: 180px !important;
+
+    padding: 10px !important;
+
+    grid-template-columns:
+      minmax(0, 1fr) 40px !important;
+  }
+
+  /* CATÉGORIE */
+  #products .card.productCardClickable > .info > .cat {
+    margin-bottom: 5px !important;
+
+    padding: 4px 8px !important;
+
+    font-size: 8px !important;
+  }
+
+  /* NOM */
+  #products .card.productCardClickable > .info > h3 {
+    font-size: 14px !important;
+
+    min-height: 34px !important;
+    max-height: 34px !important;
+  }
+
+  /* STOCK */
+  #products .card.productCardClickable > .info > .stock {
+    font-size: 10px !important;
+
+    margin-top: 5px !important;
+  }
+
+  /* PROMOTION */
+  #products .card.productCardClickable .price--promo {
+    min-height: 50px !important;
+  }
+
+  #products .card.productCardClickable .priceOld {
+    font-size: 9px !important;
+  }
+
+  #products .card.productCardClickable .discountBadge {
+    min-height: 18px !important;
+
+    padding: 2px 5px !important;
+
+    font-size: 8px !important;
+  }
+
+  /* PRIX ACTUEL */
+  #products .card.productCardClickable .priceCurrent {
+    font-size: 17px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small {
+    font-size: 9px !important;
+  }
+
+  /* BOUTON + */
+  #products .card.productCardClickable .addToCartIcon {
+    width: 36px !important;
+    height: 36px !important;
+
+    min-width: 36px !important;
+    min-height: 36px !important;
+
+    flex-basis: 36px !important;
+
+    border-radius: 10px !important;
+
+    font-size: 21px !important;
+  }
+  }
