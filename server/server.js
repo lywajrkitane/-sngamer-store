@@ -80,14 +80,15 @@ price INTEGER NOT NULL CHECK (price >= 0),
   ADD COLUMN IF NOT EXISTS platform TEXT DEFAULT NULL
 `);
   
-await db(`
-  ADD COLUMN IF NOT EXISTS description TEXT,
-ADD COLUMN IF NOT EXISTS main_image_url TEXT,
-ADD COLUMN IF NOT EXISTS image1_url TEXT,
-ADD COLUMN IF NOT EXISTS image2_url TEXT,
-ADD COLUMN IF NOT EXISTS image3_url TEXT,
-ADD COLUMN IF NOT EXISTS video_url TEXT
-`);
+  await db(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS description TEXT,
+    ADD COLUMN IF NOT EXISTS main_image_url TEXT,
+    ADD COLUMN IF NOT EXISTS image1_url TEXT,
+    ADD COLUMN IF NOT EXISTS image2_url TEXT,
+    ADD COLUMN IF NOT EXISTS image3_url TEXT,
+    ADD COLUMN IF NOT EXISTS video_url TEXT
+  `);
   await db(`
     CREATE TABLE IF NOT EXISTS orders (
       id BIGSERIAL PRIMARY KEY,
@@ -125,14 +126,15 @@ ADD COLUMN IF NOT EXISTS video_url TEXT
   ALTER TABLE orders
   ALTER COLUMN phone DROP NOT NULL
 `);
-    await db(`
-    ADD COLUMN IF NOT EXISTS description TEXT,
-ADD COLUMN IF NOT EXISTS main_image_url TEXT,
-ADD COLUMN IF NOT EXISTS image1_url TEXT,
-ADD COLUMN IF NOT EXISTS image2_url TEXT,
-ADD COLUMN IF NOT EXISTS image3_url TEXT,
-ADD COLUMN IF NOT EXISTS video_url TEXT
-  `);
+        await db(`
+      ALTER TABLE products
+      ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '',
+      ADD COLUMN IF NOT EXISTS main_image_url TEXT,
+      ADD COLUMN IF NOT EXISTS image1_url TEXT,
+      ADD COLUMN IF NOT EXISTS image2_url TEXT,
+      ADD COLUMN IF NOT EXISTS image3_url TEXT,
+      ADD COLUMN IF NOT EXISTS video_url TEXT
+    `);
   await db(`
   UPDATE products
   SET main_image_url = image1_url
