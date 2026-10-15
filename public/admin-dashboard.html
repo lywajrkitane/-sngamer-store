@@ -2021,6 +2021,37 @@ toggleEditCoinPlatform();
 
     document.getElementById("editProductDescription").value =
       product.description || "";
+    /* =========================================
+   APERÇUS DES MÉDIAS EXISTANTS
+========================================= */
+
+const mediaFields = [
+  ["editProductImage1", "editProductImage1Preview", product.image1_url, "image"],
+  ["editProductImage2", "editProductImage2Preview", product.image2_url, "image"],
+  ["editProductImage3", "editProductImage3Preview", product.image3_url, "image"],
+  ["editProductVideo", "editProductVideoPreview", product.video_url, "video"]
+];
+
+mediaFields.forEach(([inputId, previewId, url, type]) => {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+
+  if (input) input.value = "";
+
+  if (!preview) return;
+
+  if (!url) {
+    preview.innerHTML =
+      '<p class="edit-media-empty">Aucun média enregistré.</p>';
+    return;
+  }
+
+  preview.innerHTML = type === "image"
+    ? `<img src="${url}" alt="Média actuel"
+         style="width:100%;max-height:150px;object-fit:contain;border-radius:10px;">`
+    : `<video src="${url}" controls preload="metadata"
+         style="width:100%;max-height:150px;border-radius:10px;"></video>`;
+});
 
 
     /* ===============================
@@ -2372,6 +2403,49 @@ if (category === "Coins" && !platform) {
 
           return;
         }
+        /* =========================================
+   ENVOI DES NOUVEAUX MÉDIAS
+========================================= */
+
+const mediaForm = new FormData();
+
+const image1 =
+  document.getElementById("editProductImage1").files[0];
+
+const image2 =
+  document.getElementById("editProductImage2").files[0];
+
+const image3 =
+  document.getElementById("editProductImage3").files[0];
+
+const video =
+  document.getElementById("editProductVideo").files[0];
+
+if (image1) mediaForm.append("image1", image1);
+if (image2) mediaForm.append("image2", image2);
+if (image3) mediaForm.append("image3", image3);
+if (video) mediaForm.append("video", video);
+
+if (image1 || image2 || image3 || video) {
+
+  const mediaResponse = await fetch(
+    "/api/admin/products/" + id + "/media",
+    {
+      method: "POST",
+      body: mediaForm
+    }
+  );
+
+  const mediaData = await mediaResponse.json();
+
+  if (!mediaResponse.ok) {
+    alert(
+      mediaData.error ||
+      "Les informations sont enregistrées, mais l'envoi des médias a échoué."
+    );
+    return;
+  }
+}
 
 
         /* ===============================
@@ -3189,6 +3263,68 @@ async function loadAll() {
       placeholder="Description du produit"
     ></textarea>
   </div>
+      <!-- =========================================
+     MÉDIAS DU PRODUIT — MODIFICATION
+========================================= -->
+
+<div class="edit-product-media-section">
+
+  <h3>🖼️ Images et vidéo du produit</h3>
+
+  <p class="edit-product-media-help">
+    Sélectionne uniquement les fichiers que tu souhaites remplacer.
+    Les médias actuels seront conservés pour les champs laissés vides.
+  </p>
+
+  <div class="edit-product-media-grid">
+
+    <div class="edit-product-field">
+      <label for="editProductImage1">Image principale</label>
+      <input
+        type="file"
+        id="editProductImage1"
+        accept="image/*"
+      >
+      <div id="editProductImage1Preview"
+           class="edit-product-media-preview"></div>
+    </div>
+
+    <div class="edit-product-field">
+      <label for="editProductImage2">Image 2</label>
+      <input
+        type="file"
+        id="editProductImage2"
+        accept="image/*"
+      >
+      <div id="editProductImage2Preview"
+           class="edit-product-media-preview"></div>
+    </div>
+
+    <div class="edit-product-field">
+      <label for="editProductImage3">Image 3</label>
+      <input
+        type="file"
+        id="editProductImage3"
+        accept="image/*"
+      >
+      <div id="editProductImage3Preview"
+           class="edit-product-media-preview"></div>
+    </div>
+
+    <div class="edit-product-field">
+      <label for="editProductVideo">🎥 Vidéo du produit</label>
+      <input
+        type="file"
+        id="editProductVideo"
+        accept="video/*"
+      >
+      <div id="editProductVideoPreview"
+           class="edit-product-media-preview"></div>
+    </div>
+
+  </div>
+
+</div>
 
   <div class="edit-product-actions">
 
