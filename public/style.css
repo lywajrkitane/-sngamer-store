@@ -4103,3 +4103,150 @@ footer {
     font-size: 12px;
   }
 }
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS COMPACTES
+   ========================================================= */
+
+#products .productCardClickable {
+  cursor: pointer;
+}
+
+#products .productCardClickable:focus-visible {
+  outline: 2px solid #3d8bff;
+  outline-offset: 2px;
+}
+
+/* IMAGE PLUS COMPACTE */
+#products .card .pic {
+  height: 115px;
+  min-height: 115px;
+}
+
+#products .productCardEmoji {
+  font-size: 55px;
+}
+
+/* INFORMATIONS PLUS COMPACTES */
+#products .card .info {
+  padding: 10px;
+}
+
+#products .card .cat {
+  min-height: 20px;
+  padding: 3px 7px;
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+
+#products .card .info h3 {
+  margin: 3px 0 5px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* PRIX */
+#products .card .price {
+  margin: 8px 0 6px;
+  font-size: 17px;
+}
+
+#products .card .priceCurrent {
+  font-size: 17px;
+}
+
+/* STOCK : PLUS DE CADRE */
+#products .card .stock {
+  margin: 2px 0 6px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #55d98b !important;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#products .card .stock.outOfStock {
+  color: #ff6b6b !important;
+}
+
+/* BOUTON + */
+#products .productCardBottom {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 3px;
+}
+
+#products .addToCartIcon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(76,145,255,.55);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1677ff, #713cff);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(44,105,255,.22);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+#products .addToCartIcon:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 18px rgba(44,105,255,.35);
+}
+
+#products .addToCartIcon:active {
+  transform: scale(.94);
+}
+
+/* MOBILE : ENCORE PLUS COMPACT */
+@media (max-width: 560px) {
+
+  #products .card .pic {
+    height: 105px;
+    min-height: 105px;
+  }
+
+  #products .card .info {
+    padding: 9px;
+  }
+
+  #products .card .cat {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+
+  #products .card .info h3 {
+    font-size: 13px;
+    line-height: 1.18;
+    margin: 3px 0 4px;
+  }
+
+  #products .card .price,
+  #products .card .priceCurrent {
+    font-size: 16px;
+  }
+
+  #products .card .price {
+    margin: 7px 0 5px;
+  }
+
+  #products .card .stock {
+    font-size: 9px;
+    margin-bottom: 5px !important;
+  }
+
+  #products .addToCartIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+  }
+}
