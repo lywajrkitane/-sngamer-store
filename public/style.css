@@ -4794,3 +4794,28 @@ footer {
     transition: none;
   }
 }
+/* =========================================================
+   ANIMATION PREMIUM — OUVERTURE FICHE PRODUIT
+========================================================= */
+
+#productModal .productBox {
+  opacity: 0;
+  transform: translateY(20px) scale(.96);
+  transition:
+    opacity .22s ease,
+    transform .30s cubic-bezier(.2,.8,.2,1);
+}
+
+#productModal.show .productBox {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+#productModal .shade {
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+
+#productModal.show .shade {
+  opacity: 1;
+}
