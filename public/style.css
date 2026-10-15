@@ -5285,3 +5285,67 @@ footer {
     font-size:27px;
   }
 }
+/* =========================================================
+   IMAGE PRODUIT — FORMAT PLEINE ZONE
+   ========================================================= */
+
+#products .card .pic {
+  position: relative !important;
+  width: 100% !important;
+  height: 220px !important;
+  min-height: 220px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  overflow: hidden !important;
+
+  display: block !important;
+
+  background: #0b111b !important;
+
+  border-radius: 15px 15px 0 0 !important;
+}
+
+#products .card .pic .productCardImage,
+#products .card .pic img {
+  display: block !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: none !important;
+  max-height: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  border: 0 !important;
+
+  border-radius: 15px 15px 0 0 !important;
+
+  transform: none;
+}
+
+/* Petit zoom premium uniquement au survol */
+#products .card:hover .pic .productCardImage,
+#products .card:hover .pic img {
+  transform: scale(1.025) !important;
+}
+
+/* Mobile */
+@media (max-width: 560px) {
+  #products .card .pic {
+    height: 175px !important;
+    min-height: 175px !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+
+  #products .card .pic .productCardImage,
+  #products .card .pic img {
+    border-radius: 14px 14px 0 0 !important;
+  }
+}
