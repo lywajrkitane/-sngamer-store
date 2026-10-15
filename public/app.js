@@ -76,10 +76,9 @@ function render(){
       </div>
 
       <strong class="priceCurrent">
-        ${new Intl.NumberFormat("fr-FR").format(p.promo_price)}
-        <small>FCFA</small>
-      </strong>
-    </div>
+  ${new Intl.NumberFormat("fr-FR").format(p.promo_price)}
+  <small>FCFA</small>
+</strong>
   `
   : `
     <div class="price price--regular">
