@@ -1358,7 +1358,14 @@ let dragStartY = 0;
 let isDraggingCrop = false;
 
 function initCrop() {
-  const ids = ["pImage1", "pImage2", "pImage3"];
+  const ids = [
+  "pImage1",
+  "pImage2",
+  "pImage3",
+  "editProductImage1",
+  "editProductImage2",
+  "editProductImage3"
+];
 
   ids.forEach(id => {
     const input = document.getElementById(id);
