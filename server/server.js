@@ -81,12 +81,12 @@ price INTEGER NOT NULL CHECK (price >= 0),
 `);
   
 await db(`
-  ALTER TABLE products
   ADD COLUMN IF NOT EXISTS description TEXT,
-  ADD COLUMN IF NOT EXISTS image1_url TEXT,
-  ADD COLUMN IF NOT EXISTS image2_url TEXT,
-  ADD COLUMN IF NOT EXISTS image3_url TEXT,
-  ADD COLUMN IF NOT EXISTS video_url TEXT
+ADD COLUMN IF NOT EXISTS main_image_url TEXT,
+ADD COLUMN IF NOT EXISTS image1_url TEXT,
+ADD COLUMN IF NOT EXISTS image2_url TEXT,
+ADD COLUMN IF NOT EXISTS image3_url TEXT,
+ADD COLUMN IF NOT EXISTS video_url TEXT
 `);
   await db(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -126,13 +126,19 @@ await db(`
   ALTER COLUMN phone DROP NOT NULL
 `);
     await db(`
-    ALTER TABLE products
-    ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '',
-    ADD COLUMN IF NOT EXISTS image1_url TEXT,
-    ADD COLUMN IF NOT EXISTS image2_url TEXT,
-    ADD COLUMN IF NOT EXISTS image3_url TEXT,
-    ADD COLUMN IF NOT EXISTS video_url TEXT;
+    ADD COLUMN IF NOT EXISTS description TEXT,
+ADD COLUMN IF NOT EXISTS main_image_url TEXT,
+ADD COLUMN IF NOT EXISTS image1_url TEXT,
+ADD COLUMN IF NOT EXISTS image2_url TEXT,
+ADD COLUMN IF NOT EXISTS image3_url TEXT,
+ADD COLUMN IF NOT EXISTS video_url TEXT
   `);
+  await db(`
+  UPDATE products
+  SET main_image_url = image1_url
+  WHERE main_image_url IS NULL
+    AND image1_url IS NOT NULL
+`);
   const countResult = await db(
     "SELECT COUNT(*)::int AS count FROM products"
   );
@@ -1337,12 +1343,29 @@ app.post(
         const uploaded = {};
 
         if (image1) {
-          const result = await uploadToCloudinary(
-            image1.buffer,
-            "image",
-            `sngamer-store/products/${productId}`
-          );
-          uploaded.image1_url = result.secure_url;
+  const result = await uploadToCloudinary(
+    image1.buffer,
+    "image",
+    `sngamer-store/products/${productId}`
+  );
+
+  uploaded.image1_url = result.secure_url;
+
+  const mainImageResult = await db(
+    `
+    SELECT main_image_url
+    FROM products
+    WHERE id = $1
+    `,
+    [productId]
+  );
+
+  if (
+    mainImageResult.rows.length &&
+    !mainImageResult.rows[0].main_image_url
+  ) {
+    uploaded.main_image_url = result.secure_url;
+  }
         }
 
         if (image2) {
