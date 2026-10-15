@@ -2409,43 +2409,77 @@ if (category === "Coins" && !platform) {
 
 const mediaForm = new FormData();
 
+const image1Input =
+  document.getElementById("editProductImage1");
+
+const image2Input =
+  document.getElementById("editProductImage2");
+
+const image3Input =
+  document.getElementById("editProductImage3");
+
+const videoInput =
+  document.getElementById("editProductVideo");
+
 const image1 =
-  document.getElementById("editProductImage1").files[0];
+  image1Input?.files?.[0];
 
 const image2 =
-  document.getElementById("editProductImage2").files[0];
+  image2Input?.files?.[0];
 
 const image3 =
-  document.getElementById("editProductImage3").files[0];
+  image3Input?.files?.[0];
 
 const video =
-  document.getElementById("editProductVideo").files[0];
+  videoInput?.files?.[0];
 
-if (image1) mediaForm.append("image1", image1);
-if (image2) mediaForm.append("image2", image2);
-if (image3) mediaForm.append("image3", image3);
-if (video) mediaForm.append("video", video);
+if (image1) {
+  mediaForm.append("image1", image1);
+}
 
-if (image1 || image2 || image3 || video) {
+if (image2) {
+  mediaForm.append("image2", image2);
+}
 
-  const mediaResponse = await fetch(
-    "/api/admin/products/" + id + "/media",
-    {
-      method: "POST",
-      body: mediaForm
-    }
-  );
+if (image3) {
+  mediaForm.append("image3", image3);
+}
 
-  const mediaData = await mediaResponse.json();
+if (video) {
+  mediaForm.append("video", video);
+}
+
+if (
+  image1 ||
+  image2 ||
+  image3 ||
+  video
+) {
+
+  const mediaResponse =
+    await fetch(
+      "/api/admin/products/" +
+      id +
+      "/media",
+      {
+        method: "POST",
+        body: mediaForm
+      }
+    );
+
+  const mediaData =
+    await mediaResponse.json();
 
   if (!mediaResponse.ok) {
+
     alert(
       mediaData.error ||
-      "Les informations sont enregistrées, mais l'envoi des médias a échoué."
+      "Impossible d'enregistrer les nouveaux médias."
     );
+
     return;
   }
-}
+              }
 
 
         /* ===============================
