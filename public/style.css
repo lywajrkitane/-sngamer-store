@@ -7613,3 +7613,43 @@ min-height:44px !important;
     font-size: 23px !important;
   }
 }
+/* CORRECTION BADGE PROMOTION — SNGAMER STORE */
+
+#products .productCardClickable .pricePromoTop {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  width: calc(100% - 76px) !important;
+  max-width: calc(100% - 76px) !important;
+  min-width: 0 !important;
+}
+
+#products .productCardClickable .discountBadge {
+  flex: 0 0 auto !important;
+  min-width: 38px !important;
+  height: 26px !important;
+  padding: 0 7px !important;
+  margin: 0 !important;
+  border-radius: 9px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 560px) {
+  #products .productCardClickable .pricePromoTop {
+    width: calc(100% - 70px) !important;
+    max-width: calc(100% - 70px) !important;
+  }
+
+  #products .productCardClickable .discountBadge {
+    min-width: 36px !important;
+    height: 24px !important;
+    padding: 0 6px !important;
+    font-size: 9px !important;
+  }
+}
