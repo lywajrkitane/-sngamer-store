@@ -4060,7 +4060,7 @@ footer {
 @media(max-width:560px) {
 
   #products .card .pic {
-    height: 145px;
+    height: 90px !important;
     min-height: 145px;
   }
 
