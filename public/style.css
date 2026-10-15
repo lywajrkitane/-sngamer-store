@@ -5657,9 +5657,9 @@ footer {
 @media (max-width:560px){
 
   #products .card.productCardClickable > .pic{
-    height:175px !important;
-    min-height:175px !important;
-    flex-basis:175px !important;
+    height:155px !important;
+min-height:155px !important;
+flex-basis:155px !important;
 
     border-radius:14px 14px 0 0 !important;
   }
@@ -5670,7 +5670,7 @@ footer {
   }
 
   #products .card.productCardClickable > .info{
-    min-height:170px !important;
+    min-height:145px !important;
 
     padding:12px 12px 13px !important;
 
@@ -5701,11 +5701,11 @@ footer {
   }
 
   #products .card.productCardClickable .addToCartIcon{
-    width:46px !important;
-    height:46px !important;
+    width:44px !important;
+height:44px !important;
 
-    min-width:46px !important;
-    min-height:46px !important;
+min-width:44px !important;
+min-height:44px !important;
 
     border-radius:14px !important;
     font-size:25px !important;
