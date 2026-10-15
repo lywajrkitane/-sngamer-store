@@ -79,6 +79,7 @@ function render(){
   ${new Intl.NumberFormat("fr-FR").format(p.promo_price)}
   <small>FCFA</small>
 </strong>
+</div>
   `
   : `
     <div class="price price--regular">
