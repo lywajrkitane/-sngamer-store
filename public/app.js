@@ -47,11 +47,11 @@ const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*
 const inStock = Number(p.stock) > 0;
 const priceHtml=promoActive
 ?`<div class="price price--promo">
-  <span class="priceOld">${money(p.price)}</span>
-  <strong class="priceCurrent">${money(p.promo_price)}</strong>
+  <span class="priceOld">${new Intl.NumberFormat("fr-FR").format(p.price)}</span>
+  <strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.promo_price)}</strong>
   <span class="discountBadge">-${discount}%</span>
 </div>`
-:`<div class="price">${money(p.price)}</div>`;
+:`<div class="price">${new Intl.NumberFormat("fr-FR").format(p.price)}</div>`;
 
 return `<article class="card">
 <div class="pic">
