@@ -5414,3 +5414,300 @@ footer {
         border-radius: 14px 14px 0 0;
     }
 }
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS PREMIUM
+   ========================================================= */
+
+#products .card.productCardClickable{
+  display:flex !important;
+  flex-direction:column !important;
+  height:100% !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+
+#products .card.productCardClickable > .pic{
+  width:100% !important;
+  height:220px !important;
+  min-height:220px !important;
+  flex:0 0 220px !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  border-radius:16px 16px 0 0 !important;
+}
+
+#products .card.productCardClickable > .pic img,
+#products .card.productCardClickable > .pic .productCardImage{
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border:0 !important;
+  border-radius:16px 16px 0 0 !important;
+}
+
+/* Structure : catégorie / nom / stock / prix + bouton */
+#products .card.productCardClickable > .info{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+
+  grid-template-areas:
+    "cat cat"
+    "title title"
+    "stock stock"
+    "price action" !important;
+
+  grid-template-rows:auto auto auto 1fr !important;
+
+  column-gap:12px !important;
+  row-gap:0 !important;
+
+  flex:1 1 auto !important;
+  min-height:190px !important;
+
+  padding:14px 16px 16px !important;
+}
+
+#products .card.productCardClickable > .info > .cat{
+  grid-area:cat !important;
+  margin:0 0 7px !important;
+
+  font-size:10px !important;
+  line-height:1.2 !important;
+  letter-spacing:1.2px !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+#products .card.productCardClickable > .info > h3{
+  grid-area:title !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  font-size:17px !important;
+  line-height:1.25 !important;
+  font-weight:800 !important;
+
+  min-height:43px !important;
+
+  display:-webkit-box !important;
+  -webkit-box-orient:vertical !important;
+  -webkit-line-clamp:2 !important;
+  overflow:hidden !important;
+}
+
+/* DISPONIBILITÉ : juste après le nom */
+#products .card.productCardClickable > .info > .stock{
+  grid-area:stock !important;
+
+  margin:8px 0 0 !important;
+  min-height:18px !important;
+
+  font-size:12px !important;
+  line-height:1.35 !important;
+  font-weight:700 !important;
+}
+
+#products .card.productCardClickable > .info > .stock:not(.outOfStock){
+  color:#55d98b !important;
+}
+
+#products .card.productCardClickable > .info > .stock.outOfStock{
+  color:#ff626c !important;
+}
+
+/* PRIX : TOUJOURS EN BAS */
+#products .card.productCardClickable > .info > .price{
+  grid-area:price !important;
+
+  align-self:end !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  min-width:0 !important;
+
+  font-size:21px !important;
+  line-height:1.05 !important;
+  font-weight:900 !important;
+}
+
+#products .card.productCardClickable .priceCurrent{
+  display:inline-flex !important;
+  align-items:baseline !important;
+
+  gap:7px !important;
+
+  margin:0 !important;
+
+  font-size:21px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+
+  color:#f4c95d !important;
+
+  white-space:nowrap !important;
+}
+
+#products .card.productCardClickable .priceCurrent small{
+  margin:0 !important;
+
+  color:#aeb9ca !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+}
+
+/* PROMOTION */
+#products .card.productCardClickable .price--promo{
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:flex-end !important;
+
+  gap:5px !important;
+}
+
+#products .card.productCardClickable .pricePromoTop{
+  display:flex !important;
+  align-items:center !important;
+
+  gap:7px !important;
+}
+
+#products .card.productCardClickable .priceOld{
+  color:#7f8da2 !important;
+
+  font-size:11px !important;
+  font-weight:700 !important;
+
+  text-decoration:line-through !important;
+  white-space:nowrap !important;
+}
+
+#products .card.productCardClickable .discountBadge{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  padding:3px 6px !important;
+
+  border-radius:6px !important;
+
+  background:rgba(233,30,99,.14) !important;
+  color:#ff6b8b !important;
+
+  font-size:9px !important;
+  font-weight:900 !important;
+}
+
+/* BOUTON + : même ligne que le prix */
+#products .card.productCardClickable > .info > .productCardBottom{
+  grid-area:action !important;
+
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:flex-end !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  align-self:end !important;
+}
+
+#products .card.productCardClickable .addToCartIcon{
+  width:48px !important;
+  height:48px !important;
+
+  min-width:48px !important;
+  min-height:48px !important;
+
+  padding:0 !important;
+  margin:0 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border:1px solid rgba(96,165,250,.28) !important;
+  border-radius:15px !important;
+
+  background:linear-gradient(
+    135deg,
+    #2563eb,
+    #9333ea
+  ) !important;
+
+  color:#fff !important;
+
+  font-size:26px !important;
+  line-height:1 !important;
+
+  box-shadow:0 7px 18px rgba(37,99,235,.22) !important;
+}
+
+/* MOBILE */
+@media (max-width:560px){
+
+  #products .card.productCardClickable > .pic{
+    height:175px !important;
+    min-height:175px !important;
+    flex-basis:175px !important;
+
+    border-radius:14px 14px 0 0 !important;
+  }
+
+  #products .card.productCardClickable > .pic img,
+  #products .card.productCardClickable > .pic .productCardImage{
+    border-radius:14px 14px 0 0 !important;
+  }
+
+  #products .card.productCardClickable > .info{
+    min-height:170px !important;
+
+    padding:12px 12px 13px !important;
+
+    column-gap:9px !important;
+  }
+
+  #products .card.productCardClickable > .info > .cat{
+    font-size:9px !important;
+  }
+
+  #products .card.productCardClickable > .info > h3{
+    font-size:15px !important;
+    line-height:1.22 !important;
+    min-height:37px !important;
+  }
+
+  #products .card.productCardClickable > .info > .stock{
+    font-size:11px !important;
+  }
+
+  #products .card.productCardClickable > .info > .price,
+  #products .card.productCardClickable .priceCurrent{
+    font-size:17px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small{
+    font-size:10px !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon{
+    width:46px !important;
+    height:46px !important;
+
+    min-width:46px !important;
+    min-height:46px !important;
+
+    border-radius:14px !important;
+    font-size:25px !important;
+  }
+}
