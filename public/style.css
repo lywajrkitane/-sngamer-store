@@ -4664,3 +4664,91 @@ footer {
     font-size: 16px;
   }
 }
+/* =========================================================
+   SNGAMER STORE — AJUSTEMENT PRODUITS FINAL
+   ========================================================= */
+
+#products .productCardClickable {
+  width: 100%;
+  min-width: 0;
+}
+
+/* IMAGE PRODUIT */
+#products .productCardClickable .pic {
+  height: 145px !important;
+  min-height: 145px !important;
+  padding: 6px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#products .productCardClickable .pic img,
+#products .productCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  display: block;
+}
+
+/* INFORMATIONS : on les descend naturellement sous l'image */
+#products .productCardClickable .info {
+  padding: 10px !important;
+}
+
+#products .productCardClickable .cat {
+  font-size: 9px !important;
+  margin-bottom: 5px !important;
+  padding: 3px 7px !important;
+}
+
+#products .productCardClickable .info h3 {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  margin: 4px 0 6px !important;
+}
+
+#products .productCardClickable .price,
+#products .productCardClickable .priceCurrent {
+  font-size: 16px !important;
+  margin: 5px 0 !important;
+}
+
+#products .productCardClickable .stock {
+  font-size: 9px !important;
+  margin: 3px 0 5px !important;
+}
+
+/* MOBILE */
+@media (max-width: 560px) {
+
+  #products .grid,
+  #products .products-grid,
+  #products .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  #products .productCardClickable .pic {
+    height: 140px !important;
+    min-height: 140px !important;
+  }
+
+  #products .productCardClickable .info {
+    padding: 9px !important;
+  }
+
+  #products .productCardClickable .cat {
+    font-size: 8px !important;
+  }
+
+  #products .productCardClickable .info h3 {
+    font-size: 13px !important;
+  }
+
+  #products .productCardClickable .price,
+  #products .productCardClickable .priceCurrent {
+    font-size: 15px !important;
+  }
+}
