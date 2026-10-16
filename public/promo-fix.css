@@ -25,3 +25,33 @@
 .hero.has-no-promo .promoArea{display:none!important}
 @media(max-width:900px){.hero.has-no-promo .heroIn{min-height:auto;padding-top:38px;padding-bottom:38px}}
 @media(max-width:560px){.hero.has-no-promo .heroIn{padding-top:28px;padding-bottom:30px}}
+
+/* SNGAMER STORE — PROMOTIONS SUR LA FICHE PRODUIT */
+/* Le prix normal reprend exactement le ton clair utilisé dans le carrousel promo. */
+.productInfo .price--promo .priceOld{
+  color:#ccc !important;
+  text-decoration-line:line-through !important;
+  text-decoration-color:#ccc !important;
+  text-decoration-thickness:2px !important;
+  text-decoration-skip-ink:auto !important;
+  white-space:nowrap !important;
+  opacity:1 !important;
+}
+
+/* Le pourcentage de remise reprend le rose SNGAMER des promotions. */
+.productInfo .price--promo .discountBadge{
+  color:#ff4d6d !important;
+  background:rgba(255,77,109,.10) !important;
+  border:1px solid rgba(255,77,109,.25) !important;
+  border-radius:7px !important;
+  padding:3px 7px !important;
+  font-weight:900 !important;
+  white-space:nowrap !important;
+}
+
+.productInfo .price--promo{
+  display:flex !important;
+  align-items:center !important;
+  flex-wrap:wrap !important;
+  gap:10px !important;
+}
