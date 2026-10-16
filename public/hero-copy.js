@@ -27,4 +27,22 @@
   }else{
     start();
   }
+
+  // Charge le dashboard client après l'application principale.
+  // Cela permet de garder la navigation existante intacte tout en
+  // remplaçant proprement la vue Profil par l'espace client.
+  function loadCustomerAccount(){
+    if(document.querySelector('script[data-sngamer-customer-account]')) return;
+    const script=document.createElement("script");
+    script.src="customer-account.js";
+    script.defer=true;
+    script.dataset.sngamerCustomerAccount="true";
+    document.body.appendChild(script);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",loadCustomerAccount,{once:true});
+  }else{
+    loadCustomerAccount();
+  }
 })();
