@@ -39,124 +39,17 @@
         color:#55a8ff;
         letter-spacing:3px;
       }
-
-      .professional-hero .heroIn > div:first-child p{
-        max-width:590px;
-      }
-
-      .professional-hero .heroVisual.has-default-hero{
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        min-height:360px;
-        font-size:initial;
-        text-shadow:none;
-      }
-
-      .professional-hero .defaultHeroContent{
-        width:min(100%,520px);
-        min-height:300px;
-        padding:42px 38px;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
-        text-align:center;
-        border:1px solid rgba(74,157,255,.28);
-        border-radius:26px;
-        background:
-          radial-gradient(circle at 15% 15%,rgba(22,135,255,.18),transparent 34%),
-          radial-gradient(circle at 90% 85%,rgba(233,30,99,.12),transparent 36%),
-          linear-gradient(145deg,rgba(12,24,42,.96),rgba(8,12,22,.98));
-        box-shadow:0 24px 55px rgba(0,0,0,.28),0 0 35px rgba(22,135,255,.08);
-      }
-
-      .professional-hero .heroTrustBadge{
-        align-self:center;
-        padding:9px 16px;
-        border:1px solid rgba(74,157,255,.35);
-        border-radius:999px;
-        color:#8fc7ff;
-        background:rgba(22,135,255,.08);
-        font-size:11px;
-        font-weight:900;
-        letter-spacing:2px;
-        text-transform:uppercase;
-      }
-
-      .professional-hero .defaultHeroContent h2{
-        margin:22px 0 12px;
-        color:#fff;
-        font-family:Montserrat,Arial,sans-serif;
-        font-size:clamp(28px,4vw,42px);
-        line-height:1.08;
-        font-weight:900;
-        letter-spacing:-.5px;
-      }
-
-      .professional-hero .heroTrustProducts{
-        margin:0 auto 24px;
-        color:#b9c6d7;
-        font-size:15px;
-        line-height:1.6;
-        font-weight:700;
-      }
-
-      .professional-hero .heroTrustProducts span{
-        color:#4ea2ff;
-        padding:0 5px;
-      }
-
-      .professional-hero .heroDelivery{
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:9px;
-        width:100%;
-        padding:13px 15px;
-        border-radius:13px;
-        background:rgba(22,135,255,.08);
-        border:1px solid rgba(74,157,255,.18);
-        color:#8fc7ff;
-        font-size:13px;
-        line-height:1.4;
-        font-weight:800;
-      }
-
-      .professional-hero .heroDeliveryIcon{
-        font-size:18px;
-      }
-
-      @media(max-width:900px){
-        .professional-hero .heroVisual.has-default-hero{
-          min-height:0;
-          margin-top:18px;
-        }
-      }
-
-      @media(max-width:560px){
-        .professional-hero .defaultHeroContent{
-          min-height:280px;
-          padding:30px 20px;
-          border-radius:22px;
-        }
-
-        .professional-hero .heroTrustBadge{
-          font-size:9px;
-          letter-spacing:1.5px;
-        }
-
-        .professional-hero .defaultHeroContent h2{
-          font-size:27px;
-        }
-
-        .professional-hero .heroTrustProducts{
-          font-size:13px;
-        }
-
-        .professional-hero .heroDelivery{
-          font-size:12px;
-        }
-      }
+      .professional-hero .heroIn > div:first-child p{max-width:590px}
+      .professional-hero .heroVisual.has-default-hero{display:flex;align-items:center;justify-content:center;min-height:360px;font-size:initial;text-shadow:none}
+      .professional-hero .defaultHeroContent{width:min(100%,520px);min-height:300px;padding:42px 38px;display:flex;flex-direction:column;justify-content:center;text-align:center;border:1px solid rgba(74,157,255,.28);border-radius:26px;background:radial-gradient(circle at 15% 15%,rgba(22,135,255,.18),transparent 34%),radial-gradient(circle at 90% 85%,rgba(233,30,99,.12),transparent 36%),linear-gradient(145deg,rgba(12,24,42,.96),rgba(8,12,22,.98));box-shadow:0 24px 55px rgba(0,0,0,.28),0 0 35px rgba(22,135,255,.08)}
+      .professional-hero .heroTrustBadge{align-self:center;padding:9px 16px;border:1px solid rgba(74,157,255,.35);border-radius:999px;color:#8fc7ff;background:rgba(22,135,255,.08);font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+      .professional-hero .defaultHeroContent h2{margin:22px 0 12px;color:#fff;font-family:Montserrat,Arial,sans-serif;font-size:clamp(28px,4vw,42px);line-height:1.08;font-weight:900;letter-spacing:-.5px}
+      .professional-hero .heroTrustProducts{margin:0 auto 24px;color:#b9c6d7;font-size:15px;line-height:1.6;font-weight:700}
+      .professional-hero .heroTrustProducts span{color:#4ea2ff;padding:0 5px}
+      .professional-hero .heroDelivery{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px 15px;border-radius:13px;background:rgba(22,135,255,.08);border:1px solid rgba(74,157,255,.18);color:#8fc7ff;font-size:13px;line-height:1.4;font-weight:800}
+      .professional-hero .heroDeliveryIcon{font-size:18px}
+      @media(max-width:900px){.professional-hero .heroVisual.has-default-hero{min-height:0;margin-top:18px}}
+      @media(max-width:560px){.professional-hero .defaultHeroContent{min-height:280px;padding:30px 20px;border-radius:22px}.professional-hero .heroTrustBadge{font-size:9px;letter-spacing:1.5px}.professional-hero .defaultHeroContent h2{font-size:27px}.professional-hero .heroTrustProducts{font-size:13px}.professional-hero .heroDelivery{font-size:12px}}
     `;
     document.head.appendChild(style);
   }
@@ -167,6 +60,7 @@
     const dots = document.getElementById("promoDots");
     const fallback = document.getElementById("defaultHeroContent");
     const title = document.getElementById("promoCampaignTitle");
+    const hero = document.querySelector(".hero");
 
     applyProfessionalHero();
     injectProfessionalHeroStyles();
@@ -178,24 +72,26 @@
       const visible = getComputedStyle(slide).display !== "none";
       return visible && slide.children.length > 0;
     });
-
     const hasActivePromo = activeSlides.length > 0;
 
+    /* Sans campagne : supprimer complètement la zone promotionnelle pour que
+       la section Produits remonte juste sous le contenu principal du Hero. */
+    area.style.display = hasActivePromo ? "flex" : "none";
     carousel.style.display = hasActivePromo ? "block" : "none";
-    fallback.style.display = hasActivePromo ? "none" : "flex";
+    fallback.style.display = "none";
+
+    if(hero){
+      hero.classList.toggle("has-active-promo", hasActivePromo);
+      hero.classList.toggle("has-no-promo", !hasActivePromo);
+    }
 
     if(title){
       title.style.display = hasActivePromo && title.textContent.trim() ? "flex" : "none";
     }
 
-    if(hasActivePromo && activeSlides.length > 1){
-      dots.style.display = "flex";
-    }else{
-      dots.style.display = "none";
-    }
-
+    dots.style.display = hasActivePromo && activeSlides.length > 1 ? "flex" : "none";
     area.classList.toggle("has-active-promo", hasActivePromo);
-    area.classList.toggle("has-default-hero", !hasActivePromo);
+    area.classList.remove("has-default-hero");
   }
 
   function start(){
@@ -204,18 +100,13 @@
     const carousel = document.getElementById("promoCarousel");
     if(carousel){
       const observer = new MutationObserver(syncPromoHero);
-      observer.observe(carousel, {
-        childList:true,
-        subtree:true,
-        attributes:true,
-        attributeFilter:["style"]
-      });
+      observer.observe(carousel,{childList:true,subtree:true,attributes:true,attributeFilter:["style"]});
     }
 
     const dots = document.getElementById("promoDots");
     if(dots){
       const dotsObserver = new MutationObserver(syncPromoHero);
-      dotsObserver.observe(dots, {childList:true,subtree:true});
+      dotsObserver.observe(dots,{childList:true,subtree:true});
     }
 
     let attempts = 0;
@@ -223,11 +114,11 @@
       syncPromoHero();
       attempts++;
       if(attempts >= 30) clearInterval(timer);
-    }, 250);
+    },250);
   }
 
   if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", start, {once:true});
+    document.addEventListener("DOMContentLoaded",start,{once:true});
   }else{
     start();
   }
