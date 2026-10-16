@@ -1,0 +1,249 @@
+/* SNGAMER STORE — finition e-commerce premium
+   Navigation mobile + micro-typographie + animation fiche produit.
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap');
+
+:root{
+  --sng-nav-bg:rgba(5,10,18,.94);
+  --sng-nav-border:rgba(74,157,255,.16);
+  --sng-nav-muted:#8795aa;
+  --sng-nav-active:#5ab8ff;
+}
+
+/* Typographie commerciale : Montserrat pour les titres et libellés,
+   Inter pour le texte courant. */
+.hero label,
+.hero h1,
+.hero .primary,
+.bar h2,
+.catbtn,
+.mobileBottomNav .bottomNavItem,
+.heroTrustBadge,
+.heroTrustProducts,
+.heroDelivery{
+  font-family:'Montserrat',Arial,sans-serif;
+}
+
+.heroIn > div:first-child p{
+  font-family:'Inter',Arial,sans-serif;
+  font-weight:500;
+  letter-spacing:-.15px;
+}
+
+/* Phrase commerciale du Hero : lisible, premium et orientée conversion. */
+.professional-hero .heroIn > div:first-child p{
+  font-size:clamp(16px,2vw,19px);
+  line-height:1.65;
+  color:#c0cad8;
+  max-width:610px;
+}
+
+/* Navigation mobile premium */
+@media(max-width:700px){
+  .mobileBottomNav{
+    position:fixed !important;
+    left:10px !important;
+    right:10px !important;
+    bottom:10px !important;
+    width:auto !important;
+    height:76px !important;
+    padding:7px 5px 6px !important;
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    align-items:stretch;
+    gap:3px;
+    background:var(--sng-nav-bg) !important;
+    border:1px solid var(--sng-nav-border) !important;
+    border-radius:22px !important;
+    box-shadow:0 16px 45px rgba(0,0,0,.48),0 0 28px rgba(22,135,255,.08);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    z-index:50 !important;
+  }
+
+  .mobileBottomNav .bottomNavItem{
+    position:relative !important;
+    min-width:0 !important;
+    height:62px !important;
+    padding:6px 2px 5px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:4px !important;
+    color:var(--sng-nav-muted) !important;
+    background:transparent !important;
+    border:0 !important;
+    border-radius:16px !important;
+    font-size:9.5px !important;
+    font-weight:700 !important;
+    letter-spacing:.05px !important;
+    line-height:1.05 !important;
+    white-space:nowrap;
+    overflow:visible !important;
+    box-shadow:none !important;
+    transform:none !important;
+  }
+
+  .mobileBottomNav .bottomNavIcon{
+    width:34px !important;
+    height:34px !important;
+    display:grid !important;
+    place-items:center !important;
+    color:currentColor !important;
+    border:1px solid rgba(135,149,170,.20);
+    border-radius:11px;
+    background:rgba(255,255,255,.025);
+    transition:transform .28s cubic-bezier(.22,1,.36,1),color .28s ease,background .28s ease,border-color .28s ease,box-shadow .28s ease;
+  }
+
+  .mobileBottomNav .bottomNavIcon svg{
+    width:21px !important;
+    height:21px !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active{
+    color:#fff !important;
+    background:linear-gradient(180deg,rgba(22,135,255,.14),rgba(124,58,237,.08)) !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active .bottomNavIcon{
+    color:var(--sng-nav-active) !important;
+    border-color:rgba(90,184,255,.48);
+    background:linear-gradient(135deg,rgba(22,135,255,.16),rgba(124,58,237,.15));
+    box-shadow:0 0 0 3px rgba(22,135,255,.055),0 0 20px rgba(22,135,255,.16);
+    transform:translateY(-2px);
+  }
+
+  .mobileBottomNav .bottomNavItem.active span:last-child{
+    color:#65bfff !important;
+    font-weight:800 !important;
+  }
+
+  .mobileBottomNav .bottomNavItem:not(.active):active .bottomNavIcon{
+    transform:scale(.94);
+  }
+
+  .mobileBottomNav .bottomNavItem:focus-visible{
+    outline:2px solid rgba(90,184,255,.65);
+    outline-offset:-2px;
+  }
+
+  /* Évite que le dernier contenu passe derrière la barre fixe. */
+  body{
+    padding-bottom:92px;
+  }
+
+  .heroIn > div:first-child p{
+    max-width:100%;
+  }
+}
+
+@media(max-width:380px){
+  .mobileBottomNav{
+    left:7px !important;
+    right:7px !important;
+    bottom:7px !important;
+    height:72px !important;
+    border-radius:20px !important;
+  }
+  .mobileBottomNav .bottomNavItem{
+    font-size:8.5px !important;
+    height:59px !important;
+  }
+  .mobileBottomNav .bottomNavIcon{
+    width:31px !important;
+    height:31px !important;
+  }
+  .mobileBottomNav .bottomNavIcon svg{
+    width:19px !important;
+    height:19px !important;
+  }
+}
+
+/* Fiche produit : animation volontairement plus lente que la version précédente,
+   pour que l'utilisateur perçoive clairement l'ouverture. */
+#productModal{
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+
+#productModal.show{
+  animation:sngProductBackdropIn .42s ease-out both;
+}
+
+#productModal.show .productBox{
+  transform-origin:center center;
+  animation:sngProductModalIn .72s cubic-bezier(.16,1,.3,1) both;
+  will-change:transform,opacity;
+}
+
+#productModal.show .productMainImage{
+  animation:sngProductImageIn .82s cubic-bezier(.16,1,.3,1) .13s both;
+  will-change:transform,opacity;
+}
+
+#productModal.show .productInfo{
+  animation:sngProductInfoIn .68s cubic-bezier(.16,1,.3,1) .18s both;
+  will-change:transform,opacity;
+}
+
+#productModal.show .productThumbnails{
+  animation:sngProductThumbsIn .55s ease-out .28s both;
+}
+
+@keyframes sngProductBackdropIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes sngProductModalIn{
+  from{opacity:0;transform:translate3d(0,28px,0) scale(.955)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+
+@keyframes sngProductImageIn{
+  from{opacity:0;transform:scale(.94)}
+  to{opacity:1;transform:scale(1)}
+}
+
+@keyframes sngProductInfoIn{
+  from{opacity:0;transform:translate3d(18px,8px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+
+@keyframes sngProductThumbsIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:700px){
+  #productModal.show .productBox{
+    animation:sngProductModalMobileIn .76s cubic-bezier(.16,1,.3,1) both;
+  }
+  #productModal.show .productInfo{
+    animation:sngProductInfoMobileIn .62s cubic-bezier(.16,1,.3,1) .18s both;
+  }
+  @keyframes sngProductModalMobileIn{
+    from{opacity:0;transform:translate3d(0,42px,0) scale(.97)}
+    to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+  }
+  @keyframes sngProductInfoMobileIn{
+    from{opacity:0;transform:translate3d(0,16px,0)}
+    to{opacity:1;transform:translate3d(0,0,0)}
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #productModal.show,
+  #productModal.show .productBox,
+  #productModal.show .productMainImage,
+  #productModal.show .productInfo,
+  #productModal.show .productThumbnails,
+  .mobileBottomNav .bottomNavIcon{
+    animation:none !important;
+    transition:none !important;
+  }
+}
