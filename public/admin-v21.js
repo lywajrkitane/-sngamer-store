@@ -1,25 +1,197 @@
-/* SNGAMER STORE — ADMIN DASHBOARD V2.1 + V2.4 ORDERS */
-(function(){'use strict';
-const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const money=n=>new Intl.NumberFormat('fr-FR').format(Number(n)||0)+' FCFA';
-const esc=v=>String(v??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]));
-let products=[],orders=[];
-function customer(o){let c=o?.customer||o?.customer_info||{};if(typeof c==='string'){try{c=JSON.parse(c)}catch(e){c={}}}return c||{}}
-async function load(){const [p,o]=await Promise.all([fetch('/api/products').then(r=>r.ok?r.json():[]).catch(()=>[]),fetch('/api/admin/orders').then(r=>r.ok?r.json():[]).catch(()=>[])]);products=Array.isArray(p)?p:[];orders=Array.isArray(o)?o:[];render();renderCompactOrders()}
-function render(){const main=$('#adminBox');if(!main||$('#a21Panel'))return;const a=$('#a2Tools')||main.firstElementChild,p=document.createElement('section');p.id='a21Panel';p.innerHTML=`<div class="a21-head"><div><span class="a21-eyebrow">ADMIN V2.1</span><h2>Centre de pilotage</h2><p>Clients, performance commerciale, alertes et outils opérationnels.</p></div><div class="a21-actions"><button class="a21-btn" id="a21Export">Exporter CSV</button><button class="a21-btn primary" id="a21Refresh">Actualiser</button></div></div><div class="a21-kpis"><article><span>Chiffre d'affaires</span><strong>${money(orders.filter(o=>!['Annulée','cancelled','Cancelled'].includes(o.status)).reduce((s,o)=>s+Number(o.total||0),0))}</strong><small>${orders.length} commandes</small></article><article><span>À traiter</span><strong>${orders.filter(o=>!['Livrée','Annulée','cancelled','Delivered'].includes(o.status)).length}</strong><small>Nouvelles + préparation + expédition</small></article><article><span>Produits en alerte</span><strong>${products.filter(p=>Number(p.stock)<=5).length}</strong><small>${products.filter(p=>Number(p.stock)<=0).length} rupture(s)</small></article><article><span>Clients identifiés</span><strong>${new Set(orders.map(o=>customer(o).phone||customer(o).email).filter(Boolean)).size}</strong><small>Invités inclus dans les commandes</small></article></div><div class="a21-grid"><div class="a21-card"><div class="a21-card-head"><h3>📈 Commandes — 7 derniers jours</h3></div><div id="a21Bars" class="a21-bars"></div></div><div class="a21-card"><div class="a21-card-head"><h3>🛒 Statuts</h3></div><div id="a21Status" class="a21-status"></div></div></div><div class="a21-grid"><div class="a21-card"><div class="a21-card-head"><h3>👥 Clients récents</h3></div><div id="a21Customers" class="a21-table"></div></div><div class="a21-card"><div class="a21-card-head"><h3>🚨 Alertes opérationnelles</h3></div><div id="a21Warnings" class="a21-list"></div></div></div>`;a?.parentNode?a.parentNode.insertBefore(p,a.nextSibling):main.appendChild(p);charts();customers();warnings();$('#a21Export').onclick=exportCSV;$('#a21Refresh').onclick=load}
-function charts(){const ds=[];for(let i=6;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);ds.push(d)}const ns=ds.map(d=>orders.filter(o=>new Date(o.created_at||o.createdAt||0).toDateString()===d.toDateString()).length),max=Math.max(1,...ns);$('#a21Bars').innerHTML=ns.map((n,i)=>`<div class="a21-bar-wrap"><b>${n}</b><div class="a21-bar" style="height:${Math.max(8,n/max*120)}px"></div><small>${ds[i].toLocaleDateString('fr-FR',{weekday:'short'})}</small></div>`).join('');const st={};orders.forEach(o=>st[o.status||'Sans statut']=(st[o.status||'Sans statut']||0)+1);const total=Math.max(1,orders.length);$('#a21Status').innerHTML=Object.entries(st).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([s,n])=>`<div class="a21-status-row"><span>${esc(s)}</span><strong>${n}</strong><i><b style="width:${n/total*100}%"></b></i></div>`).join('')||'<div class="a21-empty">Aucune commande.</div>'}
-function customers(){const m=new Map();orders.forEach(o=>{const c=customer(o),k=c.phone||c.email||'guest-'+o.id,r=m.get(k)||{name:c.name||'Client invité',phone:c.phone||'—',orders:0,total:0};r.orders++;r.total+=Number(o.total||0);m.set(k,r)});const rows=[...m.values()].sort((a,b)=>b.total-a.total).slice(0,8);$('#a21Customers').innerHTML=rows.length?rows.map(c=>`<div class="a21-customer"><div><strong>${esc(c.name)}</strong><small>${esc(c.phone)}</small></div><div><strong>${c.orders}</strong><small>commande${c.orders>1?'s':''}</small></div><div><strong>${money(c.total)}</strong><small>Total</small></div></div>`).join(''):'<div class="a21-empty">Aucun client.</div>'}
-function warnings(){let w=[];products.filter(p=>Number(p.stock)<=0).slice(0,5).forEach(p=>w.push(`<div class="a21-warning danger"><span>Rupture</span><strong>${esc(p.name)}</strong><small>Stock : 0</small></div>`));products.filter(p=>Number(p.stock)>0&&Number(p.stock)<=5).slice(0,5).forEach(p=>w.push(`<div class="a21-warning"><span>Stock faible</span><strong>${esc(p.name)}</strong><small>Stock : ${p.stock}</small></div>`));const n=orders.filter(o=>['Nouvelle','Confirmée'].includes(o.status)).length;if(n)w.unshift(`<div class="a21-warning"><span>À traiter</span><strong>${n} commande(s)</strong><small>Nouvelles / confirmées</small></div>`);$('#a21Warnings').innerHTML=w.slice(0,8).join('')||'<div class="a21-empty">Aucune alerte.</div>'}
-function exportCSV(){const rows=[['ID','Date','Client','Téléphone','Adresse','Paiement','Statut','Total'],...orders.map(o=>{const c=customer(o);return[o.id,o.created_at||'',c.name||'',c.phone||'',c.address||'',o.payment||'',o.status||'',o.total||0]})];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n'),u=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=u;a.download='sngamer-commandes.csv';a.click();URL.revokeObjectURL(u)}
+/* SNGAMER STORE — ADMIN V2.1 FINAL ORDERS WORKSPACE */
+(function () {
+  'use strict';
 
-/* ========================= COMPACT ORDERS WORKSPACE ========================= */
-let orderFilter='Toutes', orderPage=1, orderQuery='';
-const orderBuckets=s=>{s=String(s||'Nouvelle').toLowerCase();if(s.includes('livr'))return'Livrées';if(s.includes('expédi')||s.includes('exped'))return'Expédiées';if(s.includes('préparation')||s.includes('preparation')||s.includes('confirm'))return'En cours';if(s.includes('annul'))return'Annulées';return'À traiter'};
-function orderSection(){return [...$$('#adminBox section')].find(s=>/commandes/i.test(s.querySelector('h2')?.textContent||''))||null}
-function installCompactOrders(){const sec=orderSection();if(!sec)return null;if(sec.dataset.compactOrders==='1')return sec;sec.dataset.compactOrders='1';const old=sec.querySelector('.orders-table-wrap');if(old)old.style.display='none';const oldV22=sec.querySelector('.v22OrdersWorkspace');if(oldV22)oldV22.style.display='none';const oldV23=sec.querySelector('.v23-order-tools');if(oldV23)oldV23.style.display='none';const oldH=sec.querySelector('h2');if(oldH)oldH.style.display='none';const box=document.createElement('div');box.id='compactOrdersWorkspace';box.innerHTML=`<div class="co-head"><div><span>ESPACE COMMANDES</span><h2>Commandes</h2><p>Une vue compacte pour gérer un grand nombre de commandes.</p></div><button id="coRefresh" type="button">↻ Actualiser</button></div><div class="co-search"><input id="coSearch" type="search" placeholder="Rechercher N° commande, client ou téléphone…"></div><div class="co-tabs">${['Toutes','À traiter','En cours','Expédiées','Livrées','Annulées'].map((x,i)=>`<button type="button" data-co-filter="${x}" class="${i===0?'active':''}">${x}<b>0</b></button>`).join('')}</div><div id="coList"></div><div id="coPagination"></div></div>`;sec.appendChild(box);$('#coRefresh').onclick=async()=>{await loadCompactOrders();};$('#coSearch').oninput=e=>{orderQuery=e.target.value.toLowerCase().trim();orderPage=1;renderCompactOrders()};$$('[data-co-filter]',box).forEach(b=>b.onclick=()=>{orderFilter=b.dataset.coFilter;orderPage=1;$$('[data-co-filter]',box).forEach(x=>x.classList.toggle('active',x===b));renderCompactOrders()});return sec}
-async function loadCompactOrders(){try{const r=await fetch('/api/admin/orders');if(r.ok){const data=await r.json();orders=Array.isArray(data)?data:orders}}catch(e){}renderCompactOrders()}
-function renderCompactOrders(){const sec=installCompactOrders();if(!sec)return;const box=$('#compactOrdersWorkspace',sec);if(!box)return;const q=($('#coSearch',box)?.value||orderQuery||'').toLowerCase().trim();const counts={Toutes:orders.length,'À traiter':0,'En cours':0,'Expédiées':0,'Livrées':0,'Annulées':0};orders.forEach(o=>{const b=orderBuckets(o.status);if(counts[b]!=null)counts[b]++});$$('[data-co-filter]',box).forEach(b=>{const n=b.querySelector('b');if(n)n.textContent=counts[b.dataset.coFilter]??0});let list=orders.filter(o=>{const c=customer(o),hay=[o.id,c.name,c.phone,c.address].join(' ').toLowerCase();return(orderFilter==='Toutes'||orderBuckets(o.status)===orderFilter)&&(!q||hay.includes(q))});const pageSize=25,totalPages=Math.max(1,Math.ceil(list.length/pageSize));if(orderPage>totalPages)orderPage=totalPages;const start=(orderPage-1)*pageSize;const shown=list.slice(start,start+pageSize);$('#coList',box).innerHTML=shown.length?shown.map(o=>{const c=customer(o);return`<div class="co-row"><div class="co-id">#${esc(o.id)}</div><div class="co-phone">${esc(c.phone||'—')}</div><div class="co-name"><strong>${esc(c.name||'Client')}</strong><small>${esc(orderBuckets(o.status))}</small></div><button type="button" class="co-detail" data-co-id="${esc(o.id)}">Voir les détails</button></div>`}).join(''):`<div class="co-empty">Aucune commande trouvée.</div>`;$$('[data-co-id]',box).forEach(b=>b.onclick=()=>openOrderDetails(Number(b.dataset.coId)));$('#coPagination',box).innerHTML=totalPages>1?`<div class="co-page"><button type="button" id="coPrev" ${orderPage===1?'disabled':''}>‹</button><span>${start+1}-${Math.min(start+pageSize,list.length)} sur ${list.length}</span><button type="button" id="coNext" ${orderPage===totalPages?'disabled':''}>›</button></div>`:'';$('#coPrev',box)?.addEventListener('click',()=>{orderPage--;renderCompactOrders()});$('#coNext',box)?.addEventListener('click',()=>{orderPage++;renderCompactOrders()})}
-function openOrderDetails(id){const o=orders.find(x=>Number(x.id)===Number(id));if(!o)return;const c=customer(o);let modal=$('#coDetailModal');if(!modal){modal=document.createElement('div');modal.id='coDetailModal';modal.className='co-modal';document.body.appendChild(modal)}modal.innerHTML=`<div class="co-modal-box"><button type="button" class="co-close" aria-label="Fermer">×</button><div class="co-modal-title"><span>COMMANDE #${esc(o.id)}</span><strong>${money(o.total)}</strong></div><div class="co-detail-grid"><div><small>Client</small><strong>${esc(c.name||'Client')}</strong></div><div><small>Téléphone</small><strong>${esc(c.phone||'—')}</strong></div><div><small>Adresse</small><strong>${esc(c.address||'—')}</strong></div><div><small>Date</small><strong>${esc(new Date(o.created_at||Date.now()).toLocaleString('fr-FR'))}</strong></div><div><small>Paiement</small><strong>${esc(o.payment||'—')}</strong></div><div><small>Statut</small><strong>${esc(o.status||'Nouvelle')}</strong></div></div><div class="co-products"><small>Produits</small><div>${Array.isArray(o.items)&&o.items.length?o.items.map(i=>`<div>${esc(i.name)} × ${esc(i.quantity||1)}</div>`).join(''):'Aucun produit enregistré.'}</div></div></div>`;modal.classList.add('show');$('.co-close',modal).onclick=()=>modal.classList.remove('show');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')}}
-function addCompactStyles(){if($('#compactOrdersStyles'))return;const s=document.createElement('style');s.id='compactOrdersStyles';s.textContent=`#compactOrdersWorkspace{margin-top:0}.co-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}.co-head>div span{color:#5aa7ff;font-size:12px;font-weight:800;letter-spacing:.18em}.co-head h2{display:block!important;margin:4px 0!important}.co-head p{margin:0;color:#8d9aaa}.co-head button,.co-tabs button,.co-page button{background:#142238;color:#fff;border:1px solid #29476e;border-radius:12px;padding:10px 14px;font-weight:700}.co-search{margin-bottom:12px}.co-search input{width:100%;margin:0;padding:13px 15px;border-radius:12px}.co-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px}.co-tabs button{white-space:nowrap}.co-tabs button.active{background:linear-gradient(135deg,#1687ff,#7b35ff);border-color:transparent}.co-tabs b{margin-left:7px;font-size:11px;opacity:.8}.co-row{display:grid;grid-template-columns:90px minmax(130px,180px) 1fr auto;align-items:center;gap:16px;padding:13px 15px;margin:7px 0;background:#0b1320;border:1px solid #20334d;border-radius:13px}.co-id{font-weight:800;color:#fff}.co-phone{color:#9db0c7;font-size:14px}.co-name strong{display:block}.co-name small{display:inline-block;margin-top:3px;color:#6daeff}.co-detail{background:linear-gradient(135deg,#1687ff,#7b35ff);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:800}.co-empty{padding:30px;text-align:center;color:#91a0b3}.co-page{display:flex;justify-content:center;align-items:center;gap:12px;padding:14px 0;color:#9eabb8}.co-page button:disabled{opacity:.35}.co-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(2,7,14,.78);backdrop-filter:blur(8px)}.co-modal.show{display:flex}.co-modal-box{width:min(560px,100%);max-height:88vh;overflow:auto;background:#101a28;border:1px solid #29476e;border-radius:18px;padding:20px;box-shadow:0 25px 80px rgba(0,0,0,.55)}.co-close{float:right;background:#18263a;color:#fff;border:1px solid #29476e;border-radius:10px;width:38px;height:38px;font-size:24px}.co-modal-title{display:flex;justify-content:space-between;gap:15px;margin-bottom:18px;padding-right:48px}.co-modal-title span{color:#6db0ff;font-weight:800;letter-spacing:.08em}.co-modal-title strong{font-size:18px}.co-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.co-detail-grid>div,.co-products{background:#0b1320;border:1px solid #20334d;border-radius:12px;padding:12px}.co-detail-grid small,.co-products>small{display:block;color:#8495aa;margin-bottom:5px}.co-detail-grid strong{font-size:14px}.co-products{margin-top:10px}.co-products div{padding:6px 0;border-bottom:1px solid #1d2d42}.co-products div:last-child{border-bottom:0}@media(max-width:700px){.co-head{align-items:flex-start}.co-head button{flex:none}.co-row{grid-template-columns:52px 1fr auto;gap:8px;padding:11px}.co-phone{grid-column:1 / 3;font-size:12px}.co-name{grid-column:2}.co-detail{grid-column:3;grid-row:1 / 3;padding:9px 10px;font-size:12px}.co-tabs{margin-right:-4px}.co-detail-grid{grid-template-columns:1fr}.co-modal-box{padding:16px}}`;document.head.appendChild(s)}
-function hookCompactOrders(){addCompactStyles();const sec=installCompactOrders();if(!sec)return;const navButtons=$$('.adminV22Nav button,[data-section="orders"],button').filter(b=>/commandes/i.test(b.textContent||''));navButtons.forEach(b=>{if(b.dataset.coHook==='1')return;b.dataset.coHook='1';b.addEventListener('click',()=>setTimeout(()=>{const s=orderSection();if(s){s.classList.remove('v22Hidden');s.style.display='block';const v22=s.querySelector('.v22OrdersWorkspace');if(v22)v22.style.display='none';const v23=s.querySelector('.v23-order-tools');if(v23)v23.style.display='none';renderCompactOrders();s.scrollIntoView({behavior:'smooth',block:'start'})}},80)});renderCompactOrders()}
-function init(){load();setTimeout(hookCompactOrders,150);const mo=new MutationObserver(()=>hookCompactOrders());mo.observe(document.body,{childList:true,subtree:true})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();})();
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const money = n => new Intl.NumberFormat('fr-FR').format(Number(n) || 0) + ' FCFA';
+  const esc = v => String(v ?? '').replace(/[&<>\"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;', "'":'&#039;' }[m]));
+
+  let orders = [];
+  let filter = 'Toutes';
+  let query = '';
+  let page = 1;
+  const pageSize = 25;
+
+  function customer(o) {
+    let c = o?.customer || o?.customer_info || {};
+    if (typeof c === 'string') { try { c = JSON.parse(c); } catch (_) { c = {}; } }
+    return c || {};
+  }
+
+  function bucket(status) {
+    const s = String(status || 'Nouvelle').toLowerCase();
+    if (s.includes('livr')) return 'Livrées';
+    if (s.includes('expédi') || s.includes('exped')) return 'Expédiées';
+    if (s.includes('préparation') || s.includes('preparation') || s.includes('confirm')) return 'En cours';
+    if (s.includes('annul')) return 'Annulées';
+    return 'À traiter';
+  }
+
+  function findOrdersSection() {
+    return [...$$('#adminBox > section')].find(s => /commandes/i.test($('h2', s)?.textContent || '')) || null;
+  }
+
+  function injectStyles() {
+    if ($('#sng-v21-final-css')) return;
+    const style = document.createElement('style');
+    style.id = 'sng-v21-final-css';
+    style.textContent = `
+      #sngFinalOrders{margin-top:0}
+      #sngFinalOrders .sng-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+      #sngFinalOrders .sng-head h2{margin:0 0 4px;font-size:24px}
+      #sngFinalOrders .sng-head p{margin:0;color:#8fa0b5;font-size:13px}
+      #sngFinalOrders .sng-refresh{border:1px solid rgba(75,140,255,.28);background:#111d2b;color:#fff;border-radius:11px;padding:10px 14px}
+      #sngFinalOrders .sng-search{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0 14px;border:1px solid rgba(75,140,255,.24);background:#09111b;border-radius:12px}
+      #sngFinalOrders .sng-search input{margin:0!important;border:0!important;outline:0;background:transparent!important;box-shadow:none!important;padding:13px 0!important}
+      #sngFinalOrders .sng-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:5px;margin-bottom:14px;scrollbar-width:none}
+      #sngFinalOrders .sng-tabs::-webkit-scrollbar{display:none}
+      #sngFinalOrders .sng-tab{white-space:nowrap;background:#101a27;color:#aebbd0;border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:9px 13px}
+      #sngFinalOrders .sng-tab.active{background:linear-gradient(135deg,#187cff,#7a35ff);color:#fff;border-color:transparent}
+      #sngFinalOrders .sng-list{display:flex;flex-direction:column;gap:8px}
+      #sngFinalOrders .sng-row{display:grid;grid-template-columns:90px minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px 14px;background:linear-gradient(145deg,#101a24,#0b121a);border:1px solid rgba(75,140,255,.16);border-radius:13px;min-height:66px}
+      #sngFinalOrders .sng-id{font-weight:900;color:#67a9ff;font-size:14px}
+      #sngFinalOrders .sng-client{min-width:0}
+      #sngFinalOrders .sng-client strong{display:block;color:#fff;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      #sngFinalOrders .sng-client span{display:block;color:#8fa0b5;font-size:12px;margin-top:3px}
+      #sngFinalOrders .sng-status{font-size:11px;color:#a9b7ca;margin-top:4px}
+      #sngFinalOrders .sng-detail{white-space:nowrap;border:1px solid rgba(75,140,255,.3);background:linear-gradient(135deg,#176dff,#8330ff);color:#fff;border-radius:10px;padding:9px 12px;font-weight:800}
+      #sngFinalOrders .sng-empty{text-align:center;color:#8190a2;padding:35px 15px;border:1px dashed rgba(255,255,255,.1);border-radius:13px}
+      #sngFinalOrders .sng-pages{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;color:#91a0b5;font-size:13px}
+      #sngFinalOrders .sng-page-btn{background:#101a27;color:#fff;border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:8px 12px}
+      #sngFinalOrders .sng-page-btn:disabled{opacity:.35}
+      #sngFinalOrders .sng-modal{display:none;position:fixed;inset:0;z-index:10050;background:rgba(2,5,9,.78);backdrop-filter:blur(8px);padding:15px;align-items:center;justify-content:center}
+      #sngFinalOrders .sng-modal.show{display:flex}
+      #sngFinalOrders .sng-modal-box{width:min(520px,100%);max-height:88vh;overflow:auto;background:linear-gradient(145deg,#111c29,#09111a);border:1px solid rgba(75,140,255,.25);border-radius:18px;padding:18px;box-shadow:0 25px 80px rgba(0,0,0,.55)}
+      #sngFinalOrders .sng-modal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+      #sngFinalOrders .sng-modal-top h3{margin:0;font-size:19px}
+      #sngFinalOrders .sng-close{width:38px;height:38px;border-radius:10px;background:#172335;color:#fff;font-size:23px;padding:0}
+      #sngFinalOrders .sng-info{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+      #sngFinalOrders .sng-info div{background:#0b141e;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:10px}
+      #sngFinalOrders .sng-info small{display:block;color:#8190a2;font-size:11px;margin-bottom:4px}
+      #sngFinalOrders .sng-info b{font-size:13px;color:#fff;overflow-wrap:anywhere}
+      #sngFinalOrders .sng-products{margin-top:12px;border-top:1px solid rgba(255,255,255,.07);padding-top:10px}
+      #sngFinalOrders .sng-product{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
+      #sngFinalOrders .sng-modal select{width:100%;margin-top:12px;padding:11px;border-radius:10px;background:#101d2d;color:#fff;border:1px solid rgba(75,140,255,.3)}
+      @media(max-width:700px){
+        #sngFinalOrders .sng-head h2{font-size:20px}
+        #sngFinalOrders .sng-row{grid-template-columns:58px minmax(0,1fr) auto;gap:9px;padding:10px 9px;min-height:60px}
+        #sngFinalOrders .sng-detail{padding:8px 9px;font-size:11px}
+        #sngFinalOrders .sng-client strong{font-size:14px}
+        #sngFinalOrders .sng-info{grid-template-columns:1fr}
+        #sngFinalOrders .sng-pages{font-size:12px}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function build() {
+    const section = findOrdersSection();
+    if (!section || $('#sngFinalOrders')) return !!section;
+    injectStyles();
+
+    const oldWrap = $('.orders-table-wrap', section) || $('.table-wrap', section);
+    if (oldWrap) oldWrap.style.display = 'none';
+    $$('.refresh', section).forEach(b => b.style.display = 'none');
+    const oldTitle = $('h2', section);
+    if (oldTitle) oldTitle.style.display = 'none';
+
+    const box = document.createElement('div');
+    box.id = 'sngFinalOrders';
+    box.innerHTML = `
+      <div class="sng-head"><div><h2>🛒 Commandes</h2><p>Gestion rapide de toutes les commandes.</p></div><button class="sng-refresh" id="sngRefresh">↻ Actualiser</button></div>
+      <label class="sng-search">🔎 <input id="sngSearch" type="search" placeholder="ID, nom ou numéro de téléphone…"></label>
+      <div class="sng-tabs">${['Toutes','À traiter','En cours','Expédiées','Livrées','Annulées'].map(x=>`<button class="sng-tab ${x==='Toutes'?'active':''}" data-filter="${x}">${x} <b data-count="${x}">0</b></button>`).join('')}</div>
+      <div class="sng-list" id="sngList"></div>
+      <div class="sng-pages"><button class="sng-page-btn" id="sngPrev">‹ Précédent</button><span id="sngPageInfo">0–0</span><button class="sng-page-btn" id="sngNext">Suivant ›</button></div>
+      <div class="sng-modal" id="sngModal"><div class="sng-modal-box"><div class="sng-modal-top"><h3 id="sngModalTitle">Commande</h3><button class="sng-close" id="sngClose">×</button></div><div id="sngModalContent"></div></div></div>
+    `;
+    section.appendChild(box);
+
+    $('#sngSearch').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); page = 1; render(); });
+    $$('.sng-tab', box).forEach(b => b.addEventListener('click', () => { filter = b.dataset.filter; page = 1; $$('.sng-tab', box).forEach(x => x.classList.toggle('active', x === b)); render(); }));
+    $('#sngPrev').onclick = () => { if (page > 1) { page--; render(); } };
+    $('#sngNext').onclick = () => { if (page < totalPages()) { page++; render(); } };
+    $('#sngClose').onclick = closeModal;
+    $('#sngModal').addEventListener('click', e => { if (e.target.id === 'sngModal') closeModal(); });
+    $('#sngRefresh').onclick = () => load(true);
+    return true;
+  }
+
+  function filtered() {
+    return orders.filter(o => {
+      const c = customer(o);
+      const okFilter = filter === 'Toutes' || bucket(o.status) === filter;
+      const hay = [o.id, c.name, c.phone].join(' ').toLowerCase();
+      return okFilter && (!query || hay.includes(query));
+    });
+  }
+
+  function totalPages() { return Math.max(1, Math.ceil(filtered().length / pageSize)); }
+
+  function render() {
+    if (!$('#sngFinalOrders')) return;
+    const all = orders;
+    ['Toutes','À traiter','En cours','Expédiées','Livrées','Annulées'].forEach(f => {
+      const n = f === 'Toutes' ? all.length : all.filter(o => bucket(o.status) === f).length;
+      const el = $(`[data-count="${f}"]`); if (el) el.textContent = n;
+    });
+    const list = filtered();
+    const pages = totalPages();
+    if (page > pages) page = pages;
+    const start = (page - 1) * pageSize;
+    const rows = list.slice(start, start + pageSize);
+    $('#sngList').innerHTML = rows.length ? rows.map(o => {
+      const c = customer(o);
+      return `<div class="sng-row"><span class="sng-id">#${esc(o.id)}</span><div class="sng-client"><strong>${esc(c.name || 'Client')}</strong><span>${esc(c.phone || '—')}</span><span class="sng-status">${esc(o.status || 'Nouvelle')}</span></div><button class="sng-detail" data-order="${esc(o.id)}">Voir les détails</button></div>`;
+    }).join('') : '<div class="sng-empty">Aucune commande dans cette catégorie.</div>';
+    $$('.sng-detail').forEach(b => b.onclick = () => openModal(Number(b.dataset.order)));
+    $('#sngPageInfo').textContent = list.length ? `${start + 1}–${Math.min(start + pageSize, list.length)} sur ${list.length}` : '0–0';
+    $('#sngPrev').disabled = page <= 1;
+    $('#sngNext').disabled = page >= pages;
+  }
+
+  function openModal(id) {
+    const o = orders.find(x => Number(x.id) === id); if (!o) return;
+    const c = customer(o);
+    const items = Array.isArray(o.items) ? o.items : [];
+    $('#sngModalTitle').textContent = `Commande #${o.id}`;
+    $('#sngModalContent').innerHTML = `<div class="sng-info"><div><small>Client</small><b>${esc(c.name || '-')}</b></div><div><small>Téléphone</small><b>${esc(c.phone || '-')}</b></div><div><small>Adresse</small><b>${esc(c.address || '-')}</b></div><div><small>Date</small><b>${esc(new Date(o.created_at).toLocaleString('fr-FR'))}</b></div><div><small>Total</small><b>${money(o.total)}</b></div><div><small>Paiement</small><b>${esc(o.payment || '-')}</b></div></div><div class="sng-products"><strong>📦 Produits</strong>${items.length ? items.map(i => `<div class="sng-product"><span>${esc(i.name)} × ${esc(i.quantity)}</span><b>${money(Number(i.price || 0) * Number(i.quantity || 0))}</b></div>`).join('') : '<p>Aucun produit.</p>'}</div><select id="sngModalStatus">${['Nouvelle','Confirmée','En préparation','Expédiée','Livrée','Annulée'].map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}</select>`;
+    $('#sngModalStatus').onchange = () => changeStatus(id, $('#sngModalStatus').value);
+    $('#sngModal').classList.add('show');
+  }
+
+  function closeModal() { $('#sngModal')?.classList.remove('show'); }
+
+  async function changeStatus(id, status) {
+    const r = await fetch('/api/admin/orders/' + id, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status}) });
+    if (!r.ok) { alert('Impossible de modifier le statut.'); return; }
+    const o = orders.find(x => Number(x.id) === Number(id)); if (o) o.status = status;
+    render();
+    openModal(id);
+  }
+
+  async function load(force) {
+    try {
+      const r = await fetch('/api/admin/orders', { cache: force ? 'no-store' : 'default' });
+      if (r.status === 401) return;
+      const data = await r.json();
+      if (Array.isArray(data)) orders = data;
+      build();
+      render();
+    } catch (_) {}
+  }
+
+  function boot() {
+    load();
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      build();
+      render();
+      if ($('#sngFinalOrders') || tries > 40) clearInterval(timer);
+    }, 250);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
