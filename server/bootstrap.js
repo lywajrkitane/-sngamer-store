@@ -13,7 +13,10 @@ const guestOrderPool = new Pool({
 function installGuestOrderRoute(app) {
   const guestRouter = express.Router();
 
-  guestRouter.post("/api/orders", async (req, res) => {
+  // Checkout is intentionally available to everyone.
+  // A customer account is optional and is only used to attach the order
+  // to the customer's history when the customer is already logged in.
+  guestRouter.post(["/api/orders", "/api/customer/orders"], async (req, res) => {
     const client = await guestOrderPool.connect();
 
     try {
@@ -89,11 +92,15 @@ function installGuestOrderRoute(app) {
         email: String(customer?.email || "").trim()
       };
 
+      // Optional account linkage: logged-in customers get the order in
+      // their profile history; guests are stored with customer_id = NULL.
+      const customerId = req.session?.customerId || null;
+
       const result = await client.query(
-        `INSERT INTO orders (status,customer,payment,items,total)
-         VALUES ('Nouvelle',$1,$2,$3,$4)
+        `INSERT INTO orders (customer_id,status,customer,payment,items,total)
+         VALUES ($1,'Nouvelle',$2,$3,$4,$5)
          RETURNING id,created_at,status,customer,payment,items,total`,
-        [JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total]
+        [customerId, JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total]
       );
 
       await client.query("COMMIT");
@@ -101,7 +108,8 @@ function installGuestOrderRoute(app) {
       res.status(201).json({
         success: true,
         orderId: result.rows[0].id,
-        order: result.rows[0]
+        order: result.rows[0],
+        guest: !customerId
       });
     } catch (error) {
       await client.query("ROLLBACK");
