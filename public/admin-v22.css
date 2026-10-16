@@ -1,0 +1,9 @@
+/* SNGAMER STORE ADMIN V2.2 — navigation-first layout */
+#adminBox{max-width:1400px!important;padding-top:18px!important}
+.adminV22Nav{position:sticky;top:0;z-index:900;background:rgba(11,15,20,.94);backdrop-filter:blur(14px);border:1px solid #26313d;border-radius:16px;padding:10px;margin:0 0 18px;display:flex;gap:8px;overflow-x:auto;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+.adminV22Nav button{white-space:nowrap;background:#101820;color:#aebdca;border:1px solid #26313d;border-radius:11px;padding:11px 15px;font-weight:800}
+.adminV22Nav button.active,.adminV22Nav button:hover{background:linear-gradient(135deg,#147dff,#5b35ff);color:#fff;border-color:rgba(91,140,255,.7)}
+.adminV22Section{scroll-margin-top:82px}.adminV22Section.v22Hidden{display:none!important}
+.adminV22Hero{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px;padding:22px;border:1px solid #26313d;border-radius:18px;background:linear-gradient(135deg,#101923,#0c121a)}
+.adminV22Hero h2{margin:0 0 6px;font-size:25px}.adminV22Hero p{margin:0;color:#8797a8}.adminV22Quick{display:flex;gap:8px;flex-wrap:wrap}.adminV22Quick button{background:#172231;color:#fff;border:1px solid #304359}
+@media(max-width:700px){.adminV22Hero{display:block}.adminV22Quick{margin-top:14px}.adminV22Nav{margin-left:-2px;margin-right:-2px}.adminV22Nav button{padding:10px 12px;font-size:12px}}
