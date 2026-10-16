@@ -7653,3 +7653,24 @@ min-height:44px !important;
     font-size: 9px !important;
   }
 }
+/* SNGAMER — DERNIER AJUSTEMENT BOUTON + */
+
+@media (max-width: 560px) {
+  #products .card .productCardBottom {
+    right: 5px !important;
+    bottom: 7px !important;
+  }
+
+  #products .card .addToCartIcon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    max-width: 30px !important;
+    max-height: 30px !important;
+
+    border-radius: 9px !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+}
