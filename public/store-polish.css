@@ -102,17 +102,18 @@
     height:21px !important;
   }
 
+  /* L'onglet actif reste sobre : seul le cadre de l'icône est mis en valeur. */
   .mobileBottomNav .bottomNavItem.active{
     color:#fff !important;
-    background:linear-gradient(180deg,rgba(22,135,255,.14),rgba(124,58,237,.08)) !important;
+    background:transparent !important;
   }
 
   .mobileBottomNav .bottomNavItem.active .bottomNavIcon{
     color:var(--sng-nav-active) !important;
-    border-color:rgba(90,184,255,.48);
-    background:linear-gradient(135deg,rgba(22,135,255,.16),rgba(124,58,237,.15));
-    box-shadow:0 0 0 3px rgba(22,135,255,.055),0 0 20px rgba(22,135,255,.16);
-    transform:translateY(-2px);
+    border-color:rgba(90,184,255,.78) !important;
+    background:linear-gradient(135deg,rgba(22,135,255,.22),rgba(124,58,237,.22)) !important;
+    box-shadow:0 0 10px rgba(22,135,255,.28),0 0 22px rgba(22,135,255,.16),inset 0 0 12px rgba(90,184,255,.08) !important;
+    transform:none !important;
   }
 
   .mobileBottomNav .bottomNavItem.active span:last-child{
