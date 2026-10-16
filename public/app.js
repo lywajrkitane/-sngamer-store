@@ -1173,3 +1173,389 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 window.addEventListener("resize", updateNavigationRing);
+
+/* =========================================================
+   SNGAMER STORE — CAMPAGNES TEMPORAIRES
+   Masquage complet + points + compte à rebours
+========================================================= */
+
+(function () {
+  "use strict";
+
+  function isTrue(value) {
+    return value === true || value === 1 || value === "true";
+  }
+
+  function isCampaignVisible(promo, now) {
+    // Média sans campagne = reste visible
+    if (!promo.campaign_id) return true;
+
+    // Activation depuis le dashboard obligatoire
+    if (!isTrue(promo.campaign_active)) return false;
+
+    const start = promo.campaign_start_date
+      ? new Date(promo.campaign_start_date).getTime()
+      : null;
+
+    const end = promo.campaign_end_date
+      ? new Date(promo.campaign_end_date).getTime()
+      : null;
+
+    if (start && Number.isFinite(start) && now < start) {
+      return false;
+    }
+
+    if (end && Number.isFinite(end) && now >= end) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function formatCountdown(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return (
+      days + "j " +
+      String(hours).padStart(2, "0") + "h " +
+      String(minutes).padStart(2, "0") + "m " +
+      String(seconds).padStart(2, "0") + "s"
+    );
+  }
+
+  async function fixPromoCampaign() {
+    const promoArea = document.querySelector(".promoArea");
+    const oldCarousel = document.getElementById("promoCarousel");
+    const oldDots = document.getElementById("promoDots");
+
+    if (!promoArea || !oldCarousel) return;
+
+    try {
+      const response = await fetch("/api/promo-media", {
+        cache: "no-store"
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (!data.success || !Array.isArray(data.promos)) {
+        return;
+      }
+
+      const now = Date.now();
+
+      const sourceSlides = Array.from(
+        oldCarousel.querySelectorAll(".promoSlide")
+      );
+
+      const visiblePromos = data.promos
+        .map(function (promo) {
+          return {
+            promo: promo,
+            index: Number(promo.slot) - 1
+          };
+        })
+        .filter(function (item) {
+          return item.index >= 0;
+        })
+        .filter(function (item) {
+          return isCampaignVisible(item.promo, now);
+        })
+        .filter(function (item) {
+          return sourceSlides[item.index];
+        });
+
+      /*
+        AUCUNE CAMPAGNE ACTIVE
+        → tout le bloc disparaît
+        → images supprimées
+        → points supprimés
+        → espace supprimé
+      */
+
+      if (!visiblePromos.length) {
+        promoArea.style.display = "none";
+
+        if (oldDots) {
+          oldDots.style.display = "none";
+        }
+
+        const title = document.getElementById(
+          "promoCampaignTitle"
+        );
+
+        if (title) {
+          title.style.display = "none";
+        }
+
+        return;
+      }
+
+      promoArea.style.display = "";
+
+      /*
+        On recrée le carrousel uniquement avec
+        les campagnes/médias réellement actifs.
+      */
+
+      const carousel = oldCarousel.cloneNode(false);
+
+      carousel.innerHTML = "";
+
+      visiblePromos.forEach(function (item) {
+        const slide =
+          sourceSlides[item.index].cloneNode(true);
+
+        slide.style.display = "";
+
+        carousel.appendChild(slide);
+      });
+
+      oldCarousel.replaceWith(carousel);
+
+      /*
+        Reconstruction des points
+      */
+
+      const dots = document.createElement("div");
+
+      dots.className = "promoDots";
+      dots.id = "promoDots";
+
+      visiblePromos.forEach(function (item, index) {
+        const dot = document.createElement("button");
+
+        dot.type = "button";
+
+        if (index === 0) {
+          dot.classList.add("active");
+        }
+
+        dot.setAttribute(
+          "aria-label",
+          "Promotion " + (index + 1)
+        );
+
+        dot.addEventListener("click", function () {
+          const width = carousel.clientWidth;
+
+          carousel.scrollTo({
+            left: index * width,
+            behavior: "smooth"
+          });
+        });
+
+        dots.appendChild(dot);
+      });
+
+      if (oldDots) {
+        oldDots.replaceWith(dots);
+      } else {
+        promoArea.appendChild(dots);
+      }
+
+      /*
+        Mise à jour du point actif
+      */
+
+      function updateDot() {
+        const width = carousel.clientWidth;
+
+        if (!width) return;
+
+        const index = Math.round(
+          carousel.scrollLeft / width
+        );
+
+        dots
+          .querySelectorAll("button")
+          .forEach(function (dot, i) {
+            dot.classList.toggle(
+              "active",
+              i === index
+            );
+          });
+      }
+
+      carousel.addEventListener(
+        "scroll",
+        updateDot,
+        { passive: true }
+      );
+
+      /*
+        Nouveau autoplay uniquement sur les
+        campagnes réellement visibles.
+      */
+
+      let autoplayTimer = null;
+
+      function startAutoplay() {
+        clearInterval(autoplayTimer);
+
+        if (visiblePromos.length < 2) {
+          return;
+        }
+
+        autoplayTimer = setInterval(function () {
+          const width = carousel.clientWidth;
+
+          if (!width) return;
+
+          const current = Math.round(
+            carousel.scrollLeft / width
+          );
+
+          const next =
+            (current + 1) % visiblePromos.length;
+
+          carousel.scrollTo({
+            left: next * width,
+            behavior: "smooth"
+          });
+        }, 4000);
+      }
+
+      startAutoplay();
+      updateDot();
+
+      /*
+        COMPTE À REBOURS
+      */
+
+      const campaign = visiblePromos.find(
+        function (item) {
+          return item.promo.campaign_id;
+        }
+      );
+
+      const title =
+        document.getElementById(
+          "promoCampaignTitle"
+        );
+
+      if (title && campaign) {
+        title.style.display = "flex";
+
+        const promo = campaign.promo;
+
+        const campaignName =
+          title.querySelector(
+            "div div:last-child"
+          );
+
+        if (campaignName) {
+          campaignName.textContent =
+            promo.campaign_name ||
+            "OFFRE EXCLUSIVE";
+        }
+
+        const end = promo.campaign_end_date
+          ? new Date(
+              promo.campaign_end_date
+            ).getTime()
+          : null;
+
+        if (
+          end &&
+          Number.isFinite(end) &&
+          end > Date.now()
+        ) {
+          let countdown =
+            title.querySelector(
+              ".promoCampaignCountdown"
+            );
+
+          if (!countdown) {
+            countdown =
+              document.createElement("div");
+
+            countdown.className =
+              "promoCampaignCountdown";
+
+            countdown.style.cssText =
+              "margin-top:6px;" +
+              "font-size:12px;" +
+              "font-weight:800;" +
+              "letter-spacing:.8px;" +
+              "color:#c4d7ff;" +
+              "font-variant-numeric:tabular-nums;";
+
+            const textBlock =
+              campaignName
+                ? campaignName.parentElement
+                : null;
+
+            if (textBlock) {
+              textBlock.appendChild(
+                countdown
+              );
+            }
+          }
+
+          const countdownTimer =
+            setInterval(function () {
+              const remaining =
+                end - Date.now();
+
+              if (remaining <= 0) {
+                clearInterval(
+                  countdownTimer
+                );
+
+                promoArea.style.display =
+                  "none";
+
+                return;
+              }
+
+              countdown.textContent =
+                "⏳ Fin de l'offre : " +
+                formatCountdown(remaining);
+            }, 1000);
+
+          countdown.textContent =
+            "⏳ Fin de l'offre : " +
+            formatCountdown(
+              end - Date.now()
+            );
+        }
+      }
+    } catch (error) {
+      console.error(
+        "PROMO_CAMPAIGN_FIX_ERROR",
+        error
+      );
+    }
+  }
+
+  function initPromoFix() {
+    /*
+      On laisse d'abord app.js charger
+      les médias depuis l'API.
+    */
+
+    setTimeout(
+      fixPromoCampaign,
+      500
+    );
+  }
+
+  if (
+    document.readyState === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initPromoFix
+    );
+  } else {
+    initPromoFix();
+  }
+
+})();
