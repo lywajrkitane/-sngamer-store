@@ -54,6 +54,131 @@
     document.head.appendChild(style);
   }
 
+  function injectProductDetailTransition(){
+    if(document.getElementById("sngamerProductDetailTransitionStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "sngamerProductDetailTransitionStyles";
+    style.textContent = `
+      /* =========================================================
+         SNGAMER STORE — transition premium fiche produit
+         Entrée douce depuis la grille vers les détails du produit.
+         ========================================================= */
+      #productModal{
+        background:rgba(0,0,0,.72);
+        backdrop-filter:blur(4px);
+      }
+
+      #productModal.show{
+        animation:sngProductBackdropIn .28s ease-out both;
+      }
+
+      #productModal.show .productBox{
+        transform-origin:center center;
+        animation:sngProductModalIn .46s cubic-bezier(.22,1,.36,1) both;
+        will-change:transform,opacity;
+      }
+
+      #productModal.show .productMainImage{
+        animation:sngProductImageIn .55s cubic-bezier(.22,1,.36,1) .06s both;
+      }
+
+      #productModal.show .productInfo{
+        animation:sngProductInfoIn .48s cubic-bezier(.22,1,.36,1) .09s both;
+      }
+
+      #productModal.show .productThumbnails{
+        animation:sngProductThumbsIn .4s ease-out .14s both;
+      }
+
+      @keyframes sngProductBackdropIn{
+        from{opacity:0}
+        to{opacity:1}
+      }
+
+      @keyframes sngProductModalIn{
+        from{
+          opacity:0;
+          transform:translate3d(0,18px,0) scale(.965);
+        }
+        to{
+          opacity:1;
+          transform:translate3d(0,0,0) scale(1);
+        }
+      }
+
+      @keyframes sngProductImageIn{
+        from{
+          opacity:0;
+          transform:scale(.97);
+        }
+        to{
+          opacity:1;
+          transform:scale(1);
+        }
+      }
+
+      @keyframes sngProductInfoIn{
+        from{
+          opacity:0;
+          transform:translate3d(12px,0,0);
+        }
+        to{
+          opacity:1;
+          transform:translate3d(0,0,0);
+        }
+      }
+
+      @keyframes sngProductThumbsIn{
+        from{opacity:0;transform:translateY(6px)}
+        to{opacity:1;transform:translateY(0)}
+      }
+
+      @media(max-width:700px){
+        #productModal.show .productBox{
+          animation:sngProductModalMobileIn .48s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        #productModal.show .productInfo{
+          animation:sngProductInfoMobileIn .44s cubic-bezier(.22,1,.36,1) .08s both;
+        }
+
+        @keyframes sngProductModalMobileIn{
+          from{
+            opacity:0;
+            transform:translate3d(0,28px,0) scale(.985);
+          }
+          to{
+            opacity:1;
+            transform:translate3d(0,0,0) scale(1);
+          }
+        }
+
+        @keyframes sngProductInfoMobileIn{
+          from{
+            opacity:0;
+            transform:translate3d(0,10px,0);
+          }
+          to{
+            opacity:1;
+            transform:translate3d(0,0,0);
+          }
+        }
+      }
+
+      @media(prefers-reduced-motion:reduce){
+        #productModal.show,
+        #productModal.show .productBox,
+        #productModal.show .productMainImage,
+        #productModal.show .productInfo,
+        #productModal.show .productThumbnails{
+          animation:none!important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function syncPromoHero(){
     const area = document.getElementById("promoArea");
     const carousel = document.getElementById("promoCarousel");
@@ -64,6 +189,7 @@
 
     applyProfessionalHero();
     injectProfessionalHeroStyles();
+    injectProductDetailTransition();
 
     if(!area || !carousel || !dots || !fallback) return;
 
@@ -95,6 +221,7 @@
   }
 
   function start(){
+    injectProductDetailTransition();
     syncPromoHero();
 
     const carousel = document.getElementById("promoCarousel");
