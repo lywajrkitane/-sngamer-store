@@ -28,6 +28,18 @@
     start();
   }
 
+  // Charge le garde-fou de rendu produits après l'application principale.
+  // Il répare automatiquement une grille qui devient vide après plusieurs
+  // changements de rubrique, sans modifier le panier ni le checkout.
+  function loadProductStability(){
+    if(document.querySelector('script[data-sngamer-product-stability]')) return;
+    const script=document.createElement("script");
+    script.src="product-stability.js";
+    script.defer=true;
+    script.dataset.sngamerProductStability="true";
+    document.body.appendChild(script);
+  }
+
   // Charge le dashboard client après l'application principale.
   // Cela permet de garder la navigation existante intacte tout en
   // remplaçant proprement la vue Profil par l'espace client.
@@ -41,8 +53,10 @@
   }
 
   if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",loadProductStability,{once:true});
     document.addEventListener("DOMContentLoaded",loadCustomerAccount,{once:true});
   }else{
+    loadProductStability();
     loadCustomerAccount();
   }
 })();
