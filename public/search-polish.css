@@ -1,40 +1,25 @@
-/* SNGAMER STORE — Premium search */
-.searchPremiumButton{
-  width:52px;
-  height:52px;
-  flex:0 0 52px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(70,150,255,.55);
-  border-radius:16px;
-  color:#fff;
-  background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%);
-  box-shadow:0 0 22px rgba(42,111,255,.24),inset 0 1px 0 rgba(255,255,255,.2);
-  cursor:pointer;
-  transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
-}
+/* SNGAMER STORE — Premium search, version 2 */
+.searchPremiumButton{width:52px;height:52px;flex:0 0 52px;display:inline-flex;align-items:center;justify-content:center;padding:0!important;border:1px solid rgba(70,150,255,.55)!important;border-radius:16px!important;color:#fff!important;background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%)!important;box-shadow:0 0 22px rgba(42,111,255,.24),inset 0 1px 0 rgba(255,255,255,.2);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
 .searchPremiumButton:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(42,111,255,.38),inset 0 1px 0 rgba(255,255,255,.24);filter:brightness(1.06)}
 .searchPremiumButton:active{transform:scale(.96)}
 .searchPremiumButton svg{width:23px;height:23px}
 .searchPremiumButton:focus-visible{outline:2px solid #6fb7ff;outline-offset:3px}
-
-/* The old full-width search stays in the DOM for compatibility with app.js,
-   but becomes the input used by the modal. */
 .siteHeader .search.sngamerSearchSource{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important}
-
-.searchModal{position:fixed;inset:0;z-index:10050;display:none;align-items:flex-start;justify-content:center;padding:86px 16px 24px;background:rgba(3,7,18,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.searchModal{position:fixed;inset:0;z-index:10050;display:none;align-items:flex-start;justify-content:center;padding:72px 16px max(18px,env(safe-area-inset-bottom));background:rgba(3,7,18,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .searchModal.show{display:flex;animation:searchFadeIn .18s ease-out}
-.searchModalPanel{width:min(680px,100%);max-height:min(720px,calc(100vh - 110px));overflow:hidden;border:1px solid rgba(95,154,255,.3);border-radius:24px;background:linear-gradient(180deg,rgba(13,22,39,.98),rgba(7,12,25,.98));box-shadow:0 30px 90px rgba(0,0,0,.55),0 0 45px rgba(32,105,255,.12)}
-.searchModalHead{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid rgba(120,150,190,.12)}
-.searchModalInputWrap{position:relative;display:flex;align-items:center;flex:1}
-.searchModalInputWrap .modalSearchIcon{position:absolute;left:16px;display:flex;color:#69b7ff;pointer-events:none}
+.searchModalPanel{width:min(680px,100%);height:min(720px,calc(100dvh - 90px));max-height:calc(100dvh - 90px);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(95,154,255,.3);border-radius:24px;background:linear-gradient(180deg,rgba(13,22,39,.99),rgba(7,12,25,.99));box-shadow:0 30px 90px rgba(0,0,0,.55),0 0 45px rgba(32,105,255,.12)}
+.searchModalHead{display:flex;align-items:center;gap:10px;flex:0 0 auto;padding:14px;border-bottom:1px solid rgba(120,150,190,.12)}
+.searchModalInputWrap{position:relative;display:flex;align-items:center;flex:1;min-width:0}
+.searchModalInputWrap .modalSearchIcon{position:absolute;left:16px;display:flex;color:#69b7ff;pointer-events:none;z-index:1}
 .searchModalInputWrap input#q{width:100%;height:52px;margin:0;padding:0 48px;border:1px solid rgba(86,139,220,.28);border-radius:15px;background:rgba(4,10,22,.88);color:#f5f8ff;font-size:16px;outline:none;box-sizing:border-box}
 .searchModalInputWrap input#q::placeholder{color:#718199}
 .searchModalInputWrap input#q:focus{border-color:rgba(65,151,255,.72);box-shadow:0 0 0 4px rgba(35,126,255,.1),0 0 22px rgba(35,126,255,.1)}
-.searchModalClose{width:44px;height:44px;flex:0 0 44px;border:1px solid rgba(126,151,190,.2);border-radius:13px;background:rgba(255,255,255,.045);color:#dce7f8;font-size:25px;line-height:1;cursor:pointer}
+.searchModalClose{width:52px;height:52px;flex:0 0 52px;padding:0;border:1px solid rgba(126,151,190,.2);border-radius:15px;background:rgba(255,255,255,.045);color:#dce7f8;font-size:25px;line-height:1;cursor:pointer}
 .searchModalClose:hover{background:rgba(255,255,255,.09);color:#fff}
-.searchModalBody{overflow:auto;max-height:calc(min(720px,100vh - 110px) - 82px);padding:10px}
+.searchModalBody{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 10px 34px;overscroll-behavior:contain;scroll-padding-bottom:34px;-webkit-overflow-scrolling:touch}
+.searchModalBody::-webkit-scrollbar{width:7px}
+.searchModalBody::-webkit-scrollbar-track{background:rgba(255,255,255,.025);border-radius:10px}
+.searchModalBody::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#1687ff,#7c3aed);border-radius:10px}
 .searchModalHint{padding:12px 10px 8px;color:#7889a3;font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:800}
 .searchResult{width:100%;display:flex;align-items:center;gap:13px;padding:11px;border:0;border-radius:15px;background:transparent;color:#fff;text-align:left;cursor:pointer;transition:background .16s ease,transform .16s ease}
 .searchResult:hover,.searchResult:focus-visible{background:rgba(63,133,255,.1);transform:translateX(2px);outline:none}
@@ -47,13 +32,6 @@
 .searchResultArrow{color:#66809f;font-size:20px;padding:0 4px}
 .searchEmpty{padding:42px 18px;text-align:center;color:#8292aa}
 .searchEmpty strong{display:block;color:#dce7f5;font-size:17px;margin-bottom:7px}
-
 @keyframes searchFadeIn{from{opacity:0}to{opacity:1}}
-
-@media(max-width:700px){
-  .searchPremiumButton{width:48px;height:48px;flex-basis:48px;border-radius:15px}
-  .searchPremiumButton svg{width:21px;height:21px}
-  .searchModal{padding:72px 10px 18px}
-  .searchModalPanel{border-radius:20px;max-height:calc(100vh - 90px)}
-  .searchModalBody{max-height:calc(100vh - 172px)}
-}
+@media(max-width:700px){.searchPremiumButton{width:48px;height:48px;flex-basis:48px;border-radius:15px!important}.searchPremiumButton svg{width:21px;height:21px}.searchModal{padding:72px 10px max(12px,env(safe-area-inset-bottom))}.searchModalPanel{width:100%;height:calc(100dvh - 90px);max-height:calc(100dvh - 90px);border-radius:20px}.searchModalBody{padding-bottom:42px;scroll-padding-bottom:42px}}
+@media(max-width:380px){.searchModalHead{gap:8px;padding:10px}.searchModalInputWrap input#q{height:48px;font-size:15px}.searchModalClose{width:48px;height:48px;flex-basis:48px}.searchResult{gap:10px;padding:10px}.searchResultImage{width:50px;height:50px;flex-basis:50px}}
