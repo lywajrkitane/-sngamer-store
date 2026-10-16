@@ -52,9 +52,19 @@
     document.body.appendChild(script);
   }
 
+  function loadAdminWorkspace() {
+    if (window.__sngamerAdminWorkspaceLoader) return;
+    window.__sngamerAdminWorkspaceLoader = true;
+    const script = document.createElement("script");
+    script.src = "admin-section-workspace-v24.js?v=20261016-2100";
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", installRefreshNavigation, { once: true });
   } else installRefreshNavigation();
   loadPremiumSearch();
   loadCompactOrders();
+  loadAdminWorkspace();
 })();
