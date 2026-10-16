@@ -1,6 +1,24 @@
 let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous",activeStoreSection="home",selectedCoinPlatform=null;
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
-async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render();update()}
+async function load(){
+  try {
+    const response = await fetch("/api/products", { cache: "no-store" });
+    if (!response.ok) throw new Error("products_http_" + response.status);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("products_response_not_array");
+    products = data;
+    window.storeProducts = products;
+    cats();
+    render();
+    update();
+  } catch (error) {
+    console.error("SNGAMER_STORE_LOAD_ERROR", error);
+    const grid = document.getElementById("products");
+    if (grid && !grid.querySelector(".productCardClickable")) {
+      grid.innerHTML = '<div role="status" style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca">Impossible de charger les produits. Vérifie ta connexion puis réessaie.</div>';
+    }
+  }
+}
 function storeCategory(p) {
   const category = (p.category || "").trim().toLowerCase();
 
@@ -33,6 +51,12 @@ function cats() {
 }
 function filterBy(c){filter=c;cats();render()}
 function render(){
+  const productGrid = document.getElementById("products");
+  if (!productGrid) return;
+  if (activeStoreSection === "profile" || activeStoreSection === "coins") {
+    productGrid.replaceChildren();
+    return;
+  }
   const q = (document.querySelector("#q")?.value || "").toLowerCase();
 
   const list = products.filter(p =>
@@ -44,8 +68,6 @@ function render(){
     ) &&
     (p.name || "").toLowerCase().includes(q)
   );
-
-  const productGrid = document.querySelector("#products");
 
   productGrid.innerHTML = list.map(p => {
 
@@ -919,12 +941,12 @@ function matchesStoreSection(p) {
 }
 
 
-    function navigateStore(section) {
+function navigateStore(section) {
   const validSections = new Set(["home", "accessories", "phones", "coins", "profile"]);
   if (!validSections.has(section)) section = "home";
-
   activeStoreSection = section;
   window.activeStoreSection = section;
+  document.body.dataset.storeSection = section;
 
   const nav = document.getElementById("mobileBottomNav");
   const title = document.getElementById("sectionTitle");
@@ -1040,6 +1062,7 @@ function matchesStoreSection(p) {
   if (section === "profile") {
     productsArea.style.display = "none";
     productsArea.setAttribute("aria-hidden", "true");
+    productsArea.setAttribute("aria-hidden", "true");
 
     profileArea.innerHTML = `
       <div style="padding:26px 20px;background:linear-gradient(145deg,#111e30,#080d16);border:1px solid #2a4262;border-radius:20px;text-align:center">
@@ -1065,8 +1088,6 @@ function matchesStoreSection(p) {
     productsArea.style.display = hideProducts ? "none" : "";
     productsArea.setAttribute("aria-hidden", hideProducts ? "true" : "false");
 
-    // Une seule source de vérité : la grille est reconstruite par render().
-    // Aucun script externe ne doit réécrire les produits après cette navigation.
     render();
   }
 
