@@ -1,7 +1,8 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const { initCustomerDatabase, installCustomerSystem } = require("./customer-system");
+const { installCustomerSystem } = require("./customer-system");
+const { initCustomersTable, ensureOrderCustomerColumns } = require("./customer-bootstrap-db");
 
 const originalListen = express.application.listen;
 
@@ -55,12 +56,17 @@ express.application.listen = function patchedListen(...args) {
     stack.splice(catchAllIndex, 0, ...(router.stack || []));
   }
 
-  return originalListen.apply(app, args);
+  ensureOrderCustomerColumns()
+    .then(() => originalListen.apply(app, args))
+    .catch(error => {
+      console.error("CUSTOMER_ORDER_DB_BOOT_ERROR:", error);
+      process.exit(1);
+    });
 };
 
 (async () => {
   try {
-    await initCustomerDatabase();
+    await initCustomersTable();
     require("./server");
   } catch (error) {
     console.error("CUSTOMER_SYSTEM_BOOT_ERROR:", error);
