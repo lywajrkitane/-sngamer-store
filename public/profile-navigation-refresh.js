@@ -40,9 +40,26 @@
     }
   }
 
+  function loadPremiumSearch() {
+    if (window.__sngamerPremiumSearchLoader) return;
+    window.__sngamerPremiumSearchLoader = true;
+
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "search-polish.css?v=20261016-1935";
+    document.head.appendChild(css);
+
+    const script = document.createElement("script");
+    script.src = "search-polish.js?v=20261016-1935";
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", installRefreshNavigation, { once: true });
   } else {
     installRefreshNavigation();
   }
+
+  loadPremiumSearch();
 })();
