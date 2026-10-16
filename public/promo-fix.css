@@ -1,0 +1,104 @@
+/* SNGAMER STORE — fallback Hero quand aucune campagne n'est active */
+
+.promoArea{
+  min-height:320px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  width:100%;
+}
+
+.promoCarousel:empty,
+.promoDots:empty{
+  min-height:0;
+}
+
+.promoCarousel{
+  width:100%;
+  min-height:0;
+}
+
+.promoDots{
+  min-height:0;
+}
+
+.defaultHeroContent{
+  width:100%;
+  min-height:320px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:34px 28px;
+  border:1px solid rgba(58,149,255,.22);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(22,135,255,.18),transparent 55%),
+    linear-gradient(145deg,#0d1726,#080d16);
+  box-shadow:0 18px 45px rgba(0,0,0,.28);
+}
+
+.defaultHeroContent .defaultHeroBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:9px 14px;
+  margin-bottom:16px;
+  border:1px solid rgba(96,165,250,.35);
+  border-radius:999px;
+  background:rgba(20,40,71,.8);
+  color:#8fc7ff;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+}
+
+.defaultHeroContent h2{
+  margin:0 0 12px;
+  color:#fff;
+  font-size:clamp(25px,5vw,42px);
+  line-height:1.05;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+
+.defaultHeroContent p{
+  max-width:420px;
+  margin:0 0 22px;
+  color:#aab6c8;
+  font-size:15px;
+  line-height:1.6;
+}
+
+.defaultHeroContent .primary{
+  margin-top:2px;
+}
+
+@media(max-width:900px){
+  .promoArea{
+    min-height:280px;
+  }
+
+  .defaultHeroContent{
+    min-height:280px;
+    padding:28px 20px;
+  }
+}
+
+@media(max-width:560px){
+  .promoArea{
+    min-height:250px;
+  }
+
+  .defaultHeroContent{
+    min-height:250px;
+    padding:24px 16px;
+    border-radius:18px;
+  }
+
+  .defaultHeroContent p{
+    font-size:13px;
+  }
+}
