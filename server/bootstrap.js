@@ -1,4 +1,6 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const { initCustomerDatabase, installCustomerSystem } = require("./customer-system");
 
 const originalListen = express.application.listen;
@@ -6,13 +8,43 @@ const originalListen = express.application.listen;
 express.application.listen = function patchedListen(...args) {
   const app = this;
   const router = installCustomerSystem();
-
-  // The original server already registers its normal routes before listen().
-  // Insert the customer routes just before the final catch-all frontend route.
-  // This keeps the existing store/admin behavior intact while making the new
-  // customer API available through the same Express application/session.
   const stack = app._router && app._router.stack;
+
   if (stack) {
+    const adminInjection = function(req, res, next) {
+      const target = req.path === "/admin-dashboard.html" || req.path === "/admin.html";
+      if (!target || req.method !== "GET") return next();
+
+      const file = path.join(__dirname, "..", "public", req.path.replace(/^\//, ""));
+      if (!fs.existsSync(file)) return next();
+
+      try {
+        let html = fs.readFileSync(file, "utf8");
+        if (!html.includes("customer-admin.js")) {
+          html = html.replace(/<\/body>/i, '<script src="/customer-admin.js" defer></script></body>');
+        }
+        res.type("html").send(html);
+      } catch (error) {
+        console.error("ADMIN_HTML_INJECTION_ERROR:", error);
+        next();
+      }
+    };
+
+    let staticIndex = stack.length;
+    for (let i = 0; i < stack.length; i++) {
+      const layer = stack[i];
+      if (layer && layer.handle && layer.handle.name === "serveStatic") {
+        staticIndex = i;
+        break;
+      }
+    }
+    stack.splice(staticIndex, 0, {
+      handle: adminInjection,
+      name: "sngamerAdminInjection",
+      route: undefined,
+      regexp: /^\/?(?=.)/
+    });
+
     let catchAllIndex = stack.length;
     for (let i = 0; i < stack.length; i++) {
       const layer = stack[i];
@@ -22,13 +54,9 @@ express.application.listen = function patchedListen(...args) {
       }
     }
 
-    const routerStack = router.stack || [];
-    stack.splice(catchAllIndex, 0, ...routerStack);
+    stack.splice(catchAllIndex, 0, ...(router.stack || []));
   }
 
-  // Serve the customer account enhancement on the storefront.
-  // The file is loaded by the existing hero-copy hook below; no existing HTML
-  // layout is replaced here.
   return originalListen.apply(app, args);
 };
 
