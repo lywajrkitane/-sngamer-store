@@ -55,3 +55,30 @@
   flex-wrap:wrap !important;
   gap:10px !important;
 }
+
+/* PANIER / CHECKOUT — ne jamais laisser la navigation mobile passer devant. */
+#drawer,
+#checkout{
+  z-index:20000 !important;
+}
+
+#drawer .drawer aside{
+  z-index:20001 !important;
+}
+
+#checkout .box{
+  max-height:calc(100vh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+@media(max-width:700px){
+  #drawer aside{
+    padding-bottom:calc(22px + env(safe-area-inset-bottom));
+  }
+
+  #checkout .box{
+    width:min(500px,92%);
+    padding-bottom:calc(25px + env(safe-area-inset-bottom));
+  }
+}
