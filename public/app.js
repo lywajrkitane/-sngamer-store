@@ -1,6 +1,25 @@
 let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous",activeStoreSection="home",selectedCoinPlatform=null;
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
-async function load(){products=await fetch("/api/products").then(r=>r.json());cats();render();update()}
+async function load(){
+  try {
+    const response = await fetch("/api/products", { cache: "no-store" });
+    if (!response.ok) throw new Error("Impossible de charger les produits (" + response.status + ")");
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("La réponse produits n'est pas une liste.");
+
+    products = data;
+    window.storeProducts = products;
+    cats();
+    render();
+    update();
+  } catch (error) {
+    console.error("SNGAMER_STORE_LOAD_ERROR", error);
+    const grid = document.querySelector("#products");
+    if (grid && !grid.children.length) {
+      grid.innerHTML = '<div class="storeLoadError" role="status">Les produits n’ont pas pu être chargés. Vérifie ta connexion puis réessaie.</div>';
+    }
+  }
+}
 function storeCategory(p) {
   const category = (p.category || "").trim().toLowerCase();
 
@@ -33,6 +52,16 @@ function cats() {
 }
 function filterBy(c){filter=c;cats();render()}
 function render(){
+  const productGrid = document.querySelector("#products");
+  if (!productGrid) return;
+
+  // Le rendu est exclusivement géré par app.js : aucune seconde grille
+  // ne doit remplacer les cartes après un changement de section.
+  if (activeStoreSection === "profile" || activeStoreSection === "coins") {
+    productGrid.innerHTML = "";
+    return;
+  }
+
   const q = (document.querySelector("#q")?.value || "").toLowerCase();
 
   const list = products.filter(p =>
@@ -44,8 +73,6 @@ function render(){
     ) &&
     (p.name || "").toLowerCase().includes(q)
   );
-
-  const productGrid = document.querySelector("#products");
 
   productGrid.innerHTML = list.map(p => {
 
@@ -925,6 +952,7 @@ function matchesStoreSection(p) {
 
   activeStoreSection = section;
   window.activeStoreSection = section;
+  document.body.dataset.storeSection = section;
 
   const nav = document.getElementById("mobileBottomNav");
   const title = document.getElementById("sectionTitle");
