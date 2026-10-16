@@ -46,3 +46,112 @@
 #checkout .checkoutActionBar .primary.full{display:block;width:100%;position:relative;bottom:auto;margin:0;box-shadow:0 8px 25px rgba(22,135,255,.16)}
 #checkout .checkoutScrollArea #checkoutSummary{margin-top:0}
 #checkout .checkoutScrollArea > *{max-width:100%}
+
+
+/* ==========================================================
+   SNGAMER STORE — CORRECTION SOURCE DU CHECKOUT MOBILE
+   La fenêtre occupe le viewport et possède son propre scroll.
+   Le bouton de confirmation reste toujours dans la barre basse.
+   ========================================================== */
+#checkout {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  z-index: 20000 !important;
+  overflow: hidden !important;
+  touch-action: auto !important;
+  align-items: center !important;
+  justify-items: center !important;
+}
+
+#checkout.show {
+  display: grid !important;
+}
+
+#checkout .box {
+  box-sizing: border-box !important;
+  width: min(720px, calc(100vw - 28px)) !important;
+  max-width: 720px !important;
+  height: min(90dvh, 900px) !important;
+  max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  min-height: 0 !important;
+  margin: auto !important;
+  padding: 28px 20px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: auto !important;
+}
+
+#checkout .checkoutScrollArea {
+  display: block !important;
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  width: 100% !important;
+  padding: 0 2px 18px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+}
+
+#checkout .checkoutActionBar {
+  display: block !important;
+  position: relative !important;
+  inset: auto !important;
+  z-index: 30 !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 12px 0 calc(14px + env(safe-area-inset-bottom)) !important;
+  border-top: 1px solid rgba(70, 122, 180, .24) !important;
+  background: linear-gradient(to bottom, rgba(8,13,22,.97), #080d18 45%) !important;
+}
+
+#checkout .checkoutActionBar .primary.full {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 54px !important;
+  margin: 0 !important;
+  padding: 15px 14px !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+
+#checkout .checkoutScrollArea > #checkoutSummary {
+  margin-top: 8px !important;
+}
+
+@media (max-width: 700px) {
+  #checkout {
+    align-items: stretch !important;
+    justify-items: stretch !important;
+  }
+
+  #checkout .box {
+    width: 100vw !important;
+    max-width: none !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: calc(26px + env(safe-area-inset-top)) 16px 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  #checkout .checkoutActionBar {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+}

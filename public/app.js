@@ -920,7 +920,11 @@ function matchesStoreSection(p) {
 
 
     function navigateStore(section) {
+  const validSections = new Set(["home", "accessories", "phones", "coins", "profile"]);
+  if (!validSections.has(section)) section = "home";
+
   activeStoreSection = section;
+  window.activeStoreSection = section;
 
   const nav = document.getElementById("mobileBottomNav");
   const title = document.getElementById("sectionTitle");
@@ -961,7 +965,9 @@ function matchesStoreSection(p) {
   catsArea.style.display = home ? "" : "none";
   subcategories.style.display = "none";
   subcategories.hidden = true;
-  profileArea.hidden = section !== "profile";
+  const isProfile = section === "profile";
+  profileArea.hidden = !isProfile;
+  profileArea.style.display = isProfile ? "block" : "none";
 
   selectedCoinPlatform = null;
   filter = "Tous";
@@ -1033,6 +1039,7 @@ function matchesStoreSection(p) {
 
   if (section === "profile") {
     productsArea.style.display = "none";
+    productsArea.setAttribute("aria-hidden", "true");
 
     profileArea.innerHTML = `
       <div style="padding:26px 20px;background:linear-gradient(145deg,#111e30,#080d16);border:1px solid #2a4262;border-radius:20px;text-align:center">
@@ -1051,9 +1058,15 @@ function matchesStoreSection(p) {
 
   } else {
     profileArea.innerHTML = "";
-    productsArea.style.display =
-      section === "coins" ? "none" : "";
+    profileArea.hidden = true;
+    profileArea.style.display = "none";
 
+    const hideProducts = section === "coins";
+    productsArea.style.display = hideProducts ? "none" : "";
+    productsArea.setAttribute("aria-hidden", hideProducts ? "true" : "false");
+
+    // Une seule source de vérité : la grille est reconstruite par render().
+    // Aucun script externe ne doit réécrire les produits après cette navigation.
     render();
   }
 
