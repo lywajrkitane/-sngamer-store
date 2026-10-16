@@ -30,6 +30,9 @@ express.application.listen = function patchedListen(...args) {
       }
     };
 
+    const injectionRouter = express.Router();
+    injectionRouter.use(adminInjection);
+
     let staticIndex = stack.length;
     for (let i = 0; i < stack.length; i++) {
       const layer = stack[i];
@@ -38,12 +41,7 @@ express.application.listen = function patchedListen(...args) {
         break;
       }
     }
-    stack.splice(staticIndex, 0, {
-      handle: adminInjection,
-      name: "sngamerAdminInjection",
-      route: undefined,
-      regexp: /^\/?(?=.)/
-    });
+    stack.splice(staticIndex, 0, ...(injectionRouter.stack || []));
 
     let catchAllIndex = stack.length;
     for (let i = 0; i < stack.length; i++) {
