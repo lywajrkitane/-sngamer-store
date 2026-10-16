@@ -82,3 +82,54 @@
     padding-bottom:calc(25px + env(safe-area-inset-bottom));
   }
 }
+
+/* CHECKOUT MOBILE PREMIUM — fenêtre large, défilement fiable et bouton toujours accessible. */
+#checkout{
+  overflow:hidden !important;
+  overscroll-behavior:none;
+  touch-action:none;
+}
+
+#checkout .box{
+  width:min(680px,calc(100vw - 24px));
+  max-width:680px;
+  max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+  scrollbar-gutter:stable;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom));
+}
+
+#checkout .box > .primary.full{
+  position:sticky;
+  bottom:calc(8px + env(safe-area-inset-bottom));
+  z-index:5;
+  margin-top:12px;
+  box-shadow:0 -8px 22px rgba(7,10,16,.72),0 8px 25px rgba(22,135,255,.16);
+}
+
+@media(max-width:700px){
+  #checkout{
+    align-items:stretch !important;
+    justify-items:stretch !important;
+  }
+
+  #checkout .box{
+    width:100vw;
+    max-width:none;
+    height:100dvh;
+    max-height:100dvh;
+    margin:0;
+    border-left:0;
+    border-right:0;
+    border-radius:0;
+    padding:24px 16px calc(34px + env(safe-area-inset-bottom));
+  }
+
+  #checkout .box > .primary.full{
+    bottom:calc(10px + env(safe-area-inset-bottom));
+  }
+}
