@@ -1,46 +1,21 @@
-(function(){
+/* SNGAMER STORE — navigation centralisée dans app.js + checkout fiable */
+(function () {
   "use strict";
 
-  function repairStoreView(section){
-    const productsArea = document.getElementById("products");
-    const profileArea = document.getElementById("profileArea");
-    if(!productsArea) return;
-
-    if(section === "profile"){
-      productsArea.style.display = "none";
-      if(profileArea) profileArea.hidden = false;
-      return;
-    }
-
-    if(profileArea) profileArea.hidden = true;
-    productsArea.style.display = "";
-
-    // Returning from the profile must restore the already-loaded product grid.
-    if(typeof window.render === "function"){
-      window.render();
-    }
-  }
-
-  if(typeof window.navigateStore === "function"){
-    const originalNavigateStore = window.navigateStore;
-    window.navigateStore = function(section){
-      originalNavigateStore(section);
-      window.setTimeout(function(){ repairStoreView(section); }, 0);
-    };
-  }
-
-  function prepareCheckoutLayout(){
+  function prepareCheckoutLayout() {
     const checkout = document.getElementById("checkout");
     const box = checkout && checkout.querySelector(".box");
-    if(!box) return;
+    if (!box) return;
 
+    const closeButton = box.querySelector(":scope > .x");
     let scroll = box.querySelector(":scope > .checkoutScrollArea");
     let actionBar = box.querySelector(":scope > .checkoutActionBar");
-    const closeButton = box.querySelector(":scope > .x");
+    let confirmButton =
+      box.querySelector(":scope > .primary.full") ||
+      (actionBar && actionBar.querySelector(".primary.full"));
 
-    if(!scroll || !actionBar){
-      const confirmButton = box.querySelector(":scope > .primary.full");
-      if(!confirmButton) return;
+    if (!scroll || !actionBar) {
+      if (!confirmButton) return;
 
       scroll = document.createElement("div");
       scroll.className = "checkoutScrollArea";
@@ -48,8 +23,8 @@
       actionBar = document.createElement("div");
       actionBar.className = "checkoutActionBar";
 
-      Array.from(box.children).forEach(function(child){
-        if(child === closeButton || child === confirmButton) return;
+      Array.from(box.children).forEach(function (child) {
+        if (child === closeButton || child === confirmButton) return;
         scroll.appendChild(child);
       });
 
@@ -58,47 +33,70 @@
       box.appendChild(actionBar);
     }
 
-    // openCheckout dynamically inserts the order summary at the top of .box.
-    // Move any newly-added content into the scroll area so the action bar stays fixed.
-    Array.from(box.children).forEach(function(child){
-      if(child !== closeButton && child !== scroll && child !== actionBar){
+    // Le résumé est créé dynamiquement à l'ouverture du checkout.
+    // Le placer juste sous le titre, jamais à la fin derrière les champs.
+    Array.from(box.children).forEach(function (child) {
+      if (child === closeButton || child === scroll || child === actionBar) return;
+
+      if (child.id === "checkoutSummary") {
+        const heading = scroll.querySelector(":scope > h2");
+        if (heading) {
+          heading.insertAdjacentElement("afterend", child);
+        } else {
+          scroll.insertBefore(child, scroll.firstChild);
+        }
+      } else {
         scroll.appendChild(child);
       }
     });
 
+    const summary = scroll.querySelector(":scope > #checkoutSummary");
+    const heading = scroll.querySelector(":scope > h2");
+    if (summary && heading && heading.nextElementSibling !== summary) {
+      heading.insertAdjacentElement("afterend", summary);
+    } else if (summary && !heading && scroll.firstElementChild !== summary) {
+      scroll.insertBefore(summary, scroll.firstChild);
+    }
+
+    // Garantir que le bouton reste dans la barre fixe, après chaque ouverture.
+    confirmButton =
+      actionBar.querySelector(".primary.full") ||
+      box.querySelector(":scope > .primary.full");
+    if (confirmButton && confirmButton.parentElement !== actionBar) {
+      actionBar.appendChild(confirmButton);
+    }
+
     box.dataset.layoutFixed = "1";
   }
 
-  function watchCheckout(){
+  function watchCheckout() {
     const checkout = document.getElementById("checkout");
-    if(!checkout) return;
+    if (!checkout) return;
 
     prepareCheckoutLayout();
 
-    const observer = new MutationObserver(function(){
-      if(checkout.classList.contains("show")){
-        prepareCheckoutLayout();
-      }
+    const checkoutObserver = new MutationObserver(function () {
+      if (checkout.classList.contains("show")) prepareCheckoutLayout();
     });
-    observer.observe(checkout, {attributes:true, attributeFilter:["class"]});
+    checkoutObserver.observe(checkout, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
 
     const box = checkout.querySelector(".box");
-    if(box){
-      const boxObserver = new MutationObserver(function(){
-        if(checkout.classList.contains("show")) prepareCheckoutLayout();
+    if (box) {
+      const boxObserver = new MutationObserver(function () {
+        if (checkout.classList.contains("show")) prepareCheckoutLayout();
       });
-      boxObserver.observe(box, {childList:true});
+      boxObserver.observe(box, { childList: true });
     }
   }
 
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", watchCheckout, {once:true});
-  }else{
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", watchCheckout, { once: true });
+  } else {
     watchCheckout();
   }
 
-  window.setTimeout(function(){
-    repairStoreView(window.activeStoreSection || "home");
-    prepareCheckoutLayout();
-  }, 250);
+  window.setTimeout(prepareCheckoutLayout, 250);
 })();
