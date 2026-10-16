@@ -278,3 +278,22 @@
     transition:none !important;
   }
 }
+
+
+/* SNGAMER STORE — ESPACE AU-DESSUS DU PANIER SUR MOBILE */
+@media (max-width: 700px) {
+  .siteHeader .nav {
+    padding-top: 10px !important;
+  }
+
+  /* Le tiroir reste aligné sous le header après l'ajout d'espace. */
+  .drawer {
+    top: 130px !important;
+    bottom: 90px !important;
+    height: auto !important;
+  }
+
+  .drawer aside {
+    height: 100% !important;
+  }
+}
