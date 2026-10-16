@@ -766,6 +766,21 @@ info.appendChild(purchaseRow);
                 slide.appendChild(info);
             }
         });
+      // Masquer complètement le carousel s'il n'y a aucune campagne active
+if (activePromoCount === 0) {
+    const promoCarousel = document.getElementById("promoCarousel");
+    const promoDots = document.getElementById("promoDots");
+
+    if (promoCarousel) {
+        promoCarousel.style.display = "none";
+    }
+
+    if (promoDots) {
+        promoDots.style.display = "none";
+    }
+
+    return;
+}
 
         // Titre de campagne affiché au-dessus du carrousel
         let title = document.getElementById("promoCampaignTitle");
