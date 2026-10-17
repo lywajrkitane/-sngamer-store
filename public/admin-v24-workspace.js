@@ -375,6 +375,113 @@
         color:#c8d6ea!important;
       }
 
+
+      /* ---------- MOBILE TABLE CARDS V1 ---------- */
+      @media(max-width:760px){
+        #adminBox .products-table-wrap,
+        #adminBox .orders-table-wrap{
+          overflow:visible!important;
+          border:0!important;
+          background:transparent!important;
+          border-radius:0!important;
+        }
+        #adminBox .products-table-wrap table,
+        #adminBox .orders-table-wrap table{
+          display:block!important;
+          width:100%!important;
+          min-width:0!important;
+          border:0!important;
+          border-collapse:separate!important;
+          border-spacing:0!important;
+        }
+        #adminBox .products-table-wrap thead,
+        #adminBox .orders-table-wrap thead{display:none!important;}
+        #adminBox .products-table-wrap tbody,
+        #adminBox .orders-table-wrap tbody{
+          display:grid!important;
+          gap:12px!important;
+          width:100%!important;
+        }
+        #adminBox .products-table-wrap tbody tr,
+        #adminBox .orders-table-wrap tbody tr{
+          display:block!important;
+          width:100%!important;
+          min-width:0!important;
+          margin:0!important;
+          padding:4px 14px!important;
+          border:1px solid rgba(115,145,190,.16)!important;
+          border-radius:16px!important;
+          background:linear-gradient(145deg,rgba(14,25,43,.96),rgba(8,15,27,.96))!important;
+          box-shadow:0 10px 28px rgba(0,0,0,.18)!important;
+          overflow:hidden!important;
+        }
+        #adminBox .products-table-wrap td,
+        #adminBox .orders-table-wrap td{
+          display:flex!important;
+          align-items:center!important;
+          justify-content:space-between!important;
+          gap:12px!important;
+          width:100%!important;
+          min-width:0!important;
+          min-height:48px!important;
+          padding:11px 0!important;
+          border-bottom:1px solid rgba(110,140,180,.10)!important;
+          white-space:normal!important;
+          overflow-wrap:anywhere!important;
+        }
+        #adminBox .products-table-wrap td:last-child,
+        #adminBox .orders-table-wrap td:last-child{border-bottom:0!important;}
+        #adminBox .products-table-wrap td::before,
+        #adminBox .orders-table-wrap td::before{
+          flex:0 0 auto!important;
+          color:#7f91aa!important;
+          font-size:10px!important;
+          font-weight:900!important;
+          letter-spacing:.08em!important;
+          text-transform:uppercase!important;
+          white-space:nowrap!important;
+        }
+        #adminBox .products-table-wrap td:nth-child(1)::before{content:'ID';}
+        #adminBox .products-table-wrap td:nth-child(2)::before{content:'Produit';}
+        #adminBox .products-table-wrap td:nth-child(3)::before{content:'Catégorie';}
+        #adminBox .products-table-wrap td:nth-child(4)::before{content:'Prix';}
+        #adminBox .products-table-wrap td:nth-child(5)::before{content:'Stock';}
+        #adminBox .products-table-wrap td:nth-child(6)::before{content:'Action';}
+        #adminBox .orders-table-wrap td:nth-child(1)::before{content:'ID';}
+        #adminBox .orders-table-wrap td:nth-child(2)::before{content:'Date';}
+        #adminBox .orders-table-wrap td:nth-child(3)::before{content:'Client';}
+        #adminBox .orders-table-wrap td:nth-child(4)::before{content:'Articles';}
+        #adminBox .orders-table-wrap td:nth-child(5)::before{content:'Total';}
+        #adminBox .orders-table-wrap td:nth-child(6)::before{content:'Paiement';}
+        #adminBox .orders-table-wrap td:nth-child(7)::before{content:'Statut';}
+        #adminBox .products-table-wrap td:last-child,
+        #adminBox .orders-table-wrap td:last-child{
+          align-items:stretch!important;
+          flex-direction:column!important;
+          gap:7px!important;
+        }
+        #adminBox .products-table-wrap td:last-child::before,
+        #adminBox .orders-table-wrap td:last-child::before{align-self:flex-start!important;}
+        #adminBox .products-table-wrap td:last-child button,
+        #adminBox .orders-table-wrap td:last-child button,
+        #adminBox .orders-table-wrap td:last-child select{
+          width:100%!important;
+          max-width:none!important;
+          min-width:0!important;
+        }
+        #adminBox .orders-table-wrap .status{min-width:0!important;width:100%!important;}
+      }
+      @media(max-width:420px){
+        #adminBox .products-table-wrap tbody tr,
+        #adminBox .orders-table-wrap tbody tr{
+          padding-left:12px!important;
+          padding-right:12px!important;
+          border-radius:14px!important;
+        }
+        #adminBox .products-table-wrap td,
+        #adminBox .orders-table-wrap td{font-size:13px!important;}
+      }
+
       /* ---------- RESPONSIVE ---------- */
       @media(max-width:1050px){
         #adminBox .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
