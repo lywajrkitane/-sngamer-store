@@ -24,7 +24,6 @@
 
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
-
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
@@ -70,14 +69,10 @@
   }
 
   function campaignIsActive(product, promo) {
-    return product?.campaign_active === true ||
-      product?.campaign_active === "true" ||
-      product?.campaign_active === 1 ||
-      product?.campaign_active === "1" ||
-      promo?.campaign_active === true ||
-      promo?.campaign_active === "true" ||
-      promo?.campaign_active === 1 ||
-      promo?.campaign_active === "1";
+    return product?.campaign_active === true || product?.campaign_active === "true" ||
+      product?.campaign_active === 1 || product?.campaign_active === "1" ||
+      promo?.campaign_active === true || promo?.campaign_active === "true" ||
+      promo?.campaign_active === 1 || promo?.campaign_active === "1";
   }
 
   function mergeCampaign(product, promo) {
@@ -94,9 +89,13 @@
 
   function resolveCampaigns(products, promos) {
     const rows = Array.isArray(promos) ? promos.filter(Boolean) : [];
-    const seen = new Set();
+    const seenProducts = new Set();
     const result = [];
 
+    // IMPORTANT: a campaign can contain several promoted products.
+    // Each promoted product is an independent carousel slide. Do not
+    // deduplicate by campaign_id, otherwise activating two promotions
+    // belonging to the same campaign leaves only one visible.
     for (const promo of rows) {
       const productId = Number(promo?.product_id || 0);
       const mediaCampaignId = Number(promo?.campaign_id || 0);
@@ -109,15 +108,10 @@
 
       if (!product || !campaignIsActive(product, promo)) continue;
 
-      const campaign = mergeCampaign(product, promo);
-      const authoritativeCampaignId = Number(product.campaign_id || campaign.campaign_id || 0);
-      const campaignKey = authoritativeCampaignId > 0
-        ? `campaign:${authoritativeCampaignId}`
-        : `product:${product.id}`;
-
-      if (seen.has(campaignKey)) continue;
-      seen.add(campaignKey);
-      result.push({ product, campaign });
+      const key = Number(product.id);
+      if (seenProducts.has(key)) continue;
+      seenProducts.add(key);
+      result.push({ product, campaign: mergeCampaign(product, promo) });
       if (result.length >= MAX_CAMPAIGNS) break;
     }
 
@@ -126,17 +120,18 @@
         .filter((product) => validPromo(product) && campaignIsActive(product, null))
         .forEach((product) => {
           if (result.length >= MAX_CAMPAIGNS) return;
-          const campaign = mergeCampaign(product, null);
-          const campaignId = Number(product.campaign_id || 0);
-          const key = campaignId > 0 ? `campaign:${campaignId}` : `product:${product.id}`;
-          if (seen.has(key)) return;
-          seen.add(key);
-          result.push({ product, campaign });
+          const key = Number(product.id);
+          if (seenProducts.has(key)) return;
+          seenProducts.add(key);
+          result.push({ product, campaign: mergeCampaign(product, null) });
         });
     }
 
     if (!result.length) {
       products.filter(validPromo).slice(0, MAX_CAMPAIGNS).forEach((product) => {
+        const key = Number(product.id);
+        if (seenProducts.has(key)) return;
+        seenProducts.add(key);
         result.push({ product, campaign: mergeCampaign(product, null) });
       });
     }
@@ -150,7 +145,6 @@
     const regular = Number(product.price || 0);
     const promo = Number(product.promo_price || 0);
     const discount = regular > promo ? Math.round((1 - promo / regular) * 100) : 0;
-
     const name = String(campaign.campaign_name || "Offre exclusive").trim() || "Offre exclusive";
     const leftSticker = String(campaign.campaign_sticker || "").trim();
     const rightSticker = String(campaign.campaign_right_sticker || "").trim();
@@ -172,8 +166,7 @@
           <strong class="campaignCurrent">${esc(money(promo))}</strong>
           ${discount > 0 ? `<span class="campaignBadge">-${discount}%</span>` : ""}
         </div>
-      </div>
-    `;
+      </div>`;
   }
 
   function render(items) {
@@ -193,8 +186,8 @@
       const slide = document.createElement("article");
       slide.className = `campaignSlide${index === 0 ? " active" : ""}`;
       slide.innerHTML = cardMarkup(item);
-
       const card = slide.querySelector(".campaignCard");
+
       const open = () => {
         const id = Number(card?.dataset.productId || 0);
         if (!id || typeof window.openProduct !== "function") return;
@@ -210,7 +203,6 @@
           open();
         }
       });
-
       viewport.appendChild(slide);
 
       if (items.length > 1) {
@@ -266,9 +258,7 @@
         fetch("/api/products?campaign_banner=1", { cache: "no-store" }),
         fetch("/api/promo-media", { cache: "no-store" })
       ]);
-
       if (!productsResponse.ok) return;
-
       const products = await productsResponse.json();
       const promos = promosResponse.ok ? await promosResponse.json() : [];
       render(resolveCampaigns(Array.isArray(products) ? products : [], promos));
