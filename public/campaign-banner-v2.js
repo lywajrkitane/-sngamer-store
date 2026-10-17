@@ -46,8 +46,8 @@
       #${HOST_ID} .campaignCurrent{display:block;color:#fff;font-size:15px;font-weight:900;white-space:nowrap}
       #${HOST_ID} .campaignBadge{display:inline-flex;margin-top:3px;padding:3px 7px;border-radius:999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:9px;font-weight:900;box-shadow:0 3px 10px rgba(239,68,68,.22)}
       #${HOST_ID} .campaignDots{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:8px;min-height:7px}
-      #${HOST_ID} .campaignDot{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#43526a;cursor:pointer;transition:all .25s ease}
-      #${HOST_ID} .campaignDot.active{width:24px;background:linear-gradient(90deg,#4da3ff,#d92aa8)}
+      #${HOST_ID} .campaignDot{display:block;width:7px !important;height:7px !important;min-width:7px !important;min-height:7px !important;max-width:7px !important;max-height:7px !important;padding:0 !important;margin:0;border:0;border-radius:999px;background:#43526a;cursor:pointer;transition:all .25s ease;box-sizing:border-box}
+      #${HOST_ID} .campaignDot.active{width:25px !important;min-width:25px !important;max-width:25px !important;height:7px !important;min-height:7px !important;max-height:7px !important;background:linear-gradient(90deg,#4da3ff,#d92aa8)}
       @keyframes sngCampaignIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
       @media(max-width:560px){
         #${HOST_ID} .campaignViewport{min-height:79px}
@@ -60,9 +60,9 @@
         #${HOST_ID} .campaignOld{font-size:8px}
         #${HOST_ID} .campaignCurrent{font-size:12px}
         #${HOST_ID} .campaignBadge{font-size:8px;padding:3px 6px}
-        #${HOST_ID} .campaignDots{margin-top:7px;gap:5px}
-        #${HOST_ID} .campaignDot{width:6px;height:6px}
-        #${HOST_ID} .campaignDot.active{width:20px}
+        #${HOST_ID} .campaignDots{margin-top:7px;gap:5px;min-height:6px}
+        #${HOST_ID} .campaignDot{width:6px !important;height:6px !important;min-width:6px !important;min-height:6px !important;max-width:6px !important;max-height:6px !important}
+        #${HOST_ID} .campaignDot.active{width:20px !important;min-width:20px !important;max-width:20px !important;height:6px !important;min-height:6px !important;max-height:6px !important}
       }
     `;
     document.head.appendChild(style);
