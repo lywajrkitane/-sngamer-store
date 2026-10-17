@@ -14,7 +14,7 @@
     .paymentMethodCard:hover{transform:translateY(-1px);border-color:rgba(90,184,255,.45)}
     .paymentMethodCard.is-selected{border-color:rgba(90,184,255,.92);background:linear-gradient(145deg,rgba(22,135,255,.13),rgba(124,58,237,.10));box-shadow:0 0 0 1px rgba(90,184,255,.12),0 10px 26px rgba(0,0,0,.18)}
     .paymentBrand{width:46px;height:46px;display:grid;place-items:center;border-radius:12px;font-weight:900;letter-spacing:-.6px;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
-    .paymentBrand.wave{background:linear-gradient(145deg,#1e9bff,#0876dc);font-size:19px;font-style:italic}.paymentBrand.orange{background:linear-gradient(145deg,#ff7900,#f45100);font-size:14px}.paymentBrand.paypal{background:linear-gradient(145deg,#1b73e8,#123b9b);font-size:12px}
+    .paymentBrand.wave{background:linear-gradient(145deg,#1e9bff,#0876dc);font-size:19px;font-style:italic}.paymentBrand.orange{background:linear-gradient(145deg,#ff7900,#f45100);font-size:14px}
     .paymentMethodName{display:block;font-size:14px;font-weight:900}.paymentMethodSub{display:block;margin-top:3px;color:#8798ae;font-size:10px;font-weight:600}
     .paymentRadio{width:18px;height:18px;border:2px solid rgba(190,205,224,.65);border-radius:50%;position:relative}.paymentMethodCard.is-selected .paymentRadio{border-color:#5ab8ff}.paymentMethodCard.is-selected .paymentRadio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:#5ab8ff;box-shadow:0 0 10px rgba(90,184,255,.55)}
     #checkout .paymentHint{margin:9px 2px 0;color:#8191a7;font-size:11px;line-height:1.5}#checkout .paymentHint strong{color:#b9c7da}#checkout .box.hasSummary .hint{margin-top:12px}
@@ -36,20 +36,58 @@
     const select=document.getElementById("pay");
     if(!select||select.dataset.polished==="true")return;
     select.dataset.polished="true";
-    select.innerHTML=`<option value="Wave">Wave</option><option value="Orange Money">Orange Money</option><option value="PayPal">PayPal</option>`;
-    const heading=document.createElement("label");heading.className="paymentHeading";heading.setAttribute("for","pay");heading.textContent="Moyen de paiement";
-    const methods=document.createElement("div");methods.className="paymentMethodsGrid";methods.setAttribute("role","radiogroup");methods.setAttribute("aria-label","Moyen de paiement");
+    select.innerHTML=`<option value="Wave">Wave</option><option value="Orange Money">Orange Money</option>`;
+    select.value="Wave";
+
+    const heading=document.createElement("label");
+    heading.className="paymentHeading";
+    heading.setAttribute("for","pay");
+    heading.textContent="Moyen de paiement";
+
+    const methods=document.createElement("div");
+    methods.className="paymentMethodsGrid";
+    methods.setAttribute("role","radiogroup");
+    methods.setAttribute("aria-label","Moyen de paiement");
     methods.innerHTML=`
       <button type="button" class="paymentMethodCard is-selected" data-payment="Wave" role="radio" aria-checked="true"><span class="paymentBrand wave" aria-hidden="true">W</span><span><span class="paymentMethodName">Wave</span><span class="paymentMethodSub">Paiement mobile</span></span><span class="paymentRadio" aria-hidden="true"></span></button>
       <button type="button" class="paymentMethodCard" data-payment="Orange Money" role="radio" aria-checked="false"><span class="paymentBrand orange" aria-hidden="true">OM</span><span><span class="paymentMethodName">Orange Money</span><span class="paymentMethodSub">Paiement mobile</span></span><span class="paymentRadio" aria-hidden="true"></span></button>
-      <button type="button" class="paymentMethodCard" data-payment="PayPal" role="radio" aria-checked="false"><span class="paymentBrand paypal" aria-hidden="true">P</span><span><span class="paymentMethodName">PayPal</span><span class="paymentMethodSub">Paiement PayPal</span></span><span class="paymentRadio" aria-hidden="true"></span></button>
     `;
-    const hint=document.createElement("p");hint.className="paymentHint";hint.innerHTML="Sélectionne ton moyen de paiement. <strong>PayPal</strong> est maintenant disponible comme option de commande.";
-    select.classList.add("paymentNativeHidden");select.parentNode.insertBefore(heading,select);select.parentNode.insertBefore(methods,select);select.parentNode.insertBefore(hint,select.nextSibling);
+
+    const hint=document.createElement("p");
+    hint.className="paymentHint";
+    hint.textContent="Sélectionne Wave ou Orange Money pour continuer vers PayTech.";
+
+    select.classList.add("paymentNativeHidden");
+    select.parentNode.insertBefore(heading,select);
+    select.parentNode.insertBefore(methods,select);
+    select.parentNode.insertBefore(hint,select.nextSibling);
+
     methods.querySelectorAll(".paymentMethodCard").forEach(card=>card.addEventListener("click",()=>{
-      const value=card.dataset.payment;select.value=value;
-      methods.querySelectorAll(".paymentMethodCard").forEach(item=>{const selected=item===card;item.classList.toggle("is-selected",selected);item.setAttribute("aria-checked",selected?"true":"false")});
+      const value=card.dataset.payment;
+      select.value=value;
+      select.dispatchEvent(new Event("change",{bubbles:true}));
+      methods.querySelectorAll(".paymentMethodCard").forEach(item=>{
+        const selected=item===card;
+        item.classList.toggle("is-selected",selected);
+        item.setAttribute("aria-checked",selected?"true":"false");
+      });
     }));
   }
-  document.addEventListener("DOMContentLoaded",polishPaymentUI);setTimeout(polishPaymentUI,250);
+
+  function loadPaytechBridge(){
+    if(document.querySelector('script[data-paytech-checkout="1"]'))return;
+    const script=document.createElement("script");
+    script.src="/paytech-checkout.js?v=20261017-2045";
+    script.dataset.paytechCheckout="1";
+    document.body.appendChild(script);
+  }
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    polishPaymentUI();
+    loadPaytechBridge();
+  });
+  setTimeout(()=>{
+    polishPaymentUI();
+    loadPaytechBridge();
+  },250);
 })();
