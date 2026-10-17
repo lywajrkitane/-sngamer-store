@@ -1,0 +1,156 @@
+/* SNGAMER STORE — MOBILE PRODUCT CARDS v3
+   Source-level fix: the add button stays in normal document flow.
+   It never overlays the product name or price and aligns at the bottom.
+*/
+
+@media (max-width:700px){
+  #products.grid{
+    align-items:stretch;
+  }
+
+  #products .card.productCardClickable{
+    min-width:0;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  #products .card.productCardClickable .pic{
+    flex:0 0 135px;
+    height:135px !important;
+    min-height:135px;
+    overflow:hidden;
+  }
+
+  #products .card.productCardClickable .pic img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  #products .card.productCardClickable .info{
+    flex:1 1 auto;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    padding:10px 10px 10px;
+    position:relative;
+  }
+
+  #products .card.productCardClickable .cat{
+    flex:0 0 auto;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  #products .card.productCardClickable .info h3{
+    flex:0 0 auto;
+    min-height:0 !important;
+    margin:7px 0 6px !important;
+    padding:0 !important;
+    max-width:100%;
+    font-size:15px !important;
+    line-height:1.22 !important;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  #products .card.productCardClickable .stock{
+    flex:0 0 auto;
+    margin:0 0 5px !important;
+    min-height:16px;
+    font-size:12px !important;
+    line-height:1.25;
+  }
+
+  #products .card.productCardClickable .price{
+    flex:0 0 auto;
+    min-height:0 !important;
+    margin:0 !important;
+    line-height:1.1;
+  }
+
+  #products .card.productCardClickable .priceCurrent{
+    font-size:18px !important;
+    line-height:1.1;
+  }
+
+  /* CRITICAL: remove the old negative-margin/relative positioning.
+     The button now occupies real space at the bottom of the card. */
+  #products .card.productCardClickable .productCardBottom{
+    position:static !important;
+    inset:auto !important;
+    margin:10px 0 0 auto !important;
+    padding:0 !important;
+    width:auto !important;
+    height:36px !important;
+    min-height:36px !important;
+    flex:0 0 36px;
+    display:flex !important;
+    align-items:center;
+    justify-content:flex-end;
+    z-index:1;
+  }
+
+  #products .card.productCardClickable .addToCartIcon{
+    position:static !important;
+    inset:auto !important;
+    width:36px !important;
+    min-width:36px !important;
+    max-width:36px !important;
+    height:36px !important;
+    min-height:36px !important;
+    max-height:36px !important;
+    margin:0 !important;
+    padding:0 !important;
+    border-radius:11px !important;
+    font-size:23px !important;
+    line-height:36px !important;
+    flex:0 0 36px;
+    transform:none;
+    box-shadow:0 6px 16px rgba(45,87,255,.20);
+  }
+
+  #products .card.productCardClickable .addToCartIcon:hover,
+  #products .card.productCardClickable .addToCartIcon:active{
+    transform:none;
+  }
+}
+
+@media (max-width:380px){
+  #products .card.productCardClickable .pic{
+    flex-basis:120px;
+    height:120px !important;
+    min-height:120px;
+  }
+
+  #products .card.productCardClickable .info{
+    padding:9px;
+  }
+
+  #products .card.productCardClickable .info h3{
+    font-size:14px !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon{
+    width:34px !important;
+    min-width:34px !important;
+    max-width:34px !important;
+    height:34px !important;
+    min-height:34px !important;
+    max-height:34px !important;
+    line-height:34px !important;
+    flex-basis:34px;
+    font-size:21px !important;
+  }
+
+  #products .card.productCardClickable .productCardBottom{
+    height:34px !important;
+    min-height:34px !important;
+    flex-basis:34px;
+  }
+}
