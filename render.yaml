@@ -2,7 +2,7 @@ services:
   - type: web
     name: sngamer-store
     runtime: node
-    buildCommand: npm install
+    buildCommand: npm install && node scripts/apply-admin-v24.js
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -12,6 +12,4 @@ services:
       - key: ADMIN_PASSWORD
         sync: false
       - key: SESSION_SECRET
-        sync: false
-      - key: DATABASE_URL
         sync: false
