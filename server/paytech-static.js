@@ -8,7 +8,9 @@ express.static = function paytechAwareStatic(root, options) {
   const originalMiddleware = originalStatic(root, options);
   const publicRoot = path.resolve(root);
 
-  return function paytechAwareStaticMiddleware(req, res, next) {
+  // Keep the Express static-handler name so the existing bootstrap ordering
+  // logic continues to detect the static layer correctly.
+  return function serveStatic(req, res, next) {
     const pathname = String(req.path || req.url || "").split("?")[0];
     const isHome = req.method === "GET" && (pathname === "/" || pathname === "/index.html");
 
