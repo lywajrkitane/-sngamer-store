@@ -1,6 +1,8 @@
-/* SNGAMER STORE — MOBILE PRODUCT CARDS v4
-   Source-level fix: the add button stays in normal document flow.
-   Touching the add button must NOT trigger the visual hover state of the whole product card.
+/* SNGAMER STORE — MOBILE PRODUCT CARDS v5
+   Source-level mobile behavior:
+   - The add button stays in normal document flow.
+   - Tapping the product card gives a premium border reaction.
+   - Tapping the + button does NOT trigger the card reaction.
 */
 
 @media (max-width:700px){
@@ -15,10 +17,14 @@
     flex-direction:column;
     overflow:hidden;
     -webkit-tap-highlight-color:transparent;
+    transition:
+      border-color .18s ease,
+      box-shadow .18s ease,
+      transform .18s ease;
   }
 
-  /* On touch devices, a tap on the + button can leave :hover on the parent card.
-     Disable the desktop card hover/glow completely on coarse pointers. */
+  /* A tap on the + button can leave :hover on the parent card.
+     Keep the desktop hover/glow disabled on touch devices. */
   #products .card.productCardClickable:hover{
     transform:none !important;
     border-color:#1c2939 !important;
@@ -29,6 +35,19 @@
     transform:none !important;
   }
 
+  /* PRODUCT TAP REACTION
+     The border lights up only while the product card itself is being touched.
+     :has() prevents the effect when the + button is the touched element. */
+  #products .card.productCardClickable:active:not(:has(.addToCartIcon:active)){
+    border-color:#3194ff !important;
+    box-shadow:
+      0 0 0 1px rgba(49,148,255,.55),
+      0 0 18px rgba(49,148,255,.38),
+      0 10px 28px rgba(0,0,0,.35) !important;
+    transform:translateY(-1px) !important;
+  }
+
+  /* Keyboard/accessibility focus gets the same premium border language. */
   #products .card.productCardClickable:focus{
     outline:none;
   }
@@ -36,6 +55,8 @@
   #products .card.productCardClickable:focus-visible{
     outline:2px solid #3194ff;
     outline-offset:2px;
+    border-color:#3194ff;
+    box-shadow:0 0 18px rgba(49,148,255,.32);
   }
 
   #products .card.productCardClickable .pic{
