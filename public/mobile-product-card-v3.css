@@ -1,6 +1,6 @@
-/* SNGAMER STORE — MOBILE PRODUCT CARDS v3
+/* SNGAMER STORE — MOBILE PRODUCT CARDS v4
    Source-level fix: the add button stays in normal document flow.
-   It never overlays the product name or price and aligns at the bottom.
+   Touching the add button must NOT trigger the visual hover state of the whole product card.
 */
 
 @media (max-width:700px){
@@ -14,6 +14,28 @@
     display:flex;
     flex-direction:column;
     overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* On touch devices, a tap on the + button can leave :hover on the parent card.
+     Disable the desktop card hover/glow completely on coarse pointers. */
+  #products .card.productCardClickable:hover{
+    transform:none !important;
+    border-color:#1c2939 !important;
+    box-shadow:none !important;
+  }
+
+  #products .card.productCardClickable:hover .pic img{
+    transform:none !important;
+  }
+
+  #products .card.productCardClickable:focus{
+    outline:none;
+  }
+
+  #products .card.productCardClickable:focus-visible{
+    outline:2px solid #3194ff;
+    outline-offset:2px;
   }
 
   #products .card.productCardClickable .pic{
@@ -79,8 +101,7 @@
     line-height:1.1;
   }
 
-  /* CRITICAL: remove the old negative-margin/relative positioning.
-     The button now occupies real space at the bottom of the card. */
+  /* The button occupies real space at the bottom of the card. */
   #products .card.productCardClickable .productCardBottom{
     position:static !important;
     inset:auto !important;
@@ -111,13 +132,30 @@
     font-size:23px !important;
     line-height:36px !important;
     flex:0 0 36px;
-    transform:none;
+    transform:none !important;
     box-shadow:0 6px 16px rgba(45,87,255,.20);
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
   }
 
+  /* Only the button itself reacts to the tap. */
   #products .card.productCardClickable .addToCartIcon:hover,
-  #products .card.productCardClickable .addToCartIcon:active{
-    transform:none;
+  #products .card.productCardClickable .addToCartIcon:active,
+  #products .card.productCardClickable .addToCartIcon:focus{
+    transform:none !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon:focus-visible{
+    outline:2px solid #fff;
+    outline-offset:2px;
+  }
+}
+
+/* Desktop/tablet: preserve the premium hover effect because these devices
+   normally have a real pointer and :hover is intentional there. */
+@media (min-width:701px) and (hover:hover) and (pointer:fine){
+  #products .card.productCardClickable:hover{
+    transform:translateY(-4px);
   }
 }
 
