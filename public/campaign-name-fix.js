@@ -130,4 +130,11 @@
   } else {
     start();
   }
+
+  // Category consistency patch: load after app.js so the category saved in
+  // the admin dashboard becomes the single source of truth everywhere.
+  const categoryPatch = document.createElement("script");
+  categoryPatch.src = "/category-consistency-v1.js?v=20261017-1810";
+  categoryPatch.defer = true;
+  document.head.appendChild(categoryPatch);
 })();
