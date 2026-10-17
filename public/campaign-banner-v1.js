@@ -81,9 +81,10 @@
         font-size:10px;
         line-height:1.2;
         font-weight:900;
-        letter-spacing:1.4px;
+        letter-spacing:1.2px;
         color:#78aefc;
         text-transform:uppercase;
+        overflow-wrap:anywhere;
       }
       #${BANNER_ID} .campaignBannerTitle{
         margin:0;
@@ -121,13 +122,14 @@
         align-items:center;
         justify-content:center;
         margin-top:3px;
-        padding:3px 7px;
+        padding:3px 8px;
         border-radius:999px;
-        background:linear-gradient(135deg,#2563eb,#9333ea);
+        background:linear-gradient(135deg,#ef4444,#dc2626);
         color:#fff;
         font-size:9px;
         font-weight:900;
         letter-spacing:.3px;
+        box-shadow:0 3px 10px rgba(239,68,68,.25);
       }
       @media (max-width:560px){
         #${BANNER_ID}{padding:9px 10px 0}
@@ -144,12 +146,12 @@
           border-radius:12px;
         }
         #${BANNER_ID} .campaignBannerEmoji{font-size:22px}
-        #${BANNER_ID} .campaignBannerEyebrow{font-size:8px;letter-spacing:1px}
+        #${BANNER_ID} .campaignBannerEyebrow{font-size:8px;letter-spacing:.8px}
         #${BANNER_ID} .campaignBannerTitle{font-size:13px}
         #${BANNER_ID} .campaignBannerProduct{font-size:10px}
         #${BANNER_ID} .campaignBannerCurrent{font-size:12px}
         #${BANNER_ID} .campaignBannerOld{font-size:9px}
-        #${BANNER_ID} .campaignBannerBadge{font-size:8px}
+        #${BANNER_ID} .campaignBannerBadge{font-size:8px;padding:3px 7px}
       }
     `;
     document.head.appendChild(style);
@@ -178,11 +180,15 @@
       campaign?.name ||
       "OFFRE EXCLUSIVE";
 
-    const sticker =
+    const leftSticker =
       campaign?.campaign_sticker ||
       campaign?.sticker ||
-      product?.emoji ||
       "🔥";
+
+    const rightSticker =
+      campaign?.campaign_right_sticker ||
+      campaign?.right_sticker ||
+      "";
 
     const image = getProductImage(product);
 
@@ -191,17 +197,21 @@
     banner.setAttribute("aria-label", "Campagne promotionnelle active");
 
     const productId = Number(product.id);
+    const campaignLabel = [leftSticker, campaignName, rightSticker]
+      .filter(Boolean)
+      .join(" ");
+
     banner.innerHTML = `
       <div class="campaignBannerInner">
         <div class="campaignBannerMedia">
           ${image
             ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(product.name || "Produit en promotion")}" loading="eager">`
-            : `<span class="campaignBannerEmoji">${escapeHtml(sticker)}</span>`}
+            : `<span class="campaignBannerEmoji">${escapeHtml(leftSticker)}</span>`}
         </div>
         <div class="campaignBannerText">
-          <div class="campaignBannerEyebrow">${escapeHtml(sticker)} OFFRE EXCLUSIVE</div>
-          <div class="campaignBannerTitle">${escapeHtml(campaignName)}</div>
-          <div class="campaignBannerProduct">${escapeHtml(product.name || "Produit en promotion")}</div>
+          <div class="campaignBannerEyebrow">${escapeHtml(campaignLabel)}</div>
+          <div class="campaignBannerTitle">${escapeHtml(product.name || "Produit en promotion")}</div>
+          <div class="campaignBannerProduct">Offre promotionnelle</div>
         </div>
         <div class="campaignBannerPrice">
           <span class="campaignBannerOld">${escapeHtml(money(regular))}</span>
@@ -267,7 +277,6 @@
 
       buildBanner(product, campaign);
 
-      // The new campaign banner is displayed above the main Hero.
       const legacyTitle = document.getElementById("promoCampaignTitle");
       if (legacyTitle) legacyTitle.remove();
     } catch (error) {
