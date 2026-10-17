@@ -14,7 +14,11 @@
 
     if(label) label.textContent = "SNGAMER STORE";
     if(title) title.innerHTML = "ÉQUIPE-TOI.<br><span>JOUE. GAGNE.</span>";
-    if(description) description.textContent = "Gaming Phones, accessoires gaming et pièces eFootball sélectionnés pour les passionnés.";
+    if(description){
+      description.innerHTML = "TON SETUP.<br><span>TON GAME.</span><br><span>TON STYLE.</span>";
+      description.classList.add("heroSlogan");
+      description.setAttribute("aria-label","TON SETUP. TON GAME. TON STYLE.");
+    }
     if(button) button.textContent = "Découvrir les produits";
 
     if(fallback){
@@ -39,7 +43,25 @@
         color:#55a8ff;
         letter-spacing:3px;
       }
-      .professional-hero .heroIn > div:first-child p{max-width:590px}
+      .professional-hero .heroIn > div:first-child p.heroSlogan{
+        margin:24px 0 28px;
+        max-width:620px;
+        font-family:Montserrat,Arial,sans-serif;
+        font-size:clamp(25px,4vw,44px);
+        line-height:.98;
+        font-weight:900;
+        letter-spacing:-1.4px;
+        text-transform:uppercase;
+        color:#f7f9ff;
+        text-shadow:0 10px 35px rgba(0,0,0,.28);
+      }
+      .professional-hero .heroIn > div:first-child p.heroSlogan span{
+        display:inline-block;
+        background:linear-gradient(90deg,#4da3ff 0%,#8b5cf6 52%,#ec2aa4 100%);
+        -webkit-background-clip:text;
+        background-clip:text;
+        color:transparent;
+      }
       .professional-hero .heroVisual.has-default-hero{display:flex;align-items:center;justify-content:center;min-height:360px;font-size:initial;text-shadow:none}
       .professional-hero .defaultHeroContent{width:min(100%,520px);min-height:300px;padding:42px 38px;display:flex;flex-direction:column;justify-content:center;text-align:center;border:1px solid rgba(74,157,255,.28);border-radius:26px;background:radial-gradient(circle at 15% 15%,rgba(22,135,255,.18),transparent 34%),radial-gradient(circle at 90% 85%,rgba(233,30,99,.12),transparent 36%),linear-gradient(145deg,rgba(12,24,42,.96),rgba(8,12,22,.98));box-shadow:0 24px 55px rgba(0,0,0,.28),0 0 35px rgba(22,135,255,.08)}
       .professional-hero .heroTrustBadge{align-self:center;padding:9px 16px;border:1px solid rgba(74,157,255,.35);border-radius:999px;color:#8fc7ff;background:rgba(22,135,255,.08);font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
@@ -48,8 +70,18 @@
       .professional-hero .heroTrustProducts span{color:#4ea2ff;padding:0 5px}
       .professional-hero .heroDelivery{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px 15px;border-radius:13px;background:rgba(22,135,255,.08);border:1px solid rgba(74,157,255,.18);color:#8fc7ff;font-size:13px;line-height:1.4;font-weight:800}
       .professional-hero .heroDeliveryIcon{font-size:18px}
-      @media(max-width:900px){.professional-hero .heroVisual.has-default-hero{min-height:0;margin-top:18px}}
-      @media(max-width:560px){.professional-hero .defaultHeroContent{min-height:280px;padding:30px 20px;border-radius:22px}.professional-hero .heroTrustBadge{font-size:9px;letter-spacing:1.5px}.professional-hero .defaultHeroContent h2{font-size:27px}.professional-hero .heroTrustProducts{font-size:13px}.professional-hero .heroDelivery{font-size:12px}}
+      @media(max-width:900px){
+        .professional-hero .heroVisual.has-default-hero{min-height:0;margin-top:18px}
+        .professional-hero .heroIn > div:first-child p.heroSlogan{font-size:clamp(24px,7vw,34px);line-height:1.02;letter-spacing:-.8px;margin:20px 0 24px}
+      }
+      @media(max-width:560px){
+        .professional-hero .heroIn > div:first-child p.heroSlogan{font-size:27px;line-height:1.03;margin:18px 0 22px}
+        .professional-hero .defaultHeroContent{min-height:280px;padding:30px 20px;border-radius:22px}
+        .professional-hero .heroTrustBadge{font-size:9px;letter-spacing:1.5px}
+        .professional-hero .defaultHeroContent h2{font-size:27px}
+        .professional-hero .heroTrustProducts{font-size:13px}
+        .professional-hero .heroDelivery{font-size:12px}
+      }
     `;
     document.head.appendChild(style);
   }
