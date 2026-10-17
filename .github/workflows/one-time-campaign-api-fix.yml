@@ -1,0 +1,45 @@
+name: one-time campaign metadata API fix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: "!contains(github.event.head_commit.message, 'Expose campaign metadata API')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch products endpoint
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('server/server.js')
+          text = path.read_text(encoding='utf-8')
+
+          old = '''      SELECT\n  id,\n  name,\n  category,\n  platform,\n  price,\n  stock,\n  emoji,\n  description,\n  image1_url,\n  image2_url,\n  image3_url,\n  video_url,\n  promo_price,\n  promo_active,\n  campaign_id,\n  created_at\nFROM products\n'''
+
+          new = '''      SELECT\n  p.id,\n  p.name,\n  p.category,\n  p.platform,\n  p.price,\n  p.stock,\n  p.emoji,\n  p.description,\n  p.image1_url,\n  p.image2_url,\n  p.image3_url,\n  p.video_url,\n  p.promo_price,\n  p.promo_active,\n  p.campaign_id,\n  c.name AS campaign_name,\n  c.sticker AS campaign_sticker,\n  c.right_sticker AS campaign_right_sticker,\n  c.active AS campaign_active,\n  p.created_at\nFROM products p\nLEFT JOIN campaigns c ON c.id = p.campaign_id\n'''
+
+          if old not in text:
+              raise SystemExit('Expected products SELECT was not found; refusing to modify the server.')
+
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+
+      - name: Commit and remove one-time workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/one-time-campaign-api-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/server.js .github/workflows/one-time-campaign-api-fix.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Expose campaign metadata API"
+          git push
