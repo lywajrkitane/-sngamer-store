@@ -2,11 +2,8 @@
   "name": "sngamer-store-v7",
   "version": "7.0.0",
   "private": true,
-  "engines": {
-    "node": ">=22.0.0 <23.0.0"
-  },
   "scripts": {
-    "start": "node scripts/preflight-db.js && node server/bootstrap.js",
+    "start": "node server/bootstrap.js",
     "dev": "node --watch server/bootstrap.js"
   },
   "dependencies": {
