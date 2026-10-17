@@ -38,22 +38,28 @@ async function installPaytech(app) {
       ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ
   `);
 
-  // Avoid PostgreSQL duplicate-relation failures when the old PayTech system
-  // already created a relation with this name.
+  // Multiple Render instances can boot at the same time. The previous
+  // existence-check was race-prone: two instances could both see that the
+  // index did not exist and then both try to create the same PostgreSQL
+  // relation. Serialize this small DDL section with a database advisory lock.
   await pool.query(`
     DO $$
+    DECLARE
+      lock_key BIGINT := hashtextextended('sngamer_paytech_index_install', 0);
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1
-        FROM pg_class c
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relname = 'idx_orders_paytech_ref_unique'
-          AND n.nspname = 'public'
-      ) THEN
-        CREATE UNIQUE INDEX idx_orders_paytech_ref_unique
+      PERFORM pg_advisory_lock(lock_key);
+      BEGIN
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_paytech_ref_unique
           ON orders(paytech_ref)
           WHERE paytech_ref IS NOT NULL;
-      END IF;
+      EXCEPTION
+        WHEN duplicate_object OR duplicate_table THEN
+          NULL;
+      END;
+      PERFORM pg_advisory_unlock(lock_key);
+    EXCEPTION WHEN OTHERS THEN
+      PERFORM pg_advisory_unlock(lock_key);
+      RAISE;
     END $$;
   `);
 
