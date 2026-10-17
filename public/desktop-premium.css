@@ -50,21 +50,84 @@
   .hero p{font-size:18px;max-width:590px;color:#aebbd0;line-height:1.65;margin-bottom:28px}
   .hero .primary{padding:14px 23px;border-radius:12px;font-size:15px}
 
-  /* FALLBACK HERO — when no campaign is active. */
+  /* FALLBACK HERO — no campaign: show one clean animated premium message only. */
   .hero.has-no-promo .heroIn{min-height:430px;padding-top:42px;padding-bottom:42px}
-  .hero.has-no-promo .promoArea{display:flex!important;visibility:visible!important;min-height:330px;position:relative;border:1px solid rgba(91,165,255,.20);border-radius:28px;background:radial-gradient(circle at 65% 25%,rgba(40,150,255,.28),transparent 35%),radial-gradient(circle at 85% 85%,rgba(124,58,237,.24),transparent 38%),linear-gradient(145deg,#0d1c30,#070d17 72%);box-shadow:0 25px 70px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden}
-  .hero.has-no-promo .promoArea:before{content:"SNGAMER STORE";position:absolute;left:30px;top:30px;color:#70bcff;font-size:11px;font-weight:900;letter-spacing:3px}
-  .hero.has-no-promo .promoArea:after{content:"TON UNIVERS\A GAMING";white-space:pre;position:absolute;left:30px;bottom:34px;color:#fff;font-size:clamp(34px,4vw,58px);line-height:.88;font-weight:950;letter-spacing:-2px;text-shadow:0 10px 35px rgba(0,0,0,.35)}
-  .hero.has-no-promo .promoArea .defaultHeroContent{display:none!important}
-  .hero.has-no-promo .promoArea .promoCarousel:before{content:"🎮";position:absolute;right:13%;top:25%;font-size:clamp(90px,9vw,145px);filter:drop-shadow(0 22px 30px rgba(0,0,0,.35));transform:rotate(-8deg)}
-  .hero.has-no-promo .promoArea .promoCarousel:after{content:"LIVRAISON SÉNÉGAL • ACCESSOIRES • eFOOTBALL";position:absolute;right:30px;bottom:38px;color:#8fa9c8;font-size:10px;letter-spacing:1.2px;font-weight:800}
+  .hero.has-no-promo .promoArea{
+    display:flex!important;
+    visibility:visible!important;
+    min-height:330px;
+    position:relative;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(91,165,255,.20);
+    border-radius:28px;
+    background:radial-gradient(circle at 65% 25%,rgba(40,150,255,.28),transparent 35%),radial-gradient(circle at 85% 85%,rgba(124,58,237,.24),transparent 38%),linear-gradient(145deg,#0d1c30,#070d17 72%);
+    box-shadow:0 25px 70px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04);
+    overflow:hidden;
+  }
 
-  /* SHOP TOOLBAR */
+  /* Remove all decorative duplicate/pseudo content from the previous hero version. */
+  .hero.has-no-promo .promoArea:before,
+  .hero.has-no-promo .promoArea:after,
+  .hero.has-no-promo .promoArea .promoCarousel:before,
+  .hero.has-no-promo .promoArea .promoCarousel:after{
+    content:none!important;
+    display:none!important;
+  }
+
+  /* promo-fix.js hides this inline when there is no campaign; !important restores it. */
+  .hero.has-no-promo .promoArea .defaultHeroContent{
+    display:flex!important;
+    width:min(100%,620px);
+    min-height:0;
+    margin:0 auto;
+    padding:42px 38px;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    border:0;
+    background:transparent;
+    box-shadow:none;
+  }
+
+  /* Keep only the requested premium phrase. */
+  .hero.has-no-promo .defaultHeroContent .heroTrustBadge,
+  .hero.has-no-promo .defaultHeroContent .heroTrustProducts,
+  .hero.has-no-promo .defaultHeroContent .heroDelivery{
+    display:none!important;
+  }
+
+  .hero.has-no-promo .defaultHeroContent h2{
+    margin:0;
+    color:#fff;
+    font-family:'Montserrat',Arial,sans-serif;
+    font-size:clamp(34px,4.2vw,58px);
+    line-height:.95;
+    font-weight:950;
+    letter-spacing:-2px;
+    text-align:center;
+    text-shadow:0 12px 35px rgba(0,0,0,.35);
+    animation:sngPremiumHeroText 3.8s cubic-bezier(.22,1,.36,1) both, sngPremiumHeroGlow 4.5s ease-in-out 1s infinite alternate;
+  }
+
+  @keyframes sngPremiumHeroText{
+    0%{opacity:0;transform:translateY(14px) scale(.97);filter:blur(7px)}
+    55%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+    100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+  }
+
+  @keyframes sngPremiumHeroGlow{
+    from{text-shadow:0 12px 35px rgba(0,0,0,.35),0 0 0 rgba(62,154,255,0)}
+    to{text-shadow:0 12px 35px rgba(0,0,0,.35),0 0 30px rgba(62,154,255,.16)}
+  }
+
+  /* SHOP TOOLBAR — title and categories stay on the same line. */
   main#shop{padding-top:55px}
-  .bar{margin:0 0 22px;align-items:flex-end}
-  .bar h2{font-size:34px;letter-spacing:-1.2px}
-  #cats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-  .catbtn{min-height:38px;padding:8px 15px;border-radius:999px;color:#9dacbf;background:#0b1420;border:1px solid rgba(105,150,205,.17);cursor:pointer;font-size:12px;font-weight:800;transition:.18s ease}
+  .bar{margin:0 0 22px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .bar h2{font-size:34px;letter-spacing:-1.2px;margin:0;white-space:nowrap;flex:0 0 auto}
+  #cats{display:flex;gap:8px;flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-end;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  #cats::-webkit-scrollbar{display:none}
+  .catbtn{min-height:38px;padding:8px 15px;border-radius:999px;color:#9dacbf;background:#0b1420;border:1px solid rgba(105,150,205,.17);cursor:pointer;font-size:12px;font-weight:800;transition:.18s ease;white-space:nowrap;flex:0 0 auto}
   .catbtn:hover{color:#fff;border-color:#398fff;transform:translateY(-1px)}
   .catbtn.on{color:#fff;background:linear-gradient(135deg,#167fff,#7c3aed);border-color:transparent;box-shadow:0 8px 22px rgba(43,83,255,.20)}
 
@@ -126,7 +189,13 @@
   .hero.has-no-promo .promoArea .promoCarousel:before{font-size:90px;right:10%;top:23%}
   .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .pic{height:190px}
-  .bar{align-items:flex-start;flex-direction:column}
-  #cats{justify-content:flex-start}
+  /* Keep Nos produits + categories together; categories can scroll horizontally. */
+  .bar{align-items:center;flex-direction:row;gap:12px}
+  .bar h2{font-size:30px}
+  #cats{justify-content:flex-end}
   #products .addToCartIcon{width:40px;min-width:40px;padding:0;font-size:26px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .hero.has-no-promo .defaultHeroContent h2{animation:none!important}
 }
