@@ -2,11 +2,30 @@
 (() => {
   const previousOrder = window.order;
 
-  window.order = async function () {
-    const payment = document.querySelector("#pay")?.value || "";
+  function getSelectedPayment() {
+    const selectedCard = document.querySelector("#checkout .paymentMethodCard.is-selected[data-payment]");
+    const cardValue = selectedCard?.dataset?.payment || "";
+    if (cardValue === "Wave" || cardValue === "Orange Money") return cardValue;
 
-    if (payment !== "Wave" && payment !== "Orange Money") {
-      return typeof previousOrder === "function" ? previousOrder.apply(this, arguments) : undefined;
+    const selectValue = document.querySelector("#pay")?.value || "";
+    if (selectValue === "Wave" || selectValue === "Orange Money") return selectValue;
+
+    return "";
+  }
+
+  window.order = async function () {
+    const payment = getSelectedPayment();
+
+    if (!payment) {
+      const error = document.getElementById("checkoutDeliveryError");
+      const message = "Sélectionne Wave ou Orange Money pour continuer vers PayTech.";
+      if (error) {
+        error.textContent = message;
+        error.classList.add("show");
+      } else {
+        alert(message);
+      }
+      return;
     }
 
     const name = document.querySelector("#name")?.value.trim() || "";
