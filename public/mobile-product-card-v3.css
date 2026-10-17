@@ -23,8 +23,6 @@
       transform .18s ease;
   }
 
-  /* A tap on the + button can leave :hover on the parent card.
-     Keep the desktop hover/glow disabled on touch devices. */
   #products .card.productCardClickable:hover{
     transform:none !important;
     border-color:#1c2939 !important;
@@ -35,9 +33,6 @@
     transform:none !important;
   }
 
-  /* PRODUCT TAP REACTION
-     The border lights up only while the product card itself is being touched.
-     :has() prevents the effect when the + button is the touched element. */
   #products .card.productCardClickable:active:not(:has(.addToCartIcon:active)){
     border-color:#3194ff !important;
     box-shadow:
@@ -111,10 +106,9 @@
     line-height:1.25;
   }
 
-  /* PROMOTION — source-level layout fix.
-     The old price, discount badge and current price stay in normal flow.
-     Nothing is absolutely positioned, so a long title can never make the
-     discount badge overlap the prices. */
+  /* PROMOTION — compact price sizing for mobile.
+     The current promotional price is deliberately smaller so long prices
+     such as "800 000 FCFA" never collide visually with the add-to-cart button. */
   #products .card.productCardClickable .price.price--promo{
     position:static !important;
     display:flex !important;
@@ -156,7 +150,7 @@
     max-width:100% !important;
     margin:0 !important;
     padding:0 !important;
-    font-size:11px !important;
+    font-size:10px !important;
     line-height:1.2 !important;
     white-space:nowrap !important;
     text-decoration:line-through !important;
@@ -173,11 +167,11 @@
     min-width:0 !important;
     max-width:100% !important;
     height:auto !important;
-    min-height:20px !important;
+    min-height:19px !important;
     margin:0 !important;
-    padding:3px 7px !important;
+    padding:3px 6px !important;
     border-radius:7px !important;
-    font-size:10px !important;
+    font-size:9px !important;
     line-height:1 !important;
     white-space:nowrap !important;
     transform:none !important;
@@ -193,17 +187,17 @@
     min-height:0 !important;
     margin:0 !important;
     padding:0 !important;
-    font-size:18px !important;
-    line-height:1.1 !important;
+    font-size:15px !important;
+    line-height:1.15 !important;
     white-space:nowrap !important;
+    letter-spacing:-.15px !important;
   }
 
   #products .card.productCardClickable .price--promo .priceCurrent small{
-    font-size:.68em !important;
+    font-size:.65em !important;
     white-space:nowrap !important;
   }
 
-  /* Regular prices use the same safe flow. */
   #products .card.productCardClickable .price.price--regular{
     position:static !important;
     display:block !important;
@@ -216,11 +210,10 @@
   }
 
   #products .card.productCardClickable .priceCurrent{
-    font-size:18px !important;
-    line-height:1.1;
+    font-size:15px !important;
+    line-height:1.15;
   }
 
-  /* The button occupies real space at the bottom of the card. */
   #products .card.productCardClickable .productCardBottom{
     position:static !important;
     inset:auto !important;
@@ -269,8 +262,6 @@
   }
 }
 
-/* Desktop/tablet: preserve the premium hover effect because these devices
-   normally have a real pointer and :hover is intentional there. */
 @media (min-width:701px) and (hover:hover) and (pointer:fine){
   #products .card.productCardClickable:hover{
     transform:translateY(-4px);
@@ -289,6 +280,10 @@
   }
 
   #products .card.productCardClickable .info h3{
+    font-size:14px !important;
+  }
+
+  #products .card.productCardClickable .price--promo .priceCurrent{
     font-size:14px !important;
   }
 
