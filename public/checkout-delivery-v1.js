@@ -4,7 +4,6 @@
     "Matam","Saint-Louis","Sédhiou","Tambacounda","Thiès","Ziguinchor"
   ];
 
-  let deliveryReady = false;
   let deliveryState = { zone: "Dakar", region: "", address: "", notes: "" };
 
   function escapeHtml(value = "") {
@@ -65,7 +64,6 @@
     if (heading?.nextSibling) box.insertBefore(block, heading.nextSibling);
     else box.prepend(block);
 
-    deliveryReady = true;
     bindDeliveryEvents();
     return true;
   }
@@ -137,6 +135,10 @@
       document.getElementById("checkoutDelivery")?.scrollIntoView({ behavior:"smooth", block:"center" });
       return;
     }
+
+    const legacyAddress = document.getElementById("addr");
+    if (legacyAddress) legacyAddress.value = result.value.address;
+
     if (typeof originalOrder === "function") return originalOrder.apply(this, arguments);
   };
 
