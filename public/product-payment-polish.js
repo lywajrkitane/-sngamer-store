@@ -77,7 +77,7 @@
   function loadPaytechBridge(){
     if(document.querySelector('script[data-paytech-checkout="1"]'))return;
     const script=document.createElement("script");
-    script.src="/paytech-checkout.js?v=20261017-2050";
+    script.src="/paytech-checkout.js?v=20261017-2055";
     script.dataset.paytechCheckout="1";
     document.body.appendChild(script);
   }
