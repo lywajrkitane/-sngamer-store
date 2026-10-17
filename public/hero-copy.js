@@ -1,36 +1,11 @@
-/* SNGAMER STORE — texte commercial du Hero */
+/* SNGAMER STORE — services complémentaires du Hero */
 (function(){
   "use strict";
 
-  const copy = "Choisis ton produit. Commande en quelques clics. Livraison partout au Sénégal et dans toute la sous-région.";
+  // Le contenu du Hero est désormais piloté par promo-fix.js.
+  // Ce fichier ne réécrit plus le paragraphe du Hero afin de ne pas
+  // annuler le rendu premium du slogan « TON SETUP. TON GAME. TON STYLE. ».
 
-  function apply(){
-    const hero = document.querySelector(".hero");
-    const paragraph = hero && hero.querySelector(".heroIn > div:first-child p");
-    if(paragraph && paragraph.textContent !== copy){
-      paragraph.textContent = copy;
-    }
-  }
-
-  function start(){
-    apply();
-    const hero = document.querySelector(".hero");
-    if(hero){
-      const observer = new MutationObserver(apply);
-      observer.observe(hero,{subtree:true,childList:true,characterData:true});
-    }
-    setInterval(apply,1000);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded",start,{once:true});
-  }else{
-    start();
-  }
-
-  // Charge le garde-fou de rendu produits après l'application principale.
-  // Il répare automatiquement une grille qui devient vide après plusieurs
-  // changements de rubrique, sans modifier le panier ni le checkout.
   function loadProductStability(){
     if(document.querySelector('script[data-sngamer-product-stability]')) return;
     const script=document.createElement("script");
@@ -40,9 +15,6 @@
     document.body.appendChild(script);
   }
 
-  // Charge le dashboard client après l'application principale.
-  // Cela permet de garder la navigation existante intacte tout en
-  // remplaçant proprement la vue Profil par l'espace client.
   function loadCustomerAccount(){
     if(document.querySelector('script[data-sngamer-customer-account]')) return;
     const script=document.createElement("script");
@@ -52,11 +24,14 @@
     document.body.appendChild(script);
   }
 
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded",loadProductStability,{once:true});
-    document.addEventListener("DOMContentLoaded",loadCustomerAccount,{once:true});
-  }else{
+  function start(){
     loadProductStability();
     loadCustomerAccount();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",start,{once:true});
+  }else{
+    start();
   }
 })();
