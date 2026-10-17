@@ -54,6 +54,18 @@
           linear-gradient(135deg,#0b1425,#111326 58%,#18112b);
         box-shadow:0 10px 28px rgba(0,0,0,.22);
         overflow:hidden;
+        cursor:pointer;
+        transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+      }
+      /* Effet de sélection : uniquement le contour de l'offre, jamais tout le contenu. */
+      #${BANNER_ID} .campaignBannerInner.campaignBannerClicked{
+        border-color:rgba(96,165,250,.95);
+        box-shadow:
+          0 0 0 2px rgba(96,165,250,.18),
+          0 0 18px rgba(59,130,246,.48),
+          0 0 34px rgba(147,51,234,.22),
+          0 10px 28px rgba(0,0,0,.22);
+        transform:translateY(-1px);
       }
       #${BANNER_ID} .campaignBannerMedia{
         width:58px;
@@ -202,7 +214,7 @@
       .join(" ");
 
     banner.innerHTML = `
-      <div class="campaignBannerInner">
+      <div class="campaignBannerInner" role="button" tabindex="0">
         <div class="campaignBannerMedia">
           ${image
             ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(product.name || "Produit en promotion")}" loading="eager">`
@@ -226,9 +238,19 @@
 
     const inner = banner.querySelector(".campaignBannerInner");
     if (inner && Number.isInteger(productId) && productId > 0) {
-      inner.style.cursor = "pointer";
-      inner.addEventListener("click", function () {
-        if (typeof window.openProduct === "function") window.openProduct(productId);
+      const openPromoProduct = function () {
+        inner.classList.add("campaignBannerClicked");
+        window.setTimeout(function () {
+          if (typeof window.openProduct === "function") window.openProduct(productId);
+        }, 140);
+      };
+
+      inner.addEventListener("click", openPromoProduct);
+      inner.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openPromoProduct();
+        }
       });
     }
   }
