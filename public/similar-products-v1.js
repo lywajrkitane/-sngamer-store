@@ -3,7 +3,7 @@
   'use strict';
   function esc(value=''){
     if (typeof window.escapeHtml === 'function') return window.escapeHtml(value);
-    return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    return String(value).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
   }
   function priceFor(p){const promo=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);return promo?Number(p.promo_price):Number(p.price);}
   function categoryFor(p){if(typeof window.storeCategory==='function')return window.storeCategory(p);return p.category||'Gaming';}
@@ -29,7 +29,32 @@
   function socialMarkup(){return SOCIALS.map(s=>`<a class="premiumFooterSocial" href="${s.url}" target="_blank" rel="noopener noreferrer"><span class="premiumFooterSocialIcon">${s.short}</span><span class="premiumFooterSocialText"><strong>${s.name}</strong><small>${s.text}</small></span><span class="premiumFooterSocialArrow">↗</span></a>`).join('');}
   function footerMarkup(){return `<div class="premiumFooterInner"><div class="premiumFooterTop"><div class="premiumFooterBrand"><div class="premiumFooterLogo"><span>SNG</span>AMER <b>STORE</b></div><p>Votre boutique gaming en ligne au Sénégal, basée à Dakar.</p><p class="premiumFooterIntro">Accessoires gaming, Gaming Phone et pièces eFootball sélectionnés pour les passionnés.</p></div><div class="premiumFooterContactCard"><span class="premiumFooterEyebrow">BESOIN D'AIDE ?</span><strong>Une question sur une commande ?</strong><a href="https://wa.me/221786127985" target="_blank" rel="noopener noreferrer">+221 78 612 79 85 <span>↗</span></a></div></div><div class="premiumFooterSocialArea"><div><span class="premiumFooterEyebrow">SUIVEZ SNGAMER</span><h3>Retrouvez-nous sur nos plateformes</h3></div><div class="premiumFooterSocialGrid">${socialMarkup()}</div></div><div class="premiumFooterLinks"><div><span class="premiumFooterEyebrow">CATÉGORIES</span><a href="#" onclick="event.preventDefault();navigateStore('accessories')">Accessoires</a><a href="#" onclick="event.preventDefault();navigateStore('phones')">Gaming Phone</a><a href="#" onclick="event.preventDefault();navigateStore('coins')">Pièces eFootball</a></div><div><span class="premiumFooterEyebrow">BOUTIQUE</span><a href="#shop" onclick="event.preventDefault();window.scrollTo({top:0,behavior:'smooth'})">Accueil</a><a href="#shop" onclick="event.preventDefault();document.querySelector('#shop')?.scrollIntoView({behavior:'smooth'})">Tous les produits</a><a href="https://wa.me/221786127985" target="_blank" rel="noopener noreferrer">Contact</a></div><div><span class="premiumFooterEyebrow">COMMANDE</span><a href="#" onclick="event.preventDefault();cart()">Mon panier</a><a href="#" onclick="event.preventDefault();cart()">Mes articles</a><span class="premiumFooterDelivery">Livraison au Sénégal</span></div></div><div class="premiumFooterBottom"><span>© 2026 SNGAMER STORE · Dakar, Sénégal</span><span>Gaming · Shopping · Performance</span></div></div>`;}
   function installFooter(){const old=document.querySelector('.store-footer-content');if(!old)return;old.classList.add('premiumFooterHost');old.innerHTML=footerMarkup();old.setAttribute('aria-label','Pied de page SNGAMER STORE');const legacyFooter=document.querySelector('body > footer');if(legacyFooter)legacyFooter.hidden=true;}
-  function installBackToTop(){if(document.getElementById('sngamerBackToTop'))return;const button=document.createElement('button');button.id='sngamerBackToTop';button.type='button';button.setAttribute('aria-label','Revenir en haut');button.setAttribute('title','Revenir en haut');button.innerHTML='<span>↑</span>';document.body.appendChild(button);const update=()=>button.classList.toggle('is-visible',window.scrollY>420);window.addEventListener('scroll',update,{passive:true});button.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));update();}
+  function installBackToTop(){
+    if(document.getElementById('sngamerBackToTop'))return;
+    const button=document.createElement('button');
+    button.id='sngamerBackToTop';
+    button.type='button';
+    button.setAttribute('aria-label','Revenir en haut');
+    button.setAttribute('title','Revenir en haut');
+    button.innerHTML='<span>↑</span>';
+    button.hidden=true;
+    button.setAttribute('aria-hidden','true');
+    document.body.appendChild(button);
+
+    const update=()=>{
+      const maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+      const threshold=Math.max(600,Math.round(maxScroll*0.45));
+      const visible=maxScroll>0 && window.scrollY>=threshold;
+      button.hidden=!visible;
+      button.classList.toggle('is-visible',visible);
+      button.setAttribute('aria-hidden',visible?'false':'true');
+    };
+
+    window.addEventListener('scroll',update,{passive:true});
+    window.addEventListener('resize',update,{passive:true});
+    button.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    update();
+  }
   function forceFooterVisible(){const host=document.querySelector('.premiumFooterHost');if(!host)return;host.hidden=false;host.style.display='block';const legacy=document.querySelector('body > footer');if(legacy)legacy.hidden=true;}
   function init(){installFooter();installBackToTop();forceFooterVisible();const observer=new MutationObserver(()=>forceFooterVisible());observer.observe(document.body,{childList:true,subtree:true});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
