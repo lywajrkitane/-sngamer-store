@@ -17,6 +17,12 @@ function normalizePhone(value) {
   return { international: String(value || "").trim(), national: digits.slice(-9) };
 }
 
+function safeEqualHex(a, b) {
+  const left = Buffer.from(String(a || ""), "utf8");
+  const right = Buffer.from(String(b || ""), "utf8");
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
 async function installPaytech(app) {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) return;
@@ -31,14 +37,20 @@ async function installPaytech(app) {
       ADD COLUMN IF NOT EXISTS paytech_token TEXT,
       ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ
   `);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_paytech_ref_unique ON orders(paytech_ref) WHERE paytech_ref IS NOT NULL`);
 
   app.post("/api/paytech/create", async (req, res) => {
     const client = await pool.connect();
+    let orderId = null;
     try {
       const apiKey = String(process.env.PAYTECH_API_KEY || "").trim();
       const apiSecret = String(process.env.PAYTECH_API_SECRET || "").trim();
+      const env = String(process.env.PAYTECH_ENV || "test").trim().toLowerCase();
       if (!apiKey || !apiSecret) {
         return res.status(503).json({ error: "PayTech n'est pas encore configuré sur le serveur." });
+      }
+      if (!["test", "prod"].includes(env)) {
+        return res.status(500).json({ error: "PAYTECH_ENV doit être 'test' ou 'prod'." });
       }
 
       const { customer, payment, items } = req.body || {};
@@ -57,7 +69,9 @@ async function installPaytech(app) {
       for (const item of items) {
         const productId = Number(item.id);
         const quantity = Number(item.quantity ?? item.qty);
-        if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity <= 0) throw new Error("Produit ou quantité invalide");
+        if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity <= 0) {
+          throw new Error("Produit ou quantité invalide");
+        }
 
         const r = await client.query(
           `SELECT id,name,price,promo_price,promo_active,stock,emoji FROM products WHERE id=$1 FOR UPDATE`,
@@ -74,6 +88,8 @@ async function installPaytech(app) {
         finalItems.push({ id: product.id, name: product.name, price: unitPrice, quantity, subtotal, emoji: product.emoji });
       }
 
+      if (!Number.isSafeInteger(total) || total <= 0) throw new Error("Montant de commande invalide");
+
       const orderCustomer = {
         name,
         phone,
@@ -89,7 +105,7 @@ async function installPaytech(app) {
          RETURNING id`,
         [JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total, refCommand]
       );
-      const orderId = inserted.rows[0].id;
+      orderId = inserted.rows[0].id;
       await client.query("COMMIT");
 
       const base = publicBaseUrl(req);
@@ -101,7 +117,7 @@ async function installPaytech(app) {
         ref_command: refCommand,
         command_name: `Commande SNGAMER STORE #${orderId}`,
         target_payment: payment,
-        env: String(process.env.PAYTECH_ENV || "test"),
+        env,
         ipn_url: `${base}/api/paytech/ipn`,
         success_url: `${base}/paytech/success?order=${encodeURIComponent(orderId)}`,
         cancel_url: `${base}/paytech/cancel?order=${encodeURIComponent(orderId)}`,
@@ -139,6 +155,9 @@ async function installPaytech(app) {
       return res.status(201).json({ success: true, orderId, token: result.token || null, redirect_url: redirectUrl });
     } catch (error) {
       try { await client.query("ROLLBACK"); } catch (_) {}
+      if (orderId) {
+        try { await pool.query(`UPDATE orders SET status='Paiement échoué', payment_status='Échec' WHERE id=$1 AND payment_status='En attente'`, [orderId]); } catch (_) {}
+      }
       console.error("PAYTECH_CREATE_ERROR:", error);
       return res.status(400).json({ error: error.message || "Impossible de créer le paiement." });
     } finally {
@@ -153,27 +172,37 @@ async function installPaytech(app) {
       if (!apiKey || !apiSecret) return res.status(503).send("PayTech not configured");
 
       const body = req.body || {};
-      const amount = String(body.final_item_price || body.item_price || "");
-      const refCommand = String(body.ref_command || "");
-      const receivedHmac = String(body.hmac_compute || "");
-      let authenticated = false;
+      const refCommand = String(body.ref_command || "").trim();
+      const receivedHmac = String(body.hmac_compute || "").trim();
+      const finalPrice = String(body.final_item_price || body.item_price || "").trim();
+      if (!refCommand) return res.status(400).send("Missing ref_command");
 
+      let authenticated = false;
       if (receivedHmac) {
-        const expected = crypto.createHmac("sha256", apiSecret).update(`${amount}|${refCommand}|${apiKey}`).digest("hex");
-        authenticated = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(receivedHmac));
+        const expected = crypto.createHmac("sha256", apiSecret).update(`${finalPrice}|${refCommand}|${apiKey}`).digest("hex");
+        authenticated = safeEqualHex(expected, receivedHmac);
       } else {
         const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
         const secretHash = crypto.createHash("sha256").update(apiSecret).digest("hex");
-        authenticated = keyHash === body.api_key_sha256 && secretHash === body.api_secret_sha256;
+        authenticated = safeEqualHex(keyHash, body.api_key_sha256) && safeEqualHex(secretHash, body.api_secret_sha256);
       }
       if (!authenticated) return res.status(403).send("Forbidden");
 
-      const orderResult = await pool.query(`SELECT id,total,payment_status,items FROM orders WHERE paytech_ref=$1 FOR UPDATE`, [refCommand]);
+      const configuredEnv = String(process.env.PAYTECH_ENV || "test").trim().toLowerCase();
+      const callbackEnv = String(body.env || "").trim().toLowerCase();
+      if (callbackEnv && callbackEnv !== configuredEnv) return res.status(400).send("Environment mismatch");
+
+      const orderResult = await pool.query(
+        `SELECT id,total,payment_status,items FROM orders WHERE paytech_ref=$1 FOR UPDATE`,
+        [refCommand]
+      );
       if (!orderResult.rows.length) return res.status(404).send("Order not found");
       const order = orderResult.rows[0];
 
       if (body.type_event === "sale_complete") {
-        if (Number(amount) !== Number(order.total)) return res.status(400).send("Amount mismatch");
+        const amount = Number(finalPrice);
+        if (!Number.isFinite(amount) || amount !== Number(order.total)) return res.status(400).send("Amount mismatch");
+
         if (order.payment_status !== "Payé") {
           const client = await pool.connect();
           try {
@@ -182,10 +211,20 @@ async function installPaytech(app) {
             if (locked.rows[0].payment_status !== "Payé") {
               const items = Array.isArray(locked.rows[0].items) ? locked.rows[0].items : [];
               for (const item of items) {
-                await client.query(`UPDATE products SET stock=stock-$1 WHERE id=$2 AND stock >= $1`, [Number(item.quantity), Number(item.id)]);
+                const quantity = Number(item.quantity);
+                const productId = Number(item.id);
+                if (!Number.isInteger(quantity) || quantity <= 0 || !Number.isInteger(productId)) throw new Error("Commande payée invalide");
+                const stockUpdate = await client.query(
+                  `UPDATE products SET stock=stock-$1 WHERE id=$2 AND stock >= $1`,
+                  [quantity, productId]
+                );
+                if (stockUpdate.rowCount !== 1) throw new Error(`Stock insuffisant ou produit introuvable pour ${productId}`);
               }
+
               await client.query(
-                `UPDATE orders SET status='Payée',payment_status='Payé',payment_method=$1,paid_at=NOW(),paytech_token=COALESCE($2,paytech_token) WHERE id=$3`,
+                `UPDATE orders
+                 SET status='Payée',payment_status='Payé',payment_method=$1,paid_at=NOW(),paytech_token=COALESCE($2,paytech_token)
+                 WHERE id=$3`,
                 [body.payment_method || null, body.token || null, order.id]
               );
             }
@@ -198,7 +237,12 @@ async function installPaytech(app) {
           }
         }
       } else if (body.type_event === "sale_canceled") {
-        await pool.query(`UPDATE orders SET status='Annulée',payment_status='Annulée',payment_method=COALESCE($1,payment_method),paytech_token=COALESCE($2,paytech_token) WHERE id=$3`, [body.payment_method || null, body.token || null, order.id]);
+        await pool.query(
+          `UPDATE orders
+           SET status='Annulée',payment_status='Annulée',payment_method=COALESCE($1,payment_method),paytech_token=COALESCE($2,paytech_token)
+           WHERE id=$3 AND payment_status <> 'Payé'`,
+          [body.payment_method || null, body.token || null, order.id]
+        );
       }
 
       return res.status(200).send("OK");
