@@ -23,7 +23,7 @@
       return typeof previousOrder === "function" ? previousOrder.apply(this, arguments) : undefined;
     }
 
-    const items = Array.isArray(window.cartItems) ? window.cartItems : [];
+    const items = typeof cartItems !== "undefined" && Array.isArray(cartItems) ? cartItems : [];
     if (!items.length) {
       alert("Le panier est vide.");
       return;
