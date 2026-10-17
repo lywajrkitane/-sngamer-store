@@ -1,76 +1,50 @@
-/* SNGAMER STORE — PayTech checkout bridge */
+/* SNGAMER STORE — PayTech-only checkout controller (v2)
+ * Replaces legacy checkout submission for Wave and Orange Money.
+ */
 (() => {
-  function getSelectedPayment() {
-    const selectedCard = document.querySelector("#checkout .paymentMethodCard.is-selected[data-payment]");
-    const cardValue = selectedCard?.dataset?.payment || "";
-    if (cardValue === "Wave" || cardValue === "Orange Money") return cardValue;
+  "use strict";
 
-    const selectValue = document.querySelector("#pay")?.value || "";
-    if (selectValue === "Wave" || selectValue === "Orange Money") return selectValue;
-
-    return "";
+  function selectedPayment() {
+    const card = document.querySelector("#checkout .paymentMethodCard.is-selected[data-payment]");
+    const value = card?.dataset?.payment || document.getElementById("pay")?.value || "";
+    return value === "Wave" || value === "Orange Money" ? value : "";
   }
 
-  function showError(message) {
-    const error = document.getElementById("checkoutDeliveryError");
-    if (error) {
-      error.textContent = message;
-      error.classList.add("show");
-      error.scrollIntoView({ behavior: "smooth", block: "center" });
+  function message(text) {
+    const el = document.getElementById("checkoutDeliveryError");
+    if (el) {
+      el.textContent = text;
+      el.classList.add("show");
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
     } else {
-      alert(message);
+      alert(text);
     }
   }
 
-  window.order = async function () {
-    const payment = getSelectedPayment();
-    const name = document.querySelector("#name")?.value.trim() || "";
-    const phone = document.querySelector("#phone")?.value.trim() || "";
-    const zone = document.querySelector('input[name="deliveryZone"]:checked')?.value || "";
-    const region = document.querySelector("#deliveryRegionValue")?.value || "";
-    const address = document.querySelector("#deliveryAddress")?.value.trim() || document.querySelector("#addr")?.value.trim() || "";
-    const notes = document.querySelector("#deliveryNotes")?.value.trim() || "";
-
-    if (!name) {
-      showError("Indique ton nom complet pour continuer.");
-      document.querySelector("#name")?.focus();
-      return;
-    }
-    if (!phone) {
-      showError("Indique ton numéro de téléphone pour continuer.");
-      document.querySelector("#phone")?.focus();
-      return;
-    }
-    if (!zone) {
-      showError("Choisis une zone de livraison.");
-      return;
-    }
-    if (zone === "Régions" && !region) {
-      showError("Choisis la région de livraison.");
-      return;
-    }
-    if (!address) {
-      showError("Indique l'adresse ou le point de repère pour la livraison.");
-      document.querySelector("#deliveryAddress")?.focus();
-      return;
-    }
-    if (!payment) {
-      showError("Sélectionne Wave ou Orange Money pour continuer vers PayTech.");
-      return;
-    }
-
+  window.order = async function paytechOnlyOrder() {
+    const button = document.querySelector("#checkout .checkoutActionBar .primary.full, #checkout .primary.full");
+    const name = (document.getElementById("name")?.value || "").trim();
+    const phone = (document.getElementById("phone")?.value || "").trim();
+    const zone = document.querySelector('input[name="deliveryZone"]:checked')?.value || "Dakar";
+    const region = (document.getElementById("deliveryRegionValue")?.value || "").trim();
+    const address = (document.getElementById("deliveryAddress")?.value || document.getElementById("addr")?.value || "").trim();
+    const notes = (document.getElementById("deliveryNotes")?.value || "").trim();
+    const payment = selectedPayment();
     const items = typeof cartItems !== "undefined" && Array.isArray(cartItems) ? cartItems : [];
-    if (!items.length) {
-      showError("Le panier est vide.");
-      return;
-    }
 
-    const button = document.querySelector('#checkout .primary.full');
-    const error = document.getElementById("checkoutDeliveryError");
+    if (!name) return message("Indique ton nom complet.");
+    if (!phone) return message("Indique ton numéro de téléphone.");
+    if (!address) return message("Indique ton adresse de livraison.");
+    if (zone === "Régions" && !region) return message("Sélectionne la région de livraison.");
+    if (!payment) return message("Sélectionne Wave ou Orange Money.");
+    if (!items.length) return message("Ton panier est vide.");
+
     if (button) {
       button.disabled = true;
+      button.dataset.originalText = button.textContent;
       button.textContent = "Connexion à PayTech…";
     }
+    const error = document.getElementById("checkoutDeliveryError");
     if (error) { error.textContent = ""; error.classList.remove("show"); }
 
     try {
@@ -80,22 +54,20 @@
         body: JSON.stringify({
           customer: { name, phone, address, delivery: { zone, region, address, notes } },
           payment,
-          items
+          items: items.map(item => ({ id: Number(item.id), qty: Number(item.qty ?? item.quantity) }))
         })
       });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.success || !data.redirect_url) {
-        throw new Error(data.error || data.message || "Impossible d'ouvrir le paiement PayTech.");
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.success !== true || !result.redirect_url) {
+        throw new Error(result.error || result.message || "PayTech n'a pas pu créer la session de paiement.");
       }
-
-      window.location.href = data.redirect_url;
-    } catch (e) {
-      console.error("SNGAMER PAYTECH CHECKOUT ERROR:", e);
-      showError(e.message || "Impossible d'ouvrir le paiement. Réessaie.");
+      window.location.assign(result.redirect_url);
+    } catch (err) {
+      console.error("SNGAMER_PAYTECH_CHECKOUT_V2_ERROR", err);
+      message(err.message || "Erreur lors de l'ouverture de PayTech.");
       if (button) {
         button.disabled = false;
-        button.textContent = "Confirmer la commande";
+        button.textContent = button.dataset.originalText || "Confirmer la commande";
       }
     }
   };
