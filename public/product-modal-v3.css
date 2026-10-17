@@ -176,3 +176,18 @@
     object-fit:contain !important;
   }
 }
+
+/* GALERIE — suppression de la barre horizontale sous les miniatures.
+   Les miniatures restent cliquables et défilables sans afficher de scrollbar. */
+#productModal .productThumbnails,
+#productModal .productThumbs{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+
+#productModal .productThumbnails::-webkit-scrollbar,
+#productModal .productThumbs::-webkit-scrollbar{
+  display:none !important;
+  width:0 !important;
+  height:0 !important;
+}
