@@ -7,6 +7,11 @@
     "exclusive"
   ]);
 
+  // Campagne actuellement activée dans le tableau de bord.
+  // Elle sert uniquement de dernier secours si l'API publique ne renvoie
+  // pas encore campaign_name sur le produit promotionnel.
+  const CURRENT_CAMPAIGN_FALLBACK = "Black Friday";
+
   function clean(value) {
     return String(value ?? "").trim();
   }
@@ -44,6 +49,24 @@
       };
     }
 
+    // Le produit promotionnel peut exister avant que son campaign_id soit
+    // correctement associé côté API publique. Dans ce cas, utilise le nom
+    // de la campagne actuellement active au lieu d'afficher le placeholder.
+    const hasActivePromo = productRows.some((row) =>
+      row &&
+      (row.promo_active === true || row.promo_active === "true" || row.promo_active === 1 || row.promo_active === "1") &&
+      Number(row.promo_price || 0) > 0 &&
+      Number(row.promo_price || 0) < Number(row.price || 0)
+    );
+
+    if (hasActivePromo) {
+      return {
+        name: CURRENT_CAMPAIGN_FALLBACK,
+        left: "",
+        right: ""
+      };
+    }
+
     return null;
   }
 
@@ -64,11 +87,8 @@
       node.textContent = display || campaign.name;
     });
 
-    document
-      .querySelectorAll("#sngamerCampaignCarousel .campaignEyebrow")
-      .forEach((node) => {
-        node.textContent = "CAMPAGNE ACTIVE";
-      });
+    // On conserve le libellé visuel existant « OFFRE EXCLUSIVE ».
+    // Seul le nom de la campagne doit remplacer le placeholder « Offre exclusive ».
 
     return true;
   }
