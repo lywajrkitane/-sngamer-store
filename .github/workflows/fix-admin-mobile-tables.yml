@@ -1,0 +1,29 @@
+name: Fix admin mobile tables
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply mobile card layout
+        run: node scripts/fix-admin-mobile-tables.js
+      - name: Commit fix
+        run: |
+          if git diff --quiet -- public/admin-v24-workspace.js; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/admin-v24-workspace.js
+          git commit -m "fix: responsive admin tables on mobile [skip ci]"
+          git push
