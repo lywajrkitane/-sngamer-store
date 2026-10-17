@@ -9,23 +9,32 @@
   const esc = (value) => String(value ?? "").replace(/[&<>\"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
   }[c]));
+
   const money = (value) => new Intl.NumberFormat("fr-FR").format(Number(value || 0)) + " FCFA";
+
   function validPromo(product) {
-    const regular = Number(product?.price || 0), promo = Number(product?.promo_price || 0);
+    const regular = Number(product?.price || 0);
+    const promo = Number(product?.promo_price || 0);
     return Boolean(product?.promo_active) && promo > 0 && regular > promo;
   }
+
   function imageOf(product) {
     return product?.main_image_url || product?.image1_url || product?.image2_url || product?.image3_url || "";
   }
+
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
-    const style = document.createElement("style"); style.id = STYLE_ID;
+
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
     style.textContent = `
       #${HOST_ID}{width:100%;margin:0;box-sizing:border-box;position:relative;z-index:5}
       #${HOST_ID} .campaignViewport{position:relative;width:100%;min-height:92px;overflow:hidden}
       #${HOST_ID} .campaignSlide{display:none;width:100%;box-sizing:border-box;cursor:pointer}
       #${HOST_ID} .campaignSlide.active{display:block;animation:sngCampaignIn .42s ease both}
-      #${HOST_ID} .campaignCard{width:100%;min-height:86px;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid rgba(96,165,250,.28);border-radius:17px;background:radial-gradient(circle at 0% 50%,rgba(37,99,235,.20),transparent 38%),linear-gradient(135deg,#0b1425,#111326 58%,#18112b);box-shadow:0 12px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035)}
+      #${HOST_ID} .campaignCard{width:100%;min-height:86px;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid rgba(96,165,250,.28);border-radius:17px;background:radial-gradient(circle at 0% 50%,rgba(37,99,235,.20),transparent 38%),linear-gradient(135deg,#0b1425,#111326 58%,#18112b);box-shadow:0 12px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035);transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+      #${HOST_ID} .campaignCard.is-pressed{border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.42),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-1px)}
+      #${HOST_ID} .campaignCard:focus-visible{outline:none;border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.38)}
       #${HOST_ID} .campaignMedia{width:58px;height:58px;flex:0 0 58px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#9333ea);border:1px solid rgba(255,255,255,.12)}
       #${HOST_ID} .campaignMedia img{width:100%;height:100%;object-fit:cover;display:block}
       #${HOST_ID} .campaignEmoji{font-size:27px}
@@ -36,7 +45,7 @@
       #${HOST_ID} .campaignPrice{flex:0 0 auto;text-align:right}
       #${HOST_ID} .campaignOld{display:block;color:#8190a2;font-size:9px;text-decoration:line-through;margin-bottom:2px;white-space:nowrap}
       #${HOST_ID} .campaignCurrent{display:block;color:#fff;font-size:15px;font-weight:900;white-space:nowrap}
-      #${HOST_ID} .campaignBadge{display:inline-flex;margin-top:3px;padding:3px 7px;border-radius:999px;background:linear-gradient(135deg,#2563eb,#9333ea);color:#fff;font-size:9px;font-weight:900}
+      #${HOST_ID} .campaignBadge{display:inline-flex;margin-top:3px;padding:3px 7px;border-radius:999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:9px;font-weight:900;box-shadow:0 3px 10px rgba(239,68,68,.22)}
       #${HOST_ID} .campaignDots{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:8px;min-height:7px}
       #${HOST_ID} .campaignDot{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#43526a;cursor:pointer;transition:all .25s ease}
       #${HOST_ID} .campaignDot.active{width:24px;background:linear-gradient(90deg,#4da3ff,#d92aa8)}
@@ -59,68 +68,233 @@
     `;
     document.head.appendChild(style);
   }
+
+  function isActiveCampaign(promo) {
+    return promo && (
+      promo.campaign_active === true ||
+      promo.campaign_active === "true" ||
+      promo.campaign_active === 1 ||
+      promo.campaign_active === "1"
+    );
+  }
+
   function resolveCampaigns(products, promos) {
-    const active = (Array.isArray(promos) ? promos : []).filter((promo) => promo && (promo.campaign_active === true || promo.campaign_active === "true" || promo.campaign_active === 1));
-    const seen = new Set(), result = [];
-    for (const promo of active) {
-      const campaignKey = promo.campaign_id != null ? `campaign:${promo.campaign_id}` : `product:${promo.product_id}`;
-      if (seen.has(campaignKey)) continue;
-      const product = Number(promo.product_id) > 0
-        ? products.find((p) => Number(p.id) === Number(promo.product_id) && validPromo(p))
-        : products.find((p) => Number(p.campaign_id) === Number(promo.campaign_id) && validPromo(p));
+    const allPromos = Array.isArray(promos) ? promos.filter(Boolean) : [];
+    const active = allPromos.filter(isActiveCampaign);
+    const ordered = [...active, ...allPromos.filter((promo) => !active.includes(promo))];
+    const seen = new Set();
+    const result = [];
+
+    for (const promo of ordered) {
+      const productId = Number(promo.product_id || 0);
+      const campaignId = Number(promo.campaign_id || 0);
+      const campaignKey = campaignId > 0 ? `campaign:${campaignId}` : (productId > 0 ? `product:${productId}` : null);
+      if (!campaignKey || seen.has(campaignKey)) continue;
+
+      const product = productId > 0
+        ? products.find((p) => Number(p.id) === productId && validPromo(p))
+        : campaignId > 0
+          ? products.find((p) => Number(p.campaign_id) === campaignId && validPromo(p))
+          : null;
+
       if (!product) continue;
-      seen.add(campaignKey); result.push({ product, campaign: promo });
+      seen.add(campaignKey);
+      result.push({ product, campaign: promo });
       if (result.length >= MAX_CAMPAIGNS) break;
     }
-    if (!result.length) products.filter(validPromo).slice(0, MAX_CAMPAIGNS).forEach((product) => result.push({ product, campaign: null }));
+
+    // Fallback: use products carrying campaign metadata directly, if available.
+    if (result.length < MAX_CAMPAIGNS) {
+      products.filter(validPromo).forEach((product) => {
+        if (result.length >= MAX_CAMPAIGNS) return;
+        const campaignName = product.campaign_name || product.campaignName;
+        const campaignId = Number(product.campaign_id || 0);
+        if (!campaignName && campaignId <= 0) return;
+        const key = campaignId > 0 ? `campaign:${campaignId}` : `product:${product.id}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        result.push({
+          product,
+          campaign: {
+            campaign_name: campaignName,
+            campaign_sticker: product.campaign_sticker || product.campaignSticker,
+            campaign_id: campaignId
+          }
+        });
+      });
+    }
+
+    // Last fallback: show promotional products, but never pretend the product name is a campaign name.
+    if (!result.length) {
+      products.filter(validPromo).slice(0, MAX_CAMPAIGNS).forEach((product) => {
+        result.push({ product, campaign: null });
+      });
+    }
+
     return result;
   }
+
   function cardMarkup(item) {
-    const product = item.product, campaign = item.campaign || {};
-    const regular = Number(product.price || 0), promo = Number(product.promo_price || 0);
+    const product = item.product;
+    const campaign = item.campaign || {};
+    const regular = Number(product.price || 0);
+    const promo = Number(product.promo_price || 0);
     const discount = regular > promo ? Math.round((1 - promo / regular) * 100) : 0;
-    const name = campaign.campaign_name || campaign.name || "Offre exclusive";
-    const sticker = campaign.campaign_sticker || campaign.sticker || product.emoji || "🔥";
+
+    const name = String(
+      campaign.campaign_name ||
+      campaign.name ||
+      product.campaign_name ||
+      product.campaignName ||
+      "Offre exclusive"
+    ).trim() || "Offre exclusive";
+
+    const sticker = String(
+      campaign.campaign_sticker ||
+      campaign.sticker ||
+      product.campaign_sticker ||
+      product.campaignSticker ||
+      product.emoji ||
+      "🔥"
+    ).trim();
+
     const image = imageOf(product);
-    return `<div class="campaignCard" data-product-id="${Number(product.id) || 0}" role="button" tabindex="0" aria-label="${esc(name)} — ${esc(product.name || "Produit")}"><div class="campaignMedia">${image ? `<img src="${esc(image)}" alt="${esc(product.name || "Produit en promotion")}" loading="eager">` : `<span class="campaignEmoji">${esc(sticker)}</span>`}</div><div class="campaignCopy"><div class="campaignEyebrow">${esc(sticker)} OFFRE EXCLUSIVE</div><div class="campaignTitle">${esc(name)}</div><div class="campaignProduct">${esc(product.name || "Produit en promotion")}</div></div><div class="campaignPrice"><span class="campaignOld">${esc(money(regular))}</span><strong class="campaignCurrent">${esc(money(promo))}</strong>${discount > 0 ? `<span class="campaignBadge">-${discount}%</span>` : ""}</div></div>`;
+
+    return `
+      <div class="campaignCard" data-product-id="${Number(product.id) || 0}" role="button" tabindex="0" aria-label="${esc(name)} — ${esc(product.name || "Produit")}">
+        <div class="campaignMedia">
+          ${image ? `<img src="${esc(image)}" alt="${esc(product.name || "Produit en promotion")}" loading="eager">` : `<span class="campaignEmoji">${esc(sticker)}</span>`}
+        </div>
+        <div class="campaignCopy">
+          <div class="campaignEyebrow">${esc(sticker)} OFFRE EXCLUSIVE</div>
+          <div class="campaignTitle">${esc(name)}</div>
+          <div class="campaignProduct">${esc(product.name || "Produit en promotion")}</div>
+        </div>
+        <div class="campaignPrice">
+          <span class="campaignOld">${esc(money(regular))}</span>
+          <strong class="campaignCurrent">${esc(money(promo))}</strong>
+          ${discount > 0 ? `<span class="campaignBadge">-${discount}%</span>` : ""}
+        </div>
+      </div>
+    `;
   }
+
   function render(items) {
-    const existing = document.getElementById(HOST_ID); if (existing) existing.remove();
+    const existing = document.getElementById(HOST_ID);
+    if (existing) existing.remove();
     if (!items.length) return;
-    const host = document.createElement("section"); host.id = HOST_ID; host.setAttribute("aria-label", "Offres exclusives");
+
+    const host = document.createElement("section");
+    host.id = HOST_ID;
+    host.setAttribute("aria-label", "Offres exclusives");
     host.innerHTML = `<div class="campaignViewport"></div><div class="campaignDots" aria-label="Navigation des offres"></div>`;
-    const viewport = host.querySelector(".campaignViewport"), dots = host.querySelector(".campaignDots");
+
+    const viewport = host.querySelector(".campaignViewport");
+    const dots = host.querySelector(".campaignDots");
+
     items.forEach((item, index) => {
-      const slide = document.createElement("article"); slide.className = `campaignSlide${index === 0 ? " active" : ""}`; slide.innerHTML = cardMarkup(item);
+      const slide = document.createElement("article");
+      slide.className = `campaignSlide${index === 0 ? " active" : ""}`;
+      slide.innerHTML = cardMarkup(item);
+
       const card = slide.querySelector(".campaignCard");
-      const open = () => { const id = Number(card?.dataset.productId || 0); if (id && typeof window.openProduct === "function") window.openProduct(id); };
-      card?.addEventListener("click", open); card?.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+      const open = () => {
+        const id = Number(card?.dataset.productId || 0);
+        if (!id || typeof window.openProduct !== "function") return;
+        card.classList.add("is-pressed");
+        window.setTimeout(() => card.classList.remove("is-pressed"), 360);
+        window.setTimeout(() => window.openProduct(id), 120);
+      };
+
+      card?.addEventListener("click", open);
+      card?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      });
+
       viewport.appendChild(slide);
-      if (items.length > 1) { const dot = document.createElement("button"); dot.type = "button"; dot.className = `campaignDot${index === 0 ? " active" : ""}`; dot.setAttribute("aria-label", `Voir l'offre ${index + 1}`); dots.appendChild(dot); }
+
+      if (items.length > 1) {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = `campaignDot${index === 0 ? " active" : ""}`;
+        dot.setAttribute("aria-label", `Voir l'offre ${index + 1}`);
+        dots.appendChild(dot);
+      }
     });
+
     const announcement = document.querySelector(".professional-hero .heroAnnouncement");
     const button = document.querySelector(".professional-hero .heroIn > div:first-child .primary");
-    if (announcement?.parentNode) announcement.parentNode.insertBefore(host, button || announcement.nextSibling);
-    else { const first = document.querySelector(".hero .heroIn > div:first-child"); if (first) first.insertBefore(host, button || null); else return; }
-    let current = 0, timer = null;
-    const slides = [...viewport.querySelectorAll(".campaignSlide")], dotEls = [...dots.querySelectorAll(".campaignDot")];
-    function show(index) { current = (index + slides.length) % slides.length; slides.forEach((s, i) => s.classList.toggle("active", i === current)); dotEls.forEach((d, i) => d.classList.toggle("active", i === current)); restart(); }
-    function restart() { if (timer) clearInterval(timer); if (slides.length > 1) timer = setInterval(() => show(current + 1), ROTATION_MS); }
-    dotEls.forEach((dot, index) => dot.addEventListener("click", (e) => { e.stopPropagation(); show(index); }));
-    host.addEventListener("mouseenter", () => { if (timer) clearInterval(timer); }); host.addEventListener("mouseleave", restart); restart();
+
+    if (announcement?.parentNode) {
+      announcement.parentNode.insertBefore(host, button || announcement.nextSibling);
+    } else {
+      const first = document.querySelector(".hero .heroIn > div:first-child");
+      if (first) first.insertBefore(host, button || null);
+      else return;
+    }
+
+    let current = 0;
+    let timer = null;
+    const slides = [...viewport.querySelectorAll(".campaignSlide")];
+    const dotEls = [...dots.querySelectorAll(".campaignDot")];
+
+    function show(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((s, i) => s.classList.toggle("active", i === current));
+      dotEls.forEach((d, i) => d.classList.toggle("active", i === current));
+      restart();
+    }
+
+    function restart() {
+      if (timer) clearInterval(timer);
+      if (slides.length > 1) timer = setInterval(() => show(current + 1), ROTATION_MS);
+    }
+
+    dotEls.forEach((dot, index) => dot.addEventListener("click", (e) => {
+      e.stopPropagation();
+      show(index);
+    }));
+
+    host.addEventListener("mouseenter", () => { if (timer) clearInterval(timer); });
+    host.addEventListener("mouseleave", restart);
+    restart();
   }
+
   async function load() {
     try {
-      const [productsResponse, promosResponse] = await Promise.all([fetch("/api/products?campaign_banner=1", { cache: "no-store" }), fetch("/api/promo-media", { cache: "no-store" })]);
+      const [productsResponse, promosResponse] = await Promise.all([
+        fetch("/api/products?campaign_banner=1", { cache: "no-store" }),
+        fetch("/api/promo-media", { cache: "no-store" })
+      ]);
+
       if (!productsResponse.ok) return;
-      const products = await productsResponse.json(), promos = promosResponse.ok ? await promosResponse.json() : [];
+
+      const products = await productsResponse.json();
+      const promos = promosResponse.ok ? await promosResponse.json() : [];
       render(resolveCampaigns(Array.isArray(products) ? products : [], promos));
-    } catch (error) { console.error("ACTIVE_CAMPAIGN_CAROUSEL_ERROR", error); }
+    } catch (error) {
+      console.error("ACTIVE_CAMPAIGN_CAROUSEL_ERROR", error);
+    }
   }
+
   function start() {
     injectStyles();
-    const waitForAnnouncement = () => { if (document.querySelector(".professional-hero .heroAnnouncement")) { load(); return; } setTimeout(waitForAnnouncement, 60); };
+    const waitForAnnouncement = () => {
+      if (document.querySelector(".professional-hero .heroAnnouncement")) {
+        load();
+        return;
+      }
+      setTimeout(waitForAnnouncement, 60);
+    };
     waitForAnnouncement();
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true }); else start();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start, { once: true });
+  } else {
+    start();
+  }
 })();
