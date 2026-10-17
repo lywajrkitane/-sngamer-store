@@ -1,7 +1,5 @@
 /* SNGAMER STORE — PayTech checkout bridge */
 (() => {
-  const previousOrder = window.order;
-
   function getSelectedPayment() {
     const selectedCard = document.querySelector("#checkout .paymentMethodCard.is-selected[data-payment]");
     const cardValue = selectedCard?.dataset?.payment || "";
@@ -13,42 +11,62 @@
     return "";
   }
 
+  function showError(message) {
+    const error = document.getElementById("checkoutDeliveryError");
+    if (error) {
+      error.textContent = message;
+      error.classList.add("show");
+      error.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      alert(message);
+    }
+  }
+
   window.order = async function () {
     const payment = getSelectedPayment();
-
-    if (!payment) {
-      const error = document.getElementById("checkoutDeliveryError");
-      const message = "Sélectionne Wave ou Orange Money pour continuer vers PayTech.";
-      if (error) {
-        error.textContent = message;
-        error.classList.add("show");
-      } else {
-        alert(message);
-      }
-      return;
-    }
-
     const name = document.querySelector("#name")?.value.trim() || "";
     const phone = document.querySelector("#phone")?.value.trim() || "";
-    const delivery = {
-      zone: document.querySelector('input[name="deliveryZone"]:checked')?.value || "",
-      region: document.querySelector("#deliveryRegionValue")?.value || "",
-      address: document.querySelector("#deliveryAddress")?.value.trim() || document.querySelector("#addr")?.value.trim() || "",
-      notes: document.querySelector("#deliveryNotes")?.value.trim() || ""
-    };
-    const error = document.getElementById("checkoutDeliveryError");
+    const zone = document.querySelector('input[name="deliveryZone"]:checked')?.value || "";
+    const region = document.querySelector("#deliveryRegionValue")?.value || "";
+    const address = document.querySelector("#deliveryAddress")?.value.trim() || document.querySelector("#addr")?.value.trim() || "";
+    const notes = document.querySelector("#deliveryNotes")?.value.trim() || "";
 
-    if (!name || !phone || !delivery.zone || !delivery.address || (delivery.zone === "Régions" && !delivery.region)) {
-      return typeof previousOrder === "function" ? previousOrder.apply(this, arguments) : undefined;
+    if (!name) {
+      showError("Indique ton nom complet pour continuer.");
+      document.querySelector("#name")?.focus();
+      return;
+    }
+    if (!phone) {
+      showError("Indique ton numéro de téléphone pour continuer.");
+      document.querySelector("#phone")?.focus();
+      return;
+    }
+    if (!zone) {
+      showError("Choisis une zone de livraison.");
+      return;
+    }
+    if (zone === "Régions" && !region) {
+      showError("Choisis la région de livraison.");
+      return;
+    }
+    if (!address) {
+      showError("Indique l'adresse ou le point de repère pour la livraison.");
+      document.querySelector("#deliveryAddress")?.focus();
+      return;
+    }
+    if (!payment) {
+      showError("Sélectionne Wave ou Orange Money pour continuer vers PayTech.");
+      return;
     }
 
     const items = typeof cartItems !== "undefined" && Array.isArray(cartItems) ? cartItems : [];
     if (!items.length) {
-      alert("Le panier est vide.");
+      showError("Le panier est vide.");
       return;
     }
 
     const button = document.querySelector('#checkout .primary.full');
+    const error = document.getElementById("checkoutDeliveryError");
     if (button) {
       button.disabled = true;
       button.textContent = "Connexion à PayTech…";
@@ -60,7 +78,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer: { name, phone, address: delivery.address, delivery },
+          customer: { name, phone, address, delivery: { zone, region, address, notes } },
           payment,
           items
         })
@@ -74,12 +92,7 @@
       window.location.href = data.redirect_url;
     } catch (e) {
       console.error("SNGAMER PAYTECH CHECKOUT ERROR:", e);
-      if (error) {
-        error.textContent = e.message || "Impossible d'ouvrir le paiement. Réessaie.";
-        error.classList.add("show");
-      } else {
-        alert(e.message || "Impossible d'ouvrir le paiement. Réessaie.");
-      }
+      showError(e.message || "Impossible d'ouvrir le paiement. Réessaie.");
       if (button) {
         button.disabled = false;
         button.textContent = "Confirmer la commande";
