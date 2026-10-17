@@ -1,0 +1,201 @@
+name: Fix campaign source
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-campaign-source.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch campaign source
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('server/server.js')
+          text = path.read_text(encoding='utf-8')
+
+          old_products = '''const result = await db(`
+      SELECT
+  id,
+  name,
+  category,
+  platform,
+  price,
+  stock,
+  emoji,
+  description,
+  image1_url,
+  image2_url,
+  image3_url,
+  video_url,
+  promo_price,
+  promo_active,
+  campaign_id,
+  created_at
+FROM products
+    `);'''
+
+          new_products = '''const result = await db(`
+      SELECT
+  p.id,
+  p.name,
+  p.category,
+  p.platform,
+  p.price,
+  p.stock,
+  p.emoji,
+  p.description,
+  p.image1_url,
+  p.image2_url,
+  p.image3_url,
+  p.video_url,
+  p.promo_price,
+  p.promo_active,
+  p.campaign_id,
+  p.created_at,
+  c.name AS campaign_name,
+  c.sticker AS campaign_sticker,
+  c.right_sticker AS campaign_right_sticker,
+  c.active AS campaign_active
+FROM products p
+LEFT JOIN campaigns c
+  ON c.id = p.campaign_id
+    `);'''
+
+          old_promo = '''  SELECT
+    pm.slot,
+    pm.media_type,
+    pm.url,
+    pm.updated_at,
+    pm.campaign_id,
+    pm.product_id,
+
+    c.name AS campaign_name,
+    c.sticker AS campaign_sticker,
+    c.right_sticker AS campaign_right_sticker,
+    c.active AS campaign_active,
+    c.start_date AS campaign_start_date,
+    c.end_date AS campaign_end_date,
+
+    p.name AS product_name,
+    p.price AS product_price,
+    p.promo_price AS product_promo_price,
+    p.promo_active AS product_promo_active,
+    p.emoji AS product_emoji
+
+  FROM promo_media pm
+
+  INNER JOIN campaigns c
+    ON c.id = pm.campaign_id
+
+  LEFT JOIN products p
+    ON p.id = pm.product_id
+
+  WHERE c.active = true
+
+    AND (
+      c.start_date IS NULL
+      OR c.start_date <= NOW()
+    )
+
+    AND (
+      c.end_date IS NULL
+      OR c.end_date > NOW()
+    )
+
+  ORDER BY pm.slot ASC'''
+
+          new_promo = '''  SELECT
+    pm.slot,
+    pm.media_type,
+    pm.url,
+    pm.updated_at,
+    pm.campaign_id,
+    pm.product_id,
+
+    CASE
+      WHEN pc.id IS NOT NULL AND pc.active = true THEN pc.name
+      ELSE mc.name
+    END AS campaign_name,
+    CASE
+      WHEN pc.id IS NOT NULL AND pc.active = true THEN pc.sticker
+      ELSE mc.sticker
+    END AS campaign_sticker,
+    CASE
+      WHEN pc.id IS NOT NULL AND pc.active = true THEN pc.right_sticker
+      ELSE mc.right_sticker
+    END AS campaign_right_sticker,
+    CASE
+      WHEN pc.id IS NOT NULL AND pc.active = true THEN pc.active
+      ELSE mc.active
+    END AS campaign_active,
+    CASE
+      WHEN pc.id IS NOT NULL AND pc.active = true THEN pc.start_date
+      ELSE mc.start_date
+    END AS campaign_start_date,
+    CASE
+      WHEN pc.id IS NOT NULL AND pc.active = true THEN pc.end_date
+      ELSE mc.end_date
+    END AS campaign_end_date,
+
+    p.name AS product_name,
+    p.price AS product_price,
+    p.promo_price AS product_promo_price,
+    p.promo_active AS product_promo_active,
+    p.emoji AS product_emoji
+
+  FROM promo_media pm
+
+  LEFT JOIN products p
+    ON p.id = pm.product_id
+
+  LEFT JOIN campaigns mc
+    ON mc.id = pm.campaign_id
+
+  LEFT JOIN campaigns pc
+    ON pc.id = p.campaign_id
+
+  WHERE
+    (
+      pc.id IS NOT NULL
+      AND pc.active = true
+      AND (pc.start_date IS NULL OR pc.start_date <= NOW())
+      AND (pc.end_date IS NULL OR pc.end_date > NOW())
+    )
+    OR
+    (
+      pc.id IS NULL
+      AND mc.id IS NOT NULL
+      AND mc.active = true
+      AND (mc.start_date IS NULL OR mc.start_date <= NOW())
+      AND (mc.end_date IS NULL OR mc.end_date > NOW())
+    )
+
+  ORDER BY pm.slot ASC'''
+
+          if old_products not in text:
+              raise SystemExit('Expected /api/products query was not found')
+          if old_promo not in text:
+              raise SystemExit('Expected /api/promo-media query was not found')
+
+          text = text.replace(old_products, new_products, 1)
+          text = text.replace(old_promo, new_promo, 1)
+          path.write_text(text, encoding='utf-8')
+
+      - name: Commit backend fix and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/fix-campaign-source.yml
+          git add server/server.js .github/workflows/fix-campaign-source.yml
+          git commit -m "Fix storefront campaign metadata source"
+          git push
