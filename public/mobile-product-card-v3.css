@@ -47,7 +47,6 @@
     transform:translateY(-1px) !important;
   }
 
-  /* Keyboard/accessibility focus gets the same premium border language. */
   #products .card.productCardClickable:focus{
     outline:none;
   }
@@ -100,6 +99,8 @@
     line-height:1.22 !important;
     overflow-wrap:anywhere;
     word-break:break-word;
+    position:static !important;
+    z-index:1;
   }
 
   #products .card.productCardClickable .stock{
@@ -110,11 +111,108 @@
     line-height:1.25;
   }
 
-  #products .card.productCardClickable .price{
-    flex:0 0 auto;
+  /* PROMOTION — source-level layout fix.
+     The old price, discount badge and current price stay in normal flow.
+     Nothing is absolutely positioned, so a long title can never make the
+     discount badge overlap the prices. */
+  #products .card.productCardClickable .price.price--promo{
+    position:static !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    justify-content:flex-start !important;
+    gap:4px !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    height:auto !important;
+    margin:0 !important;
+    padding:0 !important;
+    line-height:1.1 !important;
+    overflow:visible !important;
+  }
+
+  #products .card.productCardClickable .pricePromoTop{
+    position:static !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-start !important;
+    gap:7px !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:20px !important;
+    height:auto !important;
+    margin:0 !important;
+    padding:0 !important;
+    flex:0 0 auto !important;
+    overflow:visible !important;
+  }
+
+  #products .card.productCardClickable .priceOld{
+    position:static !important;
+    display:block !important;
+    flex:0 1 auto !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    margin:0 !important;
+    padding:0 !important;
+    font-size:11px !important;
+    line-height:1.2 !important;
+    white-space:nowrap !important;
+    text-decoration:line-through !important;
+  }
+
+  #products .card.productCardClickable .discountBadge{
+    position:static !important;
+    inset:auto !important;
+    display:inline-flex !important;
+    flex:0 0 auto !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:auto !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    height:auto !important;
+    min-height:20px !important;
+    margin:0 !important;
+    padding:3px 7px !important;
+    border-radius:7px !important;
+    font-size:10px !important;
+    line-height:1 !important;
+    white-space:nowrap !important;
+    transform:none !important;
+    z-index:auto !important;
+  }
+
+  #products .card.productCardClickable .price--promo .priceCurrent{
+    position:static !important;
+    display:block !important;
+    flex:0 0 auto !important;
+    width:auto !important;
+    max-width:100% !important;
     min-height:0 !important;
     margin:0 !important;
-    line-height:1.1;
+    padding:0 !important;
+    font-size:18px !important;
+    line-height:1.1 !important;
+    white-space:nowrap !important;
+  }
+
+  #products .card.productCardClickable .price--promo .priceCurrent small{
+    font-size:.68em !important;
+    white-space:nowrap !important;
+  }
+
+  /* Regular prices use the same safe flow. */
+  #products .card.productCardClickable .price.price--regular{
+    position:static !important;
+    display:block !important;
+    width:100% !important;
+    min-height:0 !important;
+    height:auto !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:visible !important;
   }
 
   #products .card.productCardClickable .priceCurrent{
@@ -159,7 +257,6 @@
     touch-action:manipulation;
   }
 
-  /* Only the button itself reacts to the tap. */
   #products .card.productCardClickable .addToCartIcon:hover,
   #products .card.productCardClickable .addToCartIcon:active,
   #products .card.productCardClickable .addToCartIcon:focus{
