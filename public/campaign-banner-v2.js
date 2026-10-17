@@ -69,65 +69,75 @@
     document.head.appendChild(style);
   }
 
-  function isActiveCampaign(promo) {
-    return promo && (
-      promo.campaign_active === true ||
-      promo.campaign_active === "true" ||
-      promo.campaign_active === 1 ||
-      promo.campaign_active === "1"
-    );
+  function campaignIsActive(product, promo) {
+    return product?.campaign_active === true ||
+      product?.campaign_active === "true" ||
+      product?.campaign_active === 1 ||
+      product?.campaign_active === "1" ||
+      promo?.campaign_active === true ||
+      promo?.campaign_active === "true" ||
+      promo?.campaign_active === 1 ||
+      promo?.campaign_active === "1";
+  }
+
+  function mergeCampaign(product, promo) {
+    const source = promo || {};
+    return {
+      ...source,
+      campaign_id: product?.campaign_id || source.campaign_id || null,
+      campaign_name: product?.campaign_name || source.campaign_name || "Offre exclusive",
+      campaign_sticker: product?.campaign_sticker || source.campaign_sticker || "",
+      campaign_right_sticker: product?.campaign_right_sticker || source.campaign_right_sticker || "",
+      campaign_active: product?.campaign_active ?? source.campaign_active
+    };
   }
 
   function resolveCampaigns(products, promos) {
-    const allPromos = Array.isArray(promos) ? promos.filter(Boolean) : [];
-    const active = allPromos.filter(isActiveCampaign);
-    const ordered = [...active, ...allPromos.filter((promo) => !active.includes(promo))];
+    const rows = Array.isArray(promos) ? promos.filter(Boolean) : [];
     const seen = new Set();
     const result = [];
 
-    for (const promo of ordered) {
-      const productId = Number(promo.product_id || 0);
-      const campaignId = Number(promo.campaign_id || 0);
-      const campaignKey = campaignId > 0 ? `campaign:${campaignId}` : (productId > 0 ? `product:${productId}` : null);
-      if (!campaignKey || seen.has(campaignKey)) continue;
+    for (const promo of rows) {
+      const productId = Number(promo?.product_id || 0);
+      const mediaCampaignId = Number(promo?.campaign_id || 0);
 
       const product = productId > 0
         ? products.find((p) => Number(p.id) === productId && validPromo(p))
-        : campaignId > 0
-          ? products.find((p) => Number(p.campaign_id) === campaignId && validPromo(p))
+        : mediaCampaignId > 0
+          ? products.find((p) => Number(p.campaign_id) === mediaCampaignId && validPromo(p))
           : null;
 
-      if (!product) continue;
+      if (!product || !campaignIsActive(product, promo)) continue;
+
+      const campaign = mergeCampaign(product, promo);
+      const authoritativeCampaignId = Number(product.campaign_id || campaign.campaign_id || 0);
+      const campaignKey = authoritativeCampaignId > 0
+        ? `campaign:${authoritativeCampaignId}`
+        : `product:${product.id}`;
+
+      if (seen.has(campaignKey)) continue;
       seen.add(campaignKey);
-      result.push({ product, campaign: promo });
+      result.push({ product, campaign });
       if (result.length >= MAX_CAMPAIGNS) break;
     }
 
-    // Fallback: use products carrying campaign metadata directly, if available.
     if (result.length < MAX_CAMPAIGNS) {
-      products.filter(validPromo).forEach((product) => {
-        if (result.length >= MAX_CAMPAIGNS) return;
-        const campaignName = product.campaign_name || product.campaignName;
-        const campaignId = Number(product.campaign_id || 0);
-        if (!campaignName && campaignId <= 0) return;
-        const key = campaignId > 0 ? `campaign:${campaignId}` : `product:${product.id}`;
-        if (seen.has(key)) return;
-        seen.add(key);
-        result.push({
-          product,
-          campaign: {
-            campaign_name: campaignName,
-            campaign_sticker: product.campaign_sticker || product.campaignSticker,
-            campaign_id: campaignId
-          }
+      products
+        .filter((product) => validPromo(product) && campaignIsActive(product, null))
+        .forEach((product) => {
+          if (result.length >= MAX_CAMPAIGNS) return;
+          const campaign = mergeCampaign(product, null);
+          const campaignId = Number(product.campaign_id || 0);
+          const key = campaignId > 0 ? `campaign:${campaignId}` : `product:${product.id}`;
+          if (seen.has(key)) return;
+          seen.add(key);
+          result.push({ product, campaign });
         });
-      });
     }
 
-    // Last fallback: show promotional products, but never pretend the product name is a campaign name.
     if (!result.length) {
       products.filter(validPromo).slice(0, MAX_CAMPAIGNS).forEach((product) => {
-        result.push({ product, campaign: null });
+        result.push({ product, campaign: mergeCampaign(product, null) });
       });
     }
 
@@ -141,33 +151,20 @@
     const promo = Number(product.promo_price || 0);
     const discount = regular > promo ? Math.round((1 - promo / regular) * 100) : 0;
 
-    const name = String(
-      campaign.campaign_name ||
-      campaign.name ||
-      product.campaign_name ||
-      product.campaignName ||
-      "Offre exclusive"
-    ).trim() || "Offre exclusive";
-
-    const sticker = String(
-      campaign.campaign_sticker ||
-      campaign.sticker ||
-      product.campaign_sticker ||
-      product.campaignSticker ||
-      product.emoji ||
-      "🔥"
-    ).trim();
-
+    const name = String(campaign.campaign_name || "Offre exclusive").trim() || "Offre exclusive";
+    const leftSticker = String(campaign.campaign_sticker || "").trim();
+    const rightSticker = String(campaign.campaign_right_sticker || "").trim();
+    const campaignDisplay = [leftSticker, name, rightSticker].filter(Boolean).join(" ");
     const image = imageOf(product);
 
     return `
       <div class="campaignCard" data-product-id="${Number(product.id) || 0}" role="button" tabindex="0" aria-label="${esc(name)} — ${esc(product.name || "Produit")}">
         <div class="campaignMedia">
-          ${image ? `<img src="${esc(image)}" alt="${esc(product.name || "Produit en promotion")}" loading="eager">` : `<span class="campaignEmoji">${esc(sticker)}</span>`}
+          ${image ? `<img src="${esc(image)}" alt="${esc(product.name || "Produit en promotion")}" loading="eager">` : `<span class="campaignEmoji">${esc(leftSticker || product.emoji || "🔥")}</span>`}
         </div>
         <div class="campaignCopy">
-          <div class="campaignEyebrow">${esc(sticker)} OFFRE EXCLUSIVE</div>
-          <div class="campaignTitle">${esc(name)}</div>
+          <div class="campaignEyebrow">OFFRE EXCLUSIVE</div>
+          <div class="campaignTitle">${esc(campaignDisplay)}</div>
           <div class="campaignProduct">${esc(product.name || "Produit en promotion")}</div>
         </div>
         <div class="campaignPrice">
@@ -283,7 +280,7 @@
   function start() {
     injectStyles();
     const waitForAnnouncement = () => {
-      if (document.querySelector(".professional-hero .heroAnnouncement")) {
+      if (document.querySelector(".professional-hero .heroAnnouncement") || document.querySelector(".hero")) {
         load();
         return;
       }
