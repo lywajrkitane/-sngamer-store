@@ -1,207 +1,203 @@
-/* SNGAMER STORE ADMIN — V2.5 isolated workspaces
-   Each admin module is a real workspace: no anchor scrolling and no mixed sections.
-   Overview = everything. Products = products only. Orders = orders only.
-   Promotions = promotions only. Campaigns = campaigns only.
+/* SNGAMER STORE ADMIN — V2.6 REAL WORKSPACES
+   This is the authoritative workspace controller.
+   Each module is an isolated admin view: when Orders is selected, every
+   other dashboard block is hidden. Navigation never scrolls to an anchor.
 */
 (function () {
   'use strict';
 
-  const STYLE_ID = 'sg-v25-workspace-style';
-  const NAV_ID = 'sg-v25-workspace-nav';
-  const STORAGE_KEY = 'sg_admin_workspace_v25';
+  const NAV_ID = 'sg-admin-v26-nav';
+  const STYLE_ID = 'sg-admin-v26-style';
+  const KEY = 'sg_admin_workspace_v26';
   const VIEWS = [
-    { id: 'overview', label: "Vue d'ensemble", icon: '▦' },
-    { id: 'products', label: 'Produits', icon: '📦' },
-    { id: 'orders', label: 'Commandes', icon: '🛒' },
-    { id: 'promotions', label: 'Promotions', icon: '🎉' },
-    { id: 'campaigns', label: 'Campagnes', icon: '📣' }
+    ['overview', "Vue d'ensemble", '▦'],
+    ['products', 'Produits', '📦'],
+    ['orders', 'Commandes', '🛒'],
+    ['promotions', 'Promotions', '🎉'],
+    ['campaigns', 'Campagnes', '📣']
   ];
 
   let active = 'overview';
-  let observer = null;
+  let timer = null;
 
-  const root = () => document.getElementById('adminBox');
-  const children = () => root() ? Array.from(root().children) : [];
-  const clean = value => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const box = () => $('#adminBox');
+  const norm = v => String(v || '').replace(/\s+/g, ' ').trim().toLowerCase();
 
-  function addStyles() {
-    if (document.getElementById(STYLE_ID)) return;
+  function typeOfSection(section) {
+    const heading = norm(section.querySelector('h1,h2,h3,h4')?.textContent);
+    const id = norm(section.id);
+    const cls = norm(typeof section.className === 'string' ? section.className : '');
+
+    if (cls.includes('campaignssection') || /campagnes/.test(heading) || /campagn/.test(id)) return 'campaigns';
+    if (cls.includes('promoadminsection') || /promotions?/.test(heading) || /promotion/.test(id)) return 'promotions';
+    if (/gestion des produits/.test(heading) || /produits?/.test(heading) || /stock/.test(heading) || /products?/.test(id)) return 'products';
+    if (/commandes?/.test(heading) || /orders?/.test(id)) return 'orders';
+
+    // Fallback only for clearly identifiable sections.
+    const text = norm(section.textContent);
+    if (/gestion des produits/.test(text) && !/commandes/.test(text.slice(0, 120))) return 'products';
+    if (/gestion rapide de toutes les commandes/.test(text) || /commandes/.test(heading)) return 'orders';
+    return 'other';
+  }
+
+  function sections() {
+    const root = box();
+    return root ? $$(':scope > section', root) : [];
+  }
+
+  function removeLegacyNavs() {
+    ['#sngWorkspaceNav', '#sg-v25-workspace-nav', '#sg-v25-workspace-style', '#sngWorkspaceStyles'].forEach(sel => {
+      $$(sel).forEach(el => {
+        if (el.id === STYLE_ID) return;
+        el.remove();
+      });
+    });
+  }
+
+  function styles() {
+    if ($('#' + STYLE_ID)) return;
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
       #${NAV_ID}{
-        position:sticky;top:0;z-index:9000;
+        position:sticky;top:0;z-index:9998;
         display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
         margin:0 0 18px;padding:10px;
-        background:rgba(8,14,24,.97);backdrop-filter:blur(16px);
+        background:rgba(8,14,24,.98);backdrop-filter:blur(14px);
         border:1px solid rgba(100,130,180,.20);border-radius:16px;
       }
       #${NAV_ID}::-webkit-scrollbar{display:none}
       #${NAV_ID} button{
-        flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;
-        min-height:44px;padding:10px 16px;border-radius:13px;
-        border:1px solid #26313d;background:#101a29;color:#aebbd0;
-        font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer;
+        flex:0 0 auto;min-height:44px;padding:10px 16px;
+        border-radius:13px;border:1px solid #26313d;background:#101a29;
+        color:#aebbd0;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer;
       }
-      #${NAV_ID} button.active{
-        color:#fff;border-color:transparent;
-        background:linear-gradient(135deg,#197cff,#7b32ff);
-        box-shadow:0 8px 24px rgba(60,80,255,.24);
-      }
-      #adminBox.sg-v25-workspace > .sg-v25-hidden{display:none!important}
-      #adminBox.sg-v25-workspace > section.sg-v25-hidden{display:none!important}
-      #adminBox.sg-v25-workspace > section.sg-v25-visible{display:block!important}
+      #${NAV_ID} button.active{color:#fff;border-color:transparent;background:linear-gradient(135deg,#197cff,#7b32ff);box-shadow:0 8px 24px rgba(60,80,255,.24)}
+
+      /* REAL ISOLATION: non-section dashboard blocks disappear outside overview. */
+      #adminBox.sg-v26-mode > :not(#${NAV_ID}):not(section){display:none!important}
+      #adminBox.sg-v26-mode > section.sg-v26-hide{display:none!important}
+      #adminBox.sg-v26-mode > section.sg-v26-show{display:block!important}
+
+      /* Old navigation bars cannot remain visible alongside the authoritative one. */
+      #adminBox #sngWorkspaceNav,#adminBox #sg-v25-workspace-nav{display:none!important}
+
       @media(max-width:700px){
-        #${NAV_ID}{margin:0 0 14px;padding:8px}
+        #${NAV_ID}{margin-bottom:14px;padding:8px}
         #${NAV_ID} button{min-height:42px;padding:9px 13px;font-size:13px}
       }
     `;
     document.head.appendChild(style);
   }
 
-  function classify(el) {
-    const id = clean(el.id);
-    const cls = clean(typeof el.className === 'string' ? el.className : '');
-    const heading = clean(el.querySelector?.('h1,h2,h3,h4')?.textContent);
-    const text = clean(el.textContent);
-    const hay = `${id} ${cls} ${heading} ${text}`;
+  function nav() {
+    const root = box();
+    if (!root) return null;
+    let n = $('#' + NAV_ID);
+    if (n && n.parentElement !== root) n = null;
+    if (n) return n;
 
-    if (/promo|promotion/.test(hay)) return 'promotions';
-    if (/campagne|campaign/.test(hay)) return 'campaigns';
-    if (/commande|orders?/.test(hay)) return 'orders';
-    if (/produit|products?|gestion des produits|stock/.test(hay)) return 'products';
-    return 'other';
-  }
-
-  function buildNav() {
-    const box = root();
-    if (!box) return null;
-    let nav = document.getElementById(NAV_ID);
-    if (nav && nav.parentElement !== box) nav = null;
-    if (nav) return nav;
-
-    nav = document.createElement('nav');
-    nav.id = NAV_ID;
-    nav.setAttribute('aria-label', 'Navigation des espaces administrateur');
-    nav.innerHTML = VIEWS.map(view =>
-      `<button type="button" data-workspace="${view.id}"><span aria-hidden="true">${view.icon}</span><b>${view.label}</b></button>`
+    n = document.createElement('nav');
+    n.id = NAV_ID;
+    n.setAttribute('aria-label', 'Espaces administrateur');
+    n.innerHTML = VIEWS.map(([id, label, icon]) =>
+      `<button type="button" data-v26-view="${id}"><span aria-hidden="true">${icon}</span> <b>${label}</b></button>`
     ).join('');
-
-    box.insertBefore(nav, box.firstElementChild);
-    nav.addEventListener('click', event => {
-      const button = event.target.closest('[data-workspace]');
-      if (!button) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setView(button.dataset.workspace);
-    });
-    return nav;
+    root.insertBefore(n, root.firstElementChild);
+    return n;
   }
 
-  function markChildren() {
-    children().forEach(el => {
-      if (el.id === NAV_ID) return;
-      if (el.id === 'loginBox' || el.id === 'logoutBtn') return;
-      // Recalculate every time so dynamically inserted promotion/campaign/order sections
-      // cannot remain stuck in the wrong workspace.
-      el.dataset.sgV25Type = classify(el);
-    });
-  }
+  function apply(view, scroll) {
+    const root = box();
+    if (!root) return;
+    active = VIEWS.some(v => v[0] === view) ? view : 'overview';
+    try { sessionStorage.setItem(KEY, active); } catch (_) {}
 
-  function applyVisibility(view) {
-    const box = root();
-    if (!box) return;
-    markChildren();
+    styles();
+    removeLegacyNavs();
+    const n = nav();
+    root.classList.add('sg-v26-mode');
+    root.dataset.v26Workspace = active;
 
-    box.classList.add('sg-v25-workspace');
-    box.dataset.workspace = view;
-
-    children().forEach(el => {
-      if (el.id === NAV_ID || el.id === 'loginBox' || el.id === 'logoutBtn') return;
-      const type = el.dataset.sgV25Type || classify(el);
-      const visible = view === 'overview' || type === view;
-      el.classList.toggle('sg-v25-visible', visible);
-      el.classList.toggle('sg-v25-hidden', !visible);
+    sections().forEach(section => {
+      const type = typeOfSection(section);
+      const show = active === 'overview' || type === active;
+      section.classList.toggle('sg-v26-show', show);
+      section.classList.toggle('sg-v26-hide', !show);
     });
 
-    const nav = document.getElementById(NAV_ID);
-    if (nav) {
-      nav.querySelectorAll('[data-workspace]').forEach(button => {
-        button.classList.toggle('active', button.dataset.workspace === view);
-      });
-    }
+    n.querySelectorAll('[data-v26-view]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.v26View === active);
+    });
+
+    if (scroll) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }
 
-  function setView(view, shouldScroll = true) {
-    if (!VIEWS.some(item => item.id === view)) view = 'overview';
-    active = view;
-    applyVisibility(view);
-    try { sessionStorage.setItem(STORAGE_KEY, view); } catch (_) {}
+  function bindNavigation() {
+    const n = nav();
+    if (!n || n.dataset.bound) return;
+    n.dataset.bound = '1';
+    n.addEventListener('click', e => {
+      const btn = e.target.closest('[data-v26-view]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      apply(btn.dataset.v26View, true);
+    });
 
-    // A module is a page-like workspace, never an anchor inside the overview.
-    if (shouldScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    // This capture listener runs before older document-level workspace handlers.
+    window.addEventListener('click', e => {
+      const btn = e.target.closest?.('[data-v26-view]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      apply(btn.dataset.v26View, true);
+    }, true);
   }
 
-  function bindLegacyActions() {
-    const box = root();
-    if (!box) return;
-    box.querySelectorAll('button,a,[role="button"]').forEach(el => {
-      if (el.id === NAV_ID || el.closest(`#${NAV_ID}`)) return;
-      if (el.closest('#ordersTable,#productsTable')) return;
-      if (el.dataset.sgV25Bound) return;
-
-      const text = clean(el.textContent);
+  function interceptOldDashboardButtons() {
+    if (window.__sgAdminV26LegacyIntercept) return;
+    window.__sgAdminV26LegacyIntercept = true;
+    window.addEventListener('click', e => {
+      if (e.target.closest?.('#' + NAV_ID)) return;
+      const el = e.target.closest?.('button,a,[role="button"]');
+      if (!el) return;
+      const text = norm(el.textContent);
       let view = null;
       if (/vue d'ensemble|vue d’ensemble|tableau de bord|accueil/.test(text)) view = 'overview';
-      else if (/voir les commandes|gérer les commandes/.test(text)) view = 'orders';
-      else if (/gérer les produits/.test(text)) view = 'products';
-      else if (/^promotions$|campagnes & promotions/.test(text)) view = 'promotions';
-      else if (/^campagnes$/.test(text)) view = 'campaigns';
+      else if (/voir les commandes|gérer les commandes|^commandes$/.test(text)) view = 'orders';
+      else if (/gérer les produits|^produits$/.test(text)) view = 'products';
+      else if (/^promotions$/.test(text)) view = 'promotions';
+      else if (/^campagnes$|campagnes & promotions/.test(text)) view = 'campaigns';
       if (!view) return;
-
-      el.dataset.sgV25Bound = '1';
-      el.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        setView(view, true);
-      }, true);
-    });
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      apply(view, true);
+    }, true);
   }
 
   function boot() {
-    const box = root();
-    if (!box || box.classList.contains('hidden')) return false;
-    addStyles();
-    buildNav();
-    applyVisibility(active);
-    bindLegacyActions();
+    const root = box();
+    if (!root || root.classList.contains('hidden')) return false;
+    styles();
+    removeLegacyNavs();
+    nav();
+    bindNavigation();
+    interceptOldDashboardButtons();
+    let saved = 'overview';
+    try { saved = sessionStorage.getItem(KEY) || 'overview'; } catch (_) {}
+    apply(saved, false);
     return true;
   }
 
   function start() {
-    try { active = sessionStorage.getItem(STORAGE_KEY) || 'overview'; } catch (_) { active = 'overview'; }
-    if (!VIEWS.some(item => item.id === active)) active = 'overview';
-
-    const run = () => {
-      if (boot()) {
-        // Re-run when the existing dashboard adds sections after API loading.
-        if (!observer) {
-          observer = new MutationObserver(() => {
-            if (boot()) applyVisibility(active);
-          });
-          const box = root();
-          if (box) observer.observe(box, { childList: true });
-        }
-        return true;
-      }
-      return false;
-    };
-
-    if (run()) return;
-    const timer = setInterval(() => {
-      if (run()) clearInterval(timer);
+    if (boot()) return;
+    let tries = 0;
+    timer = setInterval(() => {
+      if (boot() || ++tries > 150) clearInterval(timer);
     }, 200);
-    setTimeout(() => clearInterval(timer), 30000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
