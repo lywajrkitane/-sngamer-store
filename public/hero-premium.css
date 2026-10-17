@@ -1,0 +1,130 @@
+/* SNGAMER STORE — premium fallback hero + exact shop heading layout */
+
+@media (min-width:701px){
+  /* Keep the exact requested wording, and keep it on one line without changing its existing font. */
+  #sectionTitle{
+    white-space:nowrap!important;
+    word-break:keep-all!important;
+    flex:0 0 auto;
+  }
+
+  /* Fallback hero: shown only when no promotion is active. */
+  .hero.has-no-promo .promoArea{
+    display:flex!important;
+    visibility:visible!important;
+    position:relative;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  /* Remove the duplicate SNGAMER STORE text from inside the hero card. */
+  .hero.has-no-promo .promoArea:before{
+    display:none!important;
+    content:none!important;
+  }
+
+  /* Use the real h2 for the premium animated message instead of a fixed pseudo-element. */
+  .hero.has-no-promo .promoArea:after{
+    display:none!important;
+    content:none!important;
+  }
+
+  .hero.has-no-promo .promoArea .defaultHeroContent{
+    position:relative;
+    z-index:4;
+    display:flex!important;
+    width:100%;
+    min-height:330px;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:30px;
+    box-sizing:border-box;
+  }
+
+  .hero.has-no-promo .promoArea .defaultHeroContent h2{
+    position:relative;
+    margin:0;
+    max-width:92%;
+    color:#fff;
+    font-size:clamp(38px,4.3vw,64px);
+    line-height:.95;
+    font-weight:950;
+    letter-spacing:-2.5px;
+    text-align:center;
+    background:linear-gradient(105deg,#fff 0%,#fff 30%,#6fc4ff 48%,#b67cff 63%,#fff 80%,#fff 100%);
+    background-size:240% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 12px 30px rgba(0,0,0,.38));
+    animation:sngHeroShimmer 5s ease-in-out infinite,sngHeroFloat 4.5s ease-in-out infinite;
+  }
+
+  .hero.has-no-promo .promoArea .defaultHeroContent h2:after{
+    content:"";
+    position:absolute;
+    left:8%;
+    right:8%;
+    bottom:-18px;
+    height:2px;
+    border-radius:99px;
+    background:linear-gradient(90deg,transparent,#42a5ff,#9b5cff,#e91e63,transparent);
+    opacity:.75;
+    animation:sngHeroLine 3.5s ease-in-out infinite;
+  }
+
+  .hero.has-no-promo .promoArea .defaultHeroContent p{
+    display:none!important;
+  }
+
+  /* Subtle ambient light behind the phrase, not a distracting permanent motion. */
+  .hero.has-no-promo .promoArea .promoCarousel:before{
+    content:"";
+    position:absolute;
+    width:220px;
+    height:220px;
+    right:10%;
+    top:8%;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(44,157,255,.16),transparent 68%);
+    filter:blur(3px);
+    animation:sngHeroOrb 6s ease-in-out infinite;
+  }
+
+  .hero.has-no-promo .promoArea .promoCarousel:after{
+    content:"";
+    position:absolute;
+    inset:12%;
+    border:1px solid rgba(115,181,255,.07);
+    border-radius:24px;
+    transform:rotate(-2deg);
+    pointer-events:none;
+  }
+
+  @keyframes sngHeroShimmer{
+    0%,100%{background-position:0% 50%;transform:translateY(0) scale(1)}
+    50%{background-position:100% 50%;transform:translateY(-3px) scale(1.012)}
+  }
+
+  @keyframes sngHeroFloat{
+    0%,100%{filter:drop-shadow(0 12px 30px rgba(0,0,0,.38))}
+    50%{filter:drop-shadow(0 18px 42px rgba(73,126,255,.20))}
+  }
+
+  @keyframes sngHeroLine{
+    0%,100%{transform:scaleX(.72);opacity:.35}
+    50%{transform:scaleX(1);opacity:.9}
+  }
+
+  @keyframes sngHeroOrb{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.7}
+    50%{transform:translate3d(-16px,12px,0) scale(1.12);opacity:1}
+  }
+}
+
+@media (min-width:701px) and (max-width:899px){
+  .hero.has-no-promo .promoArea .defaultHeroContent{min-height:250px}
+  .hero.has-no-promo .promoArea .defaultHeroContent h2{font-size:38px}
+}
