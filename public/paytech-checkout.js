@@ -1,0 +1,70 @@
+/* SNGAMER STORE — PayTech checkout bridge */
+(() => {
+  const previousOrder = window.order;
+
+  window.order = async function () {
+    const payment = document.querySelector("#pay")?.value || "";
+
+    if (payment !== "Wave" && payment !== "Orange Money") {
+      return typeof previousOrder === "function" ? previousOrder.apply(this, arguments) : undefined;
+    }
+
+    const name = document.querySelector("#name")?.value.trim() || "";
+    const phone = document.querySelector("#phone")?.value.trim() || "";
+    const delivery = {
+      zone: document.querySelector('input[name="deliveryZone"]:checked')?.value || "",
+      region: document.querySelector("#deliveryRegionValue")?.value || "",
+      address: document.querySelector("#deliveryAddress")?.value.trim() || document.querySelector("#addr")?.value.trim() || "",
+      notes: document.querySelector("#deliveryNotes")?.value.trim() || ""
+    };
+    const error = document.getElementById("checkoutDeliveryError");
+
+    if (!name || !phone || !delivery.zone || !delivery.address || (delivery.zone === "Régions" && !delivery.region)) {
+      return typeof previousOrder === "function" ? previousOrder.apply(this, arguments) : undefined;
+    }
+
+    const items = Array.isArray(window.cartItems) ? window.cartItems : [];
+    if (!items.length) {
+      alert("Le panier est vide.");
+      return;
+    }
+
+    const button = document.querySelector('#checkout .primary.full');
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Connexion à PayTech…";
+    }
+    if (error) { error.textContent = ""; error.classList.remove("show"); }
+
+    try {
+      const response = await fetch("/api/paytech/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: { name, phone, address: delivery.address, delivery },
+          payment,
+          items
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success || !data.redirect_url) {
+        throw new Error(data.error || data.message || "Impossible d'ouvrir le paiement PayTech.");
+      }
+
+      window.location.href = data.redirect_url;
+    } catch (e) {
+      console.error("SNGAMER PAYTECH CHECKOUT ERROR:", e);
+      if (error) {
+        error.textContent = e.message || "Impossible d'ouvrir le paiement. Réessaie.";
+        error.classList.add("show");
+      } else {
+        alert(e.message || "Impossible d'ouvrir le paiement. Réessaie.");
+      }
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Confirmer la commande";
+      }
+    }
+  };
+})();
