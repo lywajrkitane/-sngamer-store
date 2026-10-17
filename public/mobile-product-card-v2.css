@@ -1,0 +1,102 @@
+/* SNGAMER STORE — MOBILE PRODUCT CARDS v2
+   Compact, aligned add-to-cart controls.
+   Applies only to the mobile product grid.
+*/
+@media (max-width:700px){
+  #products .card{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+
+  #products .card .pic{
+    flex:0 0 auto;
+  }
+
+  #products .card .info{
+    position:relative;
+    flex:1 1 auto;
+    min-height:112px;
+    padding:10px 11px 58px;
+  }
+
+  /* Keep text clear of the floating add button. */
+  #products .card .cat,
+  #products .card .info h3,
+  #products .card .price,
+  #products .card .stock{
+    padding-right:50px;
+  }
+
+  #products .card .info h3{
+    margin:7px 0 7px;
+    min-height:0;
+    line-height:1.22;
+    overflow-wrap:anywhere;
+  }
+
+  #products .card .price{
+    margin:7px 0 0;
+  }
+
+  #products .card .stock{
+    margin:4px 0 0;
+  }
+
+  /* One fixed anchor point for every product in the mobile grid. */
+  #products .card .productCardBottom{
+    position:absolute;
+    right:11px;
+    bottom:11px;
+    z-index:2;
+    display:block;
+    margin:0;
+  }
+
+  #products .card .addToCartIcon,
+  #products .addToCartIcon{
+    width:38px;
+    min-width:38px;
+    height:38px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    border-radius:11px;
+    font-size:23px;
+    line-height:1;
+    box-shadow:0 7px 18px rgba(45,87,255,.20);
+  }
+
+  #products .card .addToCartIcon:hover{
+    transform:none;
+  }
+}
+
+@media (max-width:380px){
+  #products .card .info{
+    padding-left:9px;
+    padding-right:9px;
+    padding-bottom:55px;
+  }
+
+  #products .card .cat,
+  #products .card .info h3,
+  #products .card .price,
+  #products .card .stock{
+    padding-right:47px;
+  }
+
+  #products .card .productCardBottom{
+    right:9px;
+    bottom:9px;
+  }
+
+  #products .card .addToCartIcon,
+  #products .addToCartIcon{
+    width:36px;
+    min-width:36px;
+    height:36px;
+    border-radius:10px;
+    font-size:21px;
+  }
+}
