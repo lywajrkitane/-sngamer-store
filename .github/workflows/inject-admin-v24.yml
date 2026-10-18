@@ -21,8 +21,9 @@ jobs:
           from pathlib import Path
           import re
 
-          version = '20261018-1035'
-          script_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
+          version = '20261018-1100'
+          workspace_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
+          fix_tag = '<script src="/admin-data-fix.js?v=20261018-1100"></script>'
 
           changed = []
           for filename in ('public/admin.html', 'public/admin-dashboard.html'):
@@ -34,11 +35,19 @@ jobs:
               s = p.read_text(encoding='utf-8')
               pattern = r'<script\s+src=["\']/admin-v24-workspace\.js\?v=[^"\']+["\']\s*></script>'
               if re.search(pattern, s):
-                  new_s = re.sub(pattern, script_tag, s, count=1)
+                  new_s = re.sub(pattern, workspace_tag, s, count=1)
               else:
                   if '</body>' not in s:
                       raise SystemExit(f'{filename} has no closing body tag')
-                  new_s = s.replace('</body>', script_tag + '\n</body>', 1)
+                  new_s = s.replace('</body>', workspace_tag + '\n</body>', 1)
+
+              fix_pattern = r'<script\s+src=["\']/admin-data-fix\.js\?v=[^"\']+["\']\s*></script>'
+              if re.search(fix_pattern, new_s):
+                  new_s = re.sub(fix_pattern, fix_tag, new_s, count=1)
+              else:
+                  if '</body>' not in new_s:
+                      raise SystemExit(f'{filename} has no closing body tag')
+                  new_s = new_s.replace('</body>', fix_tag + '\n</body>', 1)
 
               if new_s != s:
                   p.write_text(new_s, encoding='utf-8')
@@ -56,5 +65,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/admin.html public/admin-dashboard.html
-          git commit -m 'fix(admin): refresh premium workspace loader'
+          git commit -m 'fix(admin): inject automatic data refresh'
           git push
