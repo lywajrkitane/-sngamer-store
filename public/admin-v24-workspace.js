@@ -598,7 +598,7 @@
 
     sections().forEach(section => {
       const type = typeOfSection(section);
-      const show = active === 'overview' || type === active;
+      const show = active === 'overview' ? false : type === active;
       section.classList.toggle('sg-v26-show', show);
       section.classList.toggle('sg-v26-hide', !show);
     });
