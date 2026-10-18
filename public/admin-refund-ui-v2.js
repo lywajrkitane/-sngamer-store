@@ -10,6 +10,7 @@
 
   function paymentNorm(v) { return String(v || '').trim().toLowerCase(); }
   function refundNorm(v) { return String(v || 'Aucun').trim() || 'Aucun'; }
+  function orderStatusNorm(v) { return String(v || '').trim().toLowerCase(); }
   function modalId() {
     const m = ($('#sngModalTitle')?.textContent || '').match(/#(\d+)/);
     return m ? Number(m[1]) : null;
@@ -50,12 +51,13 @@
       .sg-refund-v2 button{width:100%;margin-top:12px;padding:11px;border:0;border-radius:10px;background:linear-gradient(135deg,#a9233b,#d33b55);color:#fff;font-weight:900}
       .sg-refund-v2 button.confirm{background:linear-gradient(135deg,#166534,#1f8b4c)}
       .sg-refund-v2 button:disabled{opacity:.55}
+      .sg-refund-v2 .blocked{margin-top:10px;padding:10px;border-radius:9px;background:rgba(168,85,247,.07);color:#cbd5e1;line-height:1.5;font-size:12px}
     `;
     document.head.appendChild(s);
   }
 
   function signature(o) {
-    return [o.id,o.payment_status,o.refund_status,o.paytech_ref,o.refund_requested_at,o.refunded_at,o.refund_provider_message,o.total].map(v=>String(v ?? '')).join('|');
+    return [o.id,o.status,o.payment_status,o.refund_status,o.paytech_ref,o.refund_requested_at,o.refunded_at,o.refund_provider_message,o.total].map(v=>String(v ?? '')).join('|');
   }
 
   function render(o) {
@@ -69,8 +71,10 @@
 
     const payment = paymentNorm(o.payment_status || 'En attente');
     const refund = refundNorm(o.refund_status);
+    const orderStatus = orderStatusNorm(o.status);
     const paid = ['payé','paye','paid'].includes(payment);
-    const canStart = paid && !!o.paytech_ref && refund !== 'Remboursé' && refund !== 'En cours';
+    const delivered = orderStatus === 'livrée' || orderStatus === 'livree' || orderStatus === 'delivered';
+    const canStart = paid && !!o.paytech_ref && !delivered && refund !== 'Remboursé' && refund !== 'En cours';
 
     const box = document.createElement('div');
     box.id = 'sgRefundV2';
@@ -85,6 +89,8 @@
       html += `<div class="ok">✅ Remboursement confirmé. Cette commande est exclue du chiffre d'affaires.</div>`;
     } else if (refund === 'En cours') {
       html += `<button id="sgRefundV2Action" class="confirm">✅ Confirmer le remboursement effectué</button><div class="note">Confirme uniquement après vérification dans le back-office PayTech.</div>`;
+    } else if (delivered) {
+      html += `<div class="blocked">🔒 <strong>Remboursement indisponible</strong><br>Cette commande a déjà été livrée. Elle ne peut plus être annulée ni remboursée.</div>`;
     } else if (canStart) {
       html += `<button id="sgRefundV2Action">↩️ Rembourser la totalité — ${esc(money(o.total))}</button><div class="note">Remboursement total via PayTech. Ne clique qu'une seule fois.</div>`;
     } else if (!paid) {
@@ -107,6 +113,11 @@
           if (!confirm('As-tu vérifié dans le back-office PayTech que le remboursement de la commande #' + id + ' est bien terminé ?\n\nNe confirme pas si PayTech affiche encore un remboursement en attente.')) { action.disabled=false; return; }
           await post('/api/admin/orders/' + encodeURIComponent(id) + '/refund/confirm', 'Impossible de confirmer le remboursement.');
         } else {
+          if (delivered) {
+            alert('Cette commande est déjà livrée. Le remboursement est bloqué.');
+            action.disabled=false;
+            return;
+          }
           if (!confirm('Confirmer le remboursement TOTAL de la commande #' + id + ' via PayTech ?\n\nMontant : ' + money(o.total) + '. Cette opération ne peut pas être annulée.')) { action.disabled=false; return; }
           await post('/api/admin/orders/' + encodeURIComponent(id) + '/refund', 'Impossible de lancer le remboursement.');
         }
