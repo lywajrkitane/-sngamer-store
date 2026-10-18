@@ -5,8 +5,9 @@
   const ON_ORDER = "on_order";
   const LABEL = "Sur commande";
 
-  // Premium availability color: blue/cyan, distinct from green "En stock"
-  // and red "Rupture de stock", while matching SNGAMER's neon identity.
+  // Premium availability color: vivid magenta/pink, matching SNGAMER's
+  // blue-purple-pink identity while remaining distinct from green stock
+  // and red out-of-stock states.
   function injectOnOrderStyle() {
     if (document.getElementById("sngOnOrderPremiumStyle")) return;
     const style = document.createElement("style");
@@ -15,10 +16,13 @@
       .onOrderStock,
       .card .onOrderStock,
       #products .onOrderStock,
-      #productDetail .onOrderStock {
-        color: #63c7ff !important;
+      #productDetail .onOrderStock,
+      #drawer .onOrderStock,
+      #checkout .onOrderStock,
+      #checkoutSummary .onOrderStock {
+        color: #ff4fa3 !important;
         font-weight: 700 !important;
-        text-shadow: 0 0 10px rgba(99,199,255,.16);
+        text-shadow: 0 0 10px rgba(255,79,163,.20);
       }
     `;
     document.head.appendChild(style);
