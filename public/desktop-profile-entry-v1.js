@@ -22,10 +22,19 @@
       @media (min-width: 769px) {
         /* Keep the brand on the left and the navigation controls as one compact group on the far right. */
         .siteHeader .nav { justify-content:flex-start !important; }
+
+        /* Normal store view: the icon group starts after the brand and is pushed to the far right. */
         .siteHeader .nav > .sngDesktopProfileButton { margin-left:auto !important; }
+
         .siteHeader .nav > .searchPremiumButton,
         .siteHeader .nav > .sngDesktopStoreButton,
         .siteHeader .nav > .cartButton { margin-left:0 !important; }
+
+        /* Profile view: the profile button disappears, so the remaining controls must still stay together on the far right. */
+        body.sngDesktopProfileMode .siteHeader .nav > .searchPremiumButton { margin-left:auto !important; }
+        body.sngDesktopProfileMode .siteHeader .nav > .sngDesktopStoreButton,
+        body.sngDesktopProfileMode .siteHeader .nav > .cartButton { margin-left:0 !important; }
+
         .siteHeader .nav > .searchPremiumButton { order:3 !important; }
         .siteHeader .nav > .sngDesktopProfileButton { order:2 !important; }
         .siteHeader .nav > .sngDesktopStoreButton { order:4 !important; }
