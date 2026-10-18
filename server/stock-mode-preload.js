@@ -90,9 +90,12 @@ function patchPackageScripts() {
 function patchHtml(fileName) {
   const file = path.join(ROOT, "public", fileName);
   patchFile(file, text => {
-    const tag = '<script src="/stock-mode.js?v=20261018-2300"></script>';
-    if (text.includes("/stock-mode.js")) return text;
-    return text.replace(/<\/body>/i, `${tag}</body>`);
+    const tag = '<script src="/stock-mode.js?v=20261018-2315"></script>';
+    // Always refresh the asset version; do not leave an outdated injected script tag.
+    if (text.includes("/stock-mode.js")) {
+      return text.replace(/<script\b[^>]*src="[^"]*stock-mode\.js(?:\?[^"]*)?"[^>]*><\/script>/i, tag);
+    }
+    return text.replace(/<\/body>/i, tag + "</body>");
   });
 }
 
