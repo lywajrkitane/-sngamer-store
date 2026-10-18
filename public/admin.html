@@ -767,7 +767,11 @@ const whatsappNumber = whatsappPhone.startsWith("221")
 
             <td>${money(o.total)}</td>
 
-            <td>${o.payment || "-"}</td>
+            <td>
+              ${o.payment || "-"}<br>
+              <small>État du paiement : ${adminRefundEscape(o.payment_status || "En attente")}</small><br>
+              ${adminRefundControls(o)}
+            </td>
 
             <td>
 
@@ -800,6 +804,76 @@ const whatsappNumber = whatsappPhone.startsWith("221")
       }).join("");
   }
 
+
+  function adminRefundEscape(value) {
+    return String(value ?? "-")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function adminRefundControls(order) {
+    const id = Number(order.id);
+    if (!Number.isSafeInteger(id) || id <= 0) return "";
+    const paymentStatus = String(order.payment_status || "").trim().toLowerCase();
+    const refundStatus = String(order.refund_status || "Aucun");
+    let html = `<small style="color:#9eabb8;">Remboursement : ${adminRefundEscape(refundStatus)}</small><br>`;
+
+    if (refundStatus === "Remboursé") {
+      return html + '<small style="color:#86efac;font-weight:700;">Remboursement confirmé</small>';
+    }
+    if (refundStatus === "En cours") {
+      return html + `<button type="button" style="margin-top:7px;background:#166534;color:white;padding:7px 9px;border-radius:8px;" onclick="confirmOrderRefund(${id})">✅ Confirmer le remboursement</button>`;
+    }
+    if (["payé", "paye", "paid"].includes(paymentStatus) &&
+        order.paytech_ref &&
+        ["Aucun", "Échec", "Echec"].includes(refundStatus)) {
+      return html + `<button type="button" style="margin-top:7px;background:#a9233b;color:white;padding:7px 9px;border-radius:8px;" onclick="requestOrderRefund(${id})">↩️ Rembourser total</button>`;
+    }
+    return html;
+  }
+
+  async function requestOrderRefund(id) {
+    if (!confirm("Confirmer le remboursement TOTAL de la commande #" + id + " via PayTech ?\\n\\nCette opération est irréversible. Ne confirme que si tu souhaites réellement rembourser cette commande.")) return;
+    try {
+      const response = await fetch("/api/admin/orders/" + encodeURIComponent(id) + "/refund", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+      });
+      const result = await response.json().catch(() => ({}));
+      alert(result.message || result.error || "Réponse de PayTech reçue.");
+      await loadAll();
+    } catch (error) {
+      console.error("ORDER_REFUND_REQUEST_ERROR:", error);
+      alert("Réponse du serveur incertaine. Vérifie PayTech avant de relancer pour éviter un double remboursement.");
+    }
+  }
+
+  async function confirmOrderRefund(id) {
+    if (!confirm("Confirme uniquement si tu as vérifié dans le back-office PayTech que le remboursement de la commande #" + id + " est terminé. Continuer ?")) return;
+    try {
+      const response = await fetch("/api/admin/orders/" + encodeURIComponent(id) + "/refund/confirm", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        alert(result.error || "Impossible de confirmer le remboursement.");
+        return;
+      }
+      alert(result.message || "Remboursement enregistré.");
+      await loadAll();
+    } catch (error) {
+      console.error("ORDER_REFUND_CONFIRM_ERROR:", error);
+      alert("Erreur serveur lors de la confirmation du remboursement.");
+    }
+  }
 
   async function changeStatus(id, status) {
 
