@@ -65,9 +65,15 @@ function injectCustomerSpaceScript(app) {
       const paytechTag = '<script src="/paytech-checkout.js?v=20261017-2010"></script>';
       const customerTag = '<script src="/customer-space-enhancements.js?v=20261018-1450" defer></script>';
       const pushTag = '<script src="/customer-push.js?v=20261018-1600" defer></script>';
+      const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
+      const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
       if (!html.includes("/customer-push.js")) html = html.replace(/<\/body>/i, `${pushTag}</body>`);
+      if (!html.includes("premium-dialogs-v1.css")) html = html.replace(/<\/head>/i, `${premiumCssTag}</head>`);
+      if (!html.includes("premium-dialogs-v1.js")) html = html.replace(/<\/body>/i, `${premiumJsTag}</body>`);
+      // Upgrade legacy synchronous confirmations in customer-space inline scripts.
+      html = html.replace(/if\s*\(!confirm\(([^;]*?)\)\)\s*return;/g, 'if (!(await window.sngPremiumConfirm($1))) return;');
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); res.set("Pragma", "no-cache"); res.set("Expires", "0");
       return res.type("html").send(html);
     } catch (error) { console.error("CUSTOMER_SPACE_HTML_INJECTION_ERROR:", error); return next(); }
