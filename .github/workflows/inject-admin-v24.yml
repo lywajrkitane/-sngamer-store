@@ -21,7 +21,7 @@ jobs:
           from pathlib import Path
           import re
 
-          version = '20261017-0900'
+          version = '20261018-1035'
           script_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
 
           changed = []
