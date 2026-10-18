@@ -1,0 +1,69 @@
+name: Apply admin payment/dashboard fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-admin-payment-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply fixes
+        shell: python
+        run: |
+          from pathlib import Path
+
+          # 1) Admin API must expose the real PayTech payment status.
+          p = Path('server/server.js')
+          s = p.read_text(encoding='utf-8')
+          old = '''          payment,\n          items,\n          total\n        FROM orders'''
+          new = '''          payment,\n          payment_status,\n          payment_method,\n          paid_at,\n          items,\n          total\n        FROM orders'''
+          if old not in s:
+              raise SystemExit('server.js target not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # 2) Do not let a temporary product/API failure prevent orders from loading.
+          for name in ('public/admin-dashboard.html', 'public/admin.html'):
+              p = Path(name)
+              s = p.read_text(encoding='utf-8')
+              old = '''  async function loadAll() {\n\n    await loadProducts();\n    await loadOrders();\n  }'''
+              new = '''  async function loadAll() {\n    const results = await Promise.allSettled([\n      loadProducts(),\n      loadOrders()\n    ]);\n    for (const result of results) {\n      if (result.status === 'rejected') {\n        console.error('ADMIN_LOAD_ERROR:', result.reason);\n      }\n    }\n  }'''
+              if old not in s:
+                  raise SystemExit(f'{name}: loadAll target not found')
+              s = s.replace(old, new, 1)
+
+              # Retry shortly after login/page restoration so the first authenticated
+              # request cannot leave the Commands view empty until manual refresh.
+              old = '''    loadAll();\nloadPromoMedia();'''
+              new = '''    loadAll();\n    setTimeout(() => loadAll(), 350);\n    setTimeout(() => loadAll(), 1200);\nloadPromoMedia();'''
+              if old not in s:
+                  raise SystemExit(f'{name}: showAdmin target not found')
+              s = s.replace(old, new, 1)
+
+              # Make the payment column use PayTech's real payment state.
+              old = '''            <td>${o.payment || "-"}</td>'''
+              new = '''            <td>${o.payment || "-"}<br><small style="color:#8f9db3;font-weight:700;">${o.payment_status || (o.status === "Payée" ? "Payé" : "En attente")}</small></td>'''
+              if old in s:
+                  s = s.replace(old, new, 1)
+
+              p.write_text(s, encoding='utf-8')
+
+          print('Admin/PayTech fixes applied.')
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/server.js public/admin-dashboard.html public/admin.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix admin order auto-load and PayTech status"
+          git push origin HEAD:main
