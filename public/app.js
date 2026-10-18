@@ -1094,10 +1094,19 @@ function navigateStore(section) {
   if (home) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   } else {
-    document.getElementById("shop").scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+    // Let the new section title/subcategory content finish rendering first,
+    // then align the section heading at the top of the viewport.
+    const scrollTarget = document.querySelector("#shop .bar") || title || document.getElementById("shop");
+    const alignSectionAtTop = () => {
+      if (!scrollTarget) return;
+      const header = document.querySelector(".siteHeader");
+      const headerStyle = header ? window.getComputedStyle(header) : null;
+      const headerIsPinned = !!headerStyle && (headerStyle.position === "fixed" || headerStyle.position === "sticky");
+      const headerOffset = headerIsPinned ? header.getBoundingClientRect().height : 0;
+      const top = window.scrollY + scrollTarget.getBoundingClientRect().top - headerOffset - 8;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(alignSectionAtTop));
   }
 }
 
@@ -1120,10 +1129,16 @@ function filterCoinProducts(platform) {
   // Remplacer les deux cartes par un bouton compact
   showCoinPlatformSwitch();
 
-  document.getElementById("shop").scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const target = document.querySelector("#shop .bar") || document.getElementById("shop");
+    if (!target) return;
+    const header = document.querySelector(".siteHeader");
+    const headerStyle = header ? window.getComputedStyle(header) : null;
+    const headerIsPinned = !!headerStyle && (headerStyle.position === "fixed" || headerStyle.position === "sticky");
+    const headerOffset = headerIsPinned ? header.getBoundingClientRect().height : 0;
+    const top = window.scrollY + target.getBoundingClientRect().top - headerOffset - 8;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }));
 }
 
 function showCoinPlatformSwitch() {
