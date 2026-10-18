@@ -15,38 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Repair payment and refund state model
-        shell: python
-        run: |
-          from pathlib import Path
-
-          p = Path('server/customer-system.js')
-          s = p.read_text(encoding='utf-8')
-          replacements = [
-              ('const PAYMENT_STATUSES = ["En attente", "Payé", "Remboursement demandé", "Remboursé", "Échoué"];', 'const PAYMENT_STATUSES = ["En attente", "Payé", "Échoué", "Échec"];'),
-              ('const REFUND_PHONE = "+221 78 612 79 85";', 'const REFUND_STATUSES = ["Aucun", "Demandé", "Remboursé", "Échec"];\nconst REFUND_PHONE = "+221 78 612 79 85";'),
-              ("      ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'En attente',\n      ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,", "      ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'En attente',\n      ADD COLUMN IF NOT EXISTS refund_status TEXT NOT NULL DEFAULT 'Aucun',\n      ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,"),
-              ('return `id,created_at,status,customer,payment,payment_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at`;', 'return `id,created_at,status,customer,payment,payment_status,refund_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at`;'),
-              ("UPDATE orders SET payment_status='Remboursement demandé', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1 RETURNING ${orderSelect()}", "UPDATE orders SET refund_status='Demandé', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1 RETURNING ${orderSelect()}"),
-              ("COALESCE(SUM(CASE WHEN payment_status='Payé' THEN total ELSE 0 END),0)::int AS paid_revenue, COALESCE(SUM(CASE WHEN payment_status='Remboursé' THEN total ELSE 0 END),0)::int AS refunded_total, COUNT(*) FILTER (WHERE payment_status='En attente')::int AS pending_payments, COUNT(*) FILTER (WHERE payment_status='Payé')::int AS paid_orders, COUNT(*) FILTER (WHERE payment_status='Remboursement demandé')::int AS refund_requests", "COALESCE(SUM(CASE WHEN payment_status='Payé' AND COALESCE(refund_status,'Aucun') <> 'Remboursé' THEN total ELSE 0 END),0)::int AS paid_revenue, COALESCE(SUM(CASE WHEN refund_status='Remboursé' THEN total ELSE 0 END),0)::int AS refunded_total, COUNT(*) FILTER (WHERE payment_status='En attente')::int AS pending_payments, COUNT(*) FILTER (WHERE payment_status='Payé' AND COALESCE(refund_status,'Aucun') <> 'Remboursé')::int AS paid_orders, COUNT(*) FILTER (WHERE refund_status='Demandé')::int AS refund_requests")
-          ]
-          changed = 0
-          for old, new in replacements:
-              if old in s:
-                  s = s.replace(old, new)
-                  changed += 1
-
-          migration_marker = "UPDATE orders SET refund_status = CASE"
-          if migration_marker not in s:
-              anchor = "  await customerPool.query(`\n    CREATE INDEX IF NOT EXISTS idx_orders_customer_id"
-              migration = "  await customerPool.query(`\n    UPDATE orders\n       SET refund_status = CASE\n             WHEN payment_status = 'Remboursement demandé' THEN 'Demandé'\n             WHEN payment_status = 'Remboursé' THEN 'Remboursé'\n             ELSE COALESCE(refund_status, 'Aucun')\n           END,\n           payment_status = CASE\n             WHEN payment_status IN ('Remboursement demandé', 'Remboursé') THEN 'Payé'\n             WHEN payment_status = 'Échoué' THEN 'Échec'\n             ELSE payment_status\n           END\n     WHERE payment_status IN ('Remboursement demandé', 'Remboursé', 'Échoué');\n  `);\n\n"
-              if anchor in s:
-                  s = s.replace(anchor, migration + anchor, 1)
-                  changed += 1
-
-          p.write_text(s, encoding='utf-8')
-          print('customer-system.js repaired:', changed, 'changes')
-
       - name: Validate Node.js syntax
         shell: bash
         run: |
@@ -86,7 +54,7 @@ jobs:
           from pathlib import Path
           import re
 
-          version = '20261018-1215'
+          version = '20261018-1220'
           workspace_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
           fix_tag = f'<script src="/admin-data-fix.js?v={version}"></script>'
 
@@ -124,6 +92,6 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/admin.html public/admin-dashboard.html server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js
-          git commit -m 'fix(admin): separate payment and refund states'
+          git add public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js
+          git commit -m 'fix(admin): finalize payment and refund state separation'
           git push
