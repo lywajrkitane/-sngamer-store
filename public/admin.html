@@ -531,7 +531,12 @@
       .getElementById("logoutBtn")
       .classList.remove("hidden");
 
-    loadAll();
+    void loadAll();
+    // Retry after the session cookie and admin view have settled; no manual refresh needed.
+    [600, 1600, 3500, 6500].forEach(delay => setTimeout(() => {
+      const adminBox = document.getElementById("adminBox");
+      if (adminBox && !adminBox.classList.contains("hidden")) void loadAll();
+    }, delay));
   }
 
 
@@ -667,16 +672,20 @@
 
   async function loadOrders() {
 
-    const response =
-      await fetch("/api/admin/orders");
+    const response = await fetch("/api/admin/orders", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
 
-    if (response.status === 401) {
-      location.reload();
-      return;
+    if (!response.ok) {
+      const problem = await response.json().catch(() => ({}));
+      throw new Error(problem.error || `Chargement des commandes impossible (HTTP ${response.status})`);
     }
 
-    const orders =
-      await response.json();
+    const orders = await response.json();
+    if (!Array.isArray(orders)) {
+      throw new Error("Réponse invalide lors du chargement des commandes");
+    }
   const newOrders = orders.filter(o => o.status === "Nouvelle").length;
   const confirmedOrders = orders.filter(o => o.status === "Confirmée").length;
   const shippedOrders = orders.filter(o => o.status === "Expédiée").length;
@@ -794,11 +803,54 @@ const whatsappNumber = whatsappPhone.startsWith("221")
   }
 
 
-  async function loadAll() {
+  let __sngAdminLoadInFlight = null;
 
-    await loadProducts();
-    await loadOrders();
+async function loadAll() {
+  if (__sngAdminLoadInFlight) return __sngAdminLoadInFlight;
+
+  const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const retryTask = async (label, task) => {
+    const delays = [250, 500, 900, 1500, 2200];
+    let lastError;
+    for (let attempt = 0; attempt <= delays.length; attempt++) {
+      try {
+        await task();
+        return true;
+      } catch (error) {
+        lastError = error;
+        console.warn(`ADMIN_LOAD_RETRY [${label}] ${attempt + 1}/${delays.length + 1}:`, error);
+        if (attempt < delays.length) await pause(delays[attempt]);
+      }
+    }
+    console.error(`ADMIN_LOAD_FAILED [${label}]:`, lastError);
+    return false;
+  };
+
+  __sngAdminLoadInFlight = (async () => {
+    const tasks = [
+      ["Produits", () => loadProducts()],
+      ["Commandes", () => loadOrders()]
+    ];
+    if (typeof loadCampaigns === "function") tasks.push(["Campagnes", () => loadCampaigns()]);
+
+    // One failing area must not prevent the orders, statistics or revenue from loading.
+    const results = await Promise.allSettled(
+      tasks.map(([label, task]) => retryTask(label, task))
+    );
+    results.forEach((result, index) => {
+      if (result.status === "rejected" || result.value === false) {
+        console.error("ADMIN_LOAD_AREA_UNAVAILABLE:", tasks[index][0], result.reason || "");
+      }
+    });
+    return results;
+  })();
+
+  try {
+    return await __sngAdminLoadInFlight;
+  } finally {
+    __sngAdminLoadInFlight = null;
   }
+}
 
 
   checkLogin();
