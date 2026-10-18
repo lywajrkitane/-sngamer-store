@@ -700,10 +700,16 @@
     document.getElementById("orderCount")
       .textContent = orders.length;
 
-    const revenue =
-      orders
-        .filter(o => o.status !== "Annulée")
-        .reduce((sum, o) => sum + Number(o.total || 0), 0);
+    const revenue = orders
+      .filter(o => {
+        const orderStatus = String(o.status || "").trim().toLocaleLowerCase("fr-FR");
+        const paymentStatus = String(o.payment_status || "").trim().toLocaleLowerCase("fr-FR");
+        const paid = paymentStatus === "payé" || paymentStatus === "paye" || paymentStatus === "paid"
+          || (!paymentStatus && orderStatus === "payée");
+        const cancelled = orderStatus === "annulée" || orderStatus === "annulee";
+        return paid && !cancelled;
+      })
+      .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
     document.getElementById("revenue")
       .textContent = money(revenue);
