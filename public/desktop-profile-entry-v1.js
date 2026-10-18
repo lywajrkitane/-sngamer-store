@@ -20,10 +20,22 @@
     style.id = 'sngDesktopProfileStyles';
     style.textContent = `
       @media (min-width: 769px) {
-        /* Desktop header: compact icon-only controls, matching the mobile language. */
+        /* Keep the brand on the left and the navigation controls as one compact group on the far right. */
+        .siteHeader .nav { justify-content:flex-start !important; }
+        .siteHeader .nav > .sngDesktopProfileButton { margin-left:auto !important; }
+        .siteHeader .nav > .searchPremiumButton,
+        .siteHeader .nav > .sngDesktopStoreButton,
+        .siteHeader .nav > .cartButton { margin-left:0 !important; }
+        .siteHeader .nav > .searchPremiumButton { order:3 !important; }
+        .siteHeader .nav > .sngDesktopProfileButton { order:2 !important; }
+        .siteHeader .nav > .sngDesktopStoreButton { order:4 !important; }
+        .siteHeader .nav > .cartButton { order:5 !important; }
+
+        /* All header controls use the same compact premium language. */
         .siteHeader .nav > .sngDesktopProfileButton,
         .siteHeader .nav > .sngDesktopStoreButton,
-        .siteHeader .nav > .cartButton {
+        .siteHeader .nav > .cartButton,
+        .siteHeader .nav > .searchPremiumButton {
           width:46px !important;
           min-width:46px !important;
           max-width:46px !important;
@@ -31,7 +43,6 @@
           min-height:46px !important;
           max-height:46px !important;
           padding:0 !important;
-          margin:0 !important;
           flex:0 0 46px !important;
           border-radius:15px !important;
           align-items:center !important;
@@ -39,51 +50,68 @@
           gap:0 !important;
           overflow:visible !important;
           position:relative;
+          box-sizing:border-box !important;
         }
 
-        .siteHeader .nav > .cartButton {
-          background:linear-gradient(135deg,#167fff,#7c3aed) !important;
-          border:1px solid rgba(132,188,255,.34) !important;
-          box-shadow:0 10px 28px rgba(44,91,255,.20),inset 0 1px 0 rgba(255,255,255,.10),0 0 24px rgba(74,103,255,.12) !important;
+        .siteHeader .nav > .cartButton,
+        .siteHeader .nav > .sngDesktopProfileButton,
+        .siteHeader .nav > .searchPremiumButton,
+        .siteHeader .nav > .sngDesktopStoreButton {
+          background:linear-gradient(135deg,#167fff 0%,#5b35ff 55%,#d326a8 100%) !important;
+          border:1px solid rgba(132,188,255,.42) !important;
+          color:#fff !important;
+          box-shadow:0 10px 28px rgba(44,91,255,.20),inset 0 1px 0 rgba(255,255,255,.12),0 0 24px rgba(74,103,255,.12) !important;
         }
-        .siteHeader .nav > .cartButton:hover { transform:translateY(-1px); box-shadow:0 14px 34px rgba(44,91,255,.27),inset 0 1px 0 rgba(255,255,255,.13),0 0 30px rgba(74,103,255,.18) !important; }
-        .siteHeader .nav > .cartButton:active { transform:translateY(0) scale(.97); }
+
+        .siteHeader .nav > .cartButton:hover,
+        .siteHeader .nav > .sngDesktopProfileButton:hover,
+        .siteHeader .nav > .searchPremiumButton:hover,
+        .siteHeader .nav > .sngDesktopStoreButton:hover {
+          transform:translateY(-1px);
+          filter:brightness(1.07) saturate(1.08);
+          box-shadow:0 14px 34px rgba(44,91,255,.28),inset 0 1px 0 rgba(255,255,255,.16),0 0 30px rgba(74,103,255,.18) !important;
+        }
+
+        .siteHeader .nav > .cartButton:active,
+        .siteHeader .nav > .sngDesktopProfileButton:active,
+        .siteHeader .nav > .searchPremiumButton:active,
+        .siteHeader .nav > .sngDesktopStoreButton:active { transform:translateY(0) scale(.97); }
+
         .siteHeader .nav > .cartButton > span:not(.cartIcon) { display:none !important; }
         .siteHeader .nav > .cartButton .cartIcon { display:inline-flex !important; width:22px; height:22px; align-items:center; justify-content:center; font-size:19px; line-height:1; }
-        .siteHeader .nav > .cartButton b { position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 4px !important; display:flex; align-items:center; justify-content:center; border-radius:999px; background:linear-gradient(135deg,#ff4d9d,#7c3aed) !important; border:2px solid #050912; color:#fff; font-size:9px; line-height:1; box-shadow:0 4px 12px rgba(124,58,237,.35); }
+        .siteHeader .nav > .cartButton b {
+          position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 4px !important;
+          display:flex; align-items:center; justify-content:center; border-radius:999px;
+          background:linear-gradient(135deg,#ff4d9d,#7c3aed) !important; border:2px solid #050912; color:#fff;
+          font-size:9px; line-height:1; box-shadow:0 4px 12px rgba(124,58,237,.35);
+        }
 
         .sngDesktopProfileButton {
           display:inline-flex !important;
-          align-items:center;
-          justify-content:center;
-          border:1px solid rgba(91,146,255,.42);
-          background:linear-gradient(145deg,rgba(18,30,55,.96),rgba(24,12,48,.94));
-          color:#eef5ff;
-          box-shadow:0 10px 28px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.07),0 0 24px rgba(65,116,255,.08);
-          font:inherit;
-          cursor:pointer;
-          transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
+          border:1px solid rgba(132,188,255,.42) !important;
+          font:inherit; cursor:pointer;
+          transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease;
         }
-        .sngDesktopProfileButton:hover { transform:translateY(-1px); border-color:rgba(110,171,255,.72); box-shadow:0 13px 34px rgba(0,0,0,.25),0 0 30px rgba(65,116,255,.14); }
-        .sngDesktopProfileButton.is-active { border-color:rgba(105,166,255,.78); background:linear-gradient(135deg,rgba(31,74,170,.96),rgba(89,38,171,.96)); box-shadow:0 12px 34px rgba(54,76,220,.24),inset 0 1px 0 rgba(255,255,255,.10); }
         .sngDesktopProfileButton > span:not(.sngDesktopProfileIcon) { display:none !important; }
         .sngDesktopProfileIcon { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center; }
         .sngDesktopProfileIcon svg { width:22px;height:22px; }
+        .sngDesktopProfileButton.is-active {
+          border-color:rgba(255,255,255,.48) !important;
+          box-shadow:0 12px 34px rgba(54,76,220,.30),inset 0 1px 0 rgba(255,255,255,.18),0 0 30px rgba(74,103,255,.20) !important;
+        }
+
+        /* Search is already converted to the premium icon button by search-polish.js. */
+        .siteHeader .nav > .searchPremiumButton { order:3 !important; }
+        .siteHeader .nav > .searchPremiumButton svg { width:22px !important; height:22px !important; }
 
         /* Compact premium store-return control: icon only, visible only in Profile. */
         .sngDesktopStoreButton {
           display:none !important;
-          border:1px solid rgba(96,150,255,.42);
-          background:linear-gradient(145deg,rgba(19,42,84,.98),rgba(49,19,91,.96));
-          color:#f4f8ff;
-          box-shadow:0 10px 28px rgba(20,42,100,.25),inset 0 1px 0 rgba(255,255,255,.10),0 0 26px rgba(67,104,255,.15);
-          font:inherit;
-          cursor:pointer;
+          border:1px solid rgba(132,188,255,.42) !important;
+          color:#f4f8ff; font:inherit; cursor:pointer;
           transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease;
         }
         .sngDesktopStoreButton.is-visible { display:inline-flex !important; }
-        .sngDesktopStoreButton:hover { transform:translateY(-1px); border-color:rgba(132,188,255,.82); box-shadow:0 14px 34px rgba(20,42,100,.30),inset 0 1px 0 rgba(255,255,255,.12),0 0 34px rgba(67,104,255,.23); filter:saturate(1.08); }
-        .sngDesktopStoreButton:active { transform:translateY(0) scale(.97); }
         .sngDesktopStoreIcon { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center; }
         .sngDesktopStoreIcon svg { width:22px;height:22px; }
 
@@ -134,7 +162,6 @@
       profileButton.addEventListener('click', function () { goToStore('profile'); });
       nav.insertBefore(profileButton, cart);
     }
-
     return { storeButton, profileButton };
   }
 
