@@ -1,45 +1,91 @@
-/* SNGAMER STORE — Pièces eFootball icon only.
-   The shared premium category navigation owns the frame, label, lift,
-   halo and orbit. This file only keeps the coin glyph consistent.
+/* SNGAMER STORE — premium category navigation final spacing fix.
+   Keeps the validated navigation design and only corrects:
+   - active frame staying inside the bottom navigation panel
+   - smaller active labels so long labels never touch neighbors
+   - consistent spacing for every category
 */
 @media (max-width:700px) {
-  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg,
-  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg.sngamerCoinStackSvg {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 31px !important;
-    height: 31px !important;
-    color: currentColor !important;
-    stroke: currentColor !important;
-    fill: none !important;
-    overflow: visible !important;
-    filter: none !important;
+  /* Keep the complete active animation visually inside the dark navigation panel. */
+  html body #mobileBottomNav {
+    height:104px !important;
+    min-height:104px !important;
+    overflow:hidden !important;
   }
 
-  /* Ajustement précis : le cadre actif était trop grand et mordait
-     visuellement sur les catégories voisines. On réduit uniquement
-     ses dimensions, sans modifier sa position, son animation, ses
-     couleurs, son halo ni le fonctionnement des autres catégories. */
+  html body #mobileBottomNav .bottomNavItem {
+    height:94px !important;
+    overflow:visible !important;
+  }
+
+  /* All category labels: smaller, tighter and centered. */
+  html body #mobileBottomNav .bottomNavItem > span:not(.bottomNavIcon) {
+    font-size:10.5px !important;
+    line-height:1 !important;
+    font-weight:800 !important;
+    letter-spacing:-0.2px !important;
+    max-width:108px !important;
+    white-space:nowrap !important;
+    bottom:5px !important;
+  }
+
+  /* Active category: still rises clearly, but remains inside the dark panel. */
+  html body #mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+    width:56px !important;
+    height:56px !important;
+    flex-basis:56px !important;
+    margin-bottom:13px !important;
+    border-radius:19px !important;
+    transform:translateY(-9px) !important;
+  }
+
+  /* Keep the luminous orbit proportional to the smaller active frame. */
+  html body #mobileBottomNav .bottomNavItem.active .bottomNavIcon::before {
+    inset:-4px !important;
+    border-radius:23px !important;
+  }
+
+  html body #mobileBottomNav .bottomNavItem.active .bottomNavIcon::after {
+    inset:-7px !important;
+    border-radius:26px !important;
+  }
+
+  html body #mobileBottomNav .bottomNavItem.active .bottomNavIcon svg {
+    width:32px !important;
+    height:32px !important;
+  }
+
+  /* Pièces eFootball: same visual proportions as the other categories. */
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon {
-    width: 52px !important;
-    height: 52px !important;
-    flex-basis: 52px !important;
-    border-radius: 17px !important;
+    width:56px !important;
+    height:56px !important;
+    flex-basis:56px !important;
+    border-radius:19px !important;
   }
 
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::before {
-    inset: -4px !important;
-    border-radius: 21px !important;
+    inset:-4px !important;
+    border-radius:23px !important;
   }
 
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::after {
-    inset: -7px !important;
-    border-radius: 25px !important;
+    inset:-7px !important;
+    border-radius:26px !important;
   }
 
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon svg {
-    width: 30px !important;
-    height: 30px !important;
+    width:30px !important;
+    height:30px !important;
+  }
+
+  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg,
+  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg.sngamerCoinStackSvg {
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    color:currentColor !important;
+    stroke:currentColor !important;
+    fill:none !important;
+    overflow:visible !important;
+    filter:none !important;
   }
 }
