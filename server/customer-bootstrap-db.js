@@ -27,16 +27,23 @@ async function ensureOrderCustomerColumns() {
       ADD COLUMN IF NOT EXISTS customer_id BIGINT REFERENCES customers(id) ON DELETE SET NULL,
       ADD COLUMN IF NOT EXISTS customer_message TEXT DEFAULT '',
       ADD COLUMN IF NOT EXISTS tracking_code TEXT DEFAULT '',
+      ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'En attente',
+      ADD COLUMN IF NOT EXISTS refund_status TEXT NOT NULL DEFAULT 'Aucun',
+      ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS cancelled_by TEXT,
       ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
   `);
 
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);`);
 
   // Link historical orders to an existing customer using the contact information
-  // saved on the order. This is safe because it only fills an empty customer_id.
+  // saved on the order. This fills only an empty customer_id.
   await pool.query(`
     UPDATE orders o
-       SET customer_id = c.id
+       SET customer_id = c.id,
+           updated_at = NOW()
       FROM customers c
      WHERE o.customer_id IS NULL
        AND (
