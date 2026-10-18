@@ -2,6 +2,17 @@
   'use strict';
   const nativeFetch = window.fetch.bind(window);
   let hiddenIdsPromise = null;
+  let lastOrderStatuses = new Map();
+  let firstTrackingLoad = true;
+  let trackingPollBusy = false;
+
+  const TRACKING_STEPS = [
+    { key:'Nouvelle', label:'Commande', icon:'🛒' },
+    { key:'Confirmée', label:'Confirmée', icon:'✓' },
+    { key:'En préparation', label:'Préparation', icon:'📦' },
+    { key:'Expédiée', label:'Expédiée', icon:'🚚' },
+    { key:'Livrée', label:'Livrée', icon:'✓' }
+  ];
 
   async function hiddenIds(){
     if(!hiddenIdsPromise){
@@ -82,22 +93,136 @@
     });
   }
 
+  function installTrackingStyles(){
+    if(document.getElementById('sngOrderTrackingStyles')) return;
+    const style=document.createElement('style');
+    style.id='sngOrderTrackingStyles';
+    style.textContent=`
+      .sngTracking{margin-top:14px;padding:15px 12px 13px;border:1px solid rgba(80,150,255,.20);border-radius:16px;background:linear-gradient(135deg,rgba(10,25,45,.92),rgba(17,10,35,.82));overflow:hidden}
+      .sngTrackingHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+      .sngTrackingTitle{font-weight:800;font-size:14px;color:#fff}
+      .sngTrackingStatus{font-size:12px;font-weight:800;color:#67b8ff;background:rgba(43,125,255,.12);border:1px solid rgba(80,160,255,.22);padding:5px 9px;border-radius:999px;white-space:nowrap}
+      .sngTrackingLine{display:flex;align-items:flex-start;min-width:510px;padding:0 2px}
+      .sngTrackingStep{flex:1;position:relative;text-align:center;min-width:92px}
+      .sngTrackingStep:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:3px;background:rgba(120,145,180,.22);z-index:0}
+      .sngTrackingStep.done:not(:last-child)::after{background:linear-gradient(90deg,#25d68b,#4f9cff)}
+      .sngTrackingDot{position:relative;z-index:1;width:29px;height:29px;margin:0 auto 7px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;background:#111c2d;border:2px solid rgba(130,155,190,.32);color:#8092aa;box-sizing:border-box}
+      .sngTrackingStep.done .sngTrackingDot{background:linear-gradient(135deg,#167c57,#247cff);border-color:#50b9ff;color:#fff;box-shadow:0 0 12px rgba(54,155,255,.25)}
+      .sngTrackingStep.current .sngTrackingDot{background:linear-gradient(135deg,#287bff,#873dff);border-color:#6fc1ff;color:#fff;box-shadow:0 0 16px rgba(68,135,255,.38)}
+      .sngTrackingLabel{font-size:11px;color:#71849d;font-weight:700;line-height:1.25}
+      .sngTrackingStep.done .sngTrackingLabel,.sngTrackingStep.current .sngTrackingLabel{color:#fff}
+      .sngTrackingNote{margin-top:12px;font-size:12px;color:#93a4ba;text-align:center}
+      .sngTrackingScroll{overflow-x:auto;overflow-y:hidden;padding-bottom:3px;-webkit-overflow-scrolling:touch}
+      .sngTrackingScroll::-webkit-scrollbar{height:3px}
+      .sngOrderToast{position:fixed;left:16px;right:16px;bottom:88px;z-index:99999;padding:13px 15px;border-radius:14px;background:rgba(9,19,34,.97);border:1px solid rgba(73,164,255,.38);box-shadow:0 12px 35px rgba(0,0,0,.4);color:#fff;font-size:13px;font-weight:700;transform:translateY(15px);opacity:0;transition:.25s ease;pointer-events:none}
+      .sngOrderToast.show{transform:translateY(0);opacity:1}
+      @media(max-width:600px){.sngTracking{padding-left:10px;padding-right:10px}.sngTrackingLine{min-width:470px}.sngTrackingStep{min-width:84px}.sngTrackingLabel{font-size:10px}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function showStatusToast(order,status){
+    let toast=document.getElementById('sngOrderToast');
+    if(!toast){
+      toast=document.createElement('div');
+      toast.id='sngOrderToast';
+      toast.className='sngOrderToast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent='🔔 Mise à jour — Commande #'+Number(order.id)+': '+status;
+    requestAnimationFrame(()=>toast.classList.add('show'));
+    clearTimeout(window.__sngOrderToastTimer);
+    window.__sngOrderToastTimer=setTimeout(()=>toast.classList.remove('show'),5000);
+  }
+
+  function trackingHtml(order){
+    const status=String(order.status||'Nouvelle').trim();
+    if(status==='Annulée'){
+      return `<div class="sngTracking"><div class="sngTrackingHead"><span class="sngTrackingTitle">📍 Suivi de la commande</span><span class="sngTrackingStatus">Annulée</span></div><div class="sngTrackingNote">Cette commande a été annulée.</div></div>`;
+    }
+    let index=TRACKING_STEPS.findIndex(step=>step.key===status);
+    if(index<0){
+      if(status.toLowerCase().includes('préparation')) index=2;
+      else if(status.toLowerCase().includes('expédi')) index=3;
+      else if(status.toLowerCase().includes('livr')) index=4;
+      else index=0;
+    }
+    const steps=TRACKING_STEPS.map((step,i)=>{
+      const done=i<index;
+      const current=i===index;
+      return `<div class="sngTrackingStep ${done?'done':''} ${current?'current':''}"><div class="sngTrackingDot">${i<index?'✓':step.icon}</div><div class="sngTrackingLabel">${step.label}</div></div>`;
+    }).join('');
+    const note=index===4?'Votre commande a été livrée.':index===3?'Votre commande est en cours de livraison.':index===2?'Votre commande est en préparation.':index===1?'Votre commande a été confirmée.':'Votre commande a été enregistrée.';
+    return `<div class="sngTracking"><div class="sngTrackingHead"><span class="sngTrackingTitle">📍 Suivi de la commande</span><span class="sngTrackingStatus">${status}</span></div><div class="sngTrackingScroll"><div class="sngTrackingLine">${steps}</div></div><div class="sngTrackingNote">${note}</div></div>`;
+  }
+
+  function renderTracking(orders,notifyChanges){
+    if(!Array.isArray(orders)) return;
+    const currentMap=new Map();
+    orders.forEach(order=>currentMap.set(Number(order.id),String(order.status||'Nouvelle')));
+
+    if(!firstTrackingLoad && notifyChanges){
+      orders.forEach(order=>{
+        const id=Number(order.id);
+        const old=lastOrderStatuses.get(id);
+        const now=String(order.status||'Nouvelle');
+        if(old && old!==now) showStatusToast(order,now);
+      });
+    }
+    lastOrderStatuses=currentMap;
+    firstTrackingLoad=false;
+
+    orders.forEach(order=>{
+      const card=[...document.querySelectorAll('.sgaOrder')].find(el=>{
+        const strong=el.querySelector('.sgaOrderTop strong');
+        return strong?.textContent?.includes('#'+Number(order.id));
+      });
+      if(!card) return;
+      let box=card.querySelector('.sngTracking');
+      const html=trackingHtml(order);
+      if(box){box.outerHTML=html;}else{
+        const deleteButton=card.querySelector('.sgaDeleteOrder')?.parentElement;
+        if(deleteButton) deleteButton.insertAdjacentHTML('beforebegin',html); else card.insertAdjacentHTML('beforeend',html);
+      }
+    });
+  }
+
+  async function refreshLiveTracking(showNotifications){
+    if(trackingPollBusy) return;
+    if(!document.querySelector('#profileArea')) return;
+    trackingPollBusy=true;
+    try{
+      const r=await nativeFetch('/api/customer/orders',{credentials:'same-origin',cache:'no-store'});
+      if(!r.ok) return;
+      const data=await r.json();
+      const ids=await hiddenIds();
+      const orders=Array.isArray(data)?data.filter(order=>!ids.has(Number(order.id))):[];
+      renderTracking(orders,showNotifications);
+    }catch(_){
+    }finally{trackingPollBusy=false;}
+  }
+
   function installAccountEnhancements(){
     if(typeof window.sngRefreshAccount!=='function') return false;
     if(window.__sngCustomerEnhancementsInstalled) return true;
     window.__sngCustomerEnhancementsInstalled=true;
+    installTrackingStyles();
 
     const originalRefresh=window.sngRefreshAccount;
     window.sngRefreshAccount=async function(){
       const result=await originalRefresh.apply(this,arguments);
       setTimeout(addDeleteButtons,30);
+      setTimeout(()=>refreshLiveTracking(false),60);
       return result;
     };
 
     const observer=new MutationObserver(()=>{
       addDeleteButtons();
       const profile=document.querySelector('#profileArea');
-      if(profile && profile.offsetParent!==null) loadCustomer().then(fillCheckout);
+      if(profile && profile.offsetParent!==null){
+        loadCustomer().then(fillCheckout);
+        refreshLiveTracking(false);
+      }
     });
     observer.observe(document.body,{childList:true,subtree:true});
 
@@ -105,7 +230,9 @@
     setInterval(()=>{
       if(document.querySelector('#checkout')) loadCustomer().then(fillCheckout);
       addDeleteButtons();
-    },1500);
+      refreshLiveTracking(true);
+    },10000);
+    setTimeout(()=>refreshLiveTracking(false),800);
     return true;
   }
 
