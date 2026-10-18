@@ -3,6 +3,7 @@
   const fetchNative = window.fetch.bind(window);
   const CARD_ID = 'sngPushCard';
   let installing = false;
+  const SW_VERSION = '20261018-1615';
 
   function base64UrlToUint8Array(base64String){
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -22,7 +23,7 @@
 
   async function getRegistration(){
     if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return null;
-    await navigator.serviceWorker.register('/sw.js?v=20261018-1600', { scope:'/' });
+    await navigator.serviceWorker.register('/sw.js?v=' + SW_VERSION, { scope:'/' });
     return navigator.serviceWorker.ready;
   }
 
