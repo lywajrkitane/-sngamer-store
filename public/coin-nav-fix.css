@@ -1,10 +1,10 @@
 /* SNGAMER STORE — Pièces eFootball
-   Use the requested 🪙 emoji and keep the same premium floating/glow
-   treatment as the other active bottom-navigation categories.
+   Final correction: use the requested 🪙 mark, force a monochrome
+   presentation so it matches the other category icons, and keep exactly
+   one premium active orbit/glow around the icon.
 */
 @media (max-width:700px){
-  /* The coin category uses the real requested emoji. Override the older
-     injected € / stacked-coin pseudo artwork completely. */
+  /* Remove the old SVG coin artwork completely. */
   html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg{
     display:none !important;
   }
@@ -17,9 +17,10 @@
     color:#fff !important;
   }
 
-  /* Requested coin emoji. */
+  /* The requested 🪙 symbol, forced to the same monochrome white treatment
+     as the other bottom-navigation category icons. */
   html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::before{
-    content:"🪙" !important;
+    content:"🪙︎" !important;
     position:absolute !important;
     left:50% !important;
     top:50% !important;
@@ -31,19 +32,21 @@
     border:0 !important;
     border-radius:0 !important;
     padding:0 !important;
+    margin:0 !important;
     background:none !important;
     box-shadow:none !important;
-    color:initial !important;
+    color:#fff !important;
     font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
     font-size:25px !important;
     font-weight:400 !important;
     line-height:1 !important;
     text-shadow:none !important;
-    z-index:4 !important;
+    filter:grayscale(1) brightness(0) invert(1) !important;
+    z-index:5 !important;
     pointer-events:none !important;
   }
 
-  /* Inactive: clean icon only, with no old duplicate coin/shadow. */
+  /* Inactive: clean icon only. No duplicated coin, shadow or old artwork. */
   html body #mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon{
     width:38px !important;
     height:38px !important;
@@ -60,7 +63,7 @@
     filter:none !important;
   }
 
-  /* Active: same floating premium frame used by the other categories. */
+  /* Active: exactly the same floating premium treatment as the other icons. */
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon{
     width:58px !important;
     height:58px !important;
@@ -76,7 +79,20 @@
     will-change:box-shadow,border-color;
   }
 
-  /* Rotating luminous outline. */
+  /* Remove every competing pseudo-ring. The ::before belongs only to 🪙. */
+  html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::before{
+    content:"🪙︎" !important;
+    border:0 !important;
+    border-radius:0 !important;
+    background:none !important;
+    box-shadow:none !important;
+    padding:0 !important;
+    margin:0 !important;
+    filter:grayscale(1) brightness(0) invert(1) !important;
+    z-index:5 !important;
+  }
+
+  /* One rotating luminous outline only. */
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::after{
     content:"" !important;
     position:absolute !important;
@@ -93,7 +109,7 @@
     mask-composite:exclude !important;
     animation:sngNavActiveOrbit 2.4s linear infinite !important;
     pointer-events:none !important;
-    z-index:3 !important;
+    z-index:4 !important;
     box-shadow:0 0 16px rgba(90,184,255,.30) !important;
     filter:none !important;
   }
