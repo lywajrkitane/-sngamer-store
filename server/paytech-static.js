@@ -32,61 +32,7 @@ async function normalizeLegacyPaidOrders() {
 }
 normalizeLegacyPaidOrders().catch(error => console.error("PAYTECH_LEGACY_BOOT_ERROR:", error));
 
-/* Delay the admin's first load until the login session is established. */
-const originalSend = express.response.send;
-express.response.send = function adminAutoLoadSend(body) {
-  try {
-    if (typeof body === "string" && body.includes('id="adminBox"') && !body.includes("sg-admin-autoload-fix")) {
-      const fixScript = `<script id="sg-admin-autoload-fix">
-(function(){
-  'use strict';
-  function install(){
-    const box=document.getElementById('adminBox');
-    if(!box || typeof window.loadAll !== 'function') return;
-    const originalLoadAll=window.loadAll;
-    if(!originalLoadAll.__sgWrapped){
-      const wrapped=function(){
-        setTimeout(function(){
-          const b=document.getElementById('adminBox');
-          if(b && !b.classList.contains('hidden')){
-            try { originalLoadAll(); } catch(e) { console.error('ADMIN_AUTOLOAD_ERROR:', e); }
-          }
-        },900);
-        setTimeout(function(){
-          const b=document.getElementById('adminBox');
-          if(b && !b.classList.contains('hidden')){
-            try { originalLoadAll(); } catch(e) { console.error('ADMIN_AUTOLOAD_RETRY_ERROR:', e); }
-          }
-        },2200);
-      };
-      wrapped.__sgWrapped=true;
-      wrapped.__sgOriginal=originalLoadAll;
-      window.loadAll=wrapped;
-    }
-    let wasVisible=!box.classList.contains('hidden');
-    if(wasVisible) window.loadAll();
-    const observer=new MutationObserver(function(){
-      const visible=!box.classList.contains('hidden');
-      if(visible && !wasVisible){
-        wasVisible=true;
-        window.loadAll();
-      }else if(!visible){
-        wasVisible=false;
-      }
-    });
-    observer.observe(box,{attributes:true,attributeFilter:['class']});
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
-})();
-</script>`;
-      body = body.replace(/<\/body>/i, `${fixScript}<script src="/admin-final-fix.js?v=20261018-1"></script></body>`);
-    }
-  } catch (error) {
-    console.error("ADMIN_AUTOLOAD_INJECTION_ERROR:", error);
-  }
-  return originalSend.call(this, body);
-};
+/* Admin loading is handled by the dashboard's single loadAll implementation. */
 
 express.static = function paytechAwareStatic(root, options) {
   const originalMiddleware = originalStatic(root, options);
