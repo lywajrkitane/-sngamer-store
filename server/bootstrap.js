@@ -167,32 +167,32 @@ express.application.listen = function patchedListen(...args) {
       const target = req.path === "/admin-dashboard.html" || req.path === "/admin.html";
       if (!target || req.method !== "GET") return next();
 
-      const file = path.join(__dirname, "..", "public", req.path.replace(/^\\//, ""));
+      const file = path.join(__dirname, "..", "public", req.path.replace(/^\//, ""));
       if (!fs.existsSync(file)) return next();
 
       try {
         let html = fs.readFileSync(file, "utf8");
         if (!html.includes("customer-admin.js")) {
-          html = html.replace(/<\\/body>/i, '<script src="/customer-admin.js" defer></script></body>');
+          html = html.replace(/<\/body>/i, '<script src="/customer-admin.js" defer></script></body>');
         }
         if (!html.includes("admin-v2.css")) {
-          html = html.replace(/<\\/head>/i, '<link rel="stylesheet" href="/admin-v2.css?v=20261016-2200"></head>');
+          html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/admin-v2.css?v=20261016-2200"></head>');
         }
         if (!html.includes("admin-v2.js")) {
-          html = html.replace(/<\\/body>/i, '<script src="/admin-v2.js?v=20261016-2200" defer></script></body>');
+          html = html.replace(/<\/body>/i, '<script src="/admin-v2.js?v=20261016-2200" defer></script></body>');
         }
         if (!html.includes("admin-v21.css")) {
-          html = html.replace(/<\\/head>/i, '<link rel="stylesheet" href="/admin-v21.css?v=20261016-2300"></head>');
+          html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/admin-v21.css?v=20261016-2300"></head>');
         }
         if (!html.includes("admin-v21.js")) {
-          html = html.replace(/<\\/body>/i, '<script src="/admin-v21.js?v=20261016-2300" defer></script></body>');
+          html = html.replace(/<\/body>/i, '<script src="/admin-v21.js?v=20261016-2300" defer></script></body>');
         }
 
-        html = html.replace(/<script[^>]+admin-v24-workspace\\.js[^>]*><\\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-section-workspace-v24\\.js[^>]*><\\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-v25-workspace\\.js[^>]*><\\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-v23-orders\\.js[^>]*><\\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-final-fix\\.js[^>]*><\\/script>/gi, "");
+        html = html.replace(/<script[^>]+admin-v24-workspace\.js[^>]*><\/script>/gi, "");
+        html = html.replace(/<script[^>]+admin-section-workspace-v24\.js[^>]*><\/script>/gi, "");
+        html = html.replace(/<script[^>]+admin-v25-workspace\.js[^>]*><\/script>/gi, "");
+        html = html.replace(/<script[^>]+admin-v23-orders\.js[^>]*><\/script>/gi, "");
+        html = html.replace(/<script[^>]+admin-final-fix\.js[^>]*><\/script>/gi, "");
 
         if (!html.includes("/admin-v24-workspace.js")) {
           html = html.replace("</body>", '<script src="/admin-v24-workspace.js?v=20261018-1048"></script></body>');
@@ -225,9 +225,11 @@ express.application.listen = function patchedListen(...args) {
     // Append customer routes after the static middleware but before the catch-all.
     // These are exact API paths; find the catch-all using the route path rather than
     // Express' version-dependent RegExp.toString() representation.
-    const catchAllIndex = stack.findIndex(layer =>
-      layer && layer.route && layer.route.path === "*" && layer.route.methods && layer.route.methods.get
-    );
+    const catchAllIndex = stack.findIndex(layer => {
+      if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
+      const routePath = layer.route.path;
+      return routePath === "*" || (Array.isArray(routePath) && routePath.includes("*"));
+    });
     if (catchAllIndex >= 0) {
       stack.splice(catchAllIndex, 0, ...(customerRouter.stack || []));
     } else {
