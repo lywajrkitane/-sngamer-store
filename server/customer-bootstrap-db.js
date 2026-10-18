@@ -38,8 +38,9 @@ async function ensureOrderCustomerColumns() {
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);`);
 
-  // Link historical orders to an existing customer using the contact information
-  // saved on the order. This fills only an empty customer_id.
+  // Link historical orders to an existing customer using email or a normalized
+  // phone number. Senegal numbers may be stored as +221XXXXXXXXX in the account
+  // and XXXXXXXXX in the order, so compare the last 9 digits as well.
   await pool.query(`
     UPDATE orders o
        SET customer_id = c.id,
@@ -54,7 +55,9 @@ async function ensureOrderCustomerColumns() {
          OR
          (
            NULLIF(regexp_replace(COALESCE(o.customer->>'phone', ''), '\\D', '', 'g'), '') IS NOT NULL
-           AND regexp_replace(COALESCE(c.phone, ''), '\\D', '', 'g') = regexp_replace(COALESCE(o.customer->>'phone', ''), '\\D', '', 'g')
+           AND NULLIF(regexp_replace(COALESCE(c.phone, ''), '\\D', '', 'g'), '') IS NOT NULL
+           AND right(regexp_replace(COALESCE(c.phone, ''), '\\D', '', 'g'), 9)
+               = right(regexp_replace(COALESCE(o.customer->>'phone', ''), '\\D', '', 'g'), 9)
          )
        );
   `);
@@ -81,7 +84,9 @@ async function ensureOrderCustomerColumns() {
        )
        OR (
          NULLIF(regexp_replace(COALESCE(NEW.customer->>'phone', ''), '\\D', '', 'g'), '') IS NOT NULL
-         AND regexp_replace(COALESCE(c.phone, ''), '\\D', '', 'g') = regexp_replace(COALESCE(NEW.customer->>'phone', ''), '\\D', '', 'g')
+         AND NULLIF(regexp_replace(COALESCE(c.phone, ''), '\\D', '', 'g'), '') IS NOT NULL
+         AND right(regexp_replace(COALESCE(c.phone, ''), '\\D', '', 'g'), 9)
+             = right(regexp_replace(COALESCE(NEW.customer->>'phone', ''), '\\D', '', 'g'), 9)
        )
        ORDER BY CASE
          WHEN lower(trim(COALESCE(c.email, ''))) = lower(trim(COALESCE(NEW.customer->>'email', ''))) THEN 0
