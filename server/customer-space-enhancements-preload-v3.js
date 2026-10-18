@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { Pool } = require("pg");
+const { initPushDatabase, installPushRoutes, installOrderStatusObserver } = require("./push-notifications");
 
 const CUSTOMER_SESSION_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
 const enhancementPool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
@@ -63,8 +64,10 @@ function injectCustomerSpaceScript(app) {
       let html = fs.readFileSync(indexPath, "utf8");
       const paytechTag = '<script src="/paytech-checkout.js?v=20261017-2010"></script>';
       const customerTag = '<script src="/customer-space-enhancements.js?v=20261018-1450" defer></script>';
+      const pushTag = '<script src="/customer-push.js?v=20261018-1600" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
+      if (!html.includes("/customer-push.js")) html = html.replace(/<\/body>/i, `${pushTag}</body>`);
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); res.set("Pragma", "no-cache"); res.set("Expires", "0");
       return res.type("html").send(html);
     } catch (error) { console.error("CUSTOMER_SPACE_HTML_INJECTION_ERROR:", error); return next(); }
@@ -81,15 +84,22 @@ express.application.listen = function customerSpaceListenPatched(...args) {
   const start = async () => {
     try {
       await ensureCustomerSpaceEnhancements();
+      await initPushDatabase();
       const stack = app._router && app._router.stack;
       if (stack) {
         const enhancementRouter = installCustomerSpaceRoutes();
+        const pushRouter = installPushRoutes();
         const catchAllIndex = stack.findIndex(layer => {
           if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
           const routePath = layer.route.path;
           return routePath === "*" || (Array.isArray(routePath) && routePath.includes("*"));
         });
-        if (catchAllIndex >= 0) stack.splice(catchAllIndex, 0, ...(enhancementRouter.stack || [])); else stack.push(...(enhancementRouter.stack || []));
+        if (catchAllIndex >= 0) {
+          stack.splice(catchAllIndex, 0, ...(enhancementRouter.stack || []), ...(pushRouter.stack || []));
+        } else {
+          stack.push(...(enhancementRouter.stack || []), ...(pushRouter.stack || []));
+        }
+        installOrderStatusObserver(app);
         injectCustomerSpaceScript(app);
       }
       return originalListen.apply(app, args);
