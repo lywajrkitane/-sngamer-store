@@ -8,7 +8,8 @@ const customerPool = new Pool({
 });
 
 const ORDER_STATUSES = ["Nouvelle", "Confirmée", "En préparation", "Expédiée", "Livrée", "Annulée"];
-const PAYMENT_STATUSES = ["En attente", "Payé", "Remboursement demandé", "Remboursé", "Échoué"];
+const PAYMENT_STATUSES = ["En attente", "Payé", "Échoué", "Échec"];
+const REFUND_STATUSES = ["Aucun", "Demandé", "Remboursé", "Échec"];
 const REFUND_PHONE = "+221 78 612 79 85";
 
 async function initCustomerDatabase() {
@@ -32,10 +33,26 @@ async function initCustomerDatabase() {
       ADD COLUMN IF NOT EXISTS customer_message TEXT DEFAULT '',
       ADD COLUMN IF NOT EXISTS tracking_code TEXT DEFAULT '',
       ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'En attente',
+      ADD COLUMN IF NOT EXISTS refund_status TEXT NOT NULL DEFAULT 'Aucun',
       ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS cancelled_by TEXT,
       ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+  `);
+
+  await customerPool.query(`
+    UPDATE orders
+       SET refund_status = CASE
+             WHEN payment_status = 'Remboursement demandé' THEN 'Demandé'
+             WHEN payment_status = 'Remboursé' THEN 'Remboursé'
+             ELSE COALESCE(refund_status, 'Aucun')
+           END,
+           payment_status = CASE
+             WHEN payment_status IN ('Remboursement demandé', 'Remboursé') THEN 'Payé'
+             WHEN payment_status = 'Échoué' THEN 'Échec'
+             ELSE payment_status
+           END
+     WHERE payment_status IN ('Remboursement demandé', 'Remboursé', 'Échoué');
   `);
 
   await customerPool.query(`
@@ -59,7 +76,7 @@ function requireAdmin(req, res, next) {
 }
 
 function orderSelect() {
-  return `id,created_at,status,customer,payment,payment_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at`;
+  return `id,created_at,status,customer,payment,payment_status,refund_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at`;
 }
 
 function buildRouter() {
@@ -171,7 +188,7 @@ function buildRouter() {
       const order = result.rows[0];
       let message = "Commande annulée. Aucun remboursement automatique n'est effectué. Contactez SNGAMER STORE au " + REFUND_PHONE + " pour demander votre remboursement.";
       if (order.payment_status === "Payé") {
-        const refund = await customerPool.query(`UPDATE orders SET payment_status='Remboursement demandé', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1 RETURNING ${orderSelect()}`, [id]);
+        const refund = await customerPool.query(`UPDATE orders SET refund_status='Demandé', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1 RETURNING ${orderSelect()}`, [id]);
         message = "Commande annulée. Votre demande de remboursement est enregistrée. Contactez SNGAMER STORE au " + REFUND_PHONE + " pour le traitement du remboursement.";
         return res.json({ success: true, message, order: refund.rows[0] });
       }
@@ -196,7 +213,7 @@ function buildRouter() {
   // Vue financière dédiée au dashboard : seuls les paiements réellement confirmés comptent.
   router.get("/api/admin/order-finance", requireAdmin, async (req, res) => {
     try {
-      const result = await customerPool.query(`SELECT COALESCE(SUM(CASE WHEN payment_status='Payé' THEN total ELSE 0 END),0)::int AS paid_revenue, COALESCE(SUM(CASE WHEN payment_status='Remboursé' THEN total ELSE 0 END),0)::int AS refunded_total, COUNT(*) FILTER (WHERE payment_status='En attente')::int AS pending_payments, COUNT(*) FILTER (WHERE payment_status='Payé')::int AS paid_orders, COUNT(*) FILTER (WHERE payment_status='Remboursement demandé')::int AS refund_requests FROM orders`);
+      const result = await customerPool.query(`SELECT COALESCE(SUM(CASE WHEN payment_status='Payé' AND COALESCE(refund_status,'Aucun') <> 'Remboursé' THEN total ELSE 0 END),0)::int AS paid_revenue, COALESCE(SUM(CASE WHEN refund_status='Remboursé' THEN total ELSE 0 END),0)::int AS refunded_total, COUNT(*) FILTER (WHERE payment_status='En attente')::int AS pending_payments, COUNT(*) FILTER (WHERE payment_status='Payé' AND COALESCE(refund_status,'Aucun') <> 'Remboursé')::int AS paid_orders, COUNT(*) FILTER (WHERE refund_status='Demandé')::int AS refund_requests FROM orders`);
       res.json({ ...result.rows[0], refund_phone: REFUND_PHONE });
     } catch (error) { console.error("ADMIN_ORDER_FINANCE_ERROR:", error); res.status(500).json({ error: "Impossible de charger les données financières." }); }
   });

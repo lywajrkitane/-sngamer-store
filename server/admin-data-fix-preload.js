@@ -18,7 +18,7 @@ if (!fs.__sngAdminDataFixPreload) {
       return content;
     }
 
-    const tag = '<script src="/admin-data-fix.js?v=20261018-1200"></script>';
+    const tag = '<script src="/admin-data-fix.js?v=20261018-1215"></script>';
     if (content.includes('/admin-data-fix.js')) return content;
     if (!/<\/body>/i.test(content)) return content;
 
