@@ -73,14 +73,23 @@
 
   function boot() {
     ensureStyle();
+    let lastOpenAt = 0;
+    let lastSelect = null;
     const block = (event) => {
       const select = event.target && event.target.closest ? event.target.closest('select') : null;
       if (!select || select.multiple || select.disabled) return;
-      if (!select.classList.contains('sngpd-native')) {
-        event.preventDefault();
-        event.stopPropagation();
-        openSheet(select);
-      }
+
+      // Always intercept visible native selects, including elements marked by
+      // older enhancers. The native Android picker must never be allowed to win.
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+
+      const now = Date.now();
+      if (lastSelect === select && now - lastOpenAt < 450) return;
+      lastSelect = select;
+      lastOpenAt = now;
+      openSheet(select);
     };
     document.addEventListener('pointerdown', block, true);
     document.addEventListener('mousedown', block, true);
