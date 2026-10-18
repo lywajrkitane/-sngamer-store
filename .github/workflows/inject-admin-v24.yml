@@ -31,9 +31,9 @@ jobs:
           from pathlib import Path
           import re
 
-          version = '20261018-1140'
+          version = '20261018-1146'
           workspace_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
-          fix_tag = '<script src="/admin-data-fix.js?v=20261018-1140"></script>'
+          fix_tag = f'<script src="/admin-data-fix.js?v={version}"></script>'
 
           changed = []
           for filename in ('public/admin.html', 'public/admin-dashboard.html'):
@@ -53,6 +53,17 @@ jobs:
                   p.write_text(new_s, encoding='utf-8')
                   changed.append(filename)
 
+          for filename in ('server/bootstrap.js', 'server/admin-data-fix-preload.js'):
+              p = Path(filename)
+              if not p.exists():
+                  print(f'{filename} not found; skipping')
+                  continue
+              s = p.read_text(encoding='utf-8')
+              new_s = re.sub(r'(/admin-data-fix\.js\?v=)\d+', rf'\g<1>{version}', s)
+              if new_s != s:
+                  p.write_text(new_s, encoding='utf-8')
+                  changed.append(filename)
+
           print('Updated:', ', '.join(changed) if changed else 'none')
 
       - name: Commit injection
@@ -64,6 +75,6 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/admin.html public/admin-dashboard.html
-          git commit -m 'fix(admin): load orders automatically on dashboard entry'
+          git add public/admin.html public/admin-dashboard.html server/bootstrap.js server/admin-data-fix-preload.js
+          git commit -m 'fix(admin): bust cached auto-refresh script version'
           git push
