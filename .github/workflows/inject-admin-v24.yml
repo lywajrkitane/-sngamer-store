@@ -15,6 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate Node.js syntax
+        shell: bash
+        run: |
+          set -e
+          node --check server/bootstrap.js
+          node --check server/server.js
+          node --check server/paytech.js
+          node --check server/customer-system.js
+          node --check public/admin-data-fix.js
+
       - name: Refresh admin workspace script version
         shell: python
         run: |
