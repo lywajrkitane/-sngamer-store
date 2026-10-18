@@ -68,7 +68,7 @@ function injectCustomerSpaceScript(app) {
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
       const legacyBridgeTag = '<script src="/customer-premium-legacy-bridge-v1.js?v=20261018-1900"></script>';
-      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261018-2045" defer></script>';
+      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261018-2050" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
       if (!html.includes("/customer-push.js")) html = html.replace(/<\/body>/i, `${pushTag}</body>`);
