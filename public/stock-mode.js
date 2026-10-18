@@ -5,9 +5,8 @@
   const ON_ORDER = "on_order";
   const LABEL = "Sur commande";
 
-  // Premium availability color: vivid magenta/pink, matching SNGAMER's
-  // blue-purple-pink identity while remaining distinct from green stock
-  // and red out-of-stock states.
+  // One single premium status style, used everywhere the availability label
+  // is rendered. This must also win on the home product cards.
   function injectOnOrderStyle() {
     if (document.getElementById("sngOnOrderPremiumStyle")) return;
     const style = document.createElement("style");
@@ -22,7 +21,7 @@
       #checkoutSummary .onOrderStock {
         color: #ff4fa3 !important;
         font-weight: 700 !important;
-        text-shadow: 0 0 10px rgba(255,79,163,.20);
+        text-shadow: 0 0 10px rgba(255,79,163,.20) !important;
       }
     `;
     document.head.appendChild(style);
@@ -39,7 +38,9 @@
         // The existing cart/checkout code uses stock as its quantity guard.
         // Give on-order products a virtual purchasable quantity while keeping
         // the real database stock at 0.
-        product.__realStock = Number(product.stock) || 0;
+        if (product.__realStock === undefined) {
+          product.__realStock = Number(product.stock) || 0;
+        }
         product.stock = 999999;
       }
     }
@@ -53,27 +54,38 @@
 
   function decorateCards() {
     const products = Array.isArray(window.storeProducts) ? window.storeProducts : [];
-    const onOrderIds = new Set(products.filter(isOnOrder).map(p => Number(p.id)));
+    if (!products.length) return;
+
+    const onOrderIds = new Set(
+      products.filter(isOnOrder).map(p => Number(p.id))
+    );
 
     document.querySelectorAll("#products .productCardClickable").forEach(card => {
       const id = productIdFromCard(card);
-      if (!onOrderIds.has(id)) return;
       const stock = card.querySelector(".stock");
-      if (stock) {
+      if (!stock) return;
+
+      if (onOrderIds.has(id)) {
         stock.textContent = LABEL;
         stock.classList.remove("outOfStock");
         stock.classList.add("onOrderStock");
+      } else {
+        stock.classList.remove("onOrderStock");
       }
     });
   }
 
   function decorateProductDetail(productId) {
-    const product = (window.storeProducts || []).find(p => Number(p.id) === Number(productId));
+    const product = (window.storeProducts || []).find(
+      p => Number(p.id) === Number(productId)
+    );
     if (!isOnOrder(product)) return;
+
     const root = document.querySelector("#productDetail");
     if (!root) return;
+
     root.querySelectorAll(".stock, .productStock, .availability, [class*=stock]").forEach(el => {
-      if (/rupture|disponible|stock/i.test(el.textContent || "")) {
+      if (/rupture|disponible|stock|commande/i.test(el.textContent || "")) {
         el.textContent = LABEL;
         el.classList.remove("outOfStock");
         el.classList.add("onOrderStock");
@@ -81,11 +93,27 @@
     });
   }
 
+  function installObserver() {
+    if (window.__sngStockObserverInstalled) return;
+    const productsRoot = document.getElementById("products");
+    if (!productsRoot || typeof MutationObserver === "undefined") return;
+
+    const observer = new MutationObserver(() => {
+      // render() replaces the cards asynchronously; re-apply the status after
+      // every DOM replacement so the home menu can never fall back to green.
+      decorateCards();
+    });
+
+    observer.observe(productsRoot, { childList: true, subtree: true });
+    window.__sngStockObserverInstalled = true;
+  }
+
   function install() {
     injectOnOrderStyle();
     if (!Array.isArray(window.storeProducts) || !window.storeProducts.length) return false;
 
     normalizeProducts();
+    installObserver();
 
     if (typeof window.render === "function" && !window.__sngStockRenderWrapped) {
       const originalRender = window.render;
