@@ -1917,6 +1917,15 @@ if (document.readyState === "loading") {
     }
 
     const customer = order.customer || {};
+    const paymentStatus = String(order.payment_status || "En attente");
+    const refundStatus = String(order.refund_status || "Aucun");
+    const normalizedPaymentStatus = paymentStatus.trim().toLowerCase();
+    const canRequestRefund =
+      ["payé", "paye", "paid"].includes(normalizedPaymentStatus) &&
+      Boolean(order.paytech_ref) &&
+      ["Aucun", "Échec", "Echec"].includes(refundStatus);
+    const refundInProgress = refundStatus === "En cours";
+    const refundCompleted = refundStatus === "Remboursé";
 
     const safe = value =>
       String(value ?? "-")
@@ -1978,15 +1987,35 @@ if (document.readyState === "loading") {
         </div>
 
         <div class="order-detail-row">
-          <span>💳 Paiement</span>
-          <b>${safe(order.payment)}</b>
+          <span>💳 Moyen de paiement</span>
+          <b>${safe(order.payment_method || order.payment)}</b>
         </div>
 
         <div class="order-detail-row">
-          <span>🔄 Statut</span>
+          <span>💵 Statut du paiement</span>
+          <b>${safe(paymentStatus)}</b>
+        </div>
+
+        <div class="order-detail-row">
+          <span>🔄 Statut de commande</span>
           <b>${safe(order.status)}</b>
         </div>
 
+      </div>
+
+      <div class="order-detail-section">
+        <h3>↩️ Remboursement</h3>
+        <div class="order-detail-row">
+          <span>Statut</span>
+          <b>${safe(refundStatus)}</b>
+        </div>
+        ${order.refund_requested_at ? `<div class="order-detail-row"><span>Demande</span><b>${safe(new Date(order.refund_requested_at).toLocaleString("fr-FR"))}</b></div>` : ""}
+        ${order.refunded_at ? `<div class="order-detail-row"><span>Confirmé le</span><b>${safe(new Date(order.refunded_at).toLocaleString("fr-FR"))}</b></div>` : ""}
+        ${order.refund_provider_message ? `<p style="font-size:13px;line-height:1.5;color:#9eabb8;margin:10px 0 0;">${safe(order.refund_provider_message)}</p>` : ""}
+        ${canRequestRefund ? `<button type="button" style="width:100%;margin-top:14px;background:#a9233b;color:#fff;padding:13px;border:0;border-radius:10px;font-weight:800;" onclick="requestOrderRefund(${Number(order.id)})">↩️ Rembourser la totalité — ${safe(money(order.total))}</button><p style="font-size:12px;line-height:1.5;color:#9eabb8;margin:8px 0 0;">Remboursement total via PayTech. Cette action est irréversible et ne sera pas considérée comme terminée avant confirmation.</p>` : ""}
+        ${refundInProgress ? `<button type="button" style="width:100%;margin-top:14px;background:#166534;color:#fff;padding:13px;border:0;border-radius:10px;font-weight:800;" onclick="confirmOrderRefund(${Number(order.id)})">✅ Confirmer le remboursement effectué</button><p style="font-size:12px;line-height:1.5;color:#9eabb8;margin:8px 0 0;">Utilise ce bouton uniquement après avoir vérifié dans le back-office PayTech que le remboursement a bien été effectué.</p>` : ""}
+        ${refundCompleted ? `<p style="font-size:13px;color:#86efac;margin-top:12px;font-weight:800;">✅ Remboursement confirmé. Le paiement n'est plus inclus dans le chiffre d'affaires.</p>` : ""}
+        ${!order.paytech_ref && !refundCompleted ? `<p style="font-size:12px;line-height:1.5;color:#9eabb8;margin-top:10px;">Aucune référence PayTech n'est enregistrée pour cette commande ; le remboursement ne peut pas être lancé depuis cette fiche.</p>` : ""}
       </div>
     `;
 
@@ -1997,6 +2026,51 @@ if (document.readyState === "loading") {
   } catch (error) {
     console.error(error);
     alert("Une erreur est survenue lors de l'affichage des détails.");
+  }
+}
+
+
+async function requestOrderRefund(id) {
+  if (!confirm("Confirmer le remboursement TOTAL de la commande #" + id + " via PayTech ?\\n\\nLe montant total sera remboursé. Cette opération ne peut pas être annulée. Ne confirme que si tu souhaites réellement rembourser cette commande.")) return;
+
+  try {
+    const response = await fetch("/api/admin/orders/" + encodeURIComponent(id) + "/refund", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    const result = await response.json().catch(() => ({}));
+    alert(result.message || result.error || "Réponse de PayTech reçue.");
+    await loadOrders();
+    await viewOrderDetails(id);
+  } catch (error) {
+    console.error("ORDER_REFUND_REQUEST_ERROR:", error);
+    alert("Impossible de confirmer la réponse du serveur. Vérifie le statut de la demande avant de réessayer afin d'éviter un doublon.");
+  }
+}
+
+async function confirmOrderRefund(id) {
+  if (!confirm("As-tu vérifié dans le back-office PayTech que le remboursement de la commande #" + id + " est bien terminé ?\\n\\nNe confirme pas si PayTech affiche encore un remboursement en attente.")) return;
+
+  try {
+    const response = await fetch("/api/admin/orders/" + encodeURIComponent(id) + "/refund/confirm", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      alert(result.error || "Impossible de confirmer le remboursement.");
+      return;
+    }
+    alert(result.message || "Remboursement enregistré.");
+    await loadOrders();
+    await viewOrderDetails(id);
+  } catch (error) {
+    console.error("ORDER_REFUND_CONFIRM_ERROR:", error);
+    alert("Erreur serveur lors de la confirmation du remboursement.");
   }
 }
 
