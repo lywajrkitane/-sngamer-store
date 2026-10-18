@@ -5,6 +5,25 @@
   const ON_ORDER = "on_order";
   const LABEL = "Sur commande";
 
+  // Premium availability color: blue/cyan, distinct from green "En stock"
+  // and red "Rupture de stock", while matching SNGAMER's neon identity.
+  function injectOnOrderStyle() {
+    if (document.getElementById("sngOnOrderPremiumStyle")) return;
+    const style = document.createElement("style");
+    style.id = "sngOnOrderPremiumStyle";
+    style.textContent = `
+      .onOrderStock,
+      .card .onOrderStock,
+      #products .onOrderStock,
+      #productDetail .onOrderStock {
+        color: #63c7ff !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 10px rgba(99,199,255,.16);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function isOnOrder(product) {
     return String(product?.stock_mode || "") === ON_ORDER;
   }
@@ -59,6 +78,7 @@
   }
 
   function install() {
+    injectOnOrderStyle();
     if (!Array.isArray(window.storeProducts) || !window.storeProducts.length) return false;
 
     normalizeProducts();
@@ -141,6 +161,7 @@
   }
 
   function start() {
+    injectOnOrderStyle();
     installAdmin();
     if (!install()) setTimeout(start, 150);
   }
