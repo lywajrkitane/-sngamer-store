@@ -66,10 +66,12 @@
       if (!stock) return;
 
       if (onOrderIds.has(id)) {
-        stock.textContent = LABEL;
-        stock.classList.remove("outOfStock");
-        stock.classList.add("onOrderStock");
-      } else {
+        // Idempotent updates are essential: #products is observed for renders.
+        // Replacing the same text repeatedly creates an endless MutationObserver loop.
+        if (stock.textContent.trim() !== LABEL) stock.textContent = LABEL;
+        if (stock.classList.contains("outOfStock")) stock.classList.remove("outOfStock");
+        if (!stock.classList.contains("onOrderStock")) stock.classList.add("onOrderStock");
+      } else if (stock.classList.contains("onOrderStock")) {
         stock.classList.remove("onOrderStock");
       }
     });
@@ -86,9 +88,9 @@
 
     root.querySelectorAll(".stock, .productStock, .availability, [class*=stock]").forEach(el => {
       if (/rupture|disponible|stock|commande/i.test(el.textContent || "")) {
-        el.textContent = LABEL;
-        el.classList.remove("outOfStock");
-        el.classList.add("onOrderStock");
+        if (el.textContent.trim() !== LABEL) el.textContent = LABEL;
+        if (el.classList.contains("outOfStock")) el.classList.remove("outOfStock");
+        if (!el.classList.contains("onOrderStock")) el.classList.add("onOrderStock");
       }
     });
   }
@@ -98,10 +100,16 @@
     const productsRoot = document.getElementById("products");
     if (!productsRoot || typeof MutationObserver === "undefined") return;
 
+    let decorateScheduled = false;
     const observer = new MutationObserver(() => {
-      // render() replaces the cards asynchronously; re-apply the status after
-      // every DOM replacement so the home menu can never fall back to green.
-      decorateCards();
+      // Coalesce DOM rebuilds into one frame. decorateCards is idempotent, so
+      // writing an unchanged status cannot feed back into this observer.
+      if (decorateScheduled) return;
+      decorateScheduled = true;
+      requestAnimationFrame(() => {
+        decorateScheduled = false;
+        decorateCards();
+      });
     });
 
     observer.observe(productsRoot, { childList: true, subtree: true });
