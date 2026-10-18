@@ -44,7 +44,11 @@ async function installPaytech(app) {
       ADD COLUMN IF NOT EXISTS payment_method TEXT,
       ADD COLUMN IF NOT EXISTS paytech_ref TEXT,
       ADD COLUMN IF NOT EXISTS paytech_token TEXT,
-      ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ
+      ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS refund_status TEXT NOT NULL DEFAULT 'Aucun',
+      ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS refund_provider_message TEXT
   `);
 
   await pool.query(`UPDATE orders SET status='Nouvelle' WHERE status='Payée' AND payment_status='Payé'`);
@@ -180,7 +184,7 @@ async function installPaytech(app) {
       const paymentData = {
         item_name: `Commande SNGAMER STORE #${orderId}`, item_price: total, currency: "XOF", ref_command: refCommand,
         command_name: `Commande SNGAMER STORE #${orderId}`, target_payment: payment, env,
-        ipn_url: `${base}/api/paytech/ipn`, success_url: `${base}/paytech/success?order=${encodeURIComponent(orderId)}`,
+        ipn_url: `${base}/api/paytech/ipn`, refund_notif_url: `${base}/api/paytech/refund-ipn`, success_url: `${base}/paytech/success?order=${encodeURIComponent(orderId)}`,
         cancel_url: `${base}/paytech/cancel?order=${encodeURIComponent(orderId)}`,
         custom_field: JSON.stringify({ order_id: orderId, ref_command: refCommand })
       };
@@ -244,6 +248,238 @@ async function installPaytech(app) {
     } catch (error) {
       console.error("PAYTECH_IPN_ERROR:", error);
       return res.status(500).send("IPN error");
+    }
+  });
+
+
+  // Admin-initiated full refunds. PayTech's API accepts ref_command only;
+  // the request is therefore full-order, not partial. Never mark as refunded
+  // until PayTech's refund_complete notification or an admin-verified fallback.
+  app.post("/api/admin/orders/:id/refund", async (req, res) => {
+    if (!req.session || !req.session.admin) {
+      return res.status(401).json({ error: "Non autorisé" });
+    }
+
+    const orderId = Number(req.params.id);
+    if (!Number.isSafeInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({ error: "Numéro de commande invalide." });
+    }
+
+    const apiKey = String(process.env.PAYTECH_API_KEY || "").trim();
+    const apiSecret = String(process.env.PAYTECH_API_SECRET || "").trim();
+    if (!apiKey || !apiSecret) {
+      return res.status(503).json({ error: "Les clés API PayTech ne sont pas configurées." });
+    }
+
+    let order;
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const locked = await client.query(
+        `SELECT id, total, payment_status, paytech_ref, refund_status
+         FROM orders WHERE id = $1 FOR UPDATE`,
+        [orderId]
+      );
+
+      if (!locked.rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Commande introuvable." });
+      }
+
+      order = locked.rows[0];
+      const currentRefundStatus = String(order.refund_status || "Aucun");
+      const currentPaymentStatus = String(order.payment_status || "").trim().toLowerCase();
+
+      if (!["payé", "paye", "paid"].includes(currentPaymentStatus)) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "Seule une commande déjà payée peut être remboursée." });
+      }
+      if (!order.paytech_ref) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "Cette commande n'a pas de référence PayTech. Vérifie son paiement et effectue son remboursement manuellement auprès du prestataire." });
+      }
+      if (currentRefundStatus === "Remboursé") {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "Cette commande est déjà marquée comme remboursée." });
+      }
+      if (currentRefundStatus === "En cours") {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "Un remboursement est déjà en cours. Ne relance pas la demande afin d'éviter un doublon." });
+      }
+
+      await client.query(
+        `UPDATE orders
+         SET refund_status = 'En cours',
+             refund_requested_at = NOW(),
+             refund_provider_message = 'Demande transmise à PayTech; confirmation en attente.'
+         WHERE id = $1`,
+        [orderId]
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch (_) {}
+      console.error("PAYTECH_REFUND_LOCK_ERROR:", error);
+      return res.status(500).json({ error: "Impossible de préparer le remboursement." });
+    } finally {
+      client.release();
+    }
+
+    let response;
+    let providerResult;
+    try {
+      response = await fetch("https://paytech.sn/api/payment/refund-payment", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+          API_KEY: apiKey,
+          API_SECRET: apiSecret
+        },
+        body: new URLSearchParams({ ref_command: String(order.paytech_ref) }),
+        signal: AbortSignal.timeout(15000)
+      });
+      providerResult = await response.json().catch(() => ({}));
+    } catch (error) {
+      // Timeout/network errors are ambiguous: keep "En cours" to block duplicate refunds.
+      const message = "Réponse PayTech inconnue. Vérifie le back-office PayTech avant toute nouvelle action pour éviter un double remboursement.";
+      try {
+        await pool.query(
+          `UPDATE orders SET refund_provider_message = $1
+           WHERE id = $2 AND refund_status = 'En cours'`,
+          [message, orderId]
+        );
+      } catch (dbError) {
+        console.error("PAYTECH_REFUND_UNKNOWN_STATE_SAVE_ERROR:", dbError);
+      }
+      console.error("PAYTECH_REFUND_NETWORK_ERROR:", error);
+      return res.status(202).json({ success: true, pending: true, message });
+    }
+
+    if (response.ok && Number(providerResult.success) === 1) {
+      const message = String(providerResult.message || "Demande acceptée par PayTech; confirmation finale en attente.");
+      await pool.query(
+        `UPDATE orders
+         SET refund_provider_message = $1
+         WHERE id = $2 AND refund_status <> 'Remboursé'`,
+        [message, orderId]
+      );
+      return res.status(202).json({
+        success: true,
+        pending: true,
+        message: "PayTech a accepté la demande. Le statut passera à « Remboursé » après confirmation par PayTech. Pour les anciennes transactions sans notification de remboursement configurée, vérifie le résultat dans le back-office PayTech."
+      });
+    }
+
+    const providerMessage = String(providerResult.message || "PayTech a refusé la demande de remboursement.");
+    await pool.query(
+      `UPDATE orders
+       SET refund_status = CASE WHEN refund_status = 'Remboursé' THEN 'Remboursé' ELSE 'Échec' END,
+           refund_provider_message = $1
+       WHERE id = $2`,
+      [providerMessage, orderId]
+    );
+    const current = await pool.query(
+      "SELECT refund_status FROM orders WHERE id = $1",
+      [orderId]
+    );
+    if (current.rows[0]?.refund_status === "Remboursé") {
+      return res.json({ success: true, refunded: true, message: "PayTech a confirmé le remboursement." });
+    }
+    return res.status(502).json({ error: providerMessage });
+  });
+
+  // PayTech calls this URL only for refund_complete. Authenticate the callback
+  // with the documented SHA-256 API key and secret checks before updating money status.
+  app.post("/api/paytech/refund-ipn", async (req, res) => {
+    try {
+      const apiKey = String(process.env.PAYTECH_API_KEY || "").trim();
+      const apiSecret = String(process.env.PAYTECH_API_SECRET || "").trim();
+      if (!apiKey || !apiSecret) return res.status(503).send("PayTech not configured");
+
+      const body = req.body || {};
+      const expectedKeyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
+      const expectedSecretHash = crypto.createHash("sha256").update(apiSecret).digest("hex");
+      const authenticated =
+        safeEqualHex(expectedKeyHash, body.api_key_sha256) &&
+        safeEqualHex(expectedSecretHash, body.api_secret_sha256);
+      if (!authenticated) return res.status(403).send("Forbidden");
+
+      if (body.type_event !== "refund_complete") return res.status(200).send("Ignored");
+      const configuredEnv = String(process.env.PAYTECH_ENV || "test").trim().toLowerCase();
+      const callbackEnv = String(body.env || "").trim().toLowerCase();
+      if (callbackEnv && callbackEnv !== configuredEnv) return res.status(400).send("Environment mismatch");
+
+      const refCommand = String(body.ref_command || "").trim();
+      if (!refCommand) return res.status(400).send("Missing ref_command");
+
+      const orderResult = await pool.query(
+        `SELECT id, total, refund_status FROM orders WHERE paytech_ref = $1`,
+        [refCommand]
+      );
+      if (!orderResult.rows.length) return res.status(404).send("Order not found");
+      const order = orderResult.rows[0];
+
+      if (order.refund_status === "Remboursé") return res.status(200).send("OK");
+      if (!["En cours", "Échec"].includes(String(order.refund_status || ""))) {
+        return res.status(409).send("No matching refund request");
+      }
+
+      const callbackAmount = Number(body.item_price || body.final_item_price || 0);
+      if (callbackAmount > 0 && callbackAmount !== Number(order.total)) {
+        return res.status(400).send("Refund amount mismatch");
+      }
+
+      await pool.query(
+        `UPDATE orders
+         SET refund_status = 'Remboursé',
+             payment_status = 'Remboursé',
+             refunded_at = COALESCE(refunded_at, NOW()),
+             refund_provider_message = 'Confirmation de remboursement reçue de PayTech'
+         WHERE id = $1 AND refund_status IN ('En cours', 'Échec')`,
+        [order.id]
+      );
+      console.log("PAYTECH_REFUND_CONFIRMED:", JSON.stringify({ orderId: order.id, ref_command: refCommand }));
+      return res.status(200).send("OK");
+    } catch (error) {
+      console.error("PAYTECH_REFUND_IPN_ERROR:", error);
+      return res.status(500).send("Refund IPN error");
+    }
+  });
+
+  // Fallback for historical payments which were created before refund_notif_url
+  // was included. Use only after manually verifying the completed refund in PayTech.
+  app.post("/api/admin/orders/:id/refund/confirm", async (req, res) => {
+    if (!req.session || !req.session.admin) {
+      return res.status(401).json({ error: "Non autorisé" });
+    }
+
+    const orderId = Number(req.params.id);
+    if (!Number.isSafeInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({ error: "Numéro de commande invalide." });
+    }
+
+    try {
+      const result = await pool.query(
+        `UPDATE orders
+         SET refund_status = 'Remboursé',
+             payment_status = 'Remboursé',
+             refunded_at = COALESCE(refunded_at, NOW()),
+             refund_provider_message = 'Confirmation manuelle par l’administrateur après vérification PayTech'
+         WHERE id = $1
+           AND payment_status = 'Payé'
+           AND refund_status = 'En cours'
+           AND paytech_ref IS NOT NULL
+         RETURNING id, refund_status, payment_status, refunded_at`,
+        [orderId]
+      );
+
+      if (!result.rows.length) {
+        return res.status(409).json({ error: "Aucun remboursement en cours à confirmer pour cette commande." });
+      }
+      return res.json({ success: true, order: result.rows[0], message: "Remboursement enregistré comme terminé." });
+    } catch (error) {
+      console.error("PAYTECH_REFUND_MANUAL_CONFIRM_ERROR:", error);
+      return res.status(500).json({ error: "Impossible de confirmer le remboursement." });
     }
   });
 
