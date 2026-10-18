@@ -110,7 +110,7 @@
   async function load(){
     try{
       const response=await fetch('/api/admin/orders',{credentials:'same-origin',cache:'no-store'});
-      if(response.status===401){location.reload();return;}
+      if(response.status===401){return;}
       if(!response.ok) throw new Error(`HTTP ${response.status}`);
       const data=await response.json();
       if(!Array.isArray(data)) throw new Error('Réponse commandes invalide');
@@ -125,6 +125,30 @@
   // Own the initial load instead of waiting for the legacy dashboard loader.
   // This fixes the empty Commands screen until the user presses Actualiser.
   window.loadOrders=load;
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{ensureWorkspace();setTimeout(load,50)});
-  else {ensureWorkspace();setTimeout(load,50);}
+
+  function startAutoLoad(){
+    ensureWorkspace();
+    const box=document.getElementById('adminBox');
+    let wasVisible=!!box && !box.classList.contains('hidden');
+    if(wasVisible) setTimeout(load,150);
+    if(box){
+      const observer=new MutationObserver(()=>{
+        const visible=!box.classList.contains('hidden');
+        if(visible && !wasVisible){
+          wasVisible=true;
+          setTimeout(load,100);
+          setTimeout(load,800);
+        }else if(!visible){
+          wasVisible=false;
+        }
+      });
+      observer.observe(box,{attributes:true,attributeFilter:['class']});
+    }
+    setInterval(()=>{
+      if(box && !box.classList.contains('hidden')) load();
+    },30000);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startAutoLoad,{once:true});
+  else startAutoLoad();
 })();

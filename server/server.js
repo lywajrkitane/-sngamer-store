@@ -619,6 +619,9 @@ app.get(
           status,
           customer,
           payment,
+          payment_status,
+          payment_method,
+          paid_at,
           items,
           total
         FROM orders

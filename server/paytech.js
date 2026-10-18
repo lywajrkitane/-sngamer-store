@@ -47,6 +47,8 @@ async function installPaytech(app) {
       ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ
   `);
 
+  await pool.query(`UPDATE orders SET status='Nouvelle' WHERE status='Payée' AND payment_status='Payé'`);
+
   await pool.query(`
     DO $$
     DECLARE lock_key BIGINT := hashtextextended('sngamer_paytech_index_install', 0);
@@ -85,7 +87,7 @@ async function installPaytech(app) {
         if (stockUpdate.rowCount !== 1) throw new Error(`Stock insuffisant ou produit introuvable pour ${productId}`);
       }
       await client.query(
-        `UPDATE orders SET status='Payée',payment_status='Payé',payment_method=$1,paid_at=NOW(),paytech_token=COALESCE($2,paytech_token) WHERE id=$3`,
+        `UPDATE orders SET payment_status='Payé',payment_method=$1,paid_at=NOW(),paytech_token=COALESCE($2,paytech_token) WHERE id=$3`,
         [paymentMethod || null, token || null, orderId]
       );
       await client.query("COMMIT");
