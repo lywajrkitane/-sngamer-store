@@ -2,6 +2,82 @@
 (function () {
   "use strict";
 
+  /*
+     PIÈCES eFOOTBALL — premium coin stack
+     Keep the existing navigation behavior untouched and only replace the
+     current coin glyph with a stacked-coin mark whose face contains €.
+  */
+  function injectPremiumCoinIcon() {
+    if (document.getElementById("sngamerPremiumCoinIconStyles")) return;
+    const style = document.createElement("style");
+    style.id = "sngamerPremiumCoinIconStyles";
+    style.textContent = `
+      .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon{
+        position:relative !important;
+        display:grid !important;
+        place-items:center !important;
+        width:48px !important;
+        height:48px !important;
+        color:#fff !important;
+        overflow:visible !important;
+      }
+
+      .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg{
+        display:none !important;
+      }
+
+      .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::after{
+        content:"" !important;
+        position:absolute !important;
+        left:50% !important;
+        top:50% !important;
+        width:31px !important;
+        height:17px !important;
+        transform:translate(-50%, 9px) !important;
+        border:3px solid currentColor !important;
+        border-radius:50% !important;
+        box-sizing:border-box !important;
+        opacity:.92 !important;
+        box-shadow:
+          0 5px 0 -1px rgba(255,255,255,.42),
+          0 9px 0 -2px rgba(255,255,255,.24) !important;
+        z-index:0 !important;
+        pointer-events:none !important;
+      }
+
+      .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::before{
+        content:"€" !important;
+        position:absolute !important;
+        left:50% !important;
+        top:50% !important;
+        width:31px !important;
+        height:31px !important;
+        transform:translate(-50%, -57%) !important;
+        display:grid !important;
+        place-items:center !important;
+        border:3px solid currentColor !important;
+        border-radius:50% !important;
+        box-sizing:border-box !important;
+        color:currentColor !important;
+        background:radial-gradient(circle at 38% 30%, rgba(255,255,255,.18), rgba(255,255,255,.03) 58%, rgba(0,0,0,.12)) !important;
+        font-family:Inter,Arial,sans-serif !important;
+        font-size:17px !important;
+        font-weight:900 !important;
+        line-height:1 !important;
+        text-shadow:0 0 8px rgba(255,255,255,.22) !important;
+        box-shadow:0 0 12px rgba(82,169,255,.18) !important;
+        z-index:1 !important;
+        pointer-events:none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  injectPremiumCoinIcon();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", injectPremiumCoinIcon, { once: true });
+  }
+
   const STORAGE_KEY = "sg_profile_return_section";
   const validSections = new Set(["home", "accessories", "phones", "coins"]);
 
