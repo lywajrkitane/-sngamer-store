@@ -2,8 +2,6 @@
 (function(){
   'use strict';
 
-  const WA='https://wa.me/221786127985';
-
   function injectStyles(){
     if(document.getElementById('sngamerRefundPolicyStyles')) return;
     const style=document.createElement('style');
@@ -15,7 +13,6 @@
       .sgaRefundPolicy h4{margin:0 0 5px;font-size:13px;color:#fff}
       .sgaRefundPolicy p{margin:0;color:#aebbd0;font-size:11px;line-height:1.6}
       .sgaRefundPolicy b{color:#fff}
-      .sgaRefundPolicyBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;border:1px solid rgba(70,154,255,.35);border-radius:10px;padding:10px 13px;background:#132238;color:#fff;font-weight:900;font-size:11px;text-decoration:none}
       .sgaClientCancelDisabled{display:none!important}
     `;
     document.head.appendChild(style);
@@ -27,9 +24,8 @@
         <div class="sgaRefundPolicyIcon">🔒</div>
         <div>
           <h4>Annulation & remboursement</h4>
-          <p>Si tu souhaites annuler une commande ou demander un remboursement, <b>contacte d’abord SNGAMER STORE</b>. Si la commande n’est pas encore livrée, notre équipe vérifiera la situation et pourra traiter le remboursement depuis le dashboard via PayTech.</p>
-          <p style="margin-top:7px"><b>Une commande déjà livrée ne peut pas faire l’objet d’une demande de remboursement depuis cet espace.</b></p>
-          <a class="sgaRefundPolicyBtn" href="${WA}" target="_blank" rel="noopener noreferrer">💬 Contacter SNGAMER sur WhatsApp</a>
+          <p>Pour toute demande d’annulation ou de remboursement, <b>veuillez contacter SNGAMER STORE avant la livraison de votre commande</b>. Chaque demande est examinée en fonction de l’état de la commande et de notre politique commerciale.</p>
+          <p style="margin-top:7px"><b>Une commande déjà livrée ne peut pas être annulée ni faire l’objet d’un remboursement.</b></p>
         </div>
       </div>
     </div>`;
@@ -55,7 +51,7 @@
     if(typeof window.sngCancelOrder!=='function') return;
     if(window.sngCancelOrder.__sngamerPolicyGuard) return;
     const guarded=function(){
-      alert('Pour une annulation ou une demande de remboursement, contacte d’abord SNGAMER STORE. Si la commande n’est pas encore livrée, notre équipe vérifiera ta demande et pourra traiter le remboursement via PayTech depuis le dashboard.');
+      alert('Pour toute demande d’annulation ou de remboursement, veuillez contacter SNGAMER STORE avant la livraison de votre commande. Une commande déjà livrée ne peut pas être annulée ni faire l’objet d’un remboursement.');
     };
     guarded.__sngamerPolicyGuard=true;
     window.sngCancelOrder=guarded;
