@@ -97,24 +97,38 @@ function installPushRoutes() {
 function notificationContent(order) {
   const status = String(order?.status || 'Nouvelle');
   const items = Array.isArray(order?.items) ? order.items : [];
-  const singleName = items.length === 1 ? String(items[0]?.name || '').trim() : '';
+  const names = items.map(item => String(item?.name || '').trim()).filter(Boolean);
+  const singleName = names.length === 1 ? names[0] : '';
+  const itemSummary = names.length > 1 ? `${names.length} articles` : '';
 
   if (status === 'Confirmée') {
-    return { title: 'SNGAMER STORE', body: singleName ? `Votre commande ${singleName} a été confirmée.` : 'Votre commande a été confirmée.' };
+    return {
+      title: 'SNGAMER STORE',
+      body: singleName ? `${singleName} — votre commande a été confirmée.` : itemSummary ? `Votre sélection de ${itemSummary} a été confirmée.` : 'Votre commande a été confirmée.'
+    };
   }
   if (status === 'En préparation') {
-    return { title: 'SNGAMER STORE', body: singleName ? `Votre commande ${singleName} est en préparation.` : 'Votre commande est en préparation.' };
+    return {
+      title: 'SNGAMER STORE',
+      body: singleName ? `${singleName} — votre commande est en préparation.` : itemSummary ? `Votre sélection de ${itemSummary} est en préparation.` : 'Votre commande est en préparation.'
+    };
   }
   if (status === 'Expédiée') {
-    return { title: 'SNGAMER STORE', body: singleName ? `Votre commande ${singleName} a été expédiée.` : 'Votre commande vient d’être expédiée.' };
+    return {
+      title: 'SNGAMER STORE',
+      body: singleName ? `${singleName} — votre commande vient d’être expédiée.` : itemSummary ? `Votre sélection de ${itemSummary} vient d’être expédiée.` : 'Votre commande vient d’être expédiée.'
+    };
   }
   if (status === 'Livrée') {
-    return { title: 'SNGAMER STORE', body: 'Votre commande a été livrée. Merci d’avoir choisi SNGAMER STORE ! ❤️' };
+    return { title: 'SNGAMER STORE', body: 'Votre livraison est terminée. Merci pour votre confiance !' };
   }
   if (status === 'Annulée') {
     return { title: 'SNGAMER STORE', body: 'Votre commande a été annulée.' };
   }
-  return { title: 'SNGAMER STORE', body: singleName ? `Votre commande ${singleName} a été mise à jour.` : 'Le statut de votre commande a été mis à jour.' };
+  return {
+    title: 'SNGAMER STORE',
+    body: singleName ? `${singleName} — le statut de votre commande a été mis à jour.` : itemSummary ? `Votre sélection de ${itemSummary} a été mise à jour.` : 'Le statut de votre commande a été mis à jour.'
+  };
 }
 
 async function notifyOrderStatusChange(order) {
@@ -130,6 +144,10 @@ async function notifyOrderStatusChange(order) {
         title: content.title,
         body: content.body,
         url: '/?profile=1',
+        orderId: order.id,
+        status: String(order.status || ''),
+        icon: '/sngamer-notification-icon.svg',
+        badge: '/sngamer-notification-icon.svg',
         tag: `sngamer-order-status-${order.id}`
       }));
       await pool.query('UPDATE customer_push_subscriptions SET last_success_at=NOW(), updated_at=NOW() WHERE id=$1', [row.id]);
