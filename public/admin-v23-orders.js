@@ -6,10 +6,18 @@
   let allOrders = [];
   let activeFilter = 'Toutes';
 
-  const esc = v => String(v ?? '-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  const esc = v => String(v ?? '-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');
   const moneySafe = v => typeof window.money === 'function' ? window.money(v) : `${Number(v||0).toLocaleString('fr-FR')} FCFA`;
 
   function orderStatus(o){ return String(o.status || 'Nouvelle').trim(); }
+  function paymentStatus(o){
+    const explicit = String(o.payment_status || '').trim();
+    if (explicit) return explicit;
+    // PayTech confirms the order with status='Payée'. Older admin API responses
+    // may not yet expose payment_status, so keep the dashboard truthful here.
+    if (orderStatus(o).toLowerCase() === 'payée') return 'Payé';
+    return 'En attente';
+  }
   function bucket(status){
     const s=status.toLowerCase();
     if(s.includes('livr')) return 'Livrées';
@@ -37,7 +45,7 @@
         </div>
         <label class="v23-order-search">🔎 <input id="v23OrderSearch" type="search" placeholder="Rechercher par N° de commande, client ou téléphone…"></label>`;
       section.insertBefore(tools, section.querySelector('.table-wrap'));
-      tools.querySelector('#v23OrderRefresh').addEventListener('click', ()=>originalLoadOrders?.());
+      tools.querySelector('#v23OrderRefresh').addEventListener('click',()=>load());
       tools.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{activeFilter=b.dataset.filter;tools.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));render();}));
       tools.querySelector('#v23OrderSearch').addEventListener('input',render);
     }
@@ -59,14 +67,15 @@
       const items=Array.isArray(o.items)?o.items:[];
       const productSummary=items.length===0?'Aucun produit':items.map(i=>`${esc(i.name)} × ${esc(i.quantity)}`).join('<br>');
       const safeStatus=esc(orderStatus(o));
+      const safePayment=esc(paymentStatus(o));
       return `<tr class="v23-order-row" data-order-id="${esc(o.id)}">
         <td class="v23-order-main" colspan="7">
           <div class="v23-order-card">
             <div class="v23-order-identity">
               <span class="v23-order-id">#${esc(o.id)}</span>
-              <div><strong>${esc(c.name || 'Client')}</strong><small>${esc(new Date(o.created_at).toLocaleString('fr-FR'))}</small></div>
+              <div><strong>${esc(c.name || 'Client')}</strong><small>${esc(c.phone || '')}</small></div>
             </div>
-            <div class="v23-order-meta"><span>${moneySafe(o.total)}</span><em>${safeStatus}</em></div>
+            <div class="v23-order-meta"><span>${moneySafe(o.total)}</span><em>${safeStatus} · ${safePayment}</em></div>
             <div class="v23-order-actions">
               <button type="button" class="v23-product-btn" data-products="${esc(o.id)}">📦 Voir les produits</button>
               <button type="button" class="v23-detail-btn" data-details="${esc(o.id)}">👁️ Voir les détails</button>
@@ -99,15 +108,22 @@
   }
 
   async function load(){
-    if(typeof originalLoadOrders!=='function')return;
-    const response=await fetch('/api/admin/orders');
-    if(response.status===401){location.reload();return;}
-    allOrders=await response.json();
-    render();
+    try{
+      const response=await fetch('/api/admin/orders',{credentials:'same-origin',cache:'no-store'});
+      if(response.status===401){location.reload();return;}
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data=await response.json();
+      if(!Array.isArray(data)) throw new Error('Réponse commandes invalide');
+      allOrders=data;
+      render();
+    }catch(error){
+      console.error('ADMIN_ORDERS_V23_LOAD_ERROR:',error);
+      ensureWorkspace();
+    }
   }
 
-  // The original dashboard function remains available for compatibility; this enhancement
-  // owns the visible order list and re-fetches the same authenticated API.
+  // Own the initial load instead of waiting for the legacy dashboard loader.
+  // This fixes the empty Commands screen until the user presses Actualiser.
   window.loadOrders=load;
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{ensureWorkspace();setTimeout(load,50)});
   else {ensureWorkspace();setTimeout(load,50);}
