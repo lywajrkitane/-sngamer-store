@@ -198,7 +198,7 @@ express.application.listen = function patchedListen(...args) {
           html = html.replace("</body>", '<script src="/admin-v24-workspace.js?v=20261018-1048"></script></body>');
         }
         if (!html.includes("/admin-data-fix.js")) {
-          html = html.replace("</body>", '<script src="/admin-data-fix.js?v=20261018-1146-1146-1146-1100"></script></body>');
+          html = html.replace("</body>", '<script src="/admin-data-fix.js?v=20261018-1146-1146-1146-1146-1100"></script></body>');
         }
 
         res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
