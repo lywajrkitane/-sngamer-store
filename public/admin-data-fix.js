@@ -1,13 +1,11 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V4
+/* SNGAMER STORE — ADMIN DATA REFRESH V5
    Automatic refresh owner for the authenticated admin workspace.
-   The inline admin page used to create its own timer first; that caused this
-   script to exit before it could take over. V4 explicitly replaces that timer
-   and waits for the authenticated admin box to become visible.
+   Also loads the dedicated refund UI so refund state stays separate from payment state.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV4';
+  const STATE = '__sngamerAdminAutoRefreshV5';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -38,6 +36,17 @@
     await loader();
   }
 
+  function loadRefundUiV2() {
+    if (window.__sngAdminRefundUiV2 || document.querySelector('script[data-sng-refund-ui-v2]')) return;
+    const script = document.createElement('script');
+    script.src = '/admin-refund-ui-v2.js?v=20261018-1335';
+    script.async = false;
+    script.dataset.sngRefundUiV2 = '1';
+    script.onload = () => console.debug('SNGAMER: refund UI V2 loaded');
+    script.onerror = () => console.error('SNGAMER: unable to load refund UI V2');
+    document.head.appendChild(script);
+  }
+
   async function refreshNow(reason) {
     if (!isAdminVisible() || refreshInFlight) return;
 
@@ -46,7 +55,6 @@
 
     try {
       // This is the exact same data path used by the manual Actualiser button.
-      // It refreshes products, orders, counters and revenue from the server.
       await runLoader('loadAll');
 
       // The Orders workspace must also redraw its list explicitly.
@@ -135,11 +143,10 @@
       return;
     }
 
-    // The old inline timer is the reason V3 never took control. Replace it
-    // instead of allowing two independent refresh systems to compete.
     stopOldCoreTimer();
     installObserver();
     bootPaymentSelectorGuard();
+    loadRefundUiV2();
 
     if (!isAdminVisible()) {
       window.setTimeout(boot, 250);
@@ -156,12 +163,19 @@
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
+      loadRefundUiV2();
       refreshNow('visibility');
     }
   });
 
-  window.addEventListener('pageshow', () => refreshNow('pageshow'));
-  window.addEventListener('focus', () => refreshNow('focus'));
+  window.addEventListener('pageshow', () => {
+    loadRefundUiV2();
+    refreshNow('pageshow');
+  });
+  window.addEventListener('focus', () => {
+    loadRefundUiV2();
+    refreshNow('focus');
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true });
