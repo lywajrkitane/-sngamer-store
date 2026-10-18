@@ -1,0 +1,61 @@
+/* SNGAMER STORE — correction Pièces eFootball */
+@media (max-width:700px){
+  /* The real SVG is the premium three-stack coin mark. Remove the old pseudo coin
+     that was sitting underneath it and making the icon look duplicated. */
+  .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::before,
+  .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::after{
+    content:none !important;
+    display:none !important;
+    animation:none !important;
+    box-shadow:none !important;
+    filter:none !important;
+  }
+
+  .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg{
+    display:block !important;
+    width:25px !important;
+    height:25px !important;
+    position:relative !important;
+    z-index:2 !important;
+    color:currentColor !important;
+    filter:drop-shadow(0 0 4px rgba(255,255,255,.16));
+  }
+
+  .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg *{
+    stroke:currentColor !important;
+  }
+
+  .mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg text{
+    fill:currentColor !important;
+    stroke:none !important;
+  }
+
+  /* Keep the active floating animation, but put the light on the real icon box
+     instead of creating a second floating coin underneath it. */
+  .mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon{
+    animation:sngCoinActiveGlow 2.2s ease-in-out infinite !important;
+    will-change:box-shadow,border-color,filter;
+  }
+
+  .mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon{
+    box-shadow:none !important;
+    filter:none !important;
+  }
+
+  @keyframes sngCoinActiveGlow{
+    0%,100%{
+      border-color:rgba(90,184,255,.82) !important;
+      box-shadow:0 0 9px rgba(22,135,255,.42),0 0 20px rgba(22,135,255,.22),inset 0 0 12px rgba(90,184,255,.10) !important;
+    }
+    50%{
+      border-color:rgba(123,210,255,1) !important;
+      box-shadow:0 0 14px rgba(22,135,255,.68),0 0 34px rgba(22,135,255,.34),0 0 52px rgba(124,58,237,.16),inset 0 0 16px rgba(90,184,255,.16) !important;
+    }
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon{
+    animation:none !important;
+  }
+}
