@@ -15,6 +15,88 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Repair payment and refund state model
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('server/customer-system.js')
+          s = p.read_text(encoding='utf-8')
+
+          replacements = {
+            'const PAYMENT_STATUSES = ["En attente", "Payé", "Remboursement demandé", "Remboursé", "Échoué"];':
+              'const PAYMENT_STATUSES = ["En attente", "Payé", "Échoué", "Échec"];',
+            'const REFUND_PHONE = "+221 78 612 79 85";':
+              'const REFUND_STATUSES = ["Aucun", "Demandé", "Remboursé", "Échec"];\nconst REFUND_PHONE = "+221 78 612 79 85";',
+            '      ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT \'En attente\',\n      ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,':
+              '      ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT \'En attente\',\n      ADD COLUMN IF NOT EXISTS refund_status TEXT NOT NULL DEFAULT \'Aucun\',\n      ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,',
+            '  `);\n\n  await customerPool.query(`\n    CREATE INDEX IF NOT EXISTS idx_orders_customer_id':
+              '  `);\n\n  await customerPool.query(`\n    UPDATE orders\n       SET refund_status = CASE\n             WHEN payment_status = \'Remboursement demandé\' THEN \'Demandé\'\n             WHEN payment_status = \'Remboursé\' THEN \'Remboursé\'\n             ELSE COALESCE(refund_status, \'Aucun\')\n           END,\n           payment_status = CASE\n             WHEN payment_status IN (\'Remboursement demandé\', \'Remboursé\') THEN \'Payé\'\n             WHEN payment_status = \'Échoué\' THEN \'Échec\'\n             ELSE payment_status\n           END\n     WHERE payment_status IN (\'Remboursement demandé\', \'Remboursé\', \'Échoué\');\n  `);\n\n  await customerPool.query(`\n    CREATE INDEX IF NOT EXISTS idx_orders_customer_id',
+            'return `id,created_at,status,customer,payment,payment_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at`;':
+              'return `id,created_at,status,customer,payment,payment_status,refund_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at`;',
+            'UPDATE orders SET payment_status=\'Remboursement demandé\', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1 RETURNING ${orderSelect()}':
+              'UPDATE orders SET refund_status=\'Demandé\', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1 RETURNING ${orderSelect()}',
+            'COALESCE(SUM(CASE WHEN payment_status=\'Payé\' THEN total ELSE 0 END),0)::int AS paid_revenue, COALESCE(SUM(CASE WHEN payment_status=\'Remboursé\' THEN total ELSE 0 END),0)::int AS refunded_total, COUNT(*) FILTER (WHERE payment_status=\'En attente\')::int AS pending_payments, COUNT(*) FILTER (WHERE payment_status=\'Payé\')::int AS paid_orders, COUNT(*) FILTER (WHERE payment_status=\'Remboursement demandé\')::int AS refund_requests':
+              'COALESCE(SUM(CASE WHEN payment_status=\'Payé\' AND COALESCE(refund_status,\'Aucun\') <> \'Remboursé\' THEN total ELSE 0 END),0)::int AS paid_revenue, COALESCE(SUM(CASE WHEN refund_status=\'Remboursé\' THEN total ELSE 0 END),0)::int AS refunded_total, COUNT(*) FILTER (WHERE payment_status=\'En attente\')::int AS pending_payments, COUNT(*) FILTER (WHERE payment_status=\'Payé\' AND COALESCE(refund_status,\'Aucun\') <> \'Remboursé\')::int AS paid_orders, COUNT(*) FILTER (WHERE refund_status=\'Demandé\')::int AS refund_requests'
+          }
+
+          changed = []
+          for old, new in replacements.items():
+              if old in s:
+                  s = s.replace(old, new)
+                  changed.append(old[:70])
+
+          p.write_text(s, encoding='utf-8')
+          print('customer-system.js repaired:', len(changed), 'replacements')
+
+          # The old mobile order editor could still expose refund states inside
+          # the payment <select>. Keep the UI backward-compatible while the
+          # server now owns refund_status separately.
+          p = Path('public/admin-data-fix.js')
+          s = p.read_text(encoding='utf-8')
+          marker = '/* SNGAMER PAYMENT/REFUND STATE UI FIX V1 */'
+          if marker not in s:
+              patch = r'''
+
+  /* SNGAMER PAYMENT/REFUND STATE UI FIX V1 */
+  function sanitizePaymentSelects(root = document) {
+    const selects = root.querySelectorAll ? root.querySelectorAll('select') : [];
+    selects.forEach(select => {
+      const texts = Array.from(select.options || []).map(o => String(o.textContent || '').trim().toLowerCase());
+      const looksLikePayment = texts.includes('payé') || texts.includes('paye') || texts.includes('en attente');
+      const hasRefundOptions = texts.some(t => t === 'remboursé' || t === 'remboursement demandé');
+      if (!looksLikePayment || !hasRefundOptions) return;
+
+      const oldValue = String(select.value || '').trim().toLowerCase();
+      Array.from(select.options).forEach(option => {
+        const text = String(option.textContent || '').trim().toLowerCase();
+        if (text === 'remboursé' || text === 'remboursement demandé') option.remove();
+      });
+
+      if (oldValue === 'remboursé' || oldValue === 'remboursement demandé') {
+        const paid = Array.from(select.options).find(o => ['payé', 'paye'].includes(String(o.textContent || '').trim().toLowerCase()));
+        if (paid) select.value = paid.value;
+      }
+    });
+  }
+
+  function bootPaymentStateUiFix() {
+    sanitizePaymentSelects(document);
+    const observer = new MutationObserver(() => sanitizePaymentSelects(document));
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.setInterval(() => sanitizePaymentSelects(document), 2000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootPaymentStateUiFix, { once: true });
+  } else {
+    bootPaymentStateUiFix();
+  }
+'''
+              s = s.rsplit('\n})();', 1)[0] + patch + '\n})();\n'
+              p.write_text(s, encoding='utf-8')
+              print('admin-data-fix.js: payment/refund UI guard installed')
+
       - name: Validate Node.js syntax
         shell: bash
         run: |
@@ -54,7 +136,7 @@ jobs:
           from pathlib import Path
           import re
 
-          version = '20261018-1200'
+          version = '20261018-1210'
           workspace_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
           fix_tag = f'<script src="/admin-data-fix.js?v={version}"></script>'
 
@@ -98,6 +180,6 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/admin.html public/admin-dashboard.html server/bootstrap.js server/admin-data-fix-preload.js
-          git commit -m 'fix(admin): bust cached auto-refresh script version'
+          git add public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js
+          git commit -m 'fix(admin): separate payment and refund states'
           git push
