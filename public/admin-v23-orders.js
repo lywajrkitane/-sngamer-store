@@ -2,7 +2,7 @@
    Keeps the existing API/status logic and replaces the verbose order cards with a compact workspace. */
 (function(){
   'use strict';
-  const originalLoadOrders = window.loadOrders;
+  let loadInFlight = null;
   let allOrders = [];
   let activeFilter = 'Toutes';
 
@@ -107,18 +107,69 @@
     modal.classList.add('show');
   }
 
-  async function load(){
-    try{
-      const response=await fetch('/api/admin/orders',{credentials:'same-origin',cache:'no-store'});
-      if(response.status===401){return;}
-      if(!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data=await response.json();
-      if(!Array.isArray(data)) throw new Error('Réponse commandes invalide');
-      allOrders=data;
-      render();
-    }catch(error){
-      console.error('ADMIN_ORDERS_V23_LOAD_ERROR:',error);
+  function updateDashboardStats(orders) {
+    const setText = (id, value) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    };
+    const statusOf = o => String(o.status || '').trim().toLowerCase();
+    const count = predicate => orders.filter(predicate).length;
+
+    setText('orderCount', orders.length);
+    setText('newOrderCount', count(o => ['nouvelle','nouveau'].includes(statusOf(o))));
+    setText('confirmedOrderCount', count(o => statusOf(o).includes('confirm')));
+    setText('preparedOrderCount', count(o => statusOf(o).includes('préparation') || statusOf(o).includes('preparation')));
+    setText('shippedOrderCount', count(o => statusOf(o).includes('expédi') || statusOf(o).includes('expedi')));
+    setText('deliveredOrderCount', count(o => statusOf(o).includes('livr')));
+    setText('cancelledOrderCount', count(o => statusOf(o).includes('annul')));
+
+    // Preserve the store's existing dashboard definition: all non-cancelled orders.
+    const revenue = orders
+      .filter(o => statusOf(o) !== 'annulée' && statusOf(o) !== 'annulee')
+      .reduce((sum, o) => sum + Number(o.total || 0), 0);
+    setText('revenue', moneySafe(revenue));
+  }
+
+  async function load() {
+    if (loadInFlight) return loadInFlight;
+
+    loadInFlight = (async () => {
       ensureWorkspace();
+      let response = null;
+      // Retry a transient authentication race instead of treating a 401 as
+      // a successful empty load. Credentials and no-store are explicit.
+      const waits = [0, 300, 600, 1000, 1600];
+      for (const wait of waits) {
+        if (wait) await new Promise(resolve => setTimeout(resolve, wait));
+        response = await fetch('/api/admin/orders', {
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        if (response.status !== 401) break;
+      }
+
+      if (!response || response.status === 401) {
+        throw new Error('Session administrateur pas encore prête (401).');
+      }
+      if (!response.ok) throw new Error(`HTTP ${response.status} lors du chargement des commandes.`);
+
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error('Réponse commandes invalide.');
+
+      allOrders = data;
+      updateDashboardStats(allOrders);
+      render();
+      return allOrders;
+    })();
+
+    try {
+      return await loadInFlight;
+    } catch (error) {
+      console.error('ADMIN_ORDERS_V23_LOAD_ERROR:', error);
+      ensureWorkspace();
+      return null;
+    } finally {
+      loadInFlight = null;
     }
   }
 
@@ -130,14 +181,13 @@
     ensureWorkspace();
     const box=document.getElementById('adminBox');
     let wasVisible=!!box && !box.classList.contains('hidden');
-    if(wasVisible) setTimeout(load,150);
+    if(wasVisible) [0,500,1200].forEach(delay=>setTimeout(load,delay));
     if(box){
       const observer=new MutationObserver(()=>{
         const visible=!box.classList.contains('hidden');
         if(visible && !wasVisible){
           wasVisible=true;
-          setTimeout(load,100);
-          setTimeout(load,800);
+          [100,800,1600].forEach(delay=>setTimeout(load,delay));
         }else if(!visible){
           wasVisible=false;
         }
