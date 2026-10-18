@@ -157,7 +157,7 @@ const guestOrderPool = new Pool({ connectionString: process.env.DATABASE_URL, ss
 const originalListen = express.application.listen;
 express.application.listen = function patchedListen(...args) {
   const app = this;
-  const router = installCustomerSystem();
+  const customerRouter = installCustomerSystem();
   const stack = app._router && app._router.stack;
 
   if (stack) {
@@ -211,31 +211,30 @@ express.application.listen = function patchedListen(...args) {
       }
     };
 
+    // Register exact admin routes before static files and the catch-all.
     const injectionRouter = express.Router();
     injectionRouter.use(adminInjection);
 
-    let staticIndex = stack.length;
-    for (let i = 0; i < stack.length; i++) {
-      const layer = stack[i];
-      if (layer && layer.handle && layer.handle.name === "serveStatic") {
-        staticIndex = i;
-        break;
-      }
+    const staticIndex = stack.findIndex(layer => layer && layer.handle && layer.handle.name === "serveStatic");
+    if (staticIndex >= 0) {
+      stack.splice(staticIndex, 0, ...(injectionRouter.stack || []));
+    } else {
+      stack.push(...(injectionRouter.stack || []));
     }
-    stack.splice(staticIndex, 0, ...(injectionRouter.stack || []));
 
-    let catchAllIndex = stack.length;
-    for (let i = 0; i < stack.length; i++) {
-      const layer = stack[i];
-      if (layer && layer.regexp && String(layer.regexp).includes("fast_star")) {
-        catchAllIndex = i;
-        break;
-      }
+    // Append customer routes after the static middleware but before the catch-all.
+    // These are exact API paths; find the catch-all using the route path rather than
+    // Express' version-dependent RegExp.toString() representation.
+    const catchAllIndex = stack.findIndex(layer =>
+      layer && layer.route && layer.route.path === "*" && layer.route.methods && layer.route.methods.get
+    );
+    if (catchAllIndex >= 0) {
+      stack.splice(catchAllIndex, 0, ...(customerRouter.stack || []));
+    } else {
+      stack.push(...(customerRouter.stack || []));
     }
-    stack.splice(catchAllIndex, 0, ...(router.stack || []));
   }
 
-  // Install PayTech once per application, before the listener opens.
   Promise.all([ensureOrderCustomerColumns(), installPaytech(app)])
     .then(() => originalListen.apply(app, args))
     .catch(error => {
