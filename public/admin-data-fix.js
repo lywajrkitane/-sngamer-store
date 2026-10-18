@@ -95,6 +95,39 @@
     });
   }
 
+  // Refund is a separate state from payment. Some older admin markup exposed
+  // both inside the same payment selector. Remove only those two refund
+  // options; keep the real payment failure option "Échoué".
+  function sanitizePaymentSelectors(root = document) {
+    const selects = root.querySelectorAll ? root.querySelectorAll('select') : [];
+    selects.forEach(select => {
+      const options = Array.from(select.options || []);
+      const texts = options.map(o => String(o.textContent || '').trim().toLowerCase());
+      const looksLikePayment = texts.includes('payé') || texts.includes('paye') || texts.includes('en attente');
+      const hasRefundOptions = texts.some(t => t === 'remboursé' || t === 'remboursement demandé');
+      if (!looksLikePayment || !hasRefundOptions) return;
+
+      const oldValue = String(select.value || '').trim().toLowerCase();
+      options.forEach(option => {
+        const text = String(option.textContent || '').trim().toLowerCase();
+        if (text === 'remboursé' || text === 'remboursement demandé') option.remove();
+      });
+
+      if (oldValue === 'remboursé' || oldValue === 'remboursement demandé') {
+        const paid = Array.from(select.options).find(o => ['payé', 'paye'].includes(String(o.textContent || '').trim().toLowerCase()));
+        if (paid) select.value = paid.value;
+      }
+    });
+  }
+
+  function bootPaymentSelectorGuard() {
+    sanitizePaymentSelectors(document);
+    if (!document.body) return;
+    const guard = new MutationObserver(() => sanitizePaymentSelectors(document));
+    guard.observe(document.body, { childList: true, subtree: true });
+    window.setInterval(() => sanitizePaymentSelectors(document), 2000);
+  }
+
   function boot() {
     const box = adminBox();
     if (!box) {
@@ -106,6 +139,7 @@
     // instead of allowing two independent refresh systems to compete.
     stopOldCoreTimer();
     installObserver();
+    bootPaymentSelectorGuard();
 
     if (!isAdminVisible()) {
       window.setTimeout(boot, 250);
