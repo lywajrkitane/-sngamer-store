@@ -19,7 +19,6 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import re
 
           # 1) Admin API must expose the real PayTech payment state.
           p = Path('server/server.js')
@@ -30,130 +29,47 @@ jobs:
               s = s.replace(old, new, 1)
           p.write_text(s, encoding='utf-8')
 
-          # 2) Runtime fix for the actual v24 admin workspace. The previous v23
-          # loader was not the final controller used by bootstrap, so install a
-          # small independent loader after the v24 workspace instead of replacing it.
-          live = Path('public/admin-live-orders-fix.js')
-          live.write_text(r'''/* SNGAMER STORE — live admin orders/payment fix */
-(function () {
-  'use strict';
-
-  let wrapped = null;
-  let lastVisible = false;
-
-  async function reloadOrders() {
-    try {
-      if (typeof window.loadOrders === 'function') {
-        await window.loadOrders();
-        return;
-      }
-      if (typeof window.loadAll === 'function') {
-        await window.loadAll();
-      }
-    } catch (error) {
-      console.error('ADMIN_LIVE_ORDERS_LOAD_ERROR:', error);
-    }
-  }
-
-  function wrapLoader() {
-    const fn = window.loadOrders;
-    if (typeof fn !== 'function' || fn === wrapped) return;
-    const original = fn;
-    const wrappedFn = async function () {
-      const result = await original.apply(this, arguments);
-      return result;
-    };
-    wrapped = wrappedFn;
-    window.loadOrders = wrappedFn;
-  }
-
-  function isAdminVisible() {
-    const box = document.getElementById('adminBox');
-    return !!box && !box.classList.contains('hidden');
-  }
-
-  function patchLegacyPaymentCells() {
-    document.querySelectorAll('#ordersTable tr').forEach(row => {
-      const cells = row.querySelectorAll('td');
-      if (cells.length < 6) return;
-      const idText = (cells[0].textContent || '').trim().replace('#', '');
-      if (!/^\d+$/.test(idText)) return;
-      const rowData = window.__sngamerAdminOrders?.find(o => String(o.id) === idText);
-      if (!rowData) return;
-      const payment = String(rowData.payment_status || (String(rowData.status).toLowerCase() === 'payée' ? 'Payé' : 'En attente'));
-      const method = String(rowData.payment || '-');
-      cells[5].innerHTML = method + '<br><small style="color:#8f9db3;font-weight:700;">' + payment + '</small>';
-    });
-  }
-
-  async function fetchAndRememberOrders() {
-    try {
-      const response = await fetch('/api/admin/orders', { credentials: 'same-origin', cache: 'no-store' });
-      if (!response.ok) return;
-      const data = await response.json();
-      if (Array.isArray(data)) window.__sngamerAdminOrders = data;
-      patchLegacyPaymentCells();
-    } catch (error) {
-      console.error('ADMIN_LIVE_ORDERS_API_ERROR:', error);
-    }
-  }
-
-  function start() {
-    wrapLoader();
-
-    const observer = new MutationObserver(() => {
-      const visible = isAdminVisible();
-      if (visible && !lastVisible) {
-        lastVisible = true;
-        setTimeout(reloadOrders, 150);
-        setTimeout(reloadOrders, 700);
-        setTimeout(fetchAndRememberOrders, 1300);
-      } else if (!visible) {
-        lastVisible = false;
-      }
-    });
-
-    const box = document.getElementById('adminBox');
-    if (box) observer.observe(box, { attributes: true, attributeFilter: ['class'] });
-
-    setTimeout(() => {
-      if (isAdminVisible()) {
-        reloadOrders();
-        fetchAndRememberOrders();
-      }
-    }, 250);
-
-    setInterval(() => {
-      wrapLoader();
-      if (isAdminVisible()) fetchAndRememberOrders();
-    }, 15000);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
-})();
-''', encoding='utf-8')
-
-          # 3) Bootstrap is the real source of the final admin HTML. Inject the
-          # live fix after the existing v24 workspace without disturbing it.
-          p = Path('server/bootstrap.js')
+          # 2) PayTech must update ONLY the payment state. The order workflow
+          # state remains "Nouvelle" until the admin changes it.
+          p = Path('server/paytech.js')
           s = p.read_text(encoding='utf-8')
-          tag = '<script src="/admin-live-orders-fix.js?v=20261018-1"></script>'
-          if tag not in s:
-              marker = 'res.type("html").send(html)'
-              if marker not in s:
-                  raise SystemExit('bootstrap injection marker not found')
-              s = s.replace(marker, f'html=html.replace(/<\\/body>/i,\'{tag}</body>\');{marker}', 1)
-              p.write_text(s, encoding='utf-8')
+          old = "UPDATE orders SET status='Payée',payment_status='Payé',payment_method=$1,paid_at=NOW(),paytech_token=COALESCE($2,paytech_token) WHERE id=$3"
+          new = "UPDATE orders SET payment_status='Payé',payment_method=$1,paid_at=NOW(),paytech_token=COALESCE($2,paytech_token) WHERE id=$3"
+          if old not in s:
+              raise SystemExit('PayTech paid-status target not found')
+          s = s.replace(old, new, 1)
 
-          print('Admin/PayTech runtime fixes prepared.')
+          # Normalize old records created by the previous bug: a paid order
+          # must no longer use "Payée" as its order workflow status.
+          marker = "  await pool.query(`\n    DO $$"
+          migration = "  await pool.query(`UPDATE orders SET status='Nouvelle' WHERE status='Payée' AND payment_status='Payé'`);\n\n"
+          if migration not in s:
+              if marker not in s:
+                  raise SystemExit('PayTech migration marker not found')
+              s = s.replace(marker, migration + marker, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # 3) Replace the fragile v23 initial loader. The old version ran
+          # before the admin session existed, received 401, and then stopped;
+          # therefore orders only appeared after clicking Actualiser.
+          p = Path('public/admin-v23-orders.js')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace("if(response.status===401){location.reload();return;}", "if(response.status===401){return;}", 1)
+          old_tail = '''  window.loadOrders=load;\n  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{ensureWorkspace();setTimeout(load,50)});\n  else {ensureWorkspace();setTimeout(load,50);}\n})();'''
+          new_tail = '''  window.loadOrders=load;\n\n  function startAutoLoad(){\n    ensureWorkspace();\n    const box=document.getElementById('adminBox');\n    let wasVisible=!!box && !box.classList.contains('hidden');\n    if(wasVisible) setTimeout(load,150);\n    if(box){\n      const observer=new MutationObserver(()=>{\n        const visible=!box.classList.contains('hidden');\n        if(visible && !wasVisible){\n          wasVisible=true;\n          setTimeout(load,100);\n          setTimeout(load,800);\n        }else if(!visible){\n          wasVisible=false;\n        }\n      });\n      observer.observe(box,{attributes:true,attributeFilter:['class']});\n    }\n    setInterval(()=>{\n      if(box && !box.classList.contains('hidden')) load();\n    },30000);\n  }\n\n  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startAutoLoad,{once:true});\n  else startAutoLoad();\n})();'''
+          if old_tail not in s:
+              raise SystemExit('v23 loader tail not found')
+          s = s.replace(old_tail, new_tail, 1)
+          p.write_text(s, encoding='utf-8')
+
+          print('PayTech/order status separation and admin auto-load fixes prepared.')
 
       - name: Commit and push
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server/server.js server/bootstrap.js public/admin-live-orders-fix.js
+          git add server/server.js server/paytech.js public/admin-v23-orders.js
           git diff --cached --quiet && exit 0
-          git commit -m "Fix live admin orders and PayTech payment status"
+          git commit -m "Fix PayTech payment status and admin auto-load"
           git push origin HEAD:main
