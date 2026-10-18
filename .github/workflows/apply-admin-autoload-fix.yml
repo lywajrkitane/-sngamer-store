@@ -1,0 +1,141 @@
+name: Apply admin orders auto-load fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-admin-autoload-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch admin dashboard auto-load
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('public/admin-dashboard.html')
+          s = p.read_text(encoding='utf-8')
+
+          marker = '</body>'
+          if 'sg-orders-autoload-fix' in s:
+              print('Auto-load fix already present.')
+          else:
+              script = r'''<script id="sg-orders-autoload-fix">
+(function () {
+  'use strict';
+
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  // The login request and the first dashboard request can race with session
+  // establishment on the browser/server boundary. Retry the orders request
+  // instead of forcing a page reload when that transient 401 happens.
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = async function (input, init) {
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    const isOrdersRequest = url.includes('/api/admin/orders');
+
+    for (let attempt = 0; attempt < (isOrdersRequest ? 5 : 1); attempt++) {
+      const response = await nativeFetch(input, init);
+      if (!isOrdersRequest || response.status !== 401) return response;
+      await sleep(350 * (attempt + 1));
+    }
+
+    return nativeFetch(input, init);
+  };
+
+  function installAutoLoad() {
+    if (typeof window.loadAll !== 'function' || window.loadAll.__sgAutoLoad) return;
+
+    const originalLoadAll = window.loadAll;
+
+    const wrappedLoadAll = async function () {
+      if (wrappedLoadAll.__running) return;
+      wrappedLoadAll.__running = true;
+      try {
+        // Confirm the admin session before the first orders request.
+        for (let attempt = 0; attempt < 5; attempt++) {
+          try {
+            const me = await nativeFetch('/api/admin/me', {
+              credentials: 'same-origin',
+              cache: 'no-store'
+            });
+            if (me.ok) {
+              const data = await me.json();
+              if (data && data.authenticated) break;
+            }
+          } catch (_) {}
+          await sleep(350 * (attempt + 1));
+        }
+
+        await originalLoadAll();
+      } catch (error) {
+        console.error('ADMIN_AUTOLOAD_ERROR:', error);
+        // One delayed retry is enough for a transient session/bootstrap race.
+        await sleep(900);
+        try { await originalLoadAll(); } catch (retryError) {
+          console.error('ADMIN_AUTOLOAD_RETRY_ERROR:', retryError);
+        }
+      } finally {
+        wrappedLoadAll.__running = false;
+      }
+    };
+
+    wrappedLoadAll.__sgAutoLoad = true;
+    window.loadAll = wrappedLoadAll;
+
+    // If the admin area is already visible (for example after checkLogin),
+    // load the orders without requiring the user to press Actualiser.
+    const adminBox = document.getElementById('adminBox');
+    if (adminBox && !adminBox.classList.contains('hidden')) {
+      setTimeout(() => window.loadAll(), 250);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installAutoLoad, { once: true });
+  } else {
+    installAutoLoad();
+  }
+
+  // Covers the login/checkLogin transition even if the dashboard becomes
+  // visible after this script initially runs.
+  const adminBox = document.getElementById('adminBox');
+  if (adminBox) {
+    let wasVisible = !adminBox.classList.contains('hidden');
+    const observer = new MutationObserver(() => {
+      const visible = !adminBox.classList.contains('hidden');
+      if (visible && !wasVisible) {
+        wasVisible = true;
+        setTimeout(() => {
+          if (typeof window.loadAll === 'function') window.loadAll();
+        }, 250);
+      } else if (!visible) {
+        wasVisible = false;
+      }
+    });
+    observer.observe(adminBox, { attributes: true, attributeFilter: ['class'] });
+  }
+})();
+</script>'''
+              if marker not in s:
+                  raise SystemExit('Closing body tag not found')
+              s = s.replace(marker, script + '\n' + marker, 1)
+              p.write_text(s, encoding='utf-8')
+              print('Admin orders auto-load fix injected.')
+
+      - name: Commit patch and remove one-shot workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/admin-dashboard.html .github/workflows/apply-admin-autoload-fix.yml
+          git rm .github/workflows/apply-admin-autoload-fix.yml
+          git commit -m "Fix automatic admin order loading"
+          git push origin HEAD:main
