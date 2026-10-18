@@ -224,7 +224,7 @@
       }
 
       /* REAL ISOLATION */
-      #adminBox.sg-v26-mode > :not(#${NAV_ID}):not(section){display:none!important}
+      #adminBox.sg-v26-mode > :not(#${NAV_ID}):not(section):not(.stats){display:none!important}
       #adminBox.sg-v26-mode > section.sg-v26-hide{display:none!important}
       #adminBox.sg-v26-mode > section.sg-v26-show{display:block!important}
       #adminBox #sngWorkspaceNav,#adminBox #sg-v25-workspace-nav{display:none!important}
