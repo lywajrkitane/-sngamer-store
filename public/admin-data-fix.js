@@ -1,7 +1,7 @@
 /* SNGAMER STORE — ADMIN DATA REFRESH
-   Polls the existing admin endpoints after login and while the dashboard is visible.
-   Deliberately does not call loadAll() to avoid overlapping requests from legacy code;
-   the established loaders remain the single source for orders, counts and revenue.
+   Uses the same refresh action that already works when the administrator
+   presses "Actualiser" manually. This keeps one source of truth for orders,
+   payment status, counters and revenue.
 */
 (function () {
   'use strict';
@@ -9,59 +9,80 @@
   const INTERVAL_MS = 15000;
   let started = false;
   let timer = null;
-  let inFlight = false;
-  let observer = null;
+  let clickInProgress = false;
 
   const $ = (selector, root = document) => root.querySelector(selector);
-  const visible = () => {
+  const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+  function adminVisible() {
     const root = $('#adminBox');
     return Boolean(root && !root.classList.contains('hidden'));
-  };
+  }
 
-  async function refreshDashboard() {
-    if (!visible() || inFlight || document.visibilityState === 'hidden') return;
-    inFlight = true;
+  function findOrdersSection() {
+    const root = $('#adminBox');
+    if (!root) return null;
+
+    return $$(':scope > section', root).find(section => {
+      const heading = (section.querySelector('h1,h2,h3,h4')?.textContent || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+      return heading.includes('commande');
+    }) || null;
+  }
+
+  function findRealOrdersRefreshButton() {
+    const section = findOrdersSection();
+    if (!section) return null;
+
+    // This is the exact button already used by the administrator manually.
+    return $$('.refresh', section).find(button => {
+      const text = (button.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      return text.includes('actualiser');
+    }) || null;
+  }
+
+  async function refreshOrders() {
+    if (!adminVisible() || document.visibilityState === 'hidden' || clickInProgress) return;
+
+    const button = findRealOrdersRefreshButton();
+    if (!button) return;
+
+    clickInProgress = true;
     try {
-      // The original loaders own the order list, all status counters and revenue.
-      // Run them independently so one failure does not block the other.
-      const tasks = [];
-      if (typeof window.loadProducts === 'function') tasks.push(
-        Promise.resolve().then(() => window.loadProducts())
-      );
-      if (typeof window.loadOrders === 'function') tasks.push(
-        Promise.resolve().then(() => window.loadOrders())
-      );
-      const results = await Promise.allSettled(tasks);
-      results.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          console.error('ADMIN_AUTO_REFRESH_FAILED:', index === 0 ? 'products' : 'orders', result.reason);
-        }
-      });
+      // Do not duplicate the order-loading logic here. The existing button
+      // already calls the established loader that updates orders, counters
+      // and revenue correctly.
+      button.click();
+    } catch (error) {
+      console.error('ADMIN_AUTO_REFRESH_FAILED:', error);
     } finally {
-      inFlight = false;
+      // Let the existing async loader finish before another automatic click.
+      window.setTimeout(() => {
+        clickInProgress = false;
+      }, 3000);
     }
   }
 
   function start() {
-    if (started || !visible()) return;
+    if (started || !adminVisible()) return;
     started = true;
-    // Do several short retries because the login callback can expose the UI
-    // before the browser has fully persisted the session cookie.
-    [0, 500, 1500, 3500].forEach(delay => window.setTimeout(refreshDashboard, delay));
-    timer = window.setInterval(refreshDashboard, INTERVAL_MS);
-    document.addEventListener('visibilitychange', refreshDashboard);
 
-    const root = $('#adminBox');
-    if (root) {
-      observer = new MutationObserver(() => {
-        if (visible()) refreshDashboard();
-      });
-      observer.observe(root, { attributes: true, attributeFilter: ['class'] });
-    }
+    // Refresh immediately after login/page entry, then retry while the
+    // workspace finishes building the Orders section.
+    [0, 500, 1500, 3500, 6500].forEach(delay => {
+      window.setTimeout(refreshOrders, delay);
+    });
+
+    timer = window.setInterval(refreshOrders, INTERVAL_MS);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') refreshOrders();
+    });
   }
 
   function waitForAdmin() {
-    if (visible()) {
+    if (adminVisible()) {
       start();
       return;
     }
