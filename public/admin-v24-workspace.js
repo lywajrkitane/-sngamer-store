@@ -225,6 +225,9 @@
 
       /* REAL ISOLATION */
       #adminBox.sg-v26-mode > :not(#${NAV_ID}):not(section):not(.stats){display:none!important}
+      #adminBox.sg-v26-mode > .stats{display:grid!important;grid-column:2;min-width:0}
+      #adminBox.sg-v26-mode[data-v26-workspace="overview"] > .stats{display:grid!important}
+      #adminBox.sg-v26-mode[data-v26-workspace]:not([data-v26-workspace="overview"]) > .stats{display:none!important}
       #adminBox.sg-v26-mode > section.sg-v26-hide{display:none!important}
       #adminBox.sg-v26-mode > section.sg-v26-show{display:block!important}
       #adminBox #sngWorkspaceNav,#adminBox #sg-v25-workspace-nav{display:none!important}
@@ -548,6 +551,39 @@
     return n;
   }
 
+  let viewLoadGeneration = 0;
+
+  function refreshViewData(view) {
+    const root = box();
+    if (!root || root.classList.contains('hidden')) return;
+    const generation = ++viewLoadGeneration;
+    const delays = view === 'orders' ? [0, 1200] : view === 'overview' ? [0, 900] : view === 'products' ? [0] : [];
+
+    delays.forEach((delay, index) => {
+      setTimeout(async () => {
+        if (generation !== viewLoadGeneration || active !== view || root.classList.contains('hidden')) return;
+        if (index > 0 && view === 'orders') {
+          const tbody = $('#ordersTable');
+          // The explicit empty-state row also counts as a completed render.
+          if (tbody && tbody.children.length > 0) return;
+        }
+        const loader = view === 'orders'
+          ? (typeof window.loadOrders === 'function' ? window.loadOrders : window.loadAll)
+          : view === 'overview'
+            ? window.loadAll
+            : view === 'products'
+              ? window.loadProducts
+              : null;
+        if (typeof loader !== 'function') return;
+        try {
+          await loader();
+        } catch (error) {
+          console.error('ADMIN_WORKSPACE_AUTOLOAD_ERROR:', view, error);
+        }
+      }, delay);
+    });
+  }
+
   function apply(view, scroll) {
     const root = box();
     if (!root) return;
@@ -570,6 +606,14 @@
     n.querySelectorAll('[data-v26-view]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.v26View === active);
     });
+
+    // Statistics are a direct child of #adminBox, not a section. Explicitly
+    // show them on Overview and hide them only in the other workspaces.
+    const stats = root.querySelector(':scope > .stats');
+    if (stats) stats.style.display = active === 'overview' ? 'grid' : 'none';
+
+    // Restoring the saved "Commandes" tab also loads orders automatically.
+    refreshViewData(active);
 
     if (scroll) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }
