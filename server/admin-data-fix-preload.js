@@ -13,15 +13,12 @@ if (!fs.__sngAdminDataFixPreload) {
     if (typeof content !== 'string') return content;
 
     const name = String(file);
-    if (!/(?:^|[\\/])public[\\/]admin(?:-dashboard)?\.html$/i.test(name)) {
-      return content;
-    }
-
+    if (!/(?:^|[\\/])public[\\/]admin(?:-dashboard)?\.html$/i.test(name)) return content;
     if (!/<\/body>/i.test(content)) return content;
 
     const tags = [
       '<script src="/admin-data-fix.js?v=20261018-1220"></script>',
-      '<script src="/admin-refund-ui.js?v=20261018-1258"></script>'
+      '<script src="/admin-refund-ui-v2.js?v=20261018-1302"></script>'
     ];
 
     for (const tag of tags) {
