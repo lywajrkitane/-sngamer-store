@@ -1,10 +1,8 @@
 /* SNGAMER STORE — Pièces eFootball
-   Final correction: use the requested 🪙 mark, force a monochrome
-   presentation so it matches the other category icons, and keep exactly
-   one premium active orbit/glow around the icon.
+   Premium stacked-coin mark: three small coin piles, monochrome and
+   consistent with the other category icons. The navigation animation stays unchanged.
 */
 @media (max-width:700px){
-  /* Remove the old SVG coin artwork completely. */
   html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg{
     display:none !important;
   }
@@ -17,36 +15,57 @@
     color:#fff !important;
   }
 
-  /* The requested 🪙 symbol, forced to the same monochrome white treatment
-     as the other bottom-navigation category icons. */
+  /* Three-pile coin structure inspired by the supplied reference image.
+     No emoji, no currency symbol: only the clean coin geometry. */
   html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::before{
-    content:"🪙︎" !important;
+    content:"" !important;
     position:absolute !important;
     left:50% !important;
     top:50% !important;
-    width:auto !important;
-    height:auto !important;
-    inset:auto !important;
+    width:42px !important;
+    height:36px !important;
     transform:translate(-50%,-50%) !important;
     display:block !important;
     border:0 !important;
-    border-radius:0 !important;
-    padding:0 !important;
-    margin:0 !important;
-    background:none !important;
-    box-shadow:none !important;
+    background:
+      radial-gradient(ellipse 10px 5px at 50% 7px, currentColor 0 72%, transparent 75%),
+      linear-gradient(currentColor,currentColor) 50% 7px / 20px 5px no-repeat,
+      radial-gradient(ellipse 10px 5px at 27% 20px, currentColor 0 72%, transparent 75%),
+      linear-gradient(currentColor,currentColor) 27% 20px / 20px 5px no-repeat,
+      radial-gradient(ellipse 10px 5px at 73% 20px, currentColor 0 72%, transparent 75%),
+      linear-gradient(currentColor,currentColor) 73% 20px / 20px 5px no-repeat,
+      radial-gradient(ellipse 10px 4px at 27% 27px, currentColor 0 72%, transparent 75%),
+      radial-gradient(ellipse 10px 4px at 73% 27px, currentColor 0 72%, transparent 75%) !important;
+    background-repeat:no-repeat !important;
     color:#fff !important;
-    font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
-    font-size:25px !important;
-    font-weight:400 !important;
-    line-height:1 !important;
-    text-shadow:none !important;
-    filter:grayscale(1) brightness(0) invert(1) !important;
+    box-shadow:none !important;
+    filter:none !important;
     z-index:5 !important;
     pointer-events:none !important;
   }
 
-  /* Inactive: clean icon only. No duplicated coin, shadow or old artwork. */
+  /* Add subtle coin thickness without introducing a second icon. */
+  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::after{
+    content:"" !important;
+    position:absolute !important;
+    left:50% !important;
+    top:50% !important;
+    width:42px !important;
+    height:36px !important;
+    transform:translate(-50%,-50%) !important;
+    border:0 !important;
+    border-radius:0 !important;
+    background:
+      linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) 50% 12px / 18px 2px no-repeat,
+      linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,.28)) 27% 25px / 18px 2px no-repeat,
+      linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,.28)) 73% 25px / 18px 2px no-repeat !important;
+    pointer-events:none !important;
+    z-index:6 !important;
+    box-shadow:none !important;
+    filter:none !important;
+  }
+
+  /* Inactive: clean stacked-coin icon only. */
   html body #mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon{
     width:38px !important;
     height:38px !important;
@@ -56,11 +75,8 @@
   }
 
   html body #mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon::after{
-    content:none !important;
-    display:none !important;
+    z-index:6 !important;
     animation:none !important;
-    box-shadow:none !important;
-    filter:none !important;
   }
 
   /* Active: exactly the same floating premium treatment as the other icons. */
@@ -79,20 +95,26 @@
     will-change:box-shadow,border-color;
   }
 
-  /* Remove every competing pseudo-ring. The ::before belongs only to 🪙. */
+  /* Keep the stacked coins above the active glow and below the orbit. */
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::before{
-    content:"🪙︎" !important;
+    content:"" !important;
     border:0 !important;
     border-radius:0 !important;
-    background:none !important;
+    background:
+      radial-gradient(ellipse 10px 5px at 50% 7px, currentColor 0 72%, transparent 75%),
+      linear-gradient(currentColor,currentColor) 50% 7px / 20px 5px no-repeat,
+      radial-gradient(ellipse 10px 5px at 27% 20px, currentColor 0 72%, transparent 75%),
+      linear-gradient(currentColor,currentColor) 27% 20px / 20px 5px no-repeat,
+      radial-gradient(ellipse 10px 5px at 73% 20px, currentColor 0 72%, transparent 75%),
+      linear-gradient(currentColor,currentColor) 73% 20px / 20px 5px no-repeat,
+      radial-gradient(ellipse 10px 4px at 27% 27px, currentColor 0 72%, transparent 75%),
+      radial-gradient(ellipse 10px 4px at 73% 27px, currentColor 0 72%, transparent 75%) !important;
+    color:#fff !important;
     box-shadow:none !important;
-    padding:0 !important;
-    margin:0 !important;
-    filter:grayscale(1) brightness(0) invert(1) !important;
+    filter:none !important;
     z-index:5 !important;
   }
 
-  /* One rotating luminous outline only. */
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::after{
     content:"" !important;
     position:absolute !important;
