@@ -1,30 +1,57 @@
-/* SNGAMER STORE — correction Pièces eFootball
-   Final override: keep the real SVG coin mark, remove the duplicated
-   pseudo-coin/shadow, and restore the premium active orbit/glow.
+/* SNGAMER STORE — Pièces eFootball
+   Use the requested 🪙 emoji and keep the same premium floating/glow
+   treatment as the other active bottom-navigation categories.
 */
 @media (max-width:700px){
-  /* Existing HTML SVG = intended premium coin mark with € faces. */
+  /* The coin category uses the real requested emoji. Override the older
+     injected € / stacked-coin pseudo artwork completely. */
   html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg{
-    display:block !important;
-    width:25px !important;
-    height:25px !important;
+    display:none !important;
+  }
+
+  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon{
     position:relative !important;
-    z-index:2 !important;
-    color:currentColor !important;
-    fill:none !important;
-    filter:drop-shadow(0 0 4px rgba(255,255,255,.16)) !important;
+    display:grid !important;
+    place-items:center !important;
+    overflow:visible !important;
+    color:#fff !important;
   }
 
-  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg *{
-    stroke:currentColor !important;
-  }
-  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon svg text{
-    fill:currentColor !important;
-    stroke:none !important;
+  /* Requested coin emoji. */
+  html body #mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon::before{
+    content:"🪙" !important;
+    position:absolute !important;
+    left:50% !important;
+    top:50% !important;
+    width:auto !important;
+    height:auto !important;
+    inset:auto !important;
+    transform:translate(-50%,-50%) !important;
+    display:block !important;
+    border:0 !important;
+    border-radius:0 !important;
+    padding:0 !important;
+    background:none !important;
+    box-shadow:none !important;
+    color:initial !important;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif !important;
+    font-size:25px !important;
+    font-weight:400 !important;
+    line-height:1 !important;
+    text-shadow:none !important;
+    z-index:4 !important;
+    pointer-events:none !important;
   }
 
-  /* Inactive: absolutely no duplicate pseudo-coin or hanging shadow. */
-  html body #mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon::before,
+  /* Inactive: clean icon only, with no old duplicate coin/shadow. */
+  html body #mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon{
+    width:38px !important;
+    height:38px !important;
+    flex-basis:38px !important;
+    box-shadow:none !important;
+    filter:none !important;
+  }
+
   html body #mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon::after{
     content:none !important;
     display:none !important;
@@ -32,35 +59,31 @@
     box-shadow:none !important;
     filter:none !important;
   }
-  html body #mobileBottomNav .bottomNavItem:not(.active)[data-nav="coins"] .bottomNavIcon{
-    width:38px !important;
-    height:38px !important;
-    flex-basis:38px !important;
-    overflow:visible !important;
-    box-shadow:none !important;
-    filter:none !important;
-  }
 
-  /* Active: restore the same premium floating frame/orbit used by the other categories. */
+  /* Active: same floating premium frame used by the other categories. */
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon{
     width:58px !important;
     height:58px !important;
     flex-basis:58px !important;
     overflow:visible !important;
+    border-radius:18px !important;
     position:relative !important;
-    color:#fff !important;
-    border-color:rgba(92,194,255,.98) !important;
     background:linear-gradient(145deg,rgba(24,139,255,.28),rgba(124,58,237,.34)) !important;
+    border:1px solid rgba(92,194,255,.98) !important;
     box-shadow:0 0 12px rgba(28,150,255,.55),0 0 30px rgba(28,150,255,.28),0 0 54px rgba(124,58,237,.18),inset 0 0 20px rgba(109,205,255,.10) !important;
     transform:translateY(-2px) !important;
     animation:sngCoinActiveGlowFinal 2.2s ease-in-out infinite !important;
-    will-change:box-shadow,border-color,filter;
+    will-change:box-shadow,border-color;
   }
 
-  html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::before{
+  /* Rotating luminous outline. */
+  html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::after{
     content:"" !important;
     position:absolute !important;
     inset:-4px !important;
+    width:auto !important;
+    height:auto !important;
+    border:0 !important;
     border-radius:22px !important;
     padding:1px !important;
     background:conic-gradient(from 0deg,rgba(90,184,255,0),rgba(90,184,255,.95),rgba(138,92,255,.95),rgba(90,184,255,0)) !important;
@@ -71,36 +94,26 @@
     animation:sngNavActiveOrbit 2.4s linear infinite !important;
     pointer-events:none !important;
     z-index:3 !important;
-    box-shadow:none !important;
+    box-shadow:0 0 16px rgba(90,184,255,.30) !important;
     filter:none !important;
   }
 
-  html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::after{
-    content:"" !important;
-    position:absolute !important;
-    inset:-13px !important;
-    border-radius:28px !important;
-    background:radial-gradient(circle,rgba(41,157,255,.18) 0,rgba(41,157,255,.07) 38%,rgba(41,157,255,0) 72%) !important;
-    filter:blur(4px) !important;
-    opacity:.9 !important;
-    animation:sngNavActivePulse 2.2s ease-in-out infinite !important;
-    pointer-events:none !important;
-    z-index:0 !important;
-    box-shadow:none !important;
-  }
-
   @keyframes sngNavActiveOrbit{to{transform:rotate(360deg)}}
-  @keyframes sngNavActivePulse{
-    0%,100%{transform:scale(.96);opacity:.68}
-    50%{transform:scale(1.04);opacity:1}
-  }
   @keyframes sngCoinActiveGlowFinal{
-    0%,100%{border-color:rgba(90,184,255,.82) !important;box-shadow:0 0 9px rgba(22,135,255,.42),0 0 20px rgba(22,135,255,.22),inset 0 0 12px rgba(90,184,255,.10) !important;}
-    50%{border-color:rgba(123,210,255,1) !important;box-shadow:0 0 14px rgba(22,135,255,.68),0 0 34px rgba(22,135,255,.34),0 0 52px rgba(124,58,237,.16),inset 0 0 16px rgba(90,184,255,.16) !important;}
+    0%,100%{
+      border-color:rgba(90,184,255,.82) !important;
+      box-shadow:0 0 9px rgba(22,135,255,.42),0 0 20px rgba(22,135,255,.22),inset 0 0 12px rgba(90,184,255,.10) !important;
+    }
+    50%{
+      border-color:rgba(123,210,255,1) !important;
+      box-shadow:0 0 14px rgba(22,135,255,.68),0 0 34px rgba(22,135,255,.34),0 0 52px rgba(124,58,237,.16),inset 0 0 16px rgba(90,184,255,.16) !important;
+    }
   }
 }
+
 @media(prefers-reduced-motion:reduce){
   html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon,
-  html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::before,
-  html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::after{animation:none !important;}
+  html body #mobileBottomNav .bottomNavItem.active[data-nav="coins"] .bottomNavIcon::after{
+    animation:none !important;
+  }
 }
