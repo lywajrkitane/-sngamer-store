@@ -25,6 +25,8 @@ if (!express.application.__sngPremiumDialogsListenPatched) {
           if (!html.includes('premium-dialogs-v1.js')) {
             html = html.replace(/<\/body>/i, '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script></body>');
           }
+          // Upgrade legacy synchronous confirmation windows in admin/customer HTML to the async premium dialog.
+          html = html.replace(/if\s*\(!confirm\(([^;]*?)\)\)\s*return;/g, 'if (!(await window.sngPremiumConfirm($1))) return;');
           res.set('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate');
           res.set('Pragma','no-cache');
           res.set('Expires','0');
