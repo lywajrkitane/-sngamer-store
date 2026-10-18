@@ -1,86 +1,67 @@
-/* SNGAMER STORE — ADMIN DATA FIX
-   Keeps the existing workspace UI untouched.
-   - Loads orders automatically when the admin workspace becomes visible.
-   - Refreshes dashboard data without requiring the manual Actualiser button.
-   - Uses the server-side paid-only finance endpoint for chiffre d'affaires.
-   - Does not create or modify any order/payment status controls.
+/* SNGAMER STORE — ADMIN DATA REFRESH
+   Polls the existing admin endpoints after login and while the dashboard is visible.
+   Deliberately does not call loadAll() to avoid overlapping requests from legacy code;
+   the established loaders remain the single source for orders, counts and revenue.
 */
 (function () {
   'use strict';
 
-  const INTERVAL_MS = 30000;
+  const INTERVAL_MS = 15000;
   let started = false;
-  let refreshTimer = null;
+  let timer = null;
+  let inFlight = false;
   let observer = null;
-  let refreshInFlight = false;
 
   const $ = (selector, root = document) => root.querySelector(selector);
+  const visible = () => {
+    const root = $('#adminBox');
+    return Boolean(root && !root.classList.contains('hidden'));
+  };
 
-  function adminVisible() {
-    const box = $('#adminBox');
-    return !!box && !box.classList.contains('hidden');
-  }
-
-  function money(value) {
-    const n = Number(value || 0);
-    return `${n.toLocaleString('fr-FR')} FCFA`;
-  }
-
-  async function refreshFinance() {
+  async function refreshDashboard() {
+    if (!visible() || inFlight || document.visibilityState === 'hidden') return;
+    inFlight = true;
     try {
-      const response = await fetch('/api/admin/order-finance', {
-        credentials: 'same-origin',
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
+      // The original loaders own the order list, all status counters and revenue.
+      // Run them independently so one failure does not block the other.
+      const tasks = [];
+      if (typeof window.loadProducts === 'function') tasks.push(
+        Promise.resolve().then(() => window.loadProducts())
+      );
+      if (typeof window.loadOrders === 'function') tasks.push(
+        Promise.resolve().then(() => window.loadOrders())
+      );
+      const results = await Promise.allSettled(tasks);
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error('ADMIN_AUTO_REFRESH_FAILED:', index === 0 ? 'products' : 'orders', result.reason);
+        }
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      const revenue = $('#revenue');
-      if (revenue && data && data.paid_revenue != null) {
-        revenue.textContent = money(data.paid_revenue);
-      }
-      return data;
-    } catch (error) {
-      console.error('ADMIN_FINANCE_AUTOLOAD_ERROR:', error);
-      return null;
-    }
-  }
-
-  async function refreshData() {
-    if (!adminVisible() || refreshInFlight) return;
-    refreshInFlight = true;
-    try {
-      if (typeof window.loadAll === 'function') {
-        await window.loadAll();
-      } else if (typeof window.loadOrders === 'function') {
-        await window.loadOrders();
-      }
-      await refreshFinance();
-    } catch (error) {
-      console.error('ADMIN_DATA_AUTOLOAD_ERROR:', error);
     } finally {
-      refreshInFlight = false;
+      inFlight = false;
     }
   }
 
   function start() {
-    if (started) return;
-    if (!adminVisible()) return;
+    if (started || !visible()) return;
     started = true;
+    // Do several short retries because the login callback can expose the UI
+    // before the browser has fully persisted the session cookie.
+    [0, 500, 1500, 3500].forEach(delay => window.setTimeout(refreshDashboard, delay));
+    timer = window.setInterval(refreshDashboard, INTERVAL_MS);
+    document.addEventListener('visibilitychange', refreshDashboard);
 
-    [0, 350, 1000].forEach(delay => setTimeout(refreshData, delay));
-
-    refreshTimer = window.setInterval(refreshData, INTERVAL_MS);
-
-    const box = $('#adminBox');
-    observer = new MutationObserver(() => {
-      if (adminVisible()) refreshData();
-    });
-    observer.observe(box, { attributes: true, attributeFilter: ['class'] });
+    const root = $('#adminBox');
+    if (root) {
+      observer = new MutationObserver(() => {
+        if (visible()) refreshDashboard();
+      });
+      observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    }
   }
 
   function waitForAdmin() {
-    if (adminVisible()) {
+    if (visible()) {
       start();
       return;
     }
