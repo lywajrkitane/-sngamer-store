@@ -1,15 +1,13 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V3
-   Single source of truth: use the existing data loaders directly.
-   - loadAll() refreshes dashboard/products/orders counters and revenue.
-   - loadOrders() refreshes the Orders view itself.
-   - refresh happens after login, when the Orders workspace is opened,
-     when the page becomes visible again, and periodically.
-   No DOM/button simulation is used.
+/* SNGAMER STORE — ADMIN DATA REFRESH V4
+   Automatic refresh owner for the authenticated admin workspace.
+   The inline admin page used to create its own timer first; that caused this
+   script to exit before it could take over. V4 explicitly replaces that timer
+   and waits for the authenticated admin box to become visible.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV3';
+  const STATE = '__sngamerAdminAutoRefreshV4';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -28,55 +26,53 @@
     return !!box && !box.classList.contains('hidden');
   }
 
-  function callLoader(name) {
-    const loader = window[name];
-    if (typeof loader !== 'function') return false;
-
-    try {
-      const result = loader();
-      if (result && typeof result.catch === 'function') {
-        result.catch(error => console.error(`ADMIN_AUTO_${name}_ERROR:`, error));
-      }
-      return true;
-    } catch (error) {
-      console.error(`ADMIN_AUTO_${name}_CALL_ERROR:`, error);
-      return false;
-    }
+  function currentWorkspace() {
+    return adminBox()?.getAttribute('data-v26-workspace') || '';
   }
 
-  function currentWorkspace() {
-    const box = adminBox();
-    return box?.getAttribute('data-v26-workspace') || '';
+  async function runLoader(name) {
+    const loader = window[name];
+    if (typeof loader !== 'function') {
+      throw new Error(`Loader ${name} is not available yet`);
+    }
+    await loader();
   }
 
   async function refreshNow(reason) {
     if (!isAdminVisible() || refreshInFlight) return;
 
-    const workspace = currentWorkspace();
     refreshInFlight = true;
+    const workspace = currentWorkspace();
 
     try {
-      // Always refresh the complete admin data set so the dashboard remains
-      // synchronized with the same source used by the manual Actualiser.
-      callLoader('loadAll');
+      // This is the exact same data path used by the manual Actualiser button.
+      // It refreshes products, orders, counters and revenue from the server.
+      await runLoader('loadAll');
 
-      // When the Orders workspace is active, explicitly reload its list.
-      if (workspace === 'orders') {
-        callLoader('loadOrders');
+      // The Orders workspace must also redraw its list explicitly.
+      if (currentWorkspace() === 'orders' || workspace === 'orders') {
+        await runLoader('loadOrders');
       }
 
-      lastWorkspace = workspace;
-      console.debug('SNGAMER ADMIN AUTO REFRESH:', reason, workspace);
+      lastWorkspace = currentWorkspace();
+      console.debug('SNGAMER ADMIN AUTO REFRESH OK:', reason, lastWorkspace);
+    } catch (error) {
+      console.error('SNGAMER ADMIN AUTO REFRESH ERROR:', reason, error);
     } finally {
-      // The loaders are async; prevent overlapping requests while they settle.
-      window.setTimeout(() => {
-        refreshInFlight = false;
-      }, 2500);
+      refreshInFlight = false;
+    }
+  }
+
+  function stopOldCoreTimer() {
+    if (window.__sngAdminOrdersAutoRefreshTimer) {
+      window.clearInterval(window.__sngAdminOrdersAutoRefreshTimer);
+      window.__sngAdminOrdersAutoRefreshTimer = null;
+      console.debug('SNGAMER: replaced old core auto-refresh timer');
     }
   }
 
   function scheduleInitialRefreshes() {
-    [0, 300, 1000, 2500, 5000].forEach(delay => {
+    [0, 400, 1000, 2000, 3500, 6000].forEach(delay => {
       window.setTimeout(() => refreshNow(`initial-${delay}ms`), delay);
     });
   }
@@ -87,10 +83,8 @@
 
     observer = new MutationObserver(() => {
       if (!isAdminVisible()) return;
-
       const workspace = currentWorkspace();
       if (workspace !== lastWorkspace) {
-        lastWorkspace = workspace;
         refreshNow('workspace-change');
       }
     });
@@ -102,24 +96,28 @@
   }
 
   function boot() {
-    // The core page now owns auto-refresh. Avoid duplicate requests when present.
-    if (window.__sngAdminOrdersAutoRefreshTimer) return;
     const box = adminBox();
     if (!box) {
       window.setTimeout(boot, 250);
       return;
     }
 
+    // The old inline timer is the reason V3 never took control. Replace it
+    // instead of allowing two independent refresh systems to compete.
+    stopOldCoreTimer();
     installObserver();
 
-    if (isAdminVisible()) {
-      scheduleInitialRefreshes();
-      if (!intervalId) {
-        intervalId = window.setInterval(() => refreshNow('interval'), INTERVAL_MS);
-      }
-    } else {
+    if (!isAdminVisible()) {
       window.setTimeout(boot, 250);
+      return;
     }
+
+    if (!intervalId) {
+      scheduleInitialRefreshes();
+      intervalId = window.setInterval(() => refreshNow('interval'), INTERVAL_MS);
+    }
+
+    refreshNow('boot');
   }
 
   document.addEventListener('visibilitychange', () => {
