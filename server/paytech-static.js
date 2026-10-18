@@ -49,13 +49,13 @@ express.response.send = function adminAutoLoadSend(body) {
         setTimeout(function(){
           const b=document.getElementById('adminBox');
           if(b && !b.classList.contains('hidden')){
-            try { originalLoadAll(); } catch(e) { console.error('ADMIN_AUTOLOAD_ERROR:',e); }
+            try { originalLoadAll(); } catch(e) { console.error('ADMIN_AUTOLOAD_ERROR:', e); }
           }
         },900);
         setTimeout(function(){
           const b=document.getElementById('adminBox');
           if(b && !b.classList.contains('hidden')){
-            try { originalLoadAll(); } catch(e) { console.error('ADMIN_AUTOLOAD_RETRY_ERROR:',e); }
+            try { originalLoadAll(); } catch(e) { console.error('ADMIN_AUTOLOAD_RETRY_ERROR:', e); }
           }
         },2200);
       };
@@ -80,7 +80,7 @@ express.response.send = function adminAutoLoadSend(body) {
   else install();
 })();
 </script>`;
-      body = body.replace(/<\/body>/i, `${fixScript}</body>`);
+      body = body.replace(/<\/body>/i, `${fixScript}<script src="/admin-final-fix.js?v=20261018-1"></script></body>`);
     }
   } catch (error) {
     console.error("ADMIN_AUTOLOAD_INJECTION_ERROR:", error);
