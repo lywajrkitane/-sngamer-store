@@ -1,4 +1,4 @@
-/* SNGAMER STORE — desktop customer profile entry + store return */
+/* SNGAMER STORE — desktop customer profile entry + premium store return */
 (function () {
   'use strict';
   if (window.__sngDesktopProfileEntryV1) return;
@@ -20,8 +20,7 @@
     style.id = 'sngDesktopProfileStyles';
     style.textContent = `
       @media (min-width: 769px) {
-        .sngDesktopProfileButton,
-        .sngDesktopStoreButton {
+        .sngDesktopProfileButton {
           display:inline-flex !important;
           align-items:center;
           justify-content:center;
@@ -38,12 +37,36 @@
           cursor:pointer;
           transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
         }
-        .sngDesktopProfileButton:hover,
-        .sngDesktopStoreButton:hover { transform:translateY(-1px); border-color:rgba(110,171,255,.62); box-shadow:0 13px 34px rgba(0,0,0,.25),0 0 30px rgba(65,116,255,.14); }
+        .sngDesktopProfileButton:hover { transform:translateY(-1px); border-color:rgba(110,171,255,.62); box-shadow:0 13px 34px rgba(0,0,0,.25),0 0 30px rgba(65,116,255,.14); }
         .sngDesktopProfileButton.is-active { border-color:rgba(105,166,255,.72); background:linear-gradient(135deg,rgba(31,74,170,.92),rgba(89,38,171,.92)); box-shadow:0 12px 34px rgba(54,76,220,.22); }
-        .sngDesktopStoreButton.is-active { border-color:rgba(110,171,255,.72); background:linear-gradient(135deg,rgba(31,74,170,.92),rgba(34,122,190,.82)); }
-        .sngDesktopProfileIcon,.sngDesktopStoreIcon { width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center; }
-        .sngDesktopProfileIcon svg,.sngDesktopStoreIcon svg { width:20px;height:20px; }
+        .sngDesktopProfileIcon { width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center; }
+        .sngDesktopProfileIcon svg { width:20px;height:20px; }
+
+        /* Compact premium store-return control: icon only, visible only in Profile. */
+        .sngDesktopStoreButton {
+          display:none !important;
+          width:46px;
+          height:46px;
+          min-width:46px;
+          min-height:46px;
+          padding:0;
+          margin:0;
+          align-items:center;
+          justify-content:center;
+          border:1px solid rgba(96,150,255,.42);
+          border-radius:15px;
+          background:linear-gradient(145deg,rgba(19,42,84,.98),rgba(49,19,91,.96));
+          color:#f4f8ff;
+          box-shadow:0 10px 28px rgba(20,42,100,.25),inset 0 1px 0 rgba(255,255,255,.10),0 0 26px rgba(67,104,255,.15);
+          font:inherit;
+          cursor:pointer;
+          transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease;
+        }
+        .sngDesktopStoreButton.is-visible { display:inline-flex !important; }
+        .sngDesktopStoreButton:hover { transform:translateY(-1px); border-color:rgba(132,188,255,.82); box-shadow:0 14px 34px rgba(20,42,100,.30),inset 0 1px 0 rgba(255,255,255,.12),0 0 34px rgba(67,104,255,.23); filter:saturate(1.08); }
+        .sngDesktopStoreButton:active { transform:translateY(0) scale(.97); }
+        .sngDesktopStoreIcon { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center; }
+        .sngDesktopStoreIcon svg { width:22px;height:22px; }
 
         #profileArea.sngDesktopProfileArea { width:100%; max-width:none; }
         body.sngDesktopProfileMode .hero,
@@ -55,48 +78,9 @@
         body.sngDesktopProfileMode #navSubcategories { display:none !important; }
         body.sngDesktopProfileMode #sectionTitle { font-size:clamp(28px,3vw,42px); margin:0; }
         body.sngDesktopProfileMode #profileArea { display:block !important; visibility:visible !important; }
-
-        .sngProfileStoreReturn {
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          gap:18px;
-          margin:0 0 24px;
-          padding:16px 18px;
-          border:1px solid rgba(87,145,255,.24);
-          border-radius:20px;
-          background:linear-gradient(135deg,rgba(10,21,39,.94),rgba(18,12,35,.92));
-          box-shadow:0 16px 42px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.045);
-        }
-        .sngProfileStoreReturnCopy { min-width:0; }
-        .sngProfileStoreReturnEyebrow { display:block; margin-bottom:4px; color:#7ea8d8; font-size:10px; font-weight:900; letter-spacing:1.6px; text-transform:uppercase; }
-        .sngProfileStoreReturnTitle { display:block; color:#f4f8ff; font-size:18px; font-weight:900; }
-        .sngProfileStoreReturnButton {
-          flex:0 0 auto;
-          display:inline-flex;
-          align-items:center;
-          justify-content:center;
-          gap:9px;
-          min-height:44px;
-          padding:0 16px;
-          border:1px solid rgba(102,166,255,.42);
-          border-radius:14px;
-          background:linear-gradient(135deg,#1d4ed8,#6d28d9);
-          color:#fff;
-          font:inherit;
-          font-weight:900;
-          cursor:pointer;
-          box-shadow:0 10px 28px rgba(45,71,210,.24),inset 0 1px 0 rgba(255,255,255,.16);
-        }
-        .sngProfileStoreReturnButton:hover { transform:translateY(-1px); box-shadow:0 13px 34px rgba(45,71,210,.30); }
-        @media(max-width:900px){
-          .sngProfileStoreReturn { align-items:flex-start; flex-direction:column; }
-          .sngProfileStoreReturnButton { width:100%; }
-        }
       }
       @media (max-width: 768px) {
         .sngDesktopProfileButton,.sngDesktopStoreButton { display:none !important; }
-        .sngProfileStoreReturn { display:none !important; }
       }
     `;
     document.head.appendChild(style);
@@ -114,7 +98,8 @@
       storeButton.type = 'button';
       storeButton.className = 'sngDesktopStoreButton';
       storeButton.setAttribute('aria-label', 'Retour à la boutique');
-      storeButton.innerHTML = '<span class="sngDesktopStoreIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5h16v9.2a1.8 1.8 0 0 1-1.8 1.8H5.8A1.8 1.8 0 0 1 4 19.7z"/><path d="M3 10.5 5.2 4h13.6l2.2 6.5"/><path d="M8 10.5a2 2 0 0 0 4 0 2 2 0 0 0 4 0"/></svg></span><span>Boutique</span>';
+      storeButton.setAttribute('title', 'Retour à la boutique');
+      storeButton.innerHTML = '<span class="sngDesktopStoreIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5h16v9.2a1.8 1.8 0 0 1-1.8 1.8H5.8A1.8 1.8 0 0 1 4 19.7z"/><path d="M3 10.5 5.2 4h13.6l2.2 6.5"/><path d="M8 10.5a2 2 0 0 0 4 0 2 2 0 0 0 4 0"/></svg></span>';
       storeButton.addEventListener('click', function () { goToStore('home'); });
       nav.insertBefore(storeButton, cart);
     }
@@ -134,28 +119,6 @@
     return { storeButton, profileButton };
   }
 
-  function ensureProfileReturn() {
-    const profile = document.getElementById('profileArea');
-    if (!profile || !document.body.classList.contains('sngDesktopProfileMode')) return;
-    if (profile.querySelector('#sngProfileStoreReturn')) return;
-
-    const bar = document.createElement('div');
-    bar.id = 'sngProfileStoreReturn';
-    bar.className = 'sngProfileStoreReturn';
-    bar.innerHTML = `
-      <div class="sngProfileStoreReturnCopy">
-        <span class="sngProfileStoreReturnEyebrow">Espace client</span>
-        <span class="sngProfileStoreReturnTitle">Vous êtes dans votre profil</span>
-      </div>
-      <button type="button" class="sngProfileStoreReturnButton" aria-label="Retourner à la boutique">
-        <span aria-hidden="true">←</span>
-        <span>Retour à la boutique</span>
-      </button>
-    `;
-    bar.querySelector('button').addEventListener('click', function () { goToStore('home'); });
-    profile.prepend(bar);
-  }
-
   function sync() {
     const buttons = createButton();
     const profile = document.getElementById('profileArea');
@@ -164,9 +127,8 @@
     if (profile) profile.classList.toggle('sngDesktopProfileArea', isProfile);
     if (buttons) {
       buttons.profileButton.classList.toggle('is-active', isProfile);
-      buttons.storeButton.classList.toggle('is-active', !isProfile);
+      buttons.storeButton.classList.toggle('is-visible', isProfile);
     }
-    if (isProfile) ensureProfileReturn();
   }
 
   function boot() {
