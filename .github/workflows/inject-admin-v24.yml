@@ -31,9 +31,9 @@ jobs:
           from pathlib import Path
           import re
 
-          version = '20261018-1130'
+          version = '20261018-1140'
           workspace_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
-          fix_tag = '<script src="/admin-data-fix.js?v=20261018-1130"></script>'
+          fix_tag = '<script src="/admin-data-fix.js?v=20261018-1140"></script>'
 
           changed = []
           for filename in ('public/admin.html', 'public/admin-dashboard.html'):
