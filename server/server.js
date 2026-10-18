@@ -622,6 +622,11 @@ app.get(
           payment_status,
           payment_method,
           paid_at,
+          paytech_ref,
+          refund_status,
+          refund_requested_at,
+          refunded_at,
+          refund_provider_message,
           items,
           total
         FROM orders
