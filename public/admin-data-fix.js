@@ -102,6 +102,8 @@
   }
 
   function boot() {
+    // The core page now owns auto-refresh. Avoid duplicate requests when present.
+    if (window.__sngAdminOrdersAutoRefreshTimer) return;
     const box = adminBox();
     if (!box) {
       window.setTimeout(boot, 250);
