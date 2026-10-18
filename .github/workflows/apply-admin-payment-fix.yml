@@ -19,51 +19,141 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
+          import re
 
-          # 1) Admin API must expose the real PayTech payment status.
+          # 1) Admin API must expose the real PayTech payment state.
           p = Path('server/server.js')
           s = p.read_text(encoding='utf-8')
           old = '''          payment,\n          items,\n          total\n        FROM orders'''
           new = '''          payment,\n          payment_status,\n          payment_method,\n          paid_at,\n          items,\n          total\n        FROM orders'''
-          if old not in s:
-              raise SystemExit('server.js target not found')
-          s = s.replace(old, new, 1)
+          if old in s:
+              s = s.replace(old, new, 1)
           p.write_text(s, encoding='utf-8')
 
-          # 2) Do not let a temporary product/API failure prevent orders from loading.
-          for name in ('public/admin-dashboard.html', 'public/admin.html'):
-              p = Path(name)
-              s = p.read_text(encoding='utf-8')
-              old = '''  async function loadAll() {\n\n    await loadProducts();\n    await loadOrders();\n  }'''
-              new = '''  async function loadAll() {\n    const results = await Promise.allSettled([\n      loadProducts(),\n      loadOrders()\n    ]);\n    for (const result of results) {\n      if (result.status === 'rejected') {\n        console.error('ADMIN_LOAD_ERROR:', result.reason);\n      }\n    }\n  }'''
-              if old not in s:
-                  raise SystemExit(f'{name}: loadAll target not found')
-              s = s.replace(old, new, 1)
+          # 2) Runtime fix for the actual v24 admin workspace. The previous v23
+          # loader was not the final controller used by bootstrap, so install a
+          # small independent loader after the v24 workspace instead of replacing it.
+          live = Path('public/admin-live-orders-fix.js')
+          live.write_text(r'''/* SNGAMER STORE — live admin orders/payment fix */
+(function () {
+  'use strict';
 
-              # Retry shortly after login/page restoration so the first authenticated
-              # request cannot leave the Commands view empty until manual refresh.
-              old = '''    loadAll();\nloadPromoMedia();'''
-              new = '''    loadAll();\n    setTimeout(() => loadAll(), 350);\n    setTimeout(() => loadAll(), 1200);\nloadPromoMedia();'''
-              if old not in s:
-                  raise SystemExit(f'{name}: showAdmin target not found')
-              s = s.replace(old, new, 1)
+  let wrapped = null;
+  let lastVisible = false;
 
-              # Make the payment column use PayTech's real payment state.
-              old = '''            <td>${o.payment || "-"}</td>'''
-              new = '''            <td>${o.payment || "-"}<br><small style="color:#8f9db3;font-weight:700;">${o.payment_status || (o.status === "Payée" ? "Payé" : "En attente")}</small></td>'''
-              if old in s:
-                  s = s.replace(old, new, 1)
+  async function reloadOrders() {
+    try {
+      if (typeof window.loadOrders === 'function') {
+        await window.loadOrders();
+        return;
+      }
+      if (typeof window.loadAll === 'function') {
+        await window.loadAll();
+      }
+    } catch (error) {
+      console.error('ADMIN_LIVE_ORDERS_LOAD_ERROR:', error);
+    }
+  }
 
+  function wrapLoader() {
+    const fn = window.loadOrders;
+    if (typeof fn !== 'function' || fn === wrapped) return;
+    const original = fn;
+    const wrappedFn = async function () {
+      const result = await original.apply(this, arguments);
+      return result;
+    };
+    wrapped = wrappedFn;
+    window.loadOrders = wrappedFn;
+  }
+
+  function isAdminVisible() {
+    const box = document.getElementById('adminBox');
+    return !!box && !box.classList.contains('hidden');
+  }
+
+  function patchLegacyPaymentCells() {
+    document.querySelectorAll('#ordersTable tr').forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length < 6) return;
+      const idText = (cells[0].textContent || '').trim().replace('#', '');
+      if (!/^\d+$/.test(idText)) return;
+      const rowData = window.__sngamerAdminOrders?.find(o => String(o.id) === idText);
+      if (!rowData) return;
+      const payment = String(rowData.payment_status || (String(rowData.status).toLowerCase() === 'payée' ? 'Payé' : 'En attente'));
+      const method = String(rowData.payment || '-');
+      cells[5].innerHTML = method + '<br><small style="color:#8f9db3;font-weight:700;">' + payment + '</small>';
+    });
+  }
+
+  async function fetchAndRememberOrders() {
+    try {
+      const response = await fetch('/api/admin/orders', { credentials: 'same-origin', cache: 'no-store' });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (Array.isArray(data)) window.__sngamerAdminOrders = data;
+      patchLegacyPaymentCells();
+    } catch (error) {
+      console.error('ADMIN_LIVE_ORDERS_API_ERROR:', error);
+    }
+  }
+
+  function start() {
+    wrapLoader();
+
+    const observer = new MutationObserver(() => {
+      const visible = isAdminVisible();
+      if (visible && !lastVisible) {
+        lastVisible = true;
+        setTimeout(reloadOrders, 150);
+        setTimeout(reloadOrders, 700);
+        setTimeout(fetchAndRememberOrders, 1300);
+      } else if (!visible) {
+        lastVisible = false;
+      }
+    });
+
+    const box = document.getElementById('adminBox');
+    if (box) observer.observe(box, { attributes: true, attributeFilter: ['class'] });
+
+    setTimeout(() => {
+      if (isAdminVisible()) {
+        reloadOrders();
+        fetchAndRememberOrders();
+      }
+    }, 250);
+
+    setInterval(() => {
+      wrapLoader();
+      if (isAdminVisible()) fetchAndRememberOrders();
+    }, 15000);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
+})();
+''', encoding='utf-8')
+
+          # 3) Bootstrap is the real source of the final admin HTML. Inject the
+          # live fix after the existing v24 workspace without disturbing it.
+          p = Path('server/bootstrap.js')
+          s = p.read_text(encoding='utf-8')
+          tag = '<script src="/admin-live-orders-fix.js?v=20261018-1"></script>'
+          if tag not in s:
+              marker = 'res.type("html").send(html)'
+              if marker not in s:
+                  raise SystemExit('bootstrap injection marker not found')
+              s = s.replace(marker, f'html=html.replace(/<\\/body>/i,\'{tag}</body>\');{marker}', 1)
               p.write_text(s, encoding='utf-8')
 
-          print('Admin/PayTech fixes applied.')
+          print('Admin/PayTech runtime fixes prepared.')
 
       - name: Commit and push
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server/server.js public/admin-dashboard.html public/admin.html
+          git add server/server.js server/bootstrap.js public/admin-live-orders-fix.js
           git diff --cached --quiet && exit 0
-          git commit -m "Fix admin order auto-load and PayTech status"
+          git commit -m "Fix live admin orders and PayTech payment status"
           git push origin HEAD:main
