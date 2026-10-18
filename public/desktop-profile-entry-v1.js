@@ -20,41 +20,60 @@
     style.id = 'sngDesktopProfileStyles';
     style.textContent = `
       @media (min-width: 769px) {
+        /* Desktop header: compact icon-only controls, matching the mobile language. */
+        .siteHeader .nav > .sngDesktopProfileButton,
+        .siteHeader .nav > .sngDesktopStoreButton,
+        .siteHeader .nav > .cartButton {
+          width:46px !important;
+          min-width:46px !important;
+          max-width:46px !important;
+          height:46px !important;
+          min-height:46px !important;
+          max-height:46px !important;
+          padding:0 !important;
+          margin:0 !important;
+          flex:0 0 46px !important;
+          border-radius:15px !important;
+          align-items:center !important;
+          justify-content:center !important;
+          gap:0 !important;
+          overflow:visible !important;
+          position:relative;
+        }
+
+        .siteHeader .nav > .cartButton {
+          background:linear-gradient(135deg,#167fff,#7c3aed) !important;
+          border:1px solid rgba(132,188,255,.34) !important;
+          box-shadow:0 10px 28px rgba(44,91,255,.20),inset 0 1px 0 rgba(255,255,255,.10),0 0 24px rgba(74,103,255,.12) !important;
+        }
+        .siteHeader .nav > .cartButton:hover { transform:translateY(-1px); box-shadow:0 14px 34px rgba(44,91,255,.27),inset 0 1px 0 rgba(255,255,255,.13),0 0 30px rgba(74,103,255,.18) !important; }
+        .siteHeader .nav > .cartButton:active { transform:translateY(0) scale(.97); }
+        .siteHeader .nav > .cartButton > span:not(.cartIcon) { display:none !important; }
+        .siteHeader .nav > .cartButton .cartIcon { display:inline-flex !important; width:22px; height:22px; align-items:center; justify-content:center; font-size:19px; line-height:1; }
+        .siteHeader .nav > .cartButton b { position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 4px !important; display:flex; align-items:center; justify-content:center; border-radius:999px; background:linear-gradient(135deg,#ff4d9d,#7c3aed) !important; border:2px solid #050912; color:#fff; font-size:9px; line-height:1; box-shadow:0 4px 12px rgba(124,58,237,.35); }
+
         .sngDesktopProfileButton {
           display:inline-flex !important;
           align-items:center;
           justify-content:center;
-          gap:9px;
-          min-height:46px;
-          padding:0 17px;
-          border:1px solid rgba(91,146,255,.34);
-          border-radius:15px;
+          border:1px solid rgba(91,146,255,.42);
           background:linear-gradient(145deg,rgba(18,30,55,.96),rgba(24,12,48,.94));
           color:#eef5ff;
           box-shadow:0 10px 28px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.07),0 0 24px rgba(65,116,255,.08);
           font:inherit;
-          font-weight:850;
           cursor:pointer;
           transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
         }
-        .sngDesktopProfileButton:hover { transform:translateY(-1px); border-color:rgba(110,171,255,.62); box-shadow:0 13px 34px rgba(0,0,0,.25),0 0 30px rgba(65,116,255,.14); }
-        .sngDesktopProfileButton.is-active { border-color:rgba(105,166,255,.72); background:linear-gradient(135deg,rgba(31,74,170,.92),rgba(89,38,171,.92)); box-shadow:0 12px 34px rgba(54,76,220,.22); }
-        .sngDesktopProfileIcon { width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center; }
-        .sngDesktopProfileIcon svg { width:20px;height:20px; }
+        .sngDesktopProfileButton:hover { transform:translateY(-1px); border-color:rgba(110,171,255,.72); box-shadow:0 13px 34px rgba(0,0,0,.25),0 0 30px rgba(65,116,255,.14); }
+        .sngDesktopProfileButton.is-active { border-color:rgba(105,166,255,.78); background:linear-gradient(135deg,rgba(31,74,170,.96),rgba(89,38,171,.96)); box-shadow:0 12px 34px rgba(54,76,220,.24),inset 0 1px 0 rgba(255,255,255,.10); }
+        .sngDesktopProfileButton > span:not(.sngDesktopProfileIcon) { display:none !important; }
+        .sngDesktopProfileIcon { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center; }
+        .sngDesktopProfileIcon svg { width:22px;height:22px; }
 
         /* Compact premium store-return control: icon only, visible only in Profile. */
         .sngDesktopStoreButton {
           display:none !important;
-          width:46px;
-          height:46px;
-          min-width:46px;
-          min-height:46px;
-          padding:0;
-          margin:0;
-          align-items:center;
-          justify-content:center;
           border:1px solid rgba(96,150,255,.42);
-          border-radius:15px;
           background:linear-gradient(145deg,rgba(19,42,84,.98),rgba(49,19,91,.96));
           color:#f4f8ff;
           box-shadow:0 10px 28px rgba(20,42,100,.25),inset 0 1px 0 rgba(255,255,255,.10),0 0 26px rgba(67,104,255,.15);
