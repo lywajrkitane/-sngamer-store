@@ -98,25 +98,42 @@
     const style=document.createElement('style');
     style.id='sngOrderTrackingStyles';
     style.textContent=`
-      .sngTracking{margin-top:14px;padding:15px 12px 13px;border:1px solid rgba(80,150,255,.20);border-radius:16px;background:linear-gradient(135deg,rgba(10,25,45,.92),rgba(17,10,35,.82));overflow:hidden}
-      .sngTrackingHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
-      .sngTrackingTitle{font-weight:800;font-size:14px;color:#fff}
-      .sngTrackingStatus{font-size:12px;font-weight:800;color:#67b8ff;background:rgba(43,125,255,.12);border:1px solid rgba(80,160,255,.22);padding:5px 9px;border-radius:999px;white-space:nowrap}
-      .sngTrackingLine{display:flex;align-items:flex-start;min-width:510px;padding:0 2px}
-      .sngTrackingStep{flex:1;position:relative;text-align:center;min-width:92px}
+      .sngTracking{margin-top:14px;padding:15px 12px 13px;border:1px solid rgba(80,150,255,.20);border-radius:16px;background:linear-gradient(135deg,rgba(10,25,45,.92),rgba(17,10,35,.82));overflow:hidden;width:100%;max-width:100%;box-sizing:border-box}
+      .sngTracking *{box-sizing:border-box}
+      .sngTrackingHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;min-width:0}
+      .sngTrackingTitle{font-weight:800;font-size:14px;color:#fff;min-width:0}
+      .sngTrackingStatus{font-size:12px;font-weight:800;color:#67b8ff;background:rgba(43,125,255,.12);border:1px solid rgba(80,160,255,.22);padding:5px 9px;border-radius:999px;white-space:nowrap;flex:0 0 auto}
+      .sngTrackingScroll{width:100%;max-width:100%;overflow:hidden;padding:0 0 3px;-webkit-overflow-scrolling:touch}
+      .sngTrackingLine{display:flex;align-items:flex-start;width:100%;min-width:0;padding:0;}
+      .sngTrackingStep{flex:1 1 0;min-width:0;width:20%;position:relative;text-align:center;padding:0 1px}
       .sngTrackingStep:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:3px;background:rgba(120,145,180,.22);z-index:0}
       .sngTrackingStep.done:not(:last-child)::after{background:linear-gradient(90deg,#25d68b,#4f9cff)}
       .sngTrackingDot{position:relative;z-index:1;width:29px;height:29px;margin:0 auto 7px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;background:#111c2d;border:2px solid rgba(130,155,190,.32);color:#8092aa;box-sizing:border-box}
       .sngTrackingStep.done .sngTrackingDot{background:linear-gradient(135deg,#167c57,#247cff);border-color:#50b9ff;color:#fff;box-shadow:0 0 12px rgba(54,155,255,.25)}
       .sngTrackingStep.current .sngTrackingDot{background:linear-gradient(135deg,#287bff,#873dff);border-color:#6fc1ff;color:#fff;box-shadow:0 0 16px rgba(68,135,255,.38)}
-      .sngTrackingLabel{font-size:11px;color:#71849d;font-weight:700;line-height:1.25}
+      .sngTrackingLabel{font-size:11px;color:#71849d;font-weight:700;line-height:1.25;overflow-wrap:anywhere;word-break:normal}
       .sngTrackingStep.done .sngTrackingLabel,.sngTrackingStep.current .sngTrackingLabel{color:#fff}
       .sngTrackingNote{margin-top:12px;font-size:12px;color:#93a4ba;text-align:center}
-      .sngTrackingScroll{overflow-x:auto;overflow-y:hidden;padding-bottom:3px;-webkit-overflow-scrolling:touch}
-      .sngTrackingScroll::-webkit-scrollbar{height:3px}
       .sngOrderToast{position:fixed;left:16px;right:16px;bottom:88px;z-index:99999;padding:13px 15px;border-radius:14px;background:rgba(9,19,34,.97);border:1px solid rgba(73,164,255,.38);box-shadow:0 12px 35px rgba(0,0,0,.4);color:#fff;font-size:13px;font-weight:700;transform:translateY(15px);opacity:0;transition:.25s ease;pointer-events:none}
       .sngOrderToast.show{transform:translateY(0);opacity:1}
-      @media(max-width:600px){.sngTracking{padding-left:10px;padding-right:10px}.sngTrackingLine{min-width:470px}.sngTrackingStep{min-width:84px}.sngTrackingLabel{font-size:10px}}
+      @media(max-width:600px){
+        .sngTracking{padding:13px 8px 12px}
+        .sngTrackingHead{gap:6px;margin-bottom:12px}
+        .sngTrackingTitle{font-size:13px}
+        .sngTrackingStatus{font-size:10px;padding:4px 7px}
+        .sngTrackingDot{width:27px;height:27px;font-size:12px;margin-bottom:6px}
+        .sngTrackingStep:not(:last-child)::after{top:13px;height:2px}
+        .sngTrackingLabel{font-size:9px;line-height:1.2}
+        .sngTrackingNote{font-size:11px;margin-top:10px}
+      }
+      @media(max-width:380px){
+        .sngTracking{padding-left:6px;padding-right:6px}
+        .sngTrackingTitle{font-size:12px}
+        .sngTrackingStatus{font-size:9px;padding:3px 6px}
+        .sngTrackingDot{width:25px;height:25px;font-size:11px}
+        .sngTrackingStep:not(:last-child)::after{top:12px}
+        .sngTrackingLabel{font-size:8px}
+      }
     `;
     document.head.appendChild(style);
   }
