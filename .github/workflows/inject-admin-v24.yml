@@ -25,13 +25,36 @@ jobs:
           node --check server/customer-system.js
           node --check public/admin-data-fix.js
 
+      - name: Validate inline admin JavaScript
+        shell: bash
+        run: |
+          set -e
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          index = 0
+          for filename in ('public/admin.html', 'public/admin-dashboard.html'):
+              html = Path(filename).read_text(encoding='utf-8')
+              scripts = re.findall(r'<script\b([^>]*)>([\s\S]*?)</script\s*>', html, re.IGNORECASE)
+              for attrs, body in scripts:
+                  if re.search(r'\bsrc\s*=', attrs, re.IGNORECASE) or not body.strip():
+                      continue
+                  index += 1
+                  Path(f'/tmp/sngamer-admin-inline-{index}.js').write_text(body, encoding='utf-8')
+          print(f'Extracted {index} inline admin scripts for syntax checking.')
+          PY
+          for file in /tmp/sngamer-admin-inline-*.js; do
+            node --check "$file"
+          done
+
       - name: Refresh admin workspace script version
         shell: python
         run: |
           from pathlib import Path
           import re
 
-          version = '20261018-1146'
+          version = '20261018-1200'
           workspace_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
           fix_tag = f'<script src="/admin-data-fix.js?v={version}"></script>'
 
@@ -59,7 +82,7 @@ jobs:
                   print(f'{filename} not found; skipping')
                   continue
               s = p.read_text(encoding='utf-8')
-              new_s = re.sub(r'(/admin-data-fix\.js\?v=)\d+', rf'\g<1>{version}', s)
+              new_s = re.sub(r'(/admin-data-fix\.js\?v=)[^"\']+', rf'\g<1>{version}', s)
               if new_s != s:
                   p.write_text(new_s, encoding='utf-8')
                   changed.append(filename)
