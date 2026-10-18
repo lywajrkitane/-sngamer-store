@@ -1,0 +1,45 @@
+/* Inject the premium UI layer into the customer store and both admin surfaces. */
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+if (!express.application.__sngPremiumDialogsListenPatched) {
+  express.application.__sngPremiumDialogsListenPatched = true;
+  const originalListen = express.application.listen;
+  express.application.listen = function premiumDialogsListen(...args) {
+    const app = this;
+    const stack = app._router && app._router.stack;
+    if (stack && !app.__sngPremiumDialogsInjected) {
+      app.__sngPremiumDialogsInjected = true;
+      const publicDir = path.join(__dirname, '..', 'public');
+      const inject = function(req, res, next) {
+        if (req.method !== 'GET' || !['/', '/index.html', '/admin.html', '/admin-dashboard.html'].includes(req.path)) return next();
+        const filename = req.path === '/' || req.path === '/index.html' ? 'index.html' : req.path.slice(1);
+        const file = path.join(publicDir, filename);
+        if (!fs.existsSync(file)) return next();
+        try {
+          let html = fs.readFileSync(file, 'utf8');
+          if (!html.includes('premium-dialogs-v1.css')) {
+            html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525"></head>');
+          }
+          if (!html.includes('premium-dialogs-v1.js')) {
+            html = html.replace(/<\/body>/i, '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script></body>');
+          }
+          res.set('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate');
+          res.set('Pragma','no-cache');
+          res.set('Expires','0');
+          return res.type('html').send(html);
+        } catch (error) {
+          console.error('PREMIUM_DIALOGS_INJECTION_ERROR:', error);
+          return next();
+        }
+      };
+      const router = express.Router();
+      router.use(inject);
+      const staticIndex = stack.findIndex(layer => layer && layer.handle && layer.handle.name === 'serveStatic');
+      if (staticIndex >= 0) stack.splice(staticIndex, 0, ...(router.stack || []));
+      else stack.unshift(...(router.stack || []));
+    }
+    return originalListen.apply(this, args);
+  };
+}
