@@ -3,8 +3,8 @@
   "version": "7.0.0",
   "private": true,
   "scripts": {
-    "start": "node -r ./server/paytech-static.js server/bootstrap.js",
-    "dev": "node -r ./server/paytech-static.js --watch server/bootstrap.js"
+    "start": "node -r ./server/customer-space-enhancements-preload-v2.js -r ./server/paytech-static.js server/bootstrap.js",
+    "dev": "node -r ./server/customer-space-enhancements-preload-v2.js -r ./server/paytech-static.js --watch server/bootstrap.js"
   },
   "dependencies": {
     "express": "^4.21.2",
