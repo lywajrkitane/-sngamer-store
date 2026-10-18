@@ -99,6 +99,7 @@
           border-color:rgba(255,255,255,.48) !important;
           box-shadow:0 12px 34px rgba(54,76,220,.30),inset 0 1px 0 rgba(255,255,255,.18),0 0 30px rgba(74,103,255,.20) !important;
         }
+        .sngDesktopProfileButton.is-hidden { display:none !important; }
 
         /* Search is already converted to the premium icon button by search-polish.js. */
         .siteHeader .nav > .searchPremiumButton { order:3 !important; }
@@ -173,6 +174,9 @@
     if (profile) profile.classList.toggle('sngDesktopProfileArea', isProfile);
     if (buttons) {
       buttons.profileButton.classList.toggle('is-active', isProfile);
+      buttons.profileButton.classList.toggle('is-hidden', isProfile);
+      buttons.profileButton.setAttribute('aria-hidden', isProfile ? 'true' : 'false');
+      buttons.profileButton.tabIndex = isProfile ? -1 : 0;
       buttons.storeButton.classList.toggle('is-visible', isProfile);
     }
   }
