@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Paiement confirmé - SNGAMER STORE</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Arial,sans-serif;background:#07101d;color:#fff}
+    .box{width:min(100%,460px);text-align:center;padding:36px 26px;border:1px solid rgba(120,170,255,.25);border-radius:24px;background:#0d1828;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+    .ok{width:76px;height:76px;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;font-size:46px;color:#8ee28e;background:rgba(142,226,142,.1);border:2px solid rgba(142,226,142,.35)}
+    h1{margin:0 0 12px;font-size:28px}
+    p{margin:0;line-height:1.6;color:#b9c5d6}
+    .order{margin-top:16px;color:#fff;font-weight:700}
+    a{display:inline-block;margin-top:24px;padding:13px 22px;border-radius:12px;background:linear-gradient(135deg,#287cff,#c51be9);color:#fff;text-decoration:none;font-weight:700}
+  </style>
+</head>
+<body>
+  <main class="box">
+    <div class="ok">✓</div>
+    <h1>Paiement confirmé</h1>
+    <p>Félicitations, votre paiement a été effectué avec succès.</p>
+    <div class="order" id="order"></div>
+    <a href="/">Retour à la boutique</a>
+  </main>
+  <script>
+    const order = new URLSearchParams(location.search).get('order');
+    if (order) document.getElementById('order').textContent = `Commande #${order}`;
+  </script>
+</body>
+</html>
