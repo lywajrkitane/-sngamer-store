@@ -90,9 +90,7 @@ function patchPackageScripts() {
 function patchHtml(fileName) {
   const file = path.join(ROOT, "public", fileName);
   patchFile(file, text => {
-    const tag = '<script src="/stock-mode.js?v=20261019-0825"></script>';
-    // Always refresh the asset version so browsers do not keep the previous
-    // green home-card version of stock-mode.js in cache.
+    const tag = '<script src="/stock-mode.js?v=20261019-0835"></script>';
     if (text.includes("/stock-mode.js")) {
       return text.replace(/<script\b[^>]*src="[^"]*stock-mode\.js(?:\?[^"]*)?"[^>]*><\/script>/i, tag);
     }
@@ -106,7 +104,6 @@ patchHtml("index.html");
 patchHtml("admin.html");
 patchHtml("admin-dashboard.html");
 
-// bootstrap.js modifies server.js before requiring it; patch once more immediately before that require.
 const originalLoad = Module._load;
 Module._load = function(request, parent, isMain) {
   if (request === "./server" && parent && /server[\\/]bootstrap\.js$/.test(parent.filename)) {
