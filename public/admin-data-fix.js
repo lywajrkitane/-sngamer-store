@@ -53,7 +53,7 @@
   function loadAnalyticsAdmin() {
     if (window.__sngAnalyticsAdminLoaded || document.querySelector('script[data-sng-site-analytics-admin]')) return;
     const script = document.createElement('script');
-    script.src = '/site-analytics-admin.js?v=20261019-analytics2';
+    script.src = '/site-analytics-admin.js?v=20261019-analytics3';
     script.async = false;
     script.dataset.sngSiteAnalyticsAdmin = '1';
     script.onload = () => {
@@ -96,20 +96,14 @@
     );
   }
 
-  /* Remove the exact legacy standalone panel used by older admin builds.
-     Never remove a container that owns the canonical orders table/workspace. */
   function cleanupDuplicateOrderSections() {
     const root = adminBox();
     if (!root) return;
-
     const markers = Array.from(root.querySelectorAll('input')).filter(isLegacyOrderSearchInput);
-
     markers.forEach(marker => {
       if (marker.closest('#sng-order-tools')) return;
-
       let candidate = marker.closest('section');
       if (!candidate || candidate === getOrdersSection()) candidate = marker.parentElement;
-
       for (let i = 0; i < 8 && candidate && candidate !== root; i += 1) {
         const hasPayment = hasOptionText(candidate, /tous les paiements/);
         const hasStatus = hasOptionText(candidate, /tous les statuts/);
@@ -127,21 +121,14 @@
     });
   }
 
-  /* Older builds can leave a reduced duplicate containing only search + status.
-     This can happen INSIDE the same <section> as #ordersTable, so the old V11
-     guard that skipped the entire Orders section was too broad. We only remove
-     the small legacy control container itself and never its canonical workspace. */
   function cleanupDuplicateOrderTools(section) {
     if (!section) return;
-
     const marker = Array.from(section.querySelectorAll('input,select')).find(el => {
       if (el.closest('#sng-order-tools')) return false;
       const placeholder = normalizeText(el.getAttribute('placeholder'));
       return placeholder.includes('client, telephone, id');
     });
-
     if (!marker) return;
-
     let container = marker.parentElement;
     for (let i = 0; i < 8 && container && container !== section; i += 1) {
       const controls = container.querySelectorAll('input,select,button');
@@ -150,7 +137,6 @@
       );
       const ownsCanonicalTable = container.contains(document.getElementById('ordersTable'));
       const ownsCanonicalWorkspace = container.contains(document.getElementById('sngFinalOrders'));
-
       if (!ownsCanonicalTable && !ownsCanonicalWorkspace && controls.length >= 2 && hasStatus) {
         console.debug('SNGAMER: removed reduced legacy order filter panel');
         container.remove();
@@ -158,42 +144,29 @@
       }
       container = container.parentElement;
     }
-
     if (!marker.closest('#sngFinalOrders')) marker.remove();
   }
 
   function cleanupAllLegacyOrderPanels() {
     const root = adminBox();
     if (!root) return;
-
     removeLegacyOrderTools();
     cleanupDuplicateOrderSections();
-
-    // IMPORTANT: inspect the canonical Orders section too. V11 skipped it,
-    // which is exactly why the remaining search/status panel survived.
-    Array.from(root.querySelectorAll('section')).forEach(section => {
-      cleanupDuplicateOrderTools(section);
-    });
+    Array.from(root.querySelectorAll('section')).forEach(section => cleanupDuplicateOrderTools(section));
   }
 
   async function refreshNow(reason) {
     if (!isAdminVisible() || refreshInFlight) return;
-
     refreshInFlight = true;
     const workspace = currentWorkspace();
-
     try {
       cleanupAllLegacyOrderPanels();
       await runLoader('loadAll');
       cleanupAllLegacyOrderPanels();
-
       if (currentWorkspace() === 'orders' || workspace === 'orders') {
-        if (typeof window.loadOrders === 'function') {
-          await runLoader('loadOrders');
-        }
+        if (typeof window.loadOrders === 'function') await runLoader('loadOrders');
         cleanupAllLegacyOrderPanels();
       }
-
       lastWorkspace = currentWorkspace();
       console.debug('SNGAMER ADMIN AUTO REFRESH OK:', reason, lastWorkspace);
     } catch (error) {
@@ -214,18 +187,13 @@
   function installObserver() {
     const box = adminBox();
     if (!box || observer) return;
-
     observer = new MutationObserver(() => {
       if (!isAdminVisible()) return;
       cleanupAllLegacyOrderPanels();
       const workspace = currentWorkspace();
       if (workspace !== lastWorkspace) refreshNow('workspace-change');
     });
-
-    observer.observe(box, {
-      attributes: true,
-      attributeFilter: ['class', 'data-v26-workspace']
-    });
+    observer.observe(box, { attributes: true, attributeFilter: ['class', 'data-v26-workspace'] });
   }
 
   function sanitizePaymentSelectors(root = document) {
@@ -236,13 +204,11 @@
       const looksLikePayment = texts.includes('paye') || texts.includes('en attente');
       const hasRefundOptions = texts.some(t => t === 'rembourse' || t === 'remboursement demande');
       if (!looksLikePayment || !hasRefundOptions) return;
-
       const oldValue = normalizeText(select.value);
       options.forEach(option => {
         const text = normalizeText(option.textContent);
         if (text === 'rembourse' || text === 'remboursement demande') option.remove();
       });
-
       if (oldValue === 'rembourse' || oldValue === 'remboursement demande') {
         const paid = Array.from(select.options).find(o => normalizeText(o.textContent) === 'paye');
         if (paid) select.value = paid.value;
@@ -270,24 +236,20 @@
       window.setTimeout(boot, 250);
       return;
     }
-
     stopOldCoreTimer();
     cleanupAllLegacyOrderPanels();
     installObserver();
     bootPaymentSelectorGuard();
     loadRefundUiV2();
     loadAnalyticsAdmin();
-
     if (!isAdminVisible()) {
       window.setTimeout(boot, 250);
       return;
     }
-
     if (!intervalId) {
       scheduleInitialRefreshes();
       intervalId = window.setInterval(() => refreshNow('interval'), INTERVAL_MS);
     }
-
     refreshNow('boot');
   }
 
@@ -299,24 +261,18 @@
       refreshNow('visibility');
     }
   });
-
   window.addEventListener('pageshow', () => {
     cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();
     refreshNow('pageshow');
   });
-
   window.addEventListener('focus', () => {
     cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();
     refreshNow('focus');
   });
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
-  } else {
-    boot();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })();
