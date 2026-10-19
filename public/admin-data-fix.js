@@ -1,4 +1,4 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V8
+/* SNGAMER STORE — ADMIN DATA REFRESH V9
    Automatic refresh owner for the authenticated admin workspace.
    Also loads the dedicated refund UI and analytics admin UI.
    Keeps one canonical order search/filter toolbar in the existing Orders section.
@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV8';
+  const STATE = '__sngamerAdminAutoRefreshV9';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -118,37 +118,61 @@
     return table?.closest('section') || null;
   }
 
-  /* Remove the older standalone filter panel that was rendered as a second
-     Orders section above the canonical toolbar. The real toolbar is kept
-     inside the section containing #ordersTable. */
+  function normalizeText(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function isLegacyOrderSearchInput(input) {
+    if (!input || input.closest('#sng-order-tools')) return false;
+    const placeholder = normalizeText(input.getAttribute('placeholder'));
+    return placeholder.includes('commande, client, telephone') ||
+      (placeholder.includes('client') && placeholder.includes('telephone'));
+  }
+
+  function hasOptionText(container, pattern) {
+    return Array.from(container.querySelectorAll('select')).some(select =>
+      Array.from(select.options || []).some(option => pattern.test(normalizeText(option.textContent)))
+    );
+  }
+
+  /*
+     The old duplicate filter is not always a direct child <section> of #adminBox.
+     Previous cleanup therefore missed the exact panel visible on mobile.
+     We now locate the legacy search input anywhere inside the admin workspace,
+     find its nearest meaningful container, and remove only that container when
+     it has both the status and payment filters. The canonical #sng-order-tools
+     and the section containing #ordersTable are always protected.
+  */
   function cleanupDuplicateOrderSections() {
     const root = adminBox();
     if (!root) return;
 
-    Array.from(root.querySelectorAll(':scope > section')).forEach(section => {
-      const heading = String(section.querySelector('h1,h2,h3,h4')?.textContent || '').trim().toLowerCase();
-      if (/commandes?/.test(heading)) return;
+    const markers = Array.from(root.querySelectorAll('input')).filter(isLegacyOrderSearchInput);
+    markers.forEach(marker => {
+      if (marker.closest('#sng-order-tools')) return;
 
-      const marker = Array.from(section.querySelectorAll('input')).find(input => {
-        const placeholder = String(input.getAttribute('placeholder') || '').toLowerCase();
-        return (placeholder.includes('commande, client, téléphone') || (placeholder.includes('client') && placeholder.includes('téléphone'))) && !input.closest('#sng-order-tools');
-      });
-      if (!marker) return;
+      const ordersSection = getOrdersSection();
+      if (ordersSection && ordersSection.contains(marker)) return;
 
-      const hasPaymentFilter = Array.from(section.querySelectorAll('select')).some(select =>
-        Array.from(select.options || []).some(option =>
-          /tous les paiements/i.test(String(option.textContent || ''))
-        )
-      );
-      const hasStatusFilter = Array.from(section.querySelectorAll('select')).some(select =>
-        Array.from(select.options || []).some(option =>
-          /tous les statuts/i.test(String(option.textContent || ''))
-        )
-      );
+      let candidate = marker.closest('section');
+      if (!candidate || candidate === ordersSection) candidate = marker.parentElement;
 
-      if (hasPaymentFilter && hasStatusFilter) {
-        console.debug('SNGAMER: removed duplicate standalone order filter section');
-        section.remove();
+      for (let i = 0; i < 8 && candidate && candidate !== root; i += 1) {
+        const hasPayment = hasOptionText(candidate, /tous les paiements/);
+        const hasStatus = hasOptionText(candidate, /tous les statuts/);
+        const hasReset = Array.from(candidate.querySelectorAll('button')).some(button => /reinitialiser/.test(normalizeText(button.textContent)));
+        if (hasPayment && hasStatus && hasReset) {
+          if (candidate.contains(document.getElementById('ordersTable'))) return;
+          console.debug('SNGAMER: removed duplicate standalone order filter panel');
+          candidate.remove();
+          return;
+        }
+        candidate = candidate.parentElement;
       }
     });
   }
@@ -158,8 +182,8 @@
 
     const marker = Array.from(section.querySelectorAll('input,select')).find(el => {
       if (el.closest('#sng-order-tools')) return false;
-      const placeholder = String(el.getAttribute('placeholder') || '').toLowerCase();
-      return placeholder.includes('client, téléphone, id');
+      const placeholder = normalizeText(el.getAttribute('placeholder'));
+      return placeholder.includes('client, telephone, id');
     });
 
     if (!marker) return;
@@ -168,9 +192,7 @@
     for (let i = 0; i < 4 && container && container !== section; i += 1) {
       const controls = container.querySelectorAll('input,select,button');
       const hasStatus = Array.from(container.querySelectorAll('select')).some(select =>
-        Array.from(select.options || []).some(option =>
-          /tous les statuts/i.test(String(option.textContent || ''))
-        )
+        Array.from(select.options || []).some(option => /tous les statuts/i.test(String(option.textContent || '')))
       );
       if (controls.length >= 2 && hasStatus) {
         container.remove();
@@ -200,9 +222,9 @@
       const paymentText = text;
       const statusOk = status === 'all' || rowStatus === status;
       let paymentOk = true;
-      if (payment === 'paid') paymentOk = /état du paiement:\s*(payé|paye|paid)/i.test(paymentText) || /\bpayé\b|\bpaye\b|\bpaid\b/i.test(paymentText);
+      if (payment === 'paid') paymentOk = /etat du paiement:\s*(paye|paid)/i.test(paymentText) || /\bpaye\b|\bpaid\b/i.test(paymentText);
       if (payment === 'pending') paymentOk = /en attente|pending/i.test(paymentText);
-      if (payment === 'refunded') paymentOk = /remboursé|remboursement/i.test(paymentText);
+      if (payment === 'refunded') paymentOk = /rembourse|remboursement/i.test(paymentText);
       const searchOk = !search || text.includes(search);
       const show = statusOk && paymentOk && searchOk;
       row.style.display = show ? '' : 'none';
@@ -340,19 +362,19 @@
     const selects = root.querySelectorAll ? root.querySelectorAll('select') : [];
     selects.forEach(select => {
       const options = Array.from(select.options || []);
-      const texts = options.map(o => String(o.textContent || '').trim().toLowerCase());
-      const looksLikePayment = texts.includes('payé') || texts.includes('paye') || texts.includes('en attente');
-      const hasRefundOptions = texts.some(t => t === 'remboursé' || t === 'remboursement demandé');
+      const texts = options.map(o => normalizeText(o.textContent));
+      const looksLikePayment = texts.includes('paye') || texts.includes('en attente');
+      const hasRefundOptions = texts.some(t => t === 'rembourse' || t === 'remboursement demande');
       if (!looksLikePayment || !hasRefundOptions) return;
 
-      const oldValue = String(select.value || '').trim().toLowerCase();
+      const oldValue = normalizeText(select.value);
       options.forEach(option => {
-        const text = String(option.textContent || '').trim().toLowerCase();
-        if (text === 'remboursé' || text === 'remboursement demandé') option.remove();
+        const text = normalizeText(option.textContent);
+        if (text === 'rembourse' || text === 'remboursement demande') option.remove();
       });
 
-      if (oldValue === 'remboursé' || oldValue === 'remboursement demandé') {
-        const paid = Array.from(select.options).find(o => ['payé', 'paye'].includes(String(o.textContent || '').trim().toLowerCase()));
+      if (oldValue === 'rembourse' || oldValue === 'remboursement demande') {
+        const paid = Array.from(select.options).find(o => ['paye'].includes(normalizeText(o.textContent)));
         if (paid) select.value = paid.value;
       }
     });
