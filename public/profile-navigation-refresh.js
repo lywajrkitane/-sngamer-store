@@ -43,27 +43,29 @@
   }
 
   const STORAGE_KEY = "sg_profile_return_section";
-  const validSections = new Set(["home", "accessories", "phones", "coins"]);
 
   function installRefreshNavigation() {
-    if (typeof window.navigateStore !== "function") return;
-    if (window.__sngamerProfileRefreshInstalled) return;
-    const originalNavigateStore = window.navigateStore;
-    window.__sngamerProfileRefreshInstalled = true;
-    window.navigateStore = function (section) {
-      const currentSection = window.activeStoreSection;
-      if (currentSection === "profile" && validSections.has(section)) {
-        sessionStorage.setItem(STORAGE_KEY, section);
-        window.location.reload();
-        return;
-      }
-      return originalNavigateStore.apply(this, arguments);
-    };
-    const pendingSection = sessionStorage.getItem(STORAGE_KEY);
-    if (pendingSection && validSections.has(pendingSection)) {
-      sessionStorage.removeItem(STORAGE_KEY);
-      window.setTimeout(function () { originalNavigateStore(pendingSection); }, 0);
-    } else if (pendingSection) sessionStorage.removeItem(STORAGE_KEY);
+    // Remove stale state left by earlier versions which forced a full page reload.
+    try { window.sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
+
+    // Keep the profile panel strictly confined to the Profile section.
+    // This prevents notification/profile cards from leaking into category views,
+    // even if another stylesheet or observer attempts to reveal the panel.
+    if (!document.getElementById("sngProfileVisibilityGuard")) {
+      const style = document.createElement("style");
+      style.id = "sngProfileVisibilityGuard";
+      style.textContent = `
+        body:not([data-store-section="profile"]) #profileArea {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        body[data-store-section="profile"] #profileArea {
+          display: block !important;
+          visibility: visible !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }
 
   function loadPremiumSearch() {
