@@ -1,11 +1,13 @@
 (function(){
   'use strict';
-  if(window.__sngCustomerProfilePremiumV1)return;
-  window.__sngCustomerProfilePremiumV1=true;
+  if(window.__sngCustomerProfilePremiumV2)return;
+  window.__sngCustomerProfilePremiumV2=true;
 
   const nativeFetch=window.fetch.bind(window);
   let ordersCache=null;
   let customerCache=null;
+  let photoLoaded=false;
+  let photoUrlCache=null;
   let enhancing=false;
   let observer=null;
 
@@ -33,33 +35,68 @@
   function rewriteOrderTitles(orders){const map=new Map((orders||[]).map(o=>[Number(o.id),o]));document.querySelectorAll('#profileArea .sgaOrder').forEach(card=>{const strong=card.querySelector('.sgaOrderTop strong');if(!strong)return;const match=(strong.textContent||'').match(/#(\d+)/);const id=Number(card.getAttribute('data-order-id')||match?.[1]);if(!Number.isInteger(id)||id<=0)return;card.setAttribute('data-order-id',String(id));const order=map.get(id);if(!order)return;const publicTitle=orderPublicTitle(order);if(strong.dataset.sngPublicTitle===publicTitle)return;strong.dataset.sngPublicTitle=publicTitle;strong.innerHTML=`<span class="sngProfileOrderPublicTitle">${escapeHtml(publicTitle)}</span><span class="sngProfileOrderInternalId"> #${id}</span>`;});}
   function escapeHtml(text){return String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
   function hideHeaderContacts(profile,customer){if(!profile||!customer)return;const targets=[String(customer.email||'').trim(),String(customer.phone||'').trim()].filter(Boolean);profile.querySelectorAll('.sgaCard:first-child *').forEach(el=>{const text=(el.textContent||'').replace(/\s+/g,' ').trim();if(targets.some(value=>text===value))el.style.display='none';});}
-  async function loadPhoto(){try{const r=await nativeFetch('/api/customer/profile-photo',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return null;const blob=await r.blob();return URL.createObjectURL(blob);}catch(_){return null;}}
+  async function loadPhoto(){if(photoLoaded)return photoUrlCache;photoLoaded=true;try{const r=await nativeFetch('/api/customer/profile-photo',{credentials:'same-origin',cache:'no-store'});if(!r.ok){photoUrlCache=null;return null;}const blob=await r.blob();photoUrlCache=URL.createObjectURL(blob);return photoUrlCache;}catch(_){photoUrlCache=null;return null;}}
   function findOriginalAvatar(profile,customer){const initial=String(customer?.name||'W').trim().charAt(0).toUpperCase();const candidates=[...profile.querySelectorAll('.sgaCard:first-child *')].filter(el=>{if(el.closest('.sngProfileAvatarPremium'))return false;const text=(el.textContent||'').trim();if(text!==initial)return false;const r=el.getBoundingClientRect();return r.width>=35&&r.height>=35;});return candidates.sort((a,b)=>b.getBoundingClientRect().width-a.getBoundingClientRect().width)[0]||null;}
   function buildAvatar(profile,customer,photoUrl){
-    let avatar=profile.querySelector('.sngProfileAvatarPremium');
-    const duplicates=[...profile.querySelectorAll('.sngProfileAvatarPremium')];
-    if(duplicates.length>1){duplicates.slice(1).forEach(node=>node.remove());avatar=duplicates[0];}
-    if(avatar){updateAvatarImage(avatar,photoUrl,customer);if(avatar.dataset.sngPickerInstalled!=='1')installPhotoPicker(avatar);return avatar;}
+    const avatars=[...profile.querySelectorAll('.sngProfileAvatarPremium')];
+    let avatar=avatars.shift()||null;
+    avatars.forEach(node=>node.remove());
+
+    if(avatar){
+      updateAvatarImage(avatar,photoUrl,customer);
+      if(avatar.dataset.sngPickerInstalled!=='1')installPhotoPicker(avatar);
+      return avatar;
+    }
+
     const old=findOriginalAvatar(profile,customer);
     avatar=document.createElement('div');
     avatar.className='sngProfileAvatarPremium';
     avatar.title='Changer ma photo de profil';
-    if(old){old.replaceWith(avatar);}else{
+    if(old)old.replaceWith(avatar);
+    else{
+      const firstCard=profile.querySelector('.sgaCard:first-child');
       const nameNode=[...profile.querySelectorAll('.sgaCard:first-child *')].find(el=>el.children.length===0&&(el.textContent||'').trim()===String(customer?.name||''));
       if(nameNode?.parentElement)nameNode.parentElement.insertBefore(avatar,nameNode);
-      else profile.querySelector('.sgaCard:first-child')?.prepend(avatar);
+      else firstCard?.prepend(avatar);
     }
     updateAvatarImage(avatar,photoUrl,customer);
     installPhotoPicker(avatar);
     return avatar;
   }
+
   function updateAvatarImage(avatar,photoUrl,customer){
-    avatar.innerHTML='';
-    if(photoUrl){const img=document.createElement('img');img.src=photoUrl;img.alt='Photo de profil';avatar.appendChild(img);}
-    else{const span=document.createElement('span');span.className='sngProfileAvatarPremiumInitial';span.textContent=String(customer?.name||'W').trim().charAt(0).toUpperCase();avatar.appendChild(span);}
-    const camera=document.createElement('span');camera.className='sngProfileAvatarCamera';camera.textContent='📷';camera.setAttribute('aria-hidden','true');avatar.appendChild(camera);avatar.dataset.sngAvatarPremium='1';
+    const desiredPhoto=photoUrl||'';
+    const initial=String(customer?.name||'W').trim().charAt(0).toUpperCase();
+    const currentImage=avatar.querySelector('img');
+    const currentInitial=avatar.querySelector('.sngProfileAvatarPremiumInitial');
+    const hasCamera=Boolean(avatar.querySelector('.sngProfileAvatarCamera'));
+    const alreadyCorrect=avatar.dataset.sngAvatarPremium==='1'
+      && (avatar.dataset.sngPhotoUrl||'')===desiredPhoto
+      && hasCamera
+      && (desiredPhoto ? Boolean(currentImage) : Boolean(currentInitial&&currentInitial.textContent===initial));
+    if(alreadyCorrect)return;
+
+    avatar.replaceChildren();
+    if(desiredPhoto){
+      const img=document.createElement('img');
+      img.src=desiredPhoto;
+      img.alt='Photo de profil';
+      avatar.appendChild(img);
+    }else{
+      const span=document.createElement('span');
+      span.className='sngProfileAvatarPremiumInitial';
+      span.textContent=initial;
+      avatar.appendChild(span);
+    }
+    const camera=document.createElement('span');
+    camera.className='sngProfileAvatarCamera';
+    camera.textContent='📷';
+    camera.setAttribute('aria-hidden','true');
+    avatar.appendChild(camera);
+    avatar.dataset.sngPhotoUrl=desiredPhoto;
+    avatar.dataset.sngAvatarPremium='1';
   }
-  function installPhotoPicker(avatar){if(!avatar||avatar.dataset.sngPickerInstalled==='1')return;avatar.dataset.sngPickerInstalled='1';const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif';input.className='sngProfilePhotoInput';input.dataset.sngProfileInput='1';document.body.appendChild(input);avatar.addEventListener('click',()=>input.click());input.addEventListener('change',async()=>{const file=input.files?.[0];input.value='';if(!file)return;try{avatar.classList.add('sngProfilePhotoBusy');const compressed=await compressImage(file);const form=new FormData();form.append('photo',compressed,'profile.jpg');const r=await nativeFetch('/api/customer/profile-photo',{method:'POST',body:form,credentials:'same-origin'});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Impossible d’enregistrer la photo.');toast('✓ Photo de profil mise à jour');const url=await loadPhoto();if(url)updateAvatarImage(avatar,url,customerCache||{});}catch(error){toast(error.message||'Impossible de modifier la photo.');}finally{avatar.classList.remove('sngProfilePhotoBusy');}});}
+  function installPhotoPicker(avatar){if(!avatar||avatar.dataset.sngPickerInstalled==='1')return;avatar.dataset.sngPickerInstalled='1';const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,image/gif';input.className='sngProfilePhotoInput';input.dataset.sngProfileInput='1';document.body.appendChild(input);avatar.addEventListener('click',()=>input.click());input.addEventListener('change',async()=>{const file=input.files?.[0];input.value='';if(!file)return;try{avatar.classList.add('sngProfilePhotoBusy');const compressed=await compressImage(file);const form=new FormData();form.append('photo',compressed,'profile.jpg');const r=await nativeFetch('/api/customer/profile-photo',{method:'POST',body:form,credentials:'same-origin'});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Impossible d’enregistrer la photo.');toast('✓ Photo de profil mise à jour');const previousPhotoUrl=photoUrlCache;photoLoaded=false;photoUrlCache=null;const url=await loadPhoto();if(url){updateAvatarImage(avatar,url,customerCache||{});if(previousPhotoUrl)URL.revokeObjectURL(previousPhotoUrl);}}catch(error){toast(error.message||'Impossible de modifier la photo.');}finally{avatar.classList.remove('sngProfilePhotoBusy');}});}
   function compressImage(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);const max=600;const scale=Math.min(1,max/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Compression impossible.')),'image/jpeg',.86);};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Image invalide.'));};img.src=url;});}
   async function enhance(){
     if(enhancing)return;
