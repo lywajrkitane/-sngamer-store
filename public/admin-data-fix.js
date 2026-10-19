@@ -50,7 +50,8 @@
   function loadAnalyticsAdmin() {
     if (window.__sngAnalyticsAdminLoaded || document.querySelector('script[data-sng-site-analytics-admin]')) return;
     const script = document.createElement('script');
-    script.src = '/site-analytics-admin.js?v=20261019-analytics1';
+    // Cache-buster intentionally updated whenever the analytics UI changes.
+    script.src = '/site-analytics-admin.js?v=20261019-analytics2';
     script.async = false;
     script.dataset.sngSiteAnalyticsAdmin = '1';
     script.onload = () => {
@@ -68,14 +69,10 @@
     const workspace = currentWorkspace();
 
     try {
-      // This is the exact same data path used by the manual Actualiser button.
       await runLoader('loadAll');
-
-      // The Orders workspace must also redraw its list explicitly.
       if (currentWorkspace() === 'orders' || workspace === 'orders') {
         await runLoader('loadOrders');
       }
-
       lastWorkspace = currentWorkspace();
       console.debug('SNGAMER ADMIN AUTO REFRESH OK:', reason, lastWorkspace);
     } catch (error) {
@@ -106,9 +103,7 @@
     observer = new MutationObserver(() => {
       if (!isAdminVisible()) return;
       const workspace = currentWorkspace();
-      if (workspace !== lastWorkspace) {
-        refreshNow('workspace-change');
-      }
+      if (workspace !== lastWorkspace) refreshNow('workspace-change');
     });
 
     observer.observe(box, {
@@ -117,9 +112,6 @@
     });
   }
 
-  // Refund is a separate state from payment. Some older admin markup exposed
-  // both inside the same payment selector. Remove only those two refund
-  // options; keep the real payment failure option "Échoué".
   function sanitizePaymentSelectors(root = document) {
     const selects = root.querySelectorAll ? root.querySelectorAll('select') : [];
     selects.forEach(select => {
