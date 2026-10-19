@@ -33,18 +33,20 @@
       .sngHeroAnnouncementDots{flex:0 0 auto;display:flex;gap:7px;align-items:center;justify-content:center}
       .sngHeroAnnouncementDots i{width:7px;height:7px;border-radius:50%;background:#40516a;transition:all .25s ease}
       .sngHeroAnnouncementDots i.active{width:27px;border-radius:99px;background:linear-gradient(90deg,#2f9cff,#d62ab1)}
-      .sngHeroAudioButton{appearance:none;-webkit-appearance:none;border:1px solid rgba(91,169,255,.34);background:linear-gradient(135deg,rgba(22,135,255,.20),rgba(124,58,237,.24),rgba(233,30,99,.16));color:#f7fbff;min-height:42px;padding:9px 14px 9px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:9px;font-family:Inter,Arial,sans-serif;font-size:12px;line-height:1;font-weight:900;letter-spacing:.25px;cursor:pointer;box-shadow:0 9px 25px rgba(37,99,235,.18),inset 0 1px 0 rgba(255,255,255,.10);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
-      .sngHeroAudioButton:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(37,99,235,.25),inset 0 1px 0 rgba(255,255,255,.12)}
-      .sngHeroAudioButton:active{transform:scale(.97)}
-      .sngHeroAudioButton.is-playing{border-color:rgba(77,220,255,.58);box-shadow:0 0 24px rgba(45,174,255,.24),inset 0 1px 0 rgba(255,255,255,.12)}
-      .sngHeroAudioIcon{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#238cff,#8b3df0 60%,#e12b9c);font-size:13px;box-shadow:0 5px 14px rgba(54,102,255,.28)}
-      .sngHeroAudioCopy{display:flex;flex-direction:column;align-items:flex-start;gap:3px;white-space:nowrap}
-      .sngHeroAudioTitle{font-size:11px;font-weight:950;letter-spacing:.7px;text-transform:uppercase}
-      .sngHeroAudioHint{font-size:9px;font-weight:700;color:#9db2cc;letter-spacing:.15px}
+
+      /* Audio : bouton média compact, sans texte ni grand cadre. */
+      .sngHeroAudioButton{appearance:none;-webkit-appearance:none;border:1px solid rgba(91,169,255,.42);background:linear-gradient(135deg,#1687ff,#7c3aed 58%,#e91e63);color:#fff;width:50px;height:50px;padding:0;border-radius:16px;display:grid;place-items:center;font-family:Inter,Arial,sans-serif;cursor:pointer;box-shadow:0 10px 26px rgba(37,99,235,.25),0 0 22px rgba(72,157,255,.12),inset 0 1px 0 rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;margin:0 0 18px}
+      .sngHeroAudioButton:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 13px 30px rgba(37,99,235,.30),0 0 26px rgba(72,157,255,.16),inset 0 1px 0 rgba(255,255,255,.18)}
+      .sngHeroAudioButton:active{transform:scale(.94)}
+      .sngHeroAudioButton.is-playing{border-color:rgba(125,240,255,.78);box-shadow:0 0 28px rgba(45,174,255,.34),0 10px 28px rgba(37,99,235,.25),inset 0 1px 0 rgba(255,255,255,.18)}
+      .sngHeroAudioIcon{width:100%;height:100%;display:grid;place-items:center;font-size:22px;line-height:1}
+      .sngHeroAudioCopy{display:none!important}
+      .sngHeroAudioButton:focus-visible{outline:2px solid #75c8ff;outline-offset:3px}
+
       .sngHeroAnnouncement button:not(.sngHeroAudioButton),.sngHeroAnnouncement .prev,.sngHeroAnnouncement .next,.sngHeroAnnouncement .arrow,.sngHeroAnnouncement [aria-label*="précédent" i],.sngHeroAnnouncement [aria-label*="suivant" i]{display:none!important}
       @keyframes sngHeroAnnouncementIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
       @media(max-width:900px){.sngHeroAnnouncement{width:100%;margin:20px 0 26px;min-height:118px;padding:20px 19px}}
-      @media(max-width:560px){.sngHeroAnnouncement{width:100%;min-height:116px;gap:13px;border-radius:19px;padding:18px 15px;margin:18px 0 24px}.sngHeroAnnouncementIcon{flex-basis:50px;width:50px;height:50px;border-radius:15px;font-size:24px}.sngHeroAnnouncementLabel{font-size:9px;letter-spacing:1.6px;margin-bottom:6px}.sngHeroAnnouncementText{font-size:15px;line-height:1.38}.sngHeroAnnouncementDots{gap:5px}.sngHeroAnnouncementDots i{width:6px;height:6px}.sngHeroAnnouncementDots i.active{width:21px}.sngHeroAudioButton{min-height:38px;padding:8px 12px 8px 9px;gap:8px}.sngHeroAudioIcon{width:23px;height:23px;font-size:12px}.sngHeroAudioTitle{font-size:10px}.sngHeroAudioHint{font-size:8px}}
+      @media(max-width:560px){.sngHeroAnnouncement{width:100%;min-height:116px;gap:13px;border-radius:19px;padding:18px 15px;margin:18px 0 24px}.sngHeroAnnouncementIcon{flex-basis:50px;width:50px;height:50px;border-radius:15px;font-size:24px}.sngHeroAnnouncementLabel{font-size:9px;letter-spacing:1.6px;margin-bottom:6px}.sngHeroAnnouncementText{font-size:15px;line-height:1.38}.sngHeroAnnouncementDots{gap:5px}.sngHeroAnnouncementDots i{width:6px;height:6px}.sngHeroAnnouncementDots i.active{width:21px}.sngHeroAudioButton{width:46px;height:46px;border-radius:15px;margin-bottom:16px}.sngHeroAudioIcon{font-size:20px}}
       @media(prefers-reduced-motion:reduce){.sngHeroAnnouncement{animation:none}.sngHeroAudioButton{transition:none}}
     `;
     document.head.appendChild(style);
