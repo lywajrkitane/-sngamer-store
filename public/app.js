@@ -1085,10 +1085,21 @@ function navigateStore(section) {
     profileArea.style.display = "none";
 
     const hideProducts = section === "coins";
+
+    // The legacy account renderer hides #products with both a class and
+    // display:none!important. Clear that state whenever returning to a store
+    // category, otherwise inline display="" cannot make the cards visible.
+    productsArea.classList.remove("sga-hide");
+    productsArea.hidden = hideProducts;
+    productsArea.style.removeProperty("display");
     productsArea.style.display = hideProducts ? "none" : "";
     productsArea.setAttribute("aria-hidden", hideProducts ? "true" : "false");
 
+    // Re-render the existing in-memory catalog without reloading the page.
     render();
+    if (!hideProducts && (!Array.isArray(products) || products.length === 0)) {
+      load();
+    }
   }
 
   if (home) {
