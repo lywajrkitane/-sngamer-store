@@ -37,7 +37,8 @@ function setCookie(res, name, value, maxAge) {
 
 function installAnalytics(app) {
   const stack = app._router && app._router.stack;
-  if (!stack) return;
+  if (!stack || app.__sngAnalyticsInstalled) return;
+  app.__sngAnalyticsInstalled = true;
 
   // Visitor tracking: one visit per visitor per 30 minutes.
   const tracker = express.Router();
@@ -70,7 +71,8 @@ function installAnalytics(app) {
   );
   if (productsIndex >= 0) stack.splice(productsIndex, 0, ...tracker.stack);
 
-  // Admin analytics API.
+  // Admin analytics API. Register it with app.use() after the existing
+  // application middleware so express-session is always available.
   const api = express.Router();
   api.get('/api/admin/analytics', async (req, res) => {
     if (!req.session?.admin) return res.status(401).json({ error: 'Non autorisé' });
@@ -109,23 +111,17 @@ function installAnalytics(app) {
         `)
       ]);
 
+      res.set('Cache-Control', 'no-store');
       res.json({ ...totals.rows[0], ...orders.rows[0], days: days.rows });
     } catch (e) {
       console.error('SITE_ANALYTICS_API_ERROR:', e);
       res.status(500).json({ error: 'Statistiques indisponibles' });
     }
   });
+  app.use(api);
 
-  const sessionIndex = stack.findIndex(layer => layer?.handle?.name === 'session');
-  if (sessionIndex >= 0) {
-    stack.splice(sessionIndex + 1, 0, ...api.stack);
-  } else {
-    const staticIndex = stack.findIndex(layer => layer?.handle?.name === 'serveStatic');
-    if (staticIndex >= 0) stack.splice(staticIndex, 0, ...api.stack);
-    else stack.unshift(...api.stack);
-  }
-
-  // Inject the admin analytics UI into both admin pages.
+  // Compatibility fallback for admin pages. The admin HTML and data-fix
+  // already load the UI script, so this is intentionally only a fallback.
   const injector = express.Router();
   injector.use((req, res, next) => {
     try {
@@ -141,7 +137,7 @@ function installAnalytics(app) {
           ) {
             body = body.replace(
               '</body>',
-              '<script src="/site-analytics-admin.js?v=20261019-8" defer></script></body>'
+              '<script src="/site-analytics-admin.js?v=20261019-9" defer></script></body>'
             );
           }
         } catch (e) {
@@ -157,9 +153,8 @@ function installAnalytics(app) {
   stack.unshift(...injector.stack);
 }
 
-// IMPORTANT: bootstrap.js replaces express.application.listen. A normal direct
-// monkey-patch gets overwritten. This setter-based wrapper survives that later
-// assignment and automatically installs analytics around the final listener.
+// bootstrap.js replaces express.application.listen. A setter wrapper survives
+// that later assignment and installs analytics around the final listener.
 const target = express.application;
 const existingListen = target.listen;
 let currentListen = existingListen;
