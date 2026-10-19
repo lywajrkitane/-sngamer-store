@@ -14,6 +14,7 @@
 
   function ensureBackToTop() {
     if (window.innerWidth > 700) return;
+
     let button = document.getElementById("sngamerBackToTop");
     if (!button) {
       button = document.createElement("button");
@@ -26,12 +27,21 @@
       });
       document.body.appendChild(button);
     }
+
     const nav = document.getElementById("mobileBottomNav");
-    const navHeight = nav ? Math.max(92, nav.getBoundingClientRect().height) : 92;
-    button.style.setProperty("bottom", `calc(${navHeight + 18}px + env(safe-area-inset-bottom))`, "important");
+    const navHeight = nav ? Math.max(92, Math.ceil(nav.getBoundingClientRect().height)) : 92;
+    const bottomOffset = navHeight + 18;
+
+    button.style.setProperty("position", "fixed", "important");
     button.style.setProperty("right", "18px", "important");
+    button.style.setProperty("bottom", `${bottomOffset}px`, "important");
     button.style.setProperty("z-index", "10060", "important");
     button.style.setProperty("display", "grid", "important");
+    button.style.setProperty("visibility", "visible", "important");
+    button.style.setProperty("opacity", "1", "important");
+    button.style.setProperty("pointer-events", "auto", "important");
+    button.style.setProperty("inset-inline-start", "auto", "important");
+    button.style.setProperty("inset-block-start", "auto", "important");
   }
 
   function hideLegacyTopButtons() {
@@ -65,7 +75,7 @@
           #mobileBottomNav .bottomNavItem.active .bottomNavIcon{width:60px!important;height:60px!important;flex-basis:60px!important;margin-bottom:17px!important;border-radius:20px!important;background:linear-gradient(145deg,rgba(24,139,255,.36),rgba(124,58,237,.46),rgba(233,30,99,.28))!important;border:1px solid rgba(89,190,255,.98)!important;box-shadow:0 0 13px rgba(28,150,255,.58),0 0 31px rgba(28,150,255,.28),0 0 52px rgba(124,58,237,.18),inset 0 0 20px rgba(109,205,255,.10)!important;transform:translateY(-17px)!important;animation:sngPremiumNavPulse 2.2s ease-in-out infinite!important}
           #mobileBottomNav .bottomNavItem.active .bottomNavIcon:before{content:""!important;position:absolute!important;inset:-5px!important;border-radius:24px!important;padding:1.5px!important;background:conic-gradient(from 0deg,rgba(90,184,255,0),rgba(90,184,255,.95),rgba(160,88,255,.95),rgba(233,30,99,.8),rgba(90,184,255,0))!important;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;-webkit-mask-composite:xor!important;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;mask-composite:exclude!important;animation:sngPremiumNavOrbit 2.7s linear infinite!important;pointer-events:none!important}
           #mobileBottomNav .bottomNavItem.active>span:not(.bottomNavIcon){opacity:1!important;visibility:visible!important}
-          #sngamerBackToTop{position:fixed!important;width:54px!important;height:54px!important;padding:0!important;margin:0!important;border:1px solid rgba(89,190,255,.98)!important;border-radius:17px!important;display:grid!important;place-items:center!important;background:linear-gradient(145deg,#287cff,#7c3aed 65%,#c92c9b)!important;color:#fff!important;box-shadow:0 0 15px rgba(22,135,255,.55),0 0 30px rgba(124,58,237,.28)!important;line-height:1!important;font-size:30px!important;font-weight:900!important;cursor:pointer!important;transform:none!important;touch-action:manipulation!important}
+          #sngamerBackToTop{position:fixed!important;width:54px!important;height:54px!important;padding:0!important;margin:0!important;border:1px solid rgba(89,190,255,.98)!important;border-radius:17px!important;display:grid!important;place-items:center!important;background:linear-gradient(145deg,#287cff,#7c3aed 65%,#c92c9b)!important;color:#fff!important;box-shadow:0 0 15px rgba(22,135,255,.55),0 0 30px rgba(124,58,237,.28)!important;line-height:1!important;font-size:30px!important;font-weight:900!important;cursor:pointer!important;transform:none!important;touch-action:manipulation!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
           #sngamerBackToTop span{display:block!important;transform:translateY(-2px)!important;pointer-events:none!important}
           @keyframes sngPremiumNavOrbit{to{transform:rotate(360deg)}}
           @keyframes sngPremiumNavPulse{0%,100%{box-shadow:0 0 10px rgba(22,135,255,.45),0 0 24px rgba(22,135,255,.22),inset 0 0 14px rgba(90,184,255,.08)}50%{box-shadow:0 0 16px rgba(22,135,255,.72),0 0 36px rgba(22,135,255,.34),0 0 54px rgba(124,58,237,.18),inset 0 0 18px rgba(90,184,255,.14)}}
@@ -82,6 +92,7 @@
     });
     ensureBackToTop();
     hideLegacyTopButtons();
+    ensureBackToTop();
     return true;
   }
 
@@ -89,7 +100,16 @@
     if(install()) return;
     [100,300,700,1200,2000].forEach(function(delay){setTimeout(install,delay);});
   }
-  refresh();
+
+  function start(){
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", refresh, {once:true});
+    } else {
+      refresh();
+    }
+  }
+
+  start();
   window.addEventListener("resize", function(){setTimeout(ensureBackToTop,50);});
   window.addEventListener("orientationchange", function(){setTimeout(ensureBackToTop,200);});
 })();
