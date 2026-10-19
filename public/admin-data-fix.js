@@ -47,6 +47,20 @@
     document.head.appendChild(script);
   }
 
+  function loadAnalyticsAdmin() {
+    if (window.__sngAnalyticsAdminLoaded || document.querySelector('script[data-sng-site-analytics-admin]')) return;
+    const script = document.createElement('script');
+    script.src = '/site-analytics-admin.js?v=20261019-analytics1';
+    script.async = false;
+    script.dataset.sngSiteAnalyticsAdmin = '1';
+    script.onload = () => {
+      window.__sngAnalyticsAdminLoaded = true;
+      console.debug('SNGAMER: site analytics admin loaded');
+    };
+    script.onerror = () => console.error('SNGAMER: unable to load site analytics admin');
+    document.head.appendChild(script);
+  }
+
   async function refreshNow(reason) {
     if (!isAdminVisible() || refreshInFlight) return;
 
@@ -147,6 +161,7 @@
     installObserver();
     bootPaymentSelectorGuard();
     loadRefundUiV2();
+    loadAnalyticsAdmin();
 
     if (!isAdminVisible()) {
       window.setTimeout(boot, 250);
@@ -164,16 +179,19 @@
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       loadRefundUiV2();
+      loadAnalyticsAdmin();
       refreshNow('visibility');
     }
   });
 
   window.addEventListener('pageshow', () => {
     loadRefundUiV2();
+    loadAnalyticsAdmin();
     refreshNow('pageshow');
   });
   window.addEventListener('focus', () => {
     loadRefundUiV2();
+    loadAnalyticsAdmin();
     refreshNow('focus');
   });
 
