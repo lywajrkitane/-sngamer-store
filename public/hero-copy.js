@@ -67,23 +67,28 @@
     }
     if(button.dataset.audioBound==="1") return;
     button.dataset.audioBound="1";
+
+    const audio=new Audio("/audio/annonce-sngamer.mp3?v=20261019");
+    audio.preload="auto";
+    audio.setAttribute("aria-label","Annonce audio SNGAMER STORE");
+    button._sngamerAudio=audio;
+    const icon=button.querySelector(".sngHeroAudioIcon");
+    const reset=function(){button.classList.remove("is-playing");if(icon) icon.textContent="🔊"};
+    audio.addEventListener("play",function(){button.classList.add("is-playing");if(icon) icon.textContent="⏹"});
+    audio.addEventListener("ended",reset);
+    audio.addEventListener("pause",function(){if(audio.currentTime>=audio.duration-0.05) reset()});
+    audio.addEventListener("error",reset);
+
     button.addEventListener("click",function(){
-      const label=document.querySelector("#sngamerHeroAnnouncement .sngHeroAnnouncementLabel");
-      const text=document.querySelector("#sngamerHeroAnnouncement .sngHeroAnnouncementText");
-      const phrase=[label&&label.textContent,text&&text.textContent].filter(Boolean).join(". ").trim();
-      if(!phrase || !("speechSynthesis" in window)) return;
-      if(window.speechSynthesis.speaking){
-        window.speechSynthesis.cancel();
-        button.classList.remove("is-playing");
-        const icon=button.querySelector(".sngHeroAudioIcon");
-        if(icon) icon.textContent="🔊";
-        return;
+      if(audio.paused){
+        audio.currentTime=0;
+        const playPromise=audio.play();
+        if(playPromise&&typeof playPromise.catch==="function")playPromise.catch(reset);
+      }else{
+        audio.pause();
+        audio.currentTime=0;
+        reset();
       }
-      const utterance=new SpeechSynthesisUtterance(phrase);
-      utterance.lang="fr-FR";utterance.rate=.96;utterance.pitch=1;utterance.volume=1;
-      utterance.onstart=function(){button.classList.add("is-playing");const icon=button.querySelector(".sngHeroAudioIcon");if(icon) icon.textContent="⏹"};
-      utterance.onend=utterance.onerror=function(){button.classList.remove("is-playing");const icon=button.querySelector(".sngHeroAudioIcon");if(icon) icon.textContent="🔊"};
-      window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);
     });
   }
 
