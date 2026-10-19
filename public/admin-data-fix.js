@@ -1,11 +1,12 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V5
+/* SNGAMER STORE — ADMIN DATA REFRESH V6
    Automatic refresh owner for the authenticated admin workspace.
-   Also loads the dedicated refund UI so refund state stays separate from payment state.
+   Also loads the dedicated refund UI and analytics admin UI.
+   Adds a lightweight order search/filter toolbar to the existing Orders section.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV5';
+  const STATE = '__sngamerAdminAutoRefreshV6';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -13,6 +14,7 @@
   let intervalId = null;
   let refreshInFlight = false;
   let observer = null;
+  let orderObserver = null;
   let lastWorkspace = null;
 
   function adminBox() {
@@ -50,7 +52,6 @@
   function loadAnalyticsAdmin() {
     if (window.__sngAnalyticsAdminLoaded || document.querySelector('script[data-sng-site-analytics-admin]')) return;
     const script = document.createElement('script');
-    // Cache-buster intentionally updated whenever the analytics UI changes.
     script.src = '/site-analytics-admin.js?v=20261019-analytics2';
     script.async = false;
     script.dataset.sngSiteAnalyticsAdmin = '1';
@@ -62,6 +63,155 @@
     document.head.appendChild(script);
   }
 
+  function injectOrderToolsStyle() {
+    if (document.getElementById('sng-order-tools-style')) return;
+    const style = document.createElement('style');
+    style.id = 'sng-order-tools-style';
+    style.textContent = `
+      .sng-order-tools{
+        display:grid;
+        grid-template-columns:minmax(180px,1.8fr) minmax(150px,1fr) minmax(150px,1fr) auto;
+        gap:10px;
+        margin:0 0 14px;
+        padding:12px;
+        border:1px solid rgba(115,145,190,.14);
+        border-radius:14px;
+        background:rgba(5,12,23,.45);
+      }
+      .sng-order-tools input,.sng-order-tools select,.sng-order-tools button{
+        min-height:44px;
+        margin:0!important;
+        border-radius:10px!important;
+      }
+      .sng-order-tools input,.sng-order-tools select{
+        width:100%;
+        padding:10px 12px!important;
+        border:1px solid rgba(112,140,180,.20)!important;
+        background:#070e18!important;
+        color:#f5f7ff!important;
+      }
+      .sng-order-tools button{
+        padding:10px 14px;
+        border:1px solid rgba(112,140,180,.18);
+        background:#172437;
+        color:#fff;
+        cursor:pointer;
+      }
+      .sng-order-tools button:hover{background:#21334e}
+      .sng-order-tools-meta{
+        grid-column:1/-1;
+        color:#8f9db3;
+        font-size:12px;
+        font-weight:700;
+      }
+      @media(max-width:700px){
+        .sng-order-tools{grid-template-columns:1fr 1fr}
+        .sng-order-tools input,.sng-order-tools-meta{grid-column:1/-1}
+        .sng-order-tools button{grid-column:1/-1}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function getOrdersSection() {
+    const table = document.getElementById('ordersTable');
+    return table?.closest('section') || null;
+  }
+
+  function applyOrderFilters() {
+    const table = document.getElementById('ordersTable');
+    const tools = document.getElementById('sng-order-tools');
+    if (!table || !tools) return;
+
+    const search = String(tools.querySelector('[data-filter="search"]')?.value || '').trim().toLowerCase();
+    const status = String(tools.querySelector('[data-filter="status"]')?.value || 'all');
+    const payment = String(tools.querySelector('[data-filter="payment"]')?.value || 'all');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    let visible = 0;
+
+    rows.forEach(row => {
+      const text = String(row.textContent || '').toLowerCase();
+      const statusSelect = row.querySelector('select.status');
+      const rowStatus = String(statusSelect?.value || '').trim();
+      const paymentText = text;
+      const statusOk = status === 'all' || rowStatus === status;
+      let paymentOk = true;
+      if (payment === 'paid') paymentOk = /état du paiement:\s*(payé|paye|paid)/i.test(paymentText) || /\bpayé\b|\bpaye\b|\bpaid\b/i.test(paymentText);
+      if (payment === 'pending') paymentOk = /en attente|pending/i.test(paymentText);
+      if (payment === 'refunded') paymentOk = /remboursé|remboursement/i.test(paymentText);
+      const searchOk = !search || text.includes(search);
+      const show = statusOk && paymentOk && searchOk;
+      row.style.display = show ? '' : 'none';
+      if (show) visible += 1;
+    });
+
+    const meta = tools.querySelector('[data-order-meta]');
+    if (meta) meta.textContent = `${visible} commande${visible > 1 ? 's' : ''} affichée${visible > 1 ? 's' : ''}`;
+  }
+
+  function ensureOrderTools() {
+    const section = getOrdersSection();
+    if (!section) return;
+    injectOrderToolsStyle();
+    if (document.getElementById('sng-order-tools')) {
+      applyOrderFilters();
+      return;
+    }
+
+    const refreshButton = section.querySelector('.refresh');
+    const tableWrap = section.querySelector('.table-wrap');
+    if (!tableWrap) return;
+
+    const tools = document.createElement('div');
+    tools.id = 'sng-order-tools';
+    tools.className = 'sng-order-tools';
+    tools.innerHTML = `
+      <input data-filter="search" type="search" placeholder="🔎 Rechercher : commande, client, téléphone..." autocomplete="off">
+      <select data-filter="status" aria-label="Filtrer par statut">
+        <option value="all">Tous les statuts</option>
+        <option value="Nouvelle">Nouvelles</option>
+        <option value="Confirmée">Confirmées</option>
+        <option value="Expédiée">Expédiées</option>
+        <option value="Livrée">Livrées</option>
+        <option value="Annulée">Annulées</option>
+      </select>
+      <select data-filter="payment" aria-label="Filtrer par paiement">
+        <option value="all">Tous les paiements</option>
+        <option value="paid">Payées</option>
+        <option value="pending">En attente</option>
+        <option value="refunded">Remboursées</option>
+      </select>
+      <button type="button" data-filter-reset>Réinitialiser</button>
+      <div class="sng-order-tools-meta" data-order-meta>0 commande affichée</div>
+    `;
+
+    if (refreshButton) refreshButton.insertAdjacentElement('afterend', tools);
+    else section.insertBefore(tools, tableWrap);
+
+    tools.querySelectorAll('[data-filter]').forEach(el => {
+      el.addEventListener('input', applyOrderFilters);
+      el.addEventListener('change', applyOrderFilters);
+    });
+    tools.querySelector('[data-filter-reset]')?.addEventListener('click', () => {
+      tools.querySelector('[data-filter="search"]').value = '';
+      tools.querySelector('[data-filter="status"]').value = 'all';
+      tools.querySelector('[data-filter="payment"]').value = 'all';
+      applyOrderFilters();
+    });
+    applyOrderFilters();
+  }
+
+  function installOrderTools() {
+    ensureOrderTools();
+    const table = document.getElementById('ordersTable');
+    if (!table || orderObserver) return;
+    orderObserver = new MutationObserver(() => {
+      ensureOrderTools();
+      applyOrderFilters();
+    });
+    orderObserver.observe(table, { childList: true });
+  }
+
   async function refreshNow(reason) {
     if (!isAdminVisible() || refreshInFlight) return;
 
@@ -70,8 +220,10 @@
 
     try {
       await runLoader('loadAll');
+      installOrderTools();
       if (currentWorkspace() === 'orders' || workspace === 'orders') {
         await runLoader('loadOrders');
+        applyOrderFilters();
       }
       lastWorkspace = currentWorkspace();
       console.debug('SNGAMER ADMIN AUTO REFRESH OK:', reason, lastWorkspace);
@@ -154,6 +306,7 @@
     bootPaymentSelectorGuard();
     loadRefundUiV2();
     loadAnalyticsAdmin();
+    installOrderTools();
 
     if (!isAdminVisible()) {
       window.setTimeout(boot, 250);
