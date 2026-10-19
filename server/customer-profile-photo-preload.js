@@ -33,10 +33,7 @@ function installProfileRoutes() {
   router.get("/api/customer/profile-photo", async (req, res) => {
     try {
       if (!req.session?.customerId) return res.status(401).end();
-      const result = await profilePool.query(
-        `SELECT profile_photo, profile_photo_mime FROM customers WHERE id=$1 LIMIT 1`,
-        [req.session.customerId]
-      );
+      const result = await profilePool.query(`SELECT profile_photo, profile_photo_mime FROM customers WHERE id=$1 LIMIT 1`, [req.session.customerId]);
       if (!result.rows.length || !result.rows[0].profile_photo) return res.status(404).end();
       res.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
       res.type(result.rows[0].profile_photo_mime || "image/jpeg");
@@ -47,18 +44,13 @@ function installProfileRoutes() {
     }
   });
 
-  router.post("/api/customer/profile-photo", (req, res, next) => {
+  router.post("/api/customer/profile-photo", (req, res) => {
     if (!req.session?.customerId) return res.status(401).json({ error: "Connexion client requise" });
     upload.single("photo")(req, res, async error => {
-      if (error) {
-        return res.status(400).json({ error: error.message || "Photo invalide." });
-      }
+      if (error) return res.status(400).json({ error: error.message || "Photo invalide." });
       try {
         if (!req.file?.buffer?.length) return res.status(400).json({ error: "Aucune photo reçue." });
-        await profilePool.query(
-          `UPDATE customers SET profile_photo=$1, profile_photo_mime=$2, updated_at=NOW() WHERE id=$3`,
-          [req.file.buffer, req.file.mimetype, req.session.customerId]
-        );
+        await profilePool.query(`UPDATE customers SET profile_photo=$1, profile_photo_mime=$2, updated_at=NOW() WHERE id=$3`, [req.file.buffer, req.file.mimetype, req.session.customerId]);
         res.json({ success: true });
       } catch (dbError) {
         console.error("CUSTOMER_PROFILE_PHOTO_SAVE_ERROR:", dbError);
@@ -70,10 +62,7 @@ function installProfileRoutes() {
   router.delete("/api/customer/profile-photo", async (req, res) => {
     try {
       if (!req.session?.customerId) return res.status(401).json({ error: "Connexion client requise" });
-      await profilePool.query(
-        `UPDATE customers SET profile_photo=NULL, profile_photo_mime=NULL, updated_at=NOW() WHERE id=$1`,
-        [req.session.customerId]
-      );
+      await profilePool.query(`UPDATE customers SET profile_photo=NULL, profile_photo_mime=NULL, updated_at=NOW() WHERE id=$1`, [req.session.customerId]);
       res.json({ success: true });
     } catch (error) {
       console.error("CUSTOMER_PROFILE_PHOTO_DELETE_ERROR:", error);
@@ -91,7 +80,7 @@ function injectProfileScript(app) {
     try {
       let html = fs.readFileSync(indexPath, "utf8");
       const tag = '<script src="/customer-profile-premium-v1.js?v=20261019-0905" defer></script>';
-      if (!html.includes("customer-profile-premium-v1.js")) html = html.replace(/<\\/body>/i, `${tag}</body>`);
+      if (!html.includes("customer-profile-premium-v1.js")) html = html.replace(/<\/body>/i, `${tag}</body>`);
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
       res.set("Pragma", "no-cache");
       res.set("Expires", "0");
