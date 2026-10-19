@@ -126,4 +126,51 @@
   } else {
     install();
   }
+
+  /*
+     PROFILE -> CATEGORY NAVIGATION
+     profile-navigation-refresh.js historically wrapped navigateStore and
+     forced a full window.location.reload() when leaving the customer profile.
+     That reload was only a workaround for the product renderer and caused
+     the category/product view to disappear until the store was refreshed.
+
+     coin-nav-final.js and the normal navigation already use the original
+     navigateStore implementation. Here we bypass only the reload wrapper:
+     temporarily change the observed section so its wrapper delegates to the
+     original function, then let the original function set the real section,
+     render the products and update the navigation normally.
+  */
+  function installSmoothProfileNavigation() {
+    if (window.__sngamerSmoothProfileNavigationInstalled) return;
+    if (typeof window.navigateStore !== "function") return;
+
+    const wrappedNavigateStore = window.navigateStore;
+    const validSections = new Set(["home", "accessories", "phones", "coins"]);
+
+    window.__sngamerSmoothProfileNavigationInstalled = true;
+    window.navigateStore = function (section) {
+      const currentSection = window.activeStoreSection;
+
+      if (currentSection === "profile" && validSections.has(section)) {
+        try {
+          // Bypass only the reload condition inside profile-navigation-refresh.js.
+          // The wrapped function will then delegate to app.js's original navigation.
+          window.activeStoreSection = "__sngamer_profile_transition__";
+          sessionStorage.removeItem("sg_profile_return_section");
+          return wrappedNavigateStore.call(this, section);
+        } catch (error) {
+          window.activeStoreSection = "profile";
+          throw error;
+        }
+      }
+
+      return wrappedNavigateStore.apply(this, arguments);
+    };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", installSmoothProfileNavigation, { once: true });
+  } else {
+    installSmoothProfileNavigation();
+  }
 })();
