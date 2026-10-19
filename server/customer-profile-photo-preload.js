@@ -79,8 +79,9 @@ function injectProfileScript(app) {
     if (!fs.existsSync(indexPath)) return next();
     try {
       let html = fs.readFileSync(indexPath, "utf8");
-      const tag = '<script src="/customer-profile-premium-v1.js?v=20261019-0905" defer></script>';
-      if (!html.includes("customer-profile-premium-v1.js")) html = html.replace(/<\/body>/i, `${tag}</body>`);
+      const tag = '<script src="/customer-profile-premium-v1.js?v=20261019-0932" defer></script>';
+      html = html.replace(/<script\\b[^>]*src=["'][^"']*customer-profile-premium-v1\\.js[^"']*["'][^>]*>\\s*<\\/script>/gi, "");
+      html = html.replace(/<\\/body>/i, `${tag}</body>`);
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
       res.set("Pragma", "no-cache");
       res.set("Expires", "0");
