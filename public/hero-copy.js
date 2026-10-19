@@ -14,7 +14,7 @@
   function loadCustomerAccount(){
     if(document.querySelector('script[data-sngamer-customer-account]')) return;
     const script=document.createElement("script");
-    script.src="customer-account.js";
+    script.src="customer-account.js?v=20261019-1025";
     script.defer=true;
     script.dataset.sngamerCustomerAccount="true";
     document.body.appendChild(script);
