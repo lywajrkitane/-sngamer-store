@@ -1,58 +1,8 @@
 (() => {
   'use strict';
-  const STYLE = 'sg-site-analytics-style';
-  const PANEL = 'sg-site-analytics-panel';
-
-  function addStyles() {
-    if (document.getElementById(STYLE)) return;
-    const s = document.createElement('style'); s.id = STYLE;
-    s.textContent = `
-      #${PANEL}{grid-column:2;display:grid;gap:16px;margin:0 0 20px;}
-      .sg-analytics-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-      .sg-analytics-title{font-size:20px;font-weight:900;color:#f7f9ff}
-      .sg-analytics-sub{font-size:11px;color:#8f9db3;margin-top:4px}
-      .sg-analytics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-      .sg-analytics-card{padding:18px;border:1px solid rgba(115,145,190,.16);border-radius:18px;background:linear-gradient(145deg,rgba(14,25,43,.96),rgba(8,15,27,.96));box-shadow:0 10px 32px rgba(0,0,0,.20)}
-      .sg-analytics-label{font-size:11px;color:#8f9db3;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-      .sg-analytics-value{margin-top:9px;font-size:27px;font-weight:900;color:#fff}
-      .sg-analytics-chart{padding:18px;border:1px solid rgba(115,145,190,.16);border-radius:18px;background:rgba(7,13,23,.82);overflow:auto}
-      .sg-bars{display:flex;align-items:flex-end;gap:7px;height:150px;min-width:560px}
-      .sg-bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;min-width:14px}
-      .sg-bar{width:100%;max-width:24px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#2684ff,#7545ff,#e62f9f);min-height:2px}
-      .sg-bar-label{font-size:8px;color:#72829a;transform:rotate(-35deg);white-space:nowrap}
-      @media(max-width:900px){#${PANEL}{grid-column:1}.sg-analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-      @media(max-width:560px){.sg-analytics-grid{grid-template-columns:1fr 1fr}.sg-analytics-card{padding:14px}.sg-analytics-value{font-size:22px}}
-    `;
-    document.head.appendChild(s);
-  }
-
-  const fmt = n => new Intl.NumberFormat('fr-FR').format(Number(n || 0));
-  async function load() {
-    try {
-      const r = await fetch('/api/admin/analytics', { credentials:'same-origin', cache:'no-store' });
-      if (!r.ok) return;
-      const d = await r.json();
-      let panel = document.getElementById(PANEL);
-      if (!panel) {
-        const box = document.getElementById('adminBox');
-        const stats = box?.querySelector('.stats');
-        if (!box || !stats) return;
-        panel = document.createElement('div'); panel.id = PANEL;
-        stats.parentNode.insertBefore(panel, stats);
-      }
-      const days = Array.isArray(d.days) ? d.days : [];
-      const max = Math.max(1, ...days.map(x => Number(x.visits || 0)));
-      panel.innerHTML = `
-        <div class="sg-analytics-head"><div><div class="sg-analytics-title">📊 Statistiques de la boutique</div><div class="sg-analytics-sub">Fréquentation réelle • visiteurs uniques et visites</div></div></div>
-        <div class="sg-analytics-grid">
-          <div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs aujourd'hui</div><div class="sg-analytics-value">${fmt(d.visitors_today)}</div></div>
-          <div class="sg-analytics-card"><div class="sg-analytics-label">Visites aujourd'hui</div><div class="sg-analytics-value">${fmt(d.visits_today)}</div></div>
-          <div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs · 7 jours</div><div class="sg-analytics-value">${fmt(d.visitors_7d)}</div></div>
-          <div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs · 30 jours</div><div class="sg-analytics-value">${fmt(d.visitors_30d)}</div></div>
-        </div>
-        <div class="sg-analytics-chart"><div class="sg-analytics-label" style="margin-bottom:14px">Visites par jour · 30 derniers jours</div><div class="sg-bars">${days.map(x => `<div class="sg-bar-wrap" title="${x.date}: ${fmt(x.visits)} visites / ${fmt(x.visitors)} visiteurs"><div class="sg-bar" style="height:${Math.max(2,Math.round(Number(x.visits||0)/max*125))}px"></div><div class="sg-bar-label">${String(x.date).slice(5)}</div></div>`).join('')}</div></div>`;
-    } catch (e) { console.warn('SITE_ANALYTICS_ADMIN:', e); }
-  }
-  function init(){ addStyles(); load(); setInterval(load, 60000); }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  const STYLE='sg-site-analytics-style',PANEL='sg-site-analytics-panel';
+  function addStyles(){if(document.getElementById(STYLE))return;const s=document.createElement('style');s.id=STYLE;s.textContent=`#${PANEL}{grid-column:2;display:grid;gap:16px;margin:0 0 20px}.sg-analytics-head{display:flex;align-items:flex-end;justify-content:space-between}.sg-analytics-title{font-size:20px;font-weight:900;color:#f7f9ff}.sg-analytics-sub{font-size:11px;color:#8f9db3;margin-top:4px}.sg-analytics-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}.sg-analytics-card{padding:18px;border:1px solid rgba(115,145,190,.16);border-radius:18px;background:linear-gradient(145deg,rgba(14,25,43,.96),rgba(8,15,27,.96));box-shadow:0 10px 32px rgba(0,0,0,.20)}.sg-analytics-label{font-size:11px;color:#8f9db3;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.sg-analytics-value{margin-top:9px;font-size:27px;font-weight:900;color:#fff}.sg-analytics-chart{padding:18px;border:1px solid rgba(115,145,190,.16);border-radius:18px;background:rgba(7,13,23,.82);overflow:auto}.sg-bars{display:flex;align-items:flex-end;gap:7px;height:150px;min-width:560px}.sg-bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;min-width:14px}.sg-bar{width:100%;max-width:24px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#2684ff,#7545ff,#e62f9f);min-height:2px}.sg-bar-label{font-size:8px;color:#72829a;transform:rotate(-35deg);white-space:nowrap}@media(max-width:1100px){.sg-analytics-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:900px){#${PANEL}{grid-column:1}.sg-analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.sg-analytics-grid{grid-template-columns:1fr 1fr}.sg-analytics-card{padding:14px}.sg-analytics-value{font-size:22px}}`;document.head.appendChild(s)}
+  const fmt=n=>new Intl.NumberFormat('fr-FR').format(Number(n||0));
+  async function load(){try{const r=await fetch('/api/admin/analytics',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return;const d=await r.json();let panel=document.getElementById(PANEL);if(!panel){const box=document.getElementById('adminBox'),stats=box?.querySelector('.stats');if(!box||!stats)return;panel=document.createElement('div');panel.id=PANEL;stats.parentNode.insertBefore(panel,stats)}const days=Array.isArray(d.days)?d.days:[],max=Math.max(1,...days.map(x=>Number(x.visits||0)));panel.innerHTML=`<div class="sg-analytics-head"><div><div class="sg-analytics-title">📊 Statistiques de la boutique</div><div class="sg-analytics-sub">Fréquentation, visiteurs uniques et commandes</div></div></div><div class="sg-analytics-grid"><div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs aujourd'hui</div><div class="sg-analytics-value">${fmt(d.visitors_today)}</div></div><div class="sg-analytics-card"><div class="sg-analytics-label">Visites aujourd'hui</div><div class="sg-analytics-value">${fmt(d.visits_today)}</div></div><div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs · 7 jours</div><div class="sg-analytics-value">${fmt(d.visitors_7d)}</div></div><div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs · 30 jours</div><div class="sg-analytics-value">${fmt(d.visitors_30d)}</div></div><div class="sg-analytics-card"><div class="sg-analytics-label">Commandes totales</div><div class="sg-analytics-value">${fmt(d.orders)}</div></div><div class="sg-analytics-card"><div class="sg-analytics-label">Commandes aujourd'hui</div><div class="sg-analytics-value">${fmt(d.orders_today)}</div></div></div><div class="sg-analytics-chart"><div class="sg-analytics-label" style="margin-bottom:14px">Visites par jour · 30 derniers jours</div><div class="sg-bars">${days.map(x=>`<div class="sg-bar-wrap" title="${x.date}: ${fmt(x.visits)} visites / ${fmt(x.visitors)} visiteurs"><div class="sg-bar" style="height:${Math.max(2,Math.round(Number(x.visits||0)/max*125))}px"></div><div class="sg-bar-label">${String(x.date).slice(5)}</div></div>`).join('')}</div></div>`}catch(e){console.warn('SITE_ANALYTICS_ADMIN:',e)}}
+  function init(){addStyles();load();setInterval(load,60000)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
