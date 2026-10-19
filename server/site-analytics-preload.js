@@ -104,19 +104,44 @@ function installAnalytics(app) {
         `),
         analyticsPool.query(`
           SELECT
-            COUNT(*)::int AS orders,
-            COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE)::int AS orders_today,
-            COALESCE(SUM(total) FILTER (WHERE created_at >= CURRENT_DATE), 0)::int AS revenue_today,
-            COALESCE(SUM(total), 0)::int AS revenue_total,
-            COALESCE(AVG(total), 0)::numeric(12,2) AS average_order
+            COUNT(*) FILTER (
+              WHERE payment_status = 'Payé'
+                AND COALESCE(status, '') <> 'Annulée'
+                AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
+            )::int AS orders,
+            COUNT(*) FILTER (
+              WHERE created_at >= CURRENT_DATE
+                AND payment_status = 'Payé'
+                AND COALESCE(status, '') <> 'Annulée'
+                AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
+            )::int AS orders_today,
+            COALESCE(SUM(total) FILTER (
+              WHERE created_at >= CURRENT_DATE
+                AND payment_status = 'Payé'
+                AND COALESCE(status, '') <> 'Annulée'
+                AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
+            ), 0)::int AS revenue_today,
+            COALESCE(SUM(total) FILTER (
+              WHERE payment_status = 'Payé'
+                AND COALESCE(status, '') <> 'Annulée'
+                AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
+            ), 0)::int AS revenue_total,
+            COALESCE(AVG(total) FILTER (
+              WHERE payment_status = 'Payé'
+                AND COALESCE(status, '') <> 'Annulée'
+                AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
+            ), 0)::numeric(12,2) AS average_order
           FROM orders
         `)
       ]);
 
       const base = { ...totals.rows[0], ...orders.rows[0] };
-      const visitors30 = Number(base.visitors_30d || 0);
-      const ordersTotal = Number(base.orders || 0);
-      base.conversion_rate = visitors30 > 0 ? Number(((ordersTotal / visitors30) * 100).toFixed(1)) : 0;
+      const visits30 = Number(base.visits_30d || 0);
+      const orders30 = Number(base.orders || 0);
+      // This is a simple operational conversion indicator: paid, non-cancelled
+      // orders divided by tracked visits. It is intentionally based on visits,
+      // not unique visitors, so the label does not imply user-level attribution.
+      base.conversion_rate = visits30 > 0 ? Number(((orders30 / visits30) * 100).toFixed(1)) : 0;
 
       res.set('Cache-Control', 'no-store');
       res.json({ ...base, days: days.rows });
