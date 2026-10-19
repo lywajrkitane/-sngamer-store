@@ -141,7 +141,7 @@ function installAnalytics(app) {
           ) {
             body = body.replace(
               '</body>',
-              '<script src="/site-analytics-admin.js?v=20261019-7" defer></script></body>'
+              '<script src="/site-analytics-admin.js?v=20261019-8" defer></script></body>'
             );
           }
         } catch (e) {
