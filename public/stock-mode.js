@@ -4,151 +4,94 @@
 
   const ON_ORDER = "on_order";
   const LABEL = "Sur commande";
-
-  // One single premium status style, used everywhere the availability label
-  // is rendered. The product-card selector is intentionally more specific
-  // than the generic .card .stock rule so the home grid cannot turn it green.
-  function injectOnOrderStyle() {
-    if (document.getElementById("sngOnOrderPremiumStyle")) return;
-    const style = document.createElement("style");
-    style.id = "sngOnOrderPremiumStyle";
-    style.textContent = `
-      .onOrderStock,
-      .card .onOrderStock,
-      #products .onOrderStock,
-      #productDetail .onOrderStock,
-      #drawer .onOrderStock,
-      #checkout .onOrderStock,
-      #checkoutSummary .onOrderStock,
-      #products .card.productCardClickable .stock.onOrderStock,
-      #products .card .stock.onOrderStock {
-        color: #ff4fa3 !important;
-        font-weight: 700 !important;
-        text-shadow: 0 0 10px rgba(255,79,163,.20) !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  const PINK = "#ff4fa3";
 
   function isOnOrder(product) {
     return String(product?.stock_mode || "") === ON_ORDER;
   }
 
+  function injectOnOrderStyle() {
+    let style = document.getElementById("sngOnOrderPremiumStyle");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "sngOnOrderPremiumStyle";
+      document.head.appendChild(style);
+    }
+    style.textContent = `
+      #products .card .stock.onOrderStock,
+      #products .card.productCardClickable .stock.onOrderStock,
+      #productDetail .onOrderStock,
+      #drawer .onOrderStock,
+      #checkout .onOrderStock,
+      #checkoutSummary .onOrderStock {
+        color: ${PINK} !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 10px rgba(255,79,163,.20) !important;
+      }
+    `;
+  }
+
+  function forcePremium(el) {
+    if (!el) return;
+    el.textContent = LABEL;
+    el.classList.remove("outOfStock");
+    el.classList.add("onOrderStock");
+    el.style.setProperty("color", PINK, "important");
+    el.style.setProperty("font-weight", "700", "important");
+    el.style.setProperty("text-shadow", "0 0 10px rgba(255,79,163,.20)", "important");
+  }
+
   function normalizeProducts() {
     const list = Array.isArray(window.storeProducts) ? window.storeProducts : [];
     for (const product of list) {
-      if (isOnOrder(product)) {
-        // The existing cart/checkout code uses stock as its quantity guard.
-        // Give on-order products a virtual purchasable quantity while keeping
-        // the real database stock at 0.
-        if (product.__realStock === undefined) {
-          product.__realStock = Number(product.stock) || 0;
-        }
-        product.stock = 999999;
+      if (!isOnOrder(product)) continue;
+      if (product.__realStock === undefined) {
+        product.__realStock = Number(product.stock) || 0;
       }
+      // Keep the product purchasable in the existing front-end while the
+      // database stock remains untouched and the label is rendered as status.
+      product.stock = 999999;
     }
     return list;
   }
 
-  function productIdFromCard(card) {
-    const match = String(card?.getAttribute("onclick") || "").match(/openProduct\((\d+)\)/);
+  function cardProductId(card) {
+    const onclick = String(card?.getAttribute("onclick") || "");
+    const match = onclick.match(/openProduct\((\d+)\)/);
     return match ? Number(match[1]) : null;
   }
 
   function decorateCards() {
     const products = Array.isArray(window.storeProducts) ? window.storeProducts : [];
     if (!products.length) return;
+    const onOrderIds = new Set(products.filter(isOnOrder).map(p => Number(p.id)));
 
-    const onOrderIds = new Set(
-      products.filter(isOnOrder).map(p => Number(p.id))
-    );
-
-    document.querySelectorAll("#products .productCardClickable").forEach(card => {
-      const id = productIdFromCard(card);
+    document.querySelectorAll("#products .card.productCardClickable").forEach(card => {
+      const id = cardProductId(card);
       const stock = card.querySelector(".stock");
       if (!stock) return;
-
-      if (onOrderIds.has(id)) {
-        // Idempotent updates are essential: #products is observed for renders.
-        // Replacing the same text repeatedly creates an endless MutationObserver loop.
-        if (stock.textContent.trim() !== LABEL) stock.textContent = LABEL;
-        if (stock.classList.contains("outOfStock")) stock.classList.remove("outOfStock");
-        if (!stock.classList.contains("onOrderStock")) stock.classList.add("onOrderStock");
-      } else if (stock.classList.contains("onOrderStock")) {
-        stock.classList.remove("onOrderStock");
-      }
+      if (onOrderIds.has(id)) forcePremium(stock);
     });
   }
 
-  function decorateProductDetail(productId) {
-    const product = (window.storeProducts || []).find(
-      p => Number(p.id) === Number(productId)
-    );
-    if (!isOnOrder(product)) return;
-
+  function decorateDetail() {
     const root = document.querySelector("#productDetail");
     if (!root) return;
-
-    root.querySelectorAll(".stock, .productStock, .availability, [class*=stock]").forEach(el => {
-      if (/rupture|disponible|stock|commande/i.test(el.textContent || "")) {
-        if (el.textContent.trim() !== LABEL) el.textContent = LABEL;
-        if (el.classList.contains("outOfStock")) el.classList.remove("outOfStock");
-        if (!el.classList.contains("onOrderStock")) el.classList.add("onOrderStock");
-      }
-    });
+    const products = Array.isArray(window.storeProducts) ? window.storeProducts : [];
+    const title = root.querySelector("h2")?.textContent?.trim();
+    const product = products.find(p => String(p.name || "").trim() === title);
+    if (!isOnOrder(product)) return;
+    root.querySelectorAll(".stock, .productStock, .availability, [class*=stock]").forEach(forcePremium);
   }
 
   function installObserver() {
-    if (window.__sngStockObserverInstalled) return;
-    const productsRoot = document.getElementById("products");
-    if (!productsRoot || typeof MutationObserver === "undefined") return;
-
-    let decorateScheduled = false;
+    if (window.__sngStockObserverInstalled || typeof MutationObserver === "undefined") return;
     const observer = new MutationObserver(() => {
-      // Coalesce DOM rebuilds into one frame. decorateCards is idempotent, so
-      // writing an unchanged status cannot feed back into this observer.
-      if (decorateScheduled) return;
-      decorateScheduled = true;
-      requestAnimationFrame(() => {
-        decorateScheduled = false;
-        decorateCards();
-      });
+      decorateCards();
+      decorateDetail();
     });
-
-    observer.observe(productsRoot, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true });
     window.__sngStockObserverInstalled = true;
-  }
-
-  function install() {
-    injectOnOrderStyle();
-    if (!Array.isArray(window.storeProducts) || !window.storeProducts.length) return false;
-
-    normalizeProducts();
-    installObserver();
-
-    if (typeof window.render === "function" && !window.__sngStockRenderWrapped) {
-      const originalRender = window.render;
-      window.render = function () {
-        const result = originalRender.apply(this, arguments);
-        setTimeout(decorateCards, 0);
-        return result;
-      };
-      window.__sngStockRenderWrapped = true;
-    }
-
-    if (typeof window.openProduct === "function" && !window.__sngStockOpenWrapped) {
-      const originalOpenProduct = window.openProduct;
-      window.openProduct = function (id) {
-        const result = originalOpenProduct.apply(this, arguments);
-        setTimeout(() => decorateProductDetail(id), 0);
-        return result;
-      };
-      window.__sngStockOpenWrapped = true;
-    }
-
-    if (typeof window.render === "function") window.render();
-    decorateCards();
-    return true;
   }
 
   function installAdmin() {
@@ -181,7 +124,6 @@
         const response = await originalFetch(input, init);
         const url = typeof input === "string" ? input : input?.url || "";
         const method = String(init?.method || (typeof input !== "string" ? input?.method : "GET") || "GET").toUpperCase();
-
         if (method === "POST" && url.includes("/api/admin/products") && !url.includes("/media")) {
           try {
             const data = await response.clone().json();
@@ -196,16 +138,26 @@
             }
           } catch (_) {}
         }
-
         return response;
       };
       window.__sngStockFetchWrapped = true;
     }
   }
 
-  function start() {
+  function install() {
     injectOnOrderStyle();
     installAdmin();
+    if (!Array.isArray(window.storeProducts) || !window.storeProducts.length) return false;
+    normalizeProducts();
+    installObserver();
+    if (typeof window.render === "function") window.render();
+    decorateCards();
+    decorateDetail();
+    return true;
+  }
+
+  function start() {
+    injectOnOrderStyle();
     if (!install()) setTimeout(start, 150);
   }
 
