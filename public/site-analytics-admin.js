@@ -62,18 +62,24 @@
       .sg-analytics-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
       .sg-analytics-title{font-size:19px;font-weight:900;color:#f7f9ff}
       .sg-analytics-sub{font-size:11px;color:#8f9db3;margin-top:4px}
-      .sg-analytics-refresh{border:0;border-radius:10px;padding:9px 12px;background:#26313d;color:#fff;font-weight:700;cursor:pointer}
+      .sg-analytics-refresh{border:0;border-radius:10px;padding:9px 12px;background:#26313d;color:#fff;font-weight:700;cursor:pointer;white-space:nowrap}
       .sg-analytics-refresh:active{transform:scale(.98)}
       .sg-analytics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
       .sg-analytics-card{padding:12px;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:linear-gradient(145deg,#101b28,#0c141e);min-width:0}
       .sg-analytics-card--highlight{background:linear-gradient(145deg,#111f36,#0c1626);border-color:rgba(67,110,255,.24)}
       .sg-analytics-label{font-size:10px;color:#8f9db3;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
       .sg-analytics-value{margin-top:6px;font-size:21px;font-weight:900;color:#fff;overflow-wrap:anywhere}
-      .sg-analytics-chart{margin-top:12px;padding:12px;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:rgba(7,13,23,.82);overflow:auto}
-      .sg-bars{display:flex;align-items:flex-end;gap:5px;height:105px;min-width:520px;padding-top:6px}
-      .sg-bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:13px}
-      .sg-bar{width:100%;max-width:18px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#2684ff,#7545ff,#e62f9f);min-height:2px}
-      .sg-bar-label{font-size:8px;color:#72829a;transform:rotate(-35deg);white-space:nowrap}
+      .sg-analytics-chart{margin-top:12px;padding:12px;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:rgba(7,13,23,.82);overflow:hidden}
+      .sg-chart-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+      .sg-chart-note{font-size:9px;color:#667891;text-transform:none;font-weight:600;letter-spacing:0}
+      .sg-bars{display:flex;align-items:flex-end;gap:4px;height:112px;width:100%;padding-top:6px}
+      .sg-bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:0}
+      .sg-bar{width:100%;max-width:16px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#2684ff,#7545ff,#e62f9f);min-height:2px}
+      .sg-bar-label{font-size:8px;color:#72829a;white-space:nowrap;min-height:10px}
+      .sg-sales-bar{background:linear-gradient(180deg,#39b6ff,#2d6bff);}
+      .sg-sales-value{font-size:7px;color:#8797ae;white-space:nowrap;min-height:9px;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+      .sg-analytics-legend{display:flex;gap:12px;margin-top:9px;font-size:9px;color:#72829a}
+      .sg-legend-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;background:#2684ff}
       .sg-analytics-error{color:#ff7777;font-size:13px;padding:8px 0}
       @media(max-width:900px){
         #adminBox > .stats{grid-template-columns:repeat(6,minmax(0,1fr))!important}
@@ -93,8 +99,12 @@
         .sg-analytics-head{align-items:flex-start}
         .sg-analytics-title{font-size:17px}
         .sg-analytics-refresh{padding:8px 10px}
+        .sg-bars{height:100px;gap:2px}
+        .sg-bar{max-width:10px}
+        .sg-bar-label{font-size:7px}
+        .sg-chart-note{display:none}
       }
-      @media(max-width:360px){.sg-analytics-grid{grid-template-columns:1fr}}
+      @media(max-width:360px){.sg-analytics-grid{grid-template-columns:1fr}.sg-analytics-refresh{font-size:12px}}
     `;
     document.head.appendChild(s);
   }
@@ -115,18 +125,38 @@
     return panel;
   }
 
+  function normalizeDays(days, salesDays) {
+    const visits = new Map((Array.isArray(days) ? days : []).map(x => [String(x.date), x]));
+    const sales = new Map((Array.isArray(salesDays) ? salesDays : []).map(x => [String(x.date), x]));
+    const keys = new Set([...visits.keys(), ...sales.keys()]);
+    return Array.from(keys).sort().slice(-30).map(date => ({
+      date,
+      visits: Number(visits.get(date)?.visits || 0),
+      visitors: Number(visits.get(date)?.visitors || 0),
+      orders: Number(sales.get(date)?.orders || 0),
+      revenue: Number(sales.get(date)?.revenue || 0)
+    }));
+  }
+
+  function chartBars(items, valueKey, barClass, formatter, tooltipExtra) {
+    const max = Math.max(1, ...items.map(x => Number(x[valueKey] || 0)));
+    return items.map((x, i) => {
+      const value = Number(x[valueKey] || 0);
+      const height = Math.max(2, Math.round((value / max) * 86));
+      const showLabel = i === 0 || i === items.length - 1 || i % 5 === 0;
+      const title = `${x.date}: ${formatter(value)}${tooltipExtra ? ` · ${tooltipExtra(x)}` : ''}`;
+      return `<div class="sg-bar-wrap" title="${title}"><div class="sg-bar ${barClass || ''}" style="height:${height}px"></div><div class="sg-bar-label">${showLabel ? String(x.date).slice(5) : ''}</div></div>`;
+    }).join('');
+  }
+
   function render(data) {
     addStyles();
     const panel = ensurePanel();
     if (!panel) return;
 
-    const days = Array.isArray(data.days) ? data.days : [];
-    const max = Math.max(1, ...days.map(x => Number(x.visits || 0)));
-    const bars = days.map(x => {
-      const visits = Number(x.visits || 0);
-      const height = Math.max(2, Math.round((visits / max) * 90));
-      return `<div class="sg-bar-wrap" title="${x.date}: ${fmt(visits)} visites / ${fmt(x.visitors)} visiteurs"><div class="sg-bar" style="height:${height}px"></div><div class="sg-bar-label">${String(x.date).slice(5)}</div></div>`;
-    }).join('');
+    const items = normalizeDays(data.days, data.sales_days);
+    const visitBars = chartBars(items, 'visits', '', v => `${fmt(v)} visites`, x => `${fmt(x.visitors)} visiteurs`);
+    const salesBars = chartBars(items, 'revenue', 'sg-sales-bar', v => fmtMoney(v), x => `${fmt(x.orders)} commande${x.orders > 1 ? 's' : ''}`);
 
     panel.innerHTML = `
       <div class="sg-analytics-head">
@@ -151,8 +181,14 @@
         <div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs uniques · 30 j</div><div class="sg-analytics-value">${fmt(data.visitors_30d)}</div></div>
       </div>
       <div class="sg-analytics-chart">
-        <div class="sg-analytics-label" style="margin-bottom:10px">Visites par jour · 30 derniers jours</div>
-        <div class="sg-bars">${bars || '<span class="sg-analytics-sub">Aucune visite enregistrée pour le moment.</span>'}</div>
+        <div class="sg-chart-head"><div class="sg-analytics-label">Visites par jour · 30 derniers jours</div><div class="sg-chart-note">Survolez une barre pour les détails</div></div>
+        <div class="sg-bars">${visitBars || '<span class="sg-analytics-sub">Aucune visite enregistrée pour le moment.</span>'}</div>
+        <div class="sg-analytics-legend"><span><span class="sg-legend-dot"></span>Visites</span><span>Le nombre de visiteurs uniques est disponible au survol</span></div>
+      </div>
+      <div class="sg-analytics-chart">
+        <div class="sg-chart-head"><div class="sg-analytics-label">Chiffre d'affaires · 30 derniers jours</div><div class="sg-chart-note">Commandes payées uniquement</div></div>
+        <div class="sg-bars">${salesBars || '<span class="sg-analytics-sub">Aucune vente enregistrée pour le moment.</span>'}</div>
+        <div class="sg-analytics-legend"><span><span class="sg-legend-dot"></span>CA encaissé</span><span>Survolez une barre pour voir le nombre de commandes</span></div>
       </div>
     `;
 
