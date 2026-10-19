@@ -9,8 +9,61 @@
     const s = document.createElement('style');
     s.id = STYLE;
     s.textContent = `
-      /* Analytics is appended to .stats so it stays visible in Overview and
-         appears after the compact shop/order summary. */
+      /* =========================================================
+         SNGAMER ADMIN — VUE D'ENSEMBLE COMPACTE
+         Les 3 KPI principaux restent toujours sur une ligne.
+         Les 6 statuts de commandes sont compacts et réguliers.
+         ========================================================= */
+      #adminBox > .stats{
+        display:grid!important;
+        grid-template-columns:repeat(6,minmax(0,1fr))!important;
+        gap:10px!important;
+        margin-bottom:20px!important;
+      }
+
+      #adminBox > .stats > .stat{
+        grid-column:auto!important;
+        min-width:0!important;
+        min-height:74px!important;
+        padding:12px 13px!important;
+        border-radius:15px!important;
+        display:flex!important;
+        flex-direction:column!important;
+        justify-content:center!important;
+      }
+
+      /* Produits / Commandes / CA */
+      #adminBox > .stats > .stat:nth-child(1),
+      #adminBox > .stats > .stat:nth-child(2),
+      #adminBox > .stats > .stat:nth-child(3){
+        grid-column:span 2!important;
+        min-height:92px!important;
+        padding:15px!important;
+      }
+
+      #adminBox > .stats > .stat:nth-child(1) strong,
+      #adminBox > .stats > .stat:nth-child(2) strong,
+      #adminBox > .stats > .stat:nth-child(3) strong{
+        font-size:24px!important;
+        margin-top:7px!important;
+        line-height:1.1!important;
+      }
+
+      /* Six états de commande */
+      #adminBox > .stats > .stat:nth-child(n+4):not(#${PANEL}){
+        grid-column:span 1!important;
+        min-height:68px!important;
+      }
+
+      #adminBox > .stats > .stat:nth-child(n+4):not(#${PANEL}) strong{
+        font-size:20px!important;
+        margin-top:5px!important;
+        line-height:1!important;
+      }
+
+      /* =========================================================
+         ACTIVITÉ / ANALYTICS
+         ========================================================= */
       #${PANEL}{
         grid-column:1/-1!important;
         display:block!important;
@@ -22,12 +75,20 @@
         box-shadow:0 10px 32px rgba(0,0,0,.2);
         order:99!important;
       }
-      .sg-analytics-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+
+      .sg-analytics-head{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:14px
+      }
       .sg-analytics-title{font-size:19px;font-weight:900;color:#f7f9ff}
       .sg-analytics-sub{font-size:11px;color:#8f9db3;margin-top:4px}
-      .sg-analytics-refresh{border:0;border-radius:9px;padding:8px 11px;background:#26313d;color:#fff;font-weight:700;cursor:pointer}
+      .sg-analytics-refresh{border:0;border-radius:10px;padding:9px 12px;background:#26313d;color:#fff;font-weight:700;cursor:pointer}
+      .sg-analytics-refresh:active{transform:scale(.98)}
       .sg-analytics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-      .sg-analytics-card{padding:12px;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:linear-gradient(145deg,#101b28,#0c141e)}
+      .sg-analytics-card{padding:12px;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:linear-gradient(145deg,#101b28,#0c141e);min-width:0}
       .sg-analytics-label{font-size:10px;color:#8f9db3;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
       .sg-analytics-value{margin-top:6px;font-size:21px;font-weight:900;color:#fff;overflow-wrap:anywhere}
       .sg-analytics-chart{margin-top:12px;padding:12px;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:rgba(7,13,23,.82);overflow:auto}
@@ -37,67 +98,35 @@
       .sg-bar-label{font-size:8px;color:#72829a;transform:rotate(-35deg);white-space:nowrap}
       .sg-analytics-error{color:#ff7777;font-size:13px;padding:8px 0}
 
-      /* ---------- COMPACT OVERVIEW SUMMARY ----------
-         First three cards = main KPIs.
-         Remaining cards = order-status counters in a compact row instead of
-         nine large vertical blocks. */
-      #adminBox .stats{
-        grid-template-columns:repeat(12,minmax(0,1fr))!important;
-        gap:10px!important;
-      }
-      #adminBox .stats > .stat:not(#${PANEL}){
-        min-height:76px!important;
-        padding:11px 13px!important;
-        border-radius:14px!important;
-      }
-      #adminBox .stats > .stat:nth-child(1),
-      #adminBox .stats > .stat:nth-child(2),
-      #adminBox .stats > .stat:nth-child(3){
-        grid-column:span 4!important;
-        min-height:92px!important;
-        padding:15px!important;
-      }
-      #adminBox .stats > .stat:nth-child(n+4):not(#${PANEL}){
-        grid-column:span 2!important;
-        min-height:68px!important;
-        padding:10px 12px!important;
-      }
-      #adminBox .stats > .stat:not(#${PANEL}) strong{
-        font-size:20px!important;
-        margin-top:5px!important;
-        line-height:1.05!important;
-      }
-      #adminBox .stats > .stat:nth-child(1) strong,
-      #adminBox .stats > .stat:nth-child(2) strong,
-      #adminBox .stats > .stat:nth-child(3) strong{
-        font-size:24px!important;
-        margin-top:7px!important;
-      }
-
       @media(max-width:900px){
+        #adminBox > .stats{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+        #adminBox > .stats > .stat:nth-child(1),
+        #adminBox > .stats > .stat:nth-child(2),
+        #adminBox > .stats > .stat:nth-child(3){grid-column:span 2!important}
+        #adminBox > .stats > .stat:nth-child(n+4):not(#${PANEL}){grid-column:span 1!important}
         .sg-analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-        #adminBox .stats > .stat:nth-child(1),
-        #adminBox .stats > .stat:nth-child(2),
-        #adminBox .stats > .stat:nth-child(3){grid-column:span 4!important}
-        #adminBox .stats > .stat:nth-child(n+4):not(#${PANEL}){grid-column:span 2!important}
       }
 
-      @media(max-width:480px){
-        .sg-analytics-head{align-items:flex-start}
-        .sg-analytics-title{font-size:17px}
+      @media(max-width:600px){
+        #adminBox > .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+        #adminBox > .stats > .stat:nth-child(1),
+        #adminBox > .stats > .stat:nth-child(2),
+        #adminBox > .stats > .stat:nth-child(3){grid-column:span 1!important;min-height:82px!important}
+        #adminBox > .stats > .stat:nth-child(n+4):not(#${PANEL}){grid-column:span 1!important;min-height:62px!important;padding:9px 10px!important}
+        #adminBox > .stats > .stat:nth-child(1) strong,
+        #adminBox > .stats > .stat:nth-child(2) strong,
+        #adminBox > .stats > .stat:nth-child(3) strong{font-size:20px!important}
+        #adminBox > .stats > .stat:nth-child(n+4):not(#${PANEL}) strong{font-size:17px!important}
         .sg-analytics-grid{grid-template-columns:1fr 1fr;gap:8px}
         .sg-analytics-card{padding:10px}
         .sg-analytics-value{font-size:18px}
-        #adminBox .stats{grid-template-columns:1fr 1fr!important;gap:8px!important}
-        #adminBox .stats > .stat:not(#${PANEL}){min-height:66px!important;padding:10px!important}
-        #adminBox .stats > .stat:nth-child(1),
-        #adminBox .stats > .stat:nth-child(2),
-        #adminBox .stats > .stat:nth-child(3){grid-column:span 1!important;min-height:82px!important}
-        #adminBox .stats > .stat:nth-child(n+4):not(#${PANEL}){grid-column:span 1!important}
-        #adminBox .stats > .stat:not(#${PANEL}) strong{font-size:17px!important}
-        #adminBox .stats > .stat:nth-child(1) strong,
-        #adminBox .stats > .stat:nth-child(2) strong,
-        #adminBox .stats > .stat:nth-child(3) strong{font-size:20px!important}
+        .sg-analytics-head{align-items:flex-start}
+        .sg-analytics-title{font-size:17px}
+        .sg-analytics-refresh{padding:8px 10px}
+      }
+
+      @media(max-width:360px){
+        .sg-analytics-grid{grid-template-columns:1fr}
       }
     `;
     document.head.appendChild(s);
