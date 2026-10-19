@@ -141,13 +141,13 @@
         <div class="sg-analytics-card"><div class="sg-analytics-label">Visites aujourd'hui</div><div class="sg-analytics-value">${fmt(data.visits_today)}</div></div>
         <div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs · 7 jours</div><div class="sg-analytics-value">${fmt(data.visitors_7d)}</div></div>
         <div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs · 30 jours</div><div class="sg-analytics-value">${fmt(data.visitors_30d)}</div></div>
-        <div class="sg-analytics-card"><div class="sg-analytics-label">Commandes totales</div><div class="sg-analytics-value">${fmt(data.orders)}</div></div>
-        <div class="sg-analytics-card"><div class="sg-analytics-label">Commandes aujourd'hui</div><div class="sg-analytics-value">${fmt(data.orders_today)}</div></div>
-        <div class="sg-analytics-card"><div class="sg-analytics-label">CA aujourd'hui</div><div class="sg-analytics-value">${fmtMoney(data.revenue_today)}</div></div>
+        <div class="sg-analytics-card"><div class="sg-analytics-label">Commandes payées</div><div class="sg-analytics-value">${fmt(data.orders)}</div></div>
+        <div class="sg-analytics-card"><div class="sg-analytics-label">Commandes payées aujourd'hui</div><div class="sg-analytics-value">${fmt(data.orders_today)}</div></div>
+        <div class="sg-analytics-card"><div class="sg-analytics-label">CA encaissé aujourd'hui</div><div class="sg-analytics-value">${fmtMoney(data.revenue_today)}</div></div>
         <div class="sg-analytics-card"><div class="sg-analytics-label">Visites totales</div><div class="sg-analytics-value">${fmt(data.visits)}</div></div>
-        <div class="sg-analytics-card sg-analytics-card--highlight"><div class="sg-analytics-label">CA total</div><div class="sg-analytics-value">${fmtMoney(data.revenue_total)}</div></div>
-        <div class="sg-analytics-card sg-analytics-card--highlight"><div class="sg-analytics-label">Panier moyen</div><div class="sg-analytics-value">${fmtMoney(data.average_order)}</div></div>
-        <div class="sg-analytics-card sg-analytics-card--highlight"><div class="sg-analytics-label">Taux de conversion · 30 j</div><div class="sg-analytics-value">${fmtPct(data.conversion_rate)}</div></div>
+        <div class="sg-analytics-card sg-analytics-card--highlight"><div class="sg-analytics-label">CA encaissé total</div><div class="sg-analytics-value">${fmtMoney(data.revenue_total)}</div></div>
+        <div class="sg-analytics-card sg-analytics-card--highlight"><div class="sg-analytics-label">Panier moyen encaissé</div><div class="sg-analytics-value">${fmtMoney(data.average_order)}</div></div>
+        <div class="sg-analytics-card sg-analytics-card--highlight"><div class="sg-analytics-label">Commandes / visites · 30 j</div><div class="sg-analytics-value">${fmtPct(data.conversion_rate)}</div></div>
         <div class="sg-analytics-card"><div class="sg-analytics-label">Visiteurs uniques · 30 j</div><div class="sg-analytics-value">${fmt(data.visitors_30d)}</div></div>
       </div>
       <div class="sg-analytics-chart">
