@@ -6,7 +6,8 @@
   const LABEL = "Sur commande";
 
   // One single premium status style, used everywhere the availability label
-  // is rendered. This must also win on the home product cards.
+  // is rendered. The product-card selector is intentionally more specific
+  // than the generic .card .stock rule so the home grid cannot turn it green.
   function injectOnOrderStyle() {
     if (document.getElementById("sngOnOrderPremiumStyle")) return;
     const style = document.createElement("style");
@@ -18,7 +19,9 @@
       #productDetail .onOrderStock,
       #drawer .onOrderStock,
       #checkout .onOrderStock,
-      #checkoutSummary .onOrderStock {
+      #checkoutSummary .onOrderStock,
+      #products .card.productCardClickable .stock.onOrderStock,
+      #products .card .stock.onOrderStock {
         color: #ff4fa3 !important;
         font-weight: 700 !important;
         text-shadow: 0 0 10px rgba(255,79,163,.20) !important;
