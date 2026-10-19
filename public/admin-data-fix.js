@@ -1,12 +1,12 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V7
+/* SNGAMER STORE — ADMIN DATA REFRESH V8
    Automatic refresh owner for the authenticated admin workspace.
    Also loads the dedicated refund UI and analytics admin UI.
-   Keeps one lightweight order search/filter toolbar in the existing Orders section.
+   Keeps one canonical order search/filter toolbar in the existing Orders section.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV7';
+  const STATE = '__sngamerAdminAutoRefreshV8';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -118,11 +118,41 @@
     return table?.closest('section') || null;
   }
 
-  /*
-   * The premium workspace already supplies an order search/status control.
-   * Older refresh code also used to add another toolbar. Remove only that
-   * duplicate control before installing the single canonical toolbar below.
-   */
+  /* Remove the older standalone filter panel that was rendered as a second
+     Orders section above the canonical toolbar. The real toolbar is kept
+     inside the section containing #ordersTable. */
+  function cleanupDuplicateOrderSections() {
+    const root = adminBox();
+    if (!root) return;
+
+    Array.from(root.querySelectorAll(':scope > section')).forEach(section => {
+      const heading = String(section.querySelector('h1,h2,h3,h4')?.textContent || '').trim().toLowerCase();
+      if (/commandes?/.test(heading)) return;
+
+      const marker = Array.from(section.querySelectorAll('input')).find(input => {
+        const placeholder = String(input.getAttribute('placeholder') || '').toLowerCase();
+        return placeholder.includes('client, téléphone, id') && !input.closest('#sng-order-tools');
+      });
+      if (!marker) return;
+
+      const hasPaymentFilter = Array.from(section.querySelectorAll('select')).some(select =>
+        Array.from(select.options || []).some(option =>
+          /tous les paiements/i.test(String(option.textContent || ''))
+        )
+      );
+      const hasStatusFilter = Array.from(section.querySelectorAll('select')).some(select =>
+        Array.from(select.options || []).some(option =>
+          /tous les statuts/i.test(String(option.textContent || ''))
+        )
+      );
+
+      if (hasPaymentFilter && hasStatusFilter) {
+        console.debug('SNGAMER: removed duplicate standalone order filter section');
+        section.remove();
+      }
+    });
+  }
+
   function cleanupDuplicateOrderTools(section) {
     if (!section) return;
 
@@ -187,6 +217,7 @@
     const section = getOrdersSection();
     if (!section) return;
     injectOrderToolsStyle();
+    cleanupDuplicateOrderSections();
     cleanupDuplicateOrderTools(section);
 
     if (document.getElementById('sng-order-tools')) {
@@ -238,10 +269,12 @@
   }
 
   function installOrderTools() {
+    cleanupDuplicateOrderSections();
     ensureOrderTools();
     const table = document.getElementById('ordersTable');
     if (!table || orderObserver) return;
     orderObserver = new MutationObserver(() => {
+      cleanupDuplicateOrderSections();
       ensureOrderTools();
       applyOrderFilters();
     });
@@ -256,9 +289,12 @@
 
     try {
       await runLoader('loadAll');
+      cleanupDuplicateOrderSections();
       installOrderTools();
       if (currentWorkspace() === 'orders' || workspace === 'orders') {
         await runLoader('loadOrders');
+        cleanupDuplicateOrderSections();
+        installOrderTools();
         applyOrderFilters();
       }
       lastWorkspace = currentWorkspace();
