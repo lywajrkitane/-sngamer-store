@@ -69,9 +69,9 @@ function injectCustomerSpaceScript(app) {
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
       const legacyBridgeTag = '<script src="/customer-premium-legacy-bridge-v1.js?v=20261018-1900"></script>';
       const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261018-2050" defer></script>';
-      const profilePremiumTag = '<script src="/customer-profile-premium-v1.js?v=20261019-0932" defer></script>';
-      html = html.replace(/<script\\b[^>]*src=["'][^"']*customer-profile-premium-v1\\.js[^"']*["'][^>]*>\\s*<\\/script>/gi, "");
-      html = html.replace(/<\\/body>/i, `${profilePremiumTag}</body>`);
+      const profilePremiumTag = '<script src="/customer-profile-premium-v1.js?v=20261019-0933" defer></script>';
+      html = html.replace(/<script\b[^>]*src=["'][^"']*customer-profile-premium-v1\.js[^"']*["'][^>]*>\s*<\/script>/gi, "");
+      html = html.replace(/<\/body>/i, `${profilePremiumTag}</body>`);
       html = html.replace(/if\s*\(!confirm\(([^;]*?)\)\)\s*return;/g, 'if (!(await window.sngPremiumConfirm($1))) return;');
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); res.set("Pragma", "no-cache"); res.set("Expires", "0");
       return res.type("html").send(html);
