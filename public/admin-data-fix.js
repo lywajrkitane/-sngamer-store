@@ -1,12 +1,13 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V10
+/* SNGAMER STORE — ADMIN DATA REFRESH V11
    Single owner for authenticated admin data refresh, refund UI and analytics.
    Order presentation/filtering belongs to the existing V2.1 Orders workspace.
    Do not inject a second order search/filter toolbar here.
+   Also remove any legacy standalone filter panel left by older admin versions.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV10';
+  const STATE = '__sngamerAdminAutoRefreshV11';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -62,15 +63,110 @@
     document.head.appendChild(script);
   }
 
-  /*
-     The V2.1 Orders workspace is already the canonical order UI.
-     Older versions of this refresh script injected #sng-order-tools and
-     produced the duplicate panel visible above the Orders workspace.
-     Remove that obsolete node if a cached/previous controller left it behind,
-     but never create it again.
-  */
   function removeLegacyOrderTools() {
     document.querySelectorAll('#sng-order-tools, #sng-order-tools-style').forEach(el => el.remove());
+  }
+
+  function normalizeText(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function getOrdersSection() {
+    const table = document.getElementById('ordersTable');
+    return table?.closest('section') || null;
+  }
+
+  function isLegacyOrderSearchInput(input) {
+    if (!input || input.closest('#sng-order-tools')) return false;
+    const placeholder = normalizeText(input.getAttribute('placeholder'));
+    return placeholder.includes('commande, client, telephone') ||
+      (placeholder.includes('client') && placeholder.includes('telephone')) ||
+      placeholder.includes('client, telephone, id');
+  }
+
+  function hasOptionText(container, pattern) {
+    return Array.from(container.querySelectorAll('select')).some(select =>
+      Array.from(select.options || []).some(option => pattern.test(normalizeText(option.textContent)))
+    );
+  }
+
+  /* Remove the exact legacy standalone panel used by older admin builds.
+     Never touch the canonical section containing #ordersTable. */
+  function cleanupDuplicateOrderSections() {
+    const root = adminBox();
+    if (!root) return;
+
+    const ordersSection = getOrdersSection();
+    const markers = Array.from(root.querySelectorAll('input')).filter(isLegacyOrderSearchInput);
+
+    markers.forEach(marker => {
+      if (marker.closest('#sng-order-tools')) return;
+      if (ordersSection && ordersSection.contains(marker)) return;
+
+      let candidate = marker.closest('section');
+      if (!candidate || candidate === ordersSection) candidate = marker.parentElement;
+
+      for (let i = 0; i < 8 && candidate && candidate !== root; i += 1) {
+        const hasPayment = hasOptionText(candidate, /tous les paiements/);
+        const hasStatus = hasOptionText(candidate, /tous les statuts/);
+        const hasReset = Array.from(candidate.querySelectorAll('button')).some(button => /reinitialiser/.test(normalizeText(button.textContent)));
+        if (hasPayment && hasStatus && hasReset) {
+          if (candidate.contains(document.getElementById('ordersTable'))) return;
+          console.debug('SNGAMER: removed duplicate standalone order filter panel');
+          candidate.remove();
+          return;
+        }
+        candidate = candidate.parentElement;
+      }
+    });
+  }
+
+  /* Some older versions left a reduced duplicate containing only search + status.
+     Remove it without touching the real Orders workspace. */
+  function cleanupDuplicateOrderTools(section) {
+    if (!section) return;
+    if (section.contains(document.getElementById('ordersTable'))) return;
+
+    const marker = Array.from(section.querySelectorAll('input,select')).find(el => {
+      if (el.closest('#sng-order-tools')) return false;
+      const placeholder = normalizeText(el.getAttribute('placeholder'));
+      return placeholder.includes('client, telephone, id');
+    });
+
+    if (!marker) return;
+
+    let container = marker.parentElement;
+    for (let i = 0; i < 5 && container && container !== section; i += 1) {
+      const controls = container.querySelectorAll('input,select,button');
+      const hasStatus = Array.from(container.querySelectorAll('select')).some(select =>
+        Array.from(select.options || []).some(option => /tous les statuts/i.test(String(option.textContent || '')))
+      );
+      if (controls.length >= 2 && hasStatus) {
+        container.remove();
+        return;
+      }
+      container = container.parentElement;
+    }
+
+    marker.remove();
+  }
+
+  function cleanupAllLegacyOrderPanels() {
+    const root = adminBox();
+    if (!root) return;
+    removeLegacyOrderTools();
+    cleanupDuplicateOrderSections();
+    const ordersSection = getOrdersSection();
+    if (ordersSection) {
+      Array.from(root.querySelectorAll('section')).forEach(section => {
+        if (section !== ordersSection) cleanupDuplicateOrderTools(section);
+      });
+    }
   }
 
   async function refreshNow(reason) {
@@ -80,17 +176,15 @@
     const workspace = currentWorkspace();
 
     try {
-      removeLegacyOrderTools();
+      cleanupAllLegacyOrderPanels();
       await runLoader('loadAll');
-      removeLegacyOrderTools();
+      cleanupAllLegacyOrderPanels();
 
-      /* The existing V2.1 Orders workspace owns its own search, tabs,
-         pagination and details. Refresh its source data without adding UI. */
       if (currentWorkspace() === 'orders' || workspace === 'orders') {
         if (typeof window.loadOrders === 'function') {
           await runLoader('loadOrders');
         }
-        removeLegacyOrderTools();
+        cleanupAllLegacyOrderPanels();
       }
 
       lastWorkspace = currentWorkspace();
@@ -116,7 +210,7 @@
 
     observer = new MutationObserver(() => {
       if (!isAdminVisible()) return;
-      removeLegacyOrderTools();
+      cleanupAllLegacyOrderPanels();
       const workspace = currentWorkspace();
       if (workspace !== lastWorkspace) refreshNow('workspace-change');
     });
@@ -125,15 +219,6 @@
       attributes: true,
       attributeFilter: ['class', 'data-v26-workspace']
     });
-  }
-
-  function normalizeText(value) {
-    return String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
   }
 
   function sanitizePaymentSelectors(root = document) {
@@ -180,7 +265,7 @@
     }
 
     stopOldCoreTimer();
-    removeLegacyOrderTools();
+    cleanupAllLegacyOrderPanels();
     installObserver();
     bootPaymentSelectorGuard();
     loadRefundUiV2();
@@ -201,7 +286,7 @@
 
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      removeLegacyOrderTools();
+      cleanupAllLegacyOrderPanels();
       loadRefundUiV2();
       loadAnalyticsAdmin();
       refreshNow('visibility');
@@ -209,14 +294,14 @@
   });
 
   window.addEventListener('pageshow', () => {
-    removeLegacyOrderTools();
+    cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();
     refreshNow('pageshow');
   });
 
   window.addEventListener('focus', () => {
-    removeLegacyOrderTools();
+    cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();
     refreshNow('focus');
