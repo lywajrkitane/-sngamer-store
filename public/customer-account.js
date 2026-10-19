@@ -18,7 +18,24 @@
   window.sngLogout=async()=>{try{await api('/api/customer/logout',{method:'POST'});state.customer=null;authView('login')}catch(e){alert(e.message)}};
   window.sngEditProfile=()=>{const c=state.customer||{},m=document.createElement('div');m.className='sgaModal';m.innerHTML=`<div class="sgaModalBox"><button class="sgaModalClose" onclick="this.closest('.sgaModal').remove()">×</button><h3>Modifier mes informations</h3><form id="sgaEdit" class="sgaForm"><input id="eName" value="${esc(c.name)}" placeholder="Nom complet" required><input id="ePhone" value="${esc(c.phone)}" placeholder="Téléphone"><input id="eAddress" value="${esc(c.address)}" placeholder="Adresse"><button class="sgaBtn">Enregistrer</button></form><div id="eErr" class="sgaError"></div></div>`;document.body.appendChild(m);document.getElementById('sgaEdit').onsubmit=async e=>{e.preventDefault();try{await api('/api/customer/me',{method:'PATCH',body:JSON.stringify({name:eName.value,phone:ePhone.value,address:eAddress.value})});m.remove();renderAccount()}catch(x){document.getElementById('eErr').textContent=x.message}}};
   async function openProfile(){styles();await renderAccount()}
-  const originalNavigateStore=window.navigateStore;if(typeof originalNavigateStore==='function'){window.navigateStore=function(section){originalNavigateStore(section);if(section==='profile')setTimeout(openProfile,30)}}
+  const originalNavigateStore=window.navigateStore;
+  if(typeof originalNavigateStore==='function'){
+    window.navigateStore=function(section){
+      // This legacy account panel hides the product grid using .sga-hide and
+      // display:none!important. Clear both before leaving Profile so the main
+      // app renderer can display the already-loaded products without a reload.
+      if(section!=='profile'){
+        const products=document.getElementById('products');
+        if(products){
+          products.classList.remove('sga-hide');
+          products.hidden=section==='coins';
+          products.style.removeProperty('display');
+        }
+      }
+      originalNavigateStore(section);
+      if(section==='profile')setTimeout(openProfile,30);
+    };
+  }
   window.order=async function(){const ok=await me();if(!ok){if(typeof closeCheckout==='function')closeCheckout();if(typeof closeCart==='function')closeCart();if(typeof navigateStore==='function')navigateStore('profile');alert('Connecte-toi ou crée ton compte avant de passer une commande.');return}const cart=JSON.parse(localStorage.getItem('sg_cart')||'[]');if(!cart.length)return alert('Panier vide.');const payment=document.getElementById('pay')?.value||'Paiement à la livraison';try{const d=await api('/api/customer/orders',{method:'POST',body:JSON.stringify({payment,items:cart})});localStorage.removeItem('sg_cart');if(typeof cartItems!=='undefined')cartItems=[];if(typeof save==='function')save();if(typeof closeCheckout==='function')closeCheckout();if(typeof closeCart==='function')closeCart();alert('Commande #'+d.orderId+' enregistrée.');await renderAccount()}catch(e){alert(e.message)}};
   document.addEventListener('DOMContentLoaded',()=>styles());
 })();
