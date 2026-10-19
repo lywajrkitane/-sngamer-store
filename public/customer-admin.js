@@ -31,7 +31,7 @@
       .sgCustomerName{font-weight:800;color:#fff;font-size:15px}
       .sgCustomerId{display:inline-block;margin-right:8px;color:#5aa4ff;font-weight:900}
       .sgCustomerMeta{color:#8d9bad;font-size:11px;line-height:1.45;margin-top:3px}
-      .sgCustomerBtn{border:1px solid #30445b;background:#17263a;color:#fff;border-radius:9px;padding:8px 10px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;white-space:nowrap}
+      .sgCustomerBtn{width:auto!important;min-width:0!important;border:1px solid #30445b;background:#17263a;color:#fff;border-radius:9px;padding:8px 10px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;white-space:nowrap}
       .sgCustomerBtn.primary{background:#1e88e5;border-color:#1e88e5}
       .sgCustomerActionCell{text-align:right;white-space:nowrap}
 
@@ -61,7 +61,7 @@
         .sgCustomerTable td:last-child{grid-column:2;grid-row:1;text-align:right;white-space:nowrap;padding-left:4px!important}
         .sgCustomerTable .sgCustomerName{font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .sgCustomerTable .sgCustomerMeta{display:none}
-        .sgCustomerTable .sgCustomerBtn{width:auto;min-width:0;min-height:42px;padding:9px 13px;font-size:13px}
+        .sgCustomerTable .sgCustomerBtn{width:auto!important;min-width:0!important;min-height:42px;padding:9px 13px;font-size:13px}
         .sgCustomersNavBtn{width:auto;min-height:43px;flex:0 0 auto;padding:9px 12px;font-size:12px}
       }
     `;
@@ -131,7 +131,7 @@
                 <td data-label="Contact"><div>${esc(c.email)}</div><div class="sgCustomerMeta">${esc(c.phone||'Téléphone non renseigné')}<br>${esc(c.address||'Adresse non renseignée')}</div></td>
                 <td data-label="Commandes"><b>${Number(c.order_count||0)}</b><div class="sgCustomerMeta">${money(c.total_spent)}</div></td>
                 <td data-label="Dernière activité"><div>${c.last_order_at?date(c.last_order_at):'Aucune commande'}</div><div class="sgCustomerMeta">Dernière connexion : ${c.last_login_at?date(c.last_login_at):'—'}</div></td>
-                <td class="sgCustomerActionCell"><button class="sgCustomerBtn primary" onclick="sngAdminCustomer(${Number(c.id)})">Voir le client</button></td>
+                <td class="sgCustomerActionCell"><button class="sgCustomerBtn primary" onclick="sngAdminCustomer(${Number(c.id)})">Voir les détails</button></td>
               </tr>`).join(''):`<tr><td colspan="5" style="text-align:center;color:#8e9baa;padding:24px">Aucun compte client enregistré.</td></tr>`}
           </tbody>
         </table>
