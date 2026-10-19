@@ -50,15 +50,16 @@
       @media(max-width:700px){
         .sgCustomerSection{padding:14px;overflow:hidden}
         .sgCustomerGrid{grid-template-columns:1fr 1fr}
-        .sgCustomerTable{display:block;width:100%;border:0}
+        #adminBox .table-wrap:has(.sgCustomerTable){overflow:hidden!important;max-width:100%!important}
+        #adminBox .sgCustomerTable{display:block;width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;border:0}
         .sgCustomerTable thead{display:none}
-        .sgCustomerTable tbody{display:block;width:100%}
-        .sgCustomerTable tr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;width:100%;margin:0 0 9px;background:#0b0f14;border:1px solid #26313d;border-radius:12px;overflow:hidden}
-        .sgCustomerTable td{display:block;width:auto;border:0!important;padding:12px!important;min-width:0}
+        .sgCustomerTable tbody{display:block;width:100%;max-width:100%}
+        .sgCustomerTable tr{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;width:100%;max-width:100%;box-sizing:border-box;margin:0 0 9px;background:#0b0f14;border:1px solid #26313d;border-radius:12px;overflow:hidden}
+        .sgCustomerTable td{display:block;width:auto;border:0!important;padding:12px!important;min-width:0;box-sizing:border-box}
         .sgCustomerTable td:not(:first-child):not(:last-child){display:none!important}
-        .sgCustomerTable td:first-child{grid-column:1;grid-row:1}
+        .sgCustomerTable td:first-child{grid-column:1;grid-row:1;min-width:0;overflow:hidden}
         .sgCustomerTable td:first-child::before{display:none}
-        .sgCustomerTable td:last-child{grid-column:2;grid-row:1;text-align:right;white-space:nowrap;padding-left:4px!important}
+        .sgCustomerTable td:last-child{grid-column:2;grid-row:1;text-align:right;white-space:nowrap;padding-left:4px!important;min-width:0}
         .sgCustomerTable .sgCustomerName{font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .sgCustomerTable .sgCustomerMeta{display:none}
         .sgCustomerTable .sgCustomerBtn{width:auto!important;min-width:0!important;min-height:42px;padding:9px 13px;font-size:13px}
