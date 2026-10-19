@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sngamer-store.onrender.com/sitemap.xml
