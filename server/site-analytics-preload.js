@@ -118,7 +118,21 @@ function installAnalytics(app) {
       res.status(500).json({ error: 'Statistiques indisponibles' });
     }
   });
-  app.use(api);
+  // Register this API before the wildcard frontend route in server/server.js.
+  // That wildcard sends index.html for unmatched URLs; if the API is appended
+  // afterward, fetch(...).json() receives HTML and throws "Unexpected token '<'".
+  // The session middleware is already registered earlier in the app stack, so
+  // inserting immediately before the catch-all preserves the authenticated session.
+  const catchAllIndex = stack.findIndex(layer => {
+    if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
+    const routePath = layer.route.path;
+    return routePath === "*" || (Array.isArray(routePath) && routePath.includes("*"));
+  });
+  if (catchAllIndex >= 0) {
+    stack.splice(catchAllIndex, 0, ...api.stack);
+  } else {
+    stack.push(...api.stack);
+  }
 
   // Compatibility fallback for admin pages. The admin HTML and data-fix
   // already load the UI script, so this is intentionally only a fallback.
