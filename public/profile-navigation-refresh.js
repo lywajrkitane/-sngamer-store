@@ -1,18 +1,12 @@
-/* SNGAMER STORE — navigation, premium search + campaign hero reliability */
+/* SNGAMER STORE — navigation reliability + instant customer profile */
 (function () {
   "use strict";
 
-  /*
-     PIÈCES eFOOTBALL — premium stacked-coin icon
-     IMPORTANT: this icon must use exactly the same navigation container and
-     active animation as Accueil / Accessoires / Gaming Phone. We only replace
-     the glyph inside the existing .bottomNavIcon; we do not resize, lift,
-     glow, border, or animate the navigation item itself.
-  */
+  const STORAGE_KEY = "sg_profile_return_section";
+
   function injectPremiumCoinIcon() {
     const apply = function () {
       const buttons = document.querySelectorAll('.mobileBottomNav .bottomNavItem[data-nav="coins"] .bottomNavIcon');
-      if (!buttons.length) return;
       buttons.forEach(function (icon) {
         if (icon.dataset.sngamerCoinIcon === "1") return;
         icon.dataset.sngamerCoinIcon = "1";
@@ -32,44 +26,76 @@
       });
     };
     apply();
-    window.setTimeout(apply, 0);
-    window.setTimeout(apply, 300);
-    window.setTimeout(apply, 1000);
+    [0,300,1000].forEach(function(delay){ setTimeout(apply,delay); });
   }
 
-  injectPremiumCoinIcon();
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", injectPremiumCoinIcon, { once: true });
+  function installVisibilityGuard() {
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    if (document.getElementById("sngProfileVisibilityGuard")) return;
+    const style = document.createElement("style");
+    style.id = "sngProfileVisibilityGuard";
+    style.textContent = `
+      body:not([data-store-section="profile"]) #profileArea{display:none!important;visibility:hidden!important}
+      body[data-store-section="profile"] #profileArea{display:block!important;visibility:visible!important}
+    `;
+    document.head.appendChild(style);
   }
 
-  const STORAGE_KEY = "sg_profile_return_section";
+  /*
+     Customer account currently rebuilds the profile from /api/customer/me and
+     /api/customer/orders every time Profile is opened. Cache the last successful
+     responses in memory and serve them immediately on subsequent profile opens.
+     The first request still goes to the server normally. This removes the visible
+     loading delay without touching product/category loading.
+  */
+  function installCustomerAccountCache() {
+    if (window.__sngamerCustomerAccountCacheInstalled) return;
+    window.__sngamerCustomerAccountCacheInstalled = true;
 
-  function installRefreshNavigation() {
-    // Remove stale state left by earlier versions which forced a full page reload.
-    try { window.sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    const nativeFetch = window.fetch.bind(window);
+    const cache = new Map();
+    const accountPaths = new Set(["/api/customer/me", "/api/customer/orders"]);
 
-    // Keep the profile panel strictly confined to the Profile section.
-    // This prevents notification/profile cards from leaking into category views,
-    // even if another stylesheet or observer attempts to reveal the panel.
-    if (!document.getElementById("sngProfileVisibilityGuard")) {
-      const style = document.createElement("style");
-      style.id = "sngProfileVisibilityGuard";
-      style.textContent = `
-        body:not([data-store-section="profile"]) #profileArea {
-          display: none !important;
-          visibility: hidden !important;
-        }
-        body[data-store-section="profile"] #profileArea {
-          display: block !important;
-          visibility: visible !important;
-        }
-      `;
-      document.head.appendChild(style);
+    function keyFor(input) {
+      try {
+        const url = typeof input === "string" ? input : input.url;
+        return new URL(url, window.location.origin).pathname;
+      } catch (_) { return ""; }
     }
+
+    window.fetch = function(input, init) {
+      const path = keyFor(input);
+      if (!accountPaths.has(path)) return nativeFetch(input, init);
+
+      const method = String((init && init.method) || (input && input.method) || "GET").toUpperCase();
+      if (method !== "GET") return nativeFetch(input, init);
+
+      const cached = cache.get(path);
+      if (cached) {
+        /* Keep the UI instant. Refresh the cache silently in the background. */
+        nativeFetch(input, init).then(function(response){
+          if (!response.ok) return;
+          return response.clone().json().then(function(data){ cache.set(path, data); });
+        }).catch(function(){});
+
+        return Promise.resolve(new Response(JSON.stringify(cached), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        }));
+      }
+
+      return nativeFetch(input, init).then(function(response){
+        if (!response.ok) return response;
+        return response.clone().json().then(function(data){
+          cache.set(path, data);
+          return response;
+        }).catch(function(){ return response; });
+      });
+    };
   }
 
   function loadPremiumSearch() {
-    const ensurePremiumSearch = function () {
+    const ensure = function () {
       const source = document.querySelector(".siteHeader .search");
       const cartButton = document.querySelector(".siteHeader .cartButton");
       if (!source || !cartButton) return;
@@ -88,81 +114,8 @@
         document.body.appendChild(script);
       }
     };
-    ensurePremiumSearch();
-    [150, 500, 1200, 2500].forEach(function (delay) { window.setTimeout(ensurePremiumSearch, delay); });
-  }
-
-  function injectCampaignHeroStyles() {
-    if (document.getElementById("sngamerCampaignHeroFallbackStyles")) return;
-    const style = document.createElement("style");
-    style.id = "sngamerCampaignHeroFallbackStyles";
-    style.textContent = `
-      .sngCampaignFallback{position:relative;width:100%;min-height:300px;overflow:hidden;border:1px solid rgba(74,157,255,.30);border-radius:24px;background:linear-gradient(145deg,rgba(9,20,37,.98),rgba(12,8,27,.98));box-shadow:0 24px 55px rgba(0,0,0,.28),0 0 35px rgba(22,135,255,.10);cursor:pointer}
-      .sngCampaignFallback img{display:block;width:100%;height:100%;min-height:300px;object-fit:cover;opacity:.88}
-      .sngCampaignFallback:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,8,18,.08) 15%,rgba(3,8,18,.34) 48%,rgba(3,8,18,.96) 100%);pointer-events:none}
-      .sngCampaignFallbackInfo{position:absolute;z-index:2;left:18px;right:18px;bottom:18px;display:flex;flex-direction:column;gap:6px}
-      .sngCampaignFallbackBadge{align-self:flex-start;padding:7px 11px;border:1px solid rgba(255,255,255,.20);border-radius:999px;background:rgba(10,16,29,.72);color:#8fc7ff;font-size:9px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase;backdrop-filter:blur(8px)}
-      .sngCampaignFallbackTitle{color:#fff;font-size:24px;line-height:1.08;font-weight:900;text-shadow:0 4px 18px rgba(0,0,0,.42)}
-      .sngCampaignFallbackProduct{color:#d4deed;font-size:13px;font-weight:750}
-      .sngCampaignFallbackPrice{color:#fff;font-size:15px;font-weight:900}
-      .sngCampaignFallbackPrice del{color:#a4afbf;margin-right:8px;font-weight:650}
-      @media(max-width:560px){.sngCampaignFallback{min-height:235px;border-radius:18px}.sngCampaignFallback img{min-height:235px}.sngCampaignFallbackInfo{left:13px;right:13px;bottom:13px}.sngCampaignFallbackTitle{font-size:19px}.sngCampaignFallbackProduct{font-size:12px}.sngCampaignFallbackPrice{font-size:13px}}
-    `;
-    document.head.appendChild(style);
-  }
-
-  function renderCampaignProductFallback(product) {
-    const area = document.getElementById("promoArea");
-    const carousel = document.getElementById("promoCarousel");
-    const dots = document.getElementById("promoDots");
-    const fallback = document.getElementById("defaultHeroContent");
-    if (!area || !carousel || !product || !product.image1_url) return false;
-    injectCampaignHeroStyles();
-    carousel.innerHTML = `
-      <article class="sngCampaignFallback" role="button" tabindex="0" aria-label="Voir ${String(product.name || "la promotion").replace(/[<>]/g, "")}">
-        <img src="${String(product.image1_url).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}" alt="${String(product.name || "Promotion SNGAMER").replace(/[<>]/g, "")}">
-        <div class="sngCampaignFallbackInfo">
-          <span class="sngCampaignFallbackBadge">${String(product.campaign_name || "OFFRE PROMOTIONNELLE").replace(/[<>]/g, "")}</span>
-          <strong class="sngCampaignFallbackTitle">${String(product.campaign_name || "Offre du moment").replace(/[<>]/g, "")}</strong>
-          <span class="sngCampaignFallbackProduct">${String(product.name || "Produit en promotion").replace(/[<>]/g, "")}</span>
-          <span class="sngCampaignFallbackPrice">
-            ${Number(product.promo_price) > 0 && Number(product.promo_price) < Number(product.price) ? `<del>${new Intl.NumberFormat("fr-FR").format(Number(product.price))} FCFA</del>${new Intl.NumberFormat("fr-FR").format(Number(product.promo_price))} FCFA` : `${new Intl.NumberFormat("fr-FR").format(Number(product.price) || 0)} FCFA`}
-          </span>
-        </div>
-      </article>`;
-    const card = carousel.querySelector(".sngCampaignFallback");
-    if (card && typeof window.openProduct === "function") {
-      card.addEventListener("click", function () { window.openProduct(Number(product.id)); });
-      card.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); window.openProduct(Number(product.id)); }
-      });
-    }
-    if (dots) dots.innerHTML = "";
-    if (fallback) fallback.style.display = "none";
-    area.classList.remove("has-no-promo");
-    area.classList.add("has-active-promo");
-    area.style.display = "block";
-    return true;
-  }
-
-  async function ensureCampaignHero() {
-    try {
-      const mediaResponse = await fetch("/api/promo-media", { cache: "no-store" });
-      const media = mediaResponse.ok ? await mediaResponse.json() : [];
-      const validMedia = Array.isArray(media) ? media.filter(function (item) { return item && item.url && item.campaign_id && item.campaign_active !== false; }) : [];
-      const carousel = document.getElementById("promoCarousel");
-      if (validMedia.length && carousel && carousel.children.length) return;
-      const productsResponse = await fetch("/api/products", { cache: "no-store" });
-      if (!productsResponse.ok) return;
-      const products = await productsResponse.json();
-      if (!Array.isArray(products)) return;
-      const campaignProduct = products.find(function (product) {
-        return product && product.campaign_id && Boolean(product.promo_active) && Number(product.promo_price) > 0 && Number(product.promo_price) < Number(product.price) && product.image1_url;
-      });
-      if (campaignProduct) renderCampaignProductFallback(campaignProduct);
-    } catch (error) {
-      console.warn("SNGAMER_CAMPAIGN_HERO_FALLBACK", error);
-    }
+    ensure();
+    [150,500,1200,2500].forEach(function(delay){setTimeout(ensure,delay);});
   }
 
   function loadCompactOrders() {
@@ -187,12 +140,18 @@
     document.body.appendChild(script);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", installRefreshNavigation, { once: true });
-  } else installRefreshNavigation();
+  function start() {
+    injectPremiumCoinIcon();
+    installVisibilityGuard();
+    installCustomerAccountCache();
+    loadPremiumSearch();
+    loadCompactOrders();
+    loadAdminWorkspace();
+  }
 
-  loadPremiumSearch();
-  loadCompactOrders();
-  loadAdminWorkspace();
-  [500, 1200, 2200, 3500].forEach(function (delay) { window.setTimeout(ensureCampaignHero, delay); });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start, { once:true });
+  } else {
+    start();
+  }
 })();
