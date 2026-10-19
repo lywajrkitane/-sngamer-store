@@ -1,0 +1,34 @@
+name: One-time fix duplicate order filter
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch exact duplicate-filter guard
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('public/admin-data-fix.js')
+          s = p.read_text(encoding='utf-8')
+          old = "return placeholder.includes('client, téléphone, id') && !input.closest('#sng-order-tools');"
+          new = "return (placeholder.includes('commande, client, téléphone') || (placeholder.includes('client') && placeholder.includes('téléphone'))) && !input.closest('#sng-order-tools');"
+          if old not in s:
+              raise SystemExit('Expected duplicate-filter guard not found; refusing to modify.')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+      - name: Validate
+        run: node --check public/admin-data-fix.js
+      - name: Commit and remove one-time workflow
+        shell: bash
+        run: |
+          git rm .github/workflows/fix-duplicate-order-filter.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/admin-data-fix.js
+          git commit -m 'Fix duplicate order filter detection'
+          git push
