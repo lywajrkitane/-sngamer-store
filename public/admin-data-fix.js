@@ -1,12 +1,12 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V6
+/* SNGAMER STORE — ADMIN DATA REFRESH V7
    Automatic refresh owner for the authenticated admin workspace.
    Also loads the dedicated refund UI and analytics admin UI.
-   Adds a lightweight order search/filter toolbar to the existing Orders section.
+   Keeps one lightweight order search/filter toolbar in the existing Orders section.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV6';
+  const STATE = '__sngamerAdminAutoRefreshV7';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -118,6 +118,40 @@
     return table?.closest('section') || null;
   }
 
+  /*
+   * The premium workspace already supplies an order search/status control.
+   * Older refresh code also used to add another toolbar. Remove only that
+   * duplicate control before installing the single canonical toolbar below.
+   */
+  function cleanupDuplicateOrderTools(section) {
+    if (!section) return;
+
+    const marker = Array.from(section.querySelectorAll('input,select')).find(el => {
+      if (el.closest('#sng-order-tools')) return false;
+      const placeholder = String(el.getAttribute('placeholder') || '').toLowerCase();
+      return placeholder.includes('client, téléphone, id');
+    });
+
+    if (!marker) return;
+
+    let container = marker.parentElement;
+    for (let i = 0; i < 4 && container && container !== section; i += 1) {
+      const controls = container.querySelectorAll('input,select,button');
+      const hasStatus = Array.from(container.querySelectorAll('select')).some(select =>
+        Array.from(select.options || []).some(option =>
+          /tous les statuts/i.test(String(option.textContent || ''))
+        )
+      );
+      if (controls.length >= 2 && hasStatus) {
+        container.remove();
+        return;
+      }
+      container = container.parentElement;
+    }
+
+    marker.remove();
+  }
+
   function applyOrderFilters() {
     const table = document.getElementById('ordersTable');
     const tools = document.getElementById('sng-order-tools');
@@ -153,6 +187,8 @@
     const section = getOrdersSection();
     if (!section) return;
     injectOrderToolsStyle();
+    cleanupDuplicateOrderTools(section);
+
     if (document.getElementById('sng-order-tools')) {
       applyOrderFilters();
       return;
