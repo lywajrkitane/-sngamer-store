@@ -1,13 +1,14 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V11
+/* SNGAMER STORE — ADMIN DATA REFRESH V12
    Single owner for authenticated admin data refresh, refund UI and analytics.
    Order presentation/filtering belongs to the existing V2.1 Orders workspace.
    Do not inject a second order search/filter toolbar here.
-   Also remove any legacy standalone filter panel left by older admin versions.
+   Remove legacy standalone and reduced order filter panels, including those
+   accidentally left inside the canonical Orders section.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV11';
+  const STATE = '__sngamerAdminAutoRefreshV12';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -96,27 +97,27 @@
   }
 
   /* Remove the exact legacy standalone panel used by older admin builds.
-     Never touch the canonical section containing #ordersTable. */
+     Never remove a container that owns the canonical orders table/workspace. */
   function cleanupDuplicateOrderSections() {
     const root = adminBox();
     if (!root) return;
 
-    const ordersSection = getOrdersSection();
     const markers = Array.from(root.querySelectorAll('input')).filter(isLegacyOrderSearchInput);
 
     markers.forEach(marker => {
       if (marker.closest('#sng-order-tools')) return;
-      if (ordersSection && ordersSection.contains(marker)) return;
 
       let candidate = marker.closest('section');
-      if (!candidate || candidate === ordersSection) candidate = marker.parentElement;
+      if (!candidate || candidate === getOrdersSection()) candidate = marker.parentElement;
 
       for (let i = 0; i < 8 && candidate && candidate !== root; i += 1) {
         const hasPayment = hasOptionText(candidate, /tous les paiements/);
         const hasStatus = hasOptionText(candidate, /tous les statuts/);
         const hasReset = Array.from(candidate.querySelectorAll('button')).some(button => /reinitialiser/.test(normalizeText(button.textContent)));
+        const ownsCanonicalTable = candidate.contains(document.getElementById('ordersTable'));
+        const ownsCanonicalWorkspace = candidate.contains(document.getElementById('sngFinalOrders'));
         if (hasPayment && hasStatus && hasReset) {
-          if (candidate.contains(document.getElementById('ordersTable'))) return;
+          if (ownsCanonicalTable || ownsCanonicalWorkspace) return;
           console.debug('SNGAMER: removed duplicate standalone order filter panel');
           candidate.remove();
           return;
@@ -126,11 +127,12 @@
     });
   }
 
-  /* Some older versions left a reduced duplicate containing only search + status.
-     Remove it without touching the real Orders workspace. */
+  /* Older builds can leave a reduced duplicate containing only search + status.
+     This can happen INSIDE the same <section> as #ordersTable, so the old V11
+     guard that skipped the entire Orders section was too broad. We only remove
+     the small legacy control container itself and never its canonical workspace. */
   function cleanupDuplicateOrderTools(section) {
     if (!section) return;
-    if (section.contains(document.getElementById('ordersTable'))) return;
 
     const marker = Array.from(section.querySelectorAll('input,select')).find(el => {
       if (el.closest('#sng-order-tools')) return false;
@@ -141,32 +143,37 @@
     if (!marker) return;
 
     let container = marker.parentElement;
-    for (let i = 0; i < 5 && container && container !== section; i += 1) {
+    for (let i = 0; i < 8 && container && container !== section; i += 1) {
       const controls = container.querySelectorAll('input,select,button');
       const hasStatus = Array.from(container.querySelectorAll('select')).some(select =>
         Array.from(select.options || []).some(option => /tous les statuts/i.test(String(option.textContent || '')))
       );
-      if (controls.length >= 2 && hasStatus) {
+      const ownsCanonicalTable = container.contains(document.getElementById('ordersTable'));
+      const ownsCanonicalWorkspace = container.contains(document.getElementById('sngFinalOrders'));
+
+      if (!ownsCanonicalTable && !ownsCanonicalWorkspace && controls.length >= 2 && hasStatus) {
+        console.debug('SNGAMER: removed reduced legacy order filter panel');
         container.remove();
         return;
       }
       container = container.parentElement;
     }
 
-    marker.remove();
+    if (!marker.closest('#sngFinalOrders')) marker.remove();
   }
 
   function cleanupAllLegacyOrderPanels() {
     const root = adminBox();
     if (!root) return;
+
     removeLegacyOrderTools();
     cleanupDuplicateOrderSections();
-    const ordersSection = getOrdersSection();
-    if (ordersSection) {
-      Array.from(root.querySelectorAll('section')).forEach(section => {
-        if (section !== ordersSection) cleanupDuplicateOrderTools(section);
-      });
-    }
+
+    // IMPORTANT: inspect the canonical Orders section too. V11 skipped it,
+    // which is exactly why the remaining search/status panel survived.
+    Array.from(root.querySelectorAll('section')).forEach(section => {
+      cleanupDuplicateOrderTools(section);
+    });
   }
 
   async function refreshNow(reason) {
