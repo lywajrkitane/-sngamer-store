@@ -131,7 +131,7 @@
 
       const marker = Array.from(section.querySelectorAll('input')).find(input => {
         const placeholder = String(input.getAttribute('placeholder') || '').toLowerCase();
-        return placeholder.includes('client, téléphone, id') && !input.closest('#sng-order-tools');
+        return (placeholder.includes('commande, client, téléphone') || (placeholder.includes('client') && placeholder.includes('téléphone'))) && !input.closest('#sng-order-tools');
       });
       if (!marker) return;
 
