@@ -79,7 +79,7 @@ function installAnalytics(app) {
 
     try {
       await ensureTable();
-      const [totals, days, orders] = await Promise.all([
+      const [totals, days, orders, salesDays] = await Promise.all([
         analyticsPool.query(`
           SELECT
             COUNT(*)::int AS visits,
@@ -132,29 +132,41 @@ function installAnalytics(app) {
                 AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
             ), 0)::numeric(12,2) AS average_order
           FROM orders
+        `),
+        analyticsPool.query(`
+          SELECT
+            (created_at AT TIME ZONE 'Africa/Dakar')::date::text AS date,
+            COUNT(*) FILTER (
+              WHERE payment_status = 'Payé'
+                AND COALESCE(status, '') <> 'Annulée'
+                AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
+            )::int AS orders,
+            COALESCE(SUM(total) FILTER (
+              WHERE payment_status = 'Payé'
+                AND COALESCE(status, '') <> 'Annulée'
+                AND COALESCE(refund_status, 'Aucun') <> 'Remboursé'
+            ), 0)::int AS revenue
+          FROM orders
+          WHERE created_at >= CURRENT_DATE - INTERVAL '29 days'
+          GROUP BY (created_at AT TIME ZONE 'Africa/Dakar')::date
+          ORDER BY date ASC
         `)
       ]);
 
       const base = { ...totals.rows[0], ...orders.rows[0] };
       const visits30 = Number(base.visits_30d || 0);
       const orders30 = Number(base.orders || 0);
-      // This is a simple operational conversion indicator: paid, non-cancelled
-      // orders divided by tracked visits. It is intentionally based on visits,
-      // not unique visitors, so the label does not imply user-level attribution.
       base.conversion_rate = visits30 > 0 ? Number(((orders30 / visits30) * 100).toFixed(1)) : 0;
 
       res.set('Cache-Control', 'no-store');
-      res.json({ ...base, days: days.rows });
+      res.json({ ...base, days: days.rows, sales_days: salesDays.rows });
     } catch (e) {
       console.error('SITE_ANALYTICS_API_ERROR:', e);
       res.status(500).json({ error: 'Statistiques indisponibles' });
     }
   });
-  // Register this API before the wildcard frontend route in server/server.js.
-  // That wildcard sends index.html for unmatched URLs; if the API is appended
-  // afterward, fetch(...).json() receives HTML and throws "Unexpected token '<'".
-  // The session middleware is already registered earlier in the app stack, so
-  // inserting immediately before the catch-all preserves the authenticated session.
+
+  // Register this API before the wildcard frontend route.
   const catchAllIndex = stack.findIndex(layer => {
     if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
     const routePath = layer.route.path;
@@ -166,8 +178,6 @@ function installAnalytics(app) {
     stack.push(...api.stack);
   }
 
-  // Compatibility fallback for admin pages. The admin HTML and data-fix
-  // already load the UI script, so this is intentionally only a fallback.
   const injector = express.Router();
   injector.use((req, res, next) => {
     try {
@@ -199,8 +209,6 @@ function installAnalytics(app) {
   stack.unshift(...injector.stack);
 }
 
-// bootstrap.js replaces express.application.listen. A setter wrapper survives
-// that later assignment and installs analytics around the final listener.
 const target = express.application;
 const existingListen = target.listen;
 let currentListen = existingListen;
