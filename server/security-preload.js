@@ -9,8 +9,7 @@ const MAX_AUTH = 30;
 const MAX_PAYTECH_CREATE = 12;
 
 function clientIp(req) {
-  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-  return forwarded || req.ip || req.socket?.remoteAddress || 'unknown';
+  return req.ip || req.socket?.remoteAddress || 'unknown';
 }
 
 function allowRate(key, limit) {
