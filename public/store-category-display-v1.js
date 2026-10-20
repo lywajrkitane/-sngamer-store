@@ -1,7 +1,11 @@
 /* SNGAMER STORE — category display only
    Keeps the existing filtering logic and product data untouched.
-*/
+   The previous version used a MutationObserver that re-appended the same
+   buttons on every mutation, which created a mutation loop and could lock
+   the storefront after a refresh. */
 (function () {
+  "use strict";
+
   const order = [
     "Tous",
     "Coins / Pièces eFootball",
@@ -15,6 +19,7 @@
     if (!area) return;
 
     const buttons = Array.from(area.querySelectorAll(".catbtn"));
+    if (!buttons.length) return;
 
     buttons.forEach(button => {
       if (button.textContent.trim() === "Coins") {
@@ -27,19 +32,40 @@
       return index === -1 ? 999 : index;
     };
 
-    buttons
-      .sort((a, b) => {
-        const ra = rank(a.textContent.trim());
-        const rb = rank(b.textContent.trim());
-        return ra - rb;
-      })
-      .forEach(button => area.appendChild(button));
+    const desired = [...buttons].sort((a, b) => {
+      const ra = rank(a.textContent.trim());
+      const rb = rank(b.textContent.trim());
+      return ra - rb;
+    });
+
+    const current = Array.from(area.querySelectorAll(".catbtn"));
+    const needsReorder = desired.some((button, index) => button !== current[index]);
+
+    if (!needsReorder) return;
+
+    const fragment = document.createDocumentFragment();
+    desired.forEach(button => fragment.appendChild(button));
+    area.appendChild(fragment);
   }
 
-  patchCategories();
+  function install() {
+    if (window.__sngamerCategoryDisplayInstalled) return;
 
-  const area = document.getElementById("cats");
-  if (area) {
-    new MutationObserver(patchCategories).observe(area, { childList: true });
+    if (typeof window.cats !== "function") {
+      window.setTimeout(install, 50);
+      return;
+    }
+
+    const originalCats = window.cats;
+    window.cats = function () {
+      const result = originalCats.apply(this, arguments);
+      patchCategories();
+      return result;
+    };
+
+    window.__sngamerCategoryDisplayInstalled = true;
+    patchCategories();
   }
+
+  install();
 })();
