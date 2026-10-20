@@ -2,21 +2,6 @@
    Keeps the existing filtering logic and product data untouched.
 */
 (function () {
-  // Restore the premium search interaction on every fresh page load.
-  // The existing search component remains untouched; this only loads its
-  // dedicated interaction layer, which is intentionally separate from the
-  // category normalization below.
-  function loadPremiumSearch() {
-    if (document.querySelector('script[data-sngamer-search-polish="1"]')) return;
-    const script = document.createElement("script");
-    script.src = "search-polish.js?v=20261020-0945";
-    script.dataset.sngamerSearchPolish = "1";
-    script.defer = true;
-    document.head.appendChild(script);
-  }
-
-  loadPremiumSearch();
-
   const order = [
     "Tous",
     "Coins / Pièces eFootball",
