@@ -28,6 +28,12 @@
       #adminBox table{max-width:100%!important}
 
       #${PANEL_ID}{grid-column:1/-1!important;margin-top:14px!important;padding:18px!important;border:1px solid rgba(115,145,190,.16)!important;border-radius:18px!important;background:linear-gradient(145deg,rgba(14,25,43,.98),rgba(8,15,27,.98))!important;box-shadow:0 10px 32px rgba(0,0,0,.2);order:100!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important}
+      /* Override the global admin table rule (#adminBox table{min-width:760px}) for product analytics. */
+      #adminBox #${PANEL_ID} .sg-prod-table,
+      #adminBox #${PANEL_ID} table.sg-prod-table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
+      #adminBox #${PANEL_ID} .sg-prod-table-wrap{width:100%!important;max-width:100%!important;overflow:hidden!important}
+      #adminBox #${PANEL_ID} .sg-prod-table th,
+      #adminBox #${PANEL_ID} .sg-prod-table td{min-width:0!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important}
       .sg-prod-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:15px;min-width:0}
       .sg-prod-title{font-size:19px;font-weight:900;color:#f7f9ff;letter-spacing:-.02em}
       .sg-prod-sub{font-size:11px;color:#8f9db3;margin-top:4px;line-height:1.45}
@@ -47,7 +53,7 @@
       .sg-prod-box-head{padding:12px 13px;border-bottom:1px solid rgba(115,145,190,.10);display:flex;justify-content:space-between;gap:10px;align-items:center;min-width:0}
       .sg-prod-box-title{font-size:11px;color:#aebbd0;font-weight:900;text-transform:uppercase;letter-spacing:.06em;min-width:0}
       .sg-prod-box-note{font-size:9px;color:#65768e;white-space:nowrap}
-      .sg-prod-table-wrap{overflow-x:auto;max-width:100%}
+      .sg-prod-table-wrap{overflow-x:hidden;max-width:100%}
       .sg-prod-table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed}
       .sg-prod-table th{padding:10px 12px;text-align:left;font-size:9px;color:#687990;text-transform:uppercase;letter-spacing:.06em;font-weight:900}
       .sg-prod-table td{padding:11px 12px;border-top:1px solid rgba(115,145,190,.08);font-size:11px;color:#e8edf6;overflow:hidden;text-overflow:ellipsis}
