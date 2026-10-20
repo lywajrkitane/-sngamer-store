@@ -1,4 +1,4 @@
-/* SNGAMER STORE — Premium search interaction, version 2 */
+/* SNGAMER STORE — Premium search interaction, version 3 */
 (function(){
   function initPremiumSearch(){
     const source=document.querySelector('.siteHeader .search');
@@ -10,13 +10,16 @@
     source.dataset.premiumSearchReady='1';
     source.classList.add('sngamerSearchSource');
 
-    const button=document.createElement('button');
-    button.type='button';
-    button.className='searchPremiumButton';
-    button.setAttribute('aria-label','Rechercher un produit');
-    button.setAttribute('title','Rechercher un produit');
-    button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>';
-    cartButton.parentNode.insertBefore(button,cartButton);
+    let button=document.querySelector('.siteHeader .searchPremiumButton');
+    if(!button){
+      button=document.createElement('button');
+      button.type='button';
+      button.className='searchPremiumButton';
+      button.setAttribute('aria-label','Rechercher un produit');
+      button.setAttribute('title','Rechercher un produit');
+      button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>';
+      cartButton.parentNode.insertBefore(button,cartButton);
+    }
 
     function syncButtonSize(){
       const height=Math.round(cartButton.getBoundingClientRect().height);
