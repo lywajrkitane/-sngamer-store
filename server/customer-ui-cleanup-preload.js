@@ -58,6 +58,11 @@ const CLIENT_SCRIPT = [
 ].join("\\n");
 
 express.application.handle = function sngamerUiCleanupHandle(req,res){
+  // Express normally decorates the response with res.send(). Some startup/health
+  // paths can reach the application with a raw response object; never crash those paths.
+  if(!res || typeof res.send !== "function"){
+    return originalHandle.call(this,req,res);
+  }
   const originalSend = res.send.bind(res);
   res.send = function sngamerUiCleanupSend(body){
     if((req.path === "/" || req.path === "/index.html") && typeof body === "string" && body.includes("</body>")){
