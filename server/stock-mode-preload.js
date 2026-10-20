@@ -5,6 +5,7 @@ const Module = require("module");
 const ROOT = path.join(__dirname, "..");
 const SERVER_DIR = __dirname;
 const MARKER = "/* SNGAMER_STOCK_MODE_V1 */";
+const RESERVATION_MARKER = "/* SNGAMER_STOCK_RESERVATION_V1 */";
 
 function patchFile(file, transform) {
   if (!fs.existsSync(file)) return;
@@ -58,6 +59,48 @@ function patchServerSource() {
       /UPDATE products SET stock=stock-\$1 WHERE id=\$2 AND stock >= \$1/g,
       "UPDATE products SET stock=CASE WHEN stock_mode='on_order' THEN stock ELSE stock-$1 END WHERE id=$2 AND (stock_mode='on_order' OR stock >= $1)"
     );
+
+    if (!text.includes(RESERVATION_MARKER)) {
+      text = text.replace(
+        /ADD COLUMN IF NOT EXISTS refund_provider_message TEXT\n    \);/,
+        "ADD COLUMN IF NOT EXISTS refund_provider_message TEXT,\n      ADD COLUMN IF NOT EXISTS stock_reserved_until TIMESTAMPTZ\n    );"
+      );
+
+      const reservationHelpers = `\n  ${RESERVATION_MARKER}\n  const STOCK_RESERVATION_MINUTES = 20;\n\n  async function releaseExpiredStockReservations() {\n    const client = await pool.connect();\n    try {\n      await client.query(\"BEGIN\");\n      const result = await client.query(\`\n        SELECT id, items FROM orders\n        WHERE payment_status='En attente'\n          AND stock_reserved_until IS NOT NULL\n          AND stock_reserved_until <= NOW()\n        FOR UPDATE SKIP LOCKED\n      \`);\n      for (const order of result.rows) {\n        for (const item of (Array.isArray(order.items) ? order.items : [])) {\n          const quantity = Number(item.quantity);\n          const productId = Number(item.id);\n          if (Number.isInteger(quantity) && quantity > 0 && Number.isInteger(productId)) {\n            await client.query(\`UPDATE products SET stock=stock+$1 WHERE id=$2 AND stock_mode <> 'on_order'\`, [quantity, productId]);\n          }\n        }\n        await client.query(\`UPDATE orders SET stock_reserved_until=NULL,status='Paiement expiré',payment_status='Échec' WHERE id=$1 AND payment_status='En attente'\`, [order.id]);\n      }\n      await client.query(\"COMMIT\");\n    } catch (error) {\n      await client.query(\"ROLLBACK\");\n      console.error(\"STOCK_RESERVATION_CLEANUP_ERROR:\", error);\n    } finally {\n      client.release();\n    }\n  }\n\n  releaseExpiredStockReservations();\n  const stockReservationTimer = setInterval(releaseExpiredStockReservations, 60 * 1000);\n  stockReservationTimer.unref?.();\n`;
+      text = text.replace(/\n  async function markOrderPaid\(/, `${reservationHelpers}\n  async function markOrderPaid(`);
+
+      text = text.replace(
+        /SELECT payment_status,items FROM orders WHERE id=\$1 FOR UPDATE/,
+        "SELECT payment_status,items,stock_reserved_until FROM orders WHERE id=$1 FOR UPDATE"
+      );
+
+      const oldLoop = `      for (const item of items) {\n        const quantity = Number(item.quantity);\n        const productId = Number(item.id);\n        if (!Number.isInteger(quantity) || quantity <= 0 || !Number.isInteger(productId)) throw new Error(\"Commande payée invalide\");\n        const stockUpdate = await client.query(\n          \`UPDATE products SET stock=CASE WHEN stock_mode='on_order' THEN stock ELSE stock-$1 END WHERE id=$2 AND (stock_mode='on_order' OR stock >= $1)\`,\n          [quantity, productId]\n        );\n        if (stockUpdate.rowCount !== 1) throw new Error(\`Stock insuffisant ou produit introuvable pour \${productId}\`);\n      }`;
+      const newLoop = `      if (!locked.rows[0].stock_reserved_until || new Date(locked.rows[0].stock_reserved_until).getTime() <= Date.now()) throw new Error(\"La réservation de stock a expiré\");\n      for (const item of items) {\n        const quantity = Number(item.quantity);\n        const productId = Number(item.id);\n        if (!Number.isInteger(quantity) || quantity <= 0 || !Number.isInteger(productId)) throw new Error(\"Commande payée invalide\");\n      }`;
+      if (text.includes(oldLoop)) text = text.replace(oldLoop, newLoop);
+      else text = text.replace(/      for \(const item of items\) \{[\s\S]*?      \}\n      await client\.query\(\n        `UPDATE orders SET payment_status='Payé'/, newLoop + "\n      await client.query(\n        `UPDATE orders SET payment_status='Payé'");
+
+      text = text.replace(
+        /`INSERT INTO orders \(status,customer,payment,items,total,payment_status,payment_method,paytech_ref,payment_request_key\)\n         VALUES \('Nouvelle',\$1,\$2,\$3,\$4,'En attente',\$2,\$5,\$6\) RETURNING id`/,
+        "`INSERT INTO orders (status,customer,payment,items,total,payment_status,payment_method,paytech_ref,payment_request_key,stock_reserved_until)\n         VALUES ('Nouvelle',$1,$2,$3,$4,'En attente',$2,$5,$6,NOW() + INTERVAL '20 minutes') RETURNING id`"
+      );
+
+      const commitNeed = `      orderId = inserted.rows[0].id;\n      await client.query(\"COMMIT\");`;
+      const reserveAfterInsert = `      orderId = inserted.rows[0].id;\n      for (const item of finalItems) {\n        const stockUpdate = await client.query(\n          \`UPDATE products SET stock=CASE WHEN stock_mode='on_order' THEN stock ELSE stock-$1 END WHERE id=$2 AND (stock_mode='on_order' OR stock >= $1)\`,\n          [item.quantity, item.id]\n        );\n        if (stockUpdate.rowCount !== 1) throw new Error(\`Stock insuffisant pour \${item.name}\`);\n      }\n      await client.query(\"COMMIT\");`;
+      if (text.includes(commitNeed)) text = text.replace(commitNeed, reserveAfterInsert);
+
+      text = text.replace(
+        /UPDATE orders SET status='Paiement échoué',payment_status='Échec' WHERE id=\$1/g,
+        "UPDATE orders SET status='Paiement échoué',payment_status='Échec',stock_reserved_until=NULL WHERE id=$1"
+      );
+
+      const cancelOld = `UPDATE orders SET status='Annulée',payment_status='Annulée',payment_method=COALESCE($1,payment_method),paytech_token=COALESCE($2,paytech_token) WHERE id=$3 AND payment_status <> 'Payé'`;
+      const cancelNew = `UPDATE orders SET status='Annulée',payment_status='Annulée',payment_method=COALESCE($1,payment_method),paytech_token=COALESCE($2,paytech_token),stock_reserved_until=NULL WHERE id=$3 AND payment_status <> 'Payé'`;
+      text = text.replace(cancelOld, cancelNew);
+
+      const cancelBlock = `      } else if (body.type_event === \"sale_canceled\") {\n        await pool.query(\`UPDATE orders SET status='Annulée',payment_status='Annulée',payment_method=COALESCE($1,payment_method),paytech_token=COALESCE($2,paytech_token),stock_reserved_until=NULL WHERE id=$3 AND payment_status <> 'Payé'\`, [body.payment_method || null, body.token || null, order.id]);\n      }`;
+      const cancelReplacement = `      } else if (body.type_event === \"sale_canceled\") {\n        const cancelClient = await pool.connect();\n        try {\n          await cancelClient.query(\"BEGIN\");\n          const locked = await cancelClient.query(\`SELECT items,payment_status,stock_reserved_until FROM orders WHERE id=$1 FOR UPDATE\`, [order.id]);\n          if (locked.rows.length && locked.rows[0].payment_status !== 'Payé' && locked.rows[0].stock_reserved_until) {\n            for (const item of (Array.isArray(locked.rows[0].items) ? locked.rows[0].items : [])) {\n              const quantity = Number(item.quantity); const productId = Number(item.id);\n              if (Number.isInteger(quantity) && quantity > 0 && Number.isInteger(productId)) await cancelClient.query(\`UPDATE products SET stock=stock+$1 WHERE id=$2 AND stock_mode <> 'on_order'\`, [quantity, productId]);\n            }\n          }\n          await cancelClient.query(\`UPDATE orders SET status='Annulée',payment_status='Annulée',payment_method=COALESCE($1,payment_method),paytech_token=COALESCE($2,paytech_token),stock_reserved_until=NULL WHERE id=$3 AND payment_status <> 'Payé'\`, [body.payment_method || null, body.token || null, order.id]);\n          await cancelClient.query(\"COMMIT\");\n        } catch (e) { await cancelClient.query(\"ROLLBACK\"); throw e; } finally { cancelClient.release(); }\n      }`;
+      if (text.includes(cancelBlock)) text = text.replace(cancelBlock, cancelReplacement);
+    }
     return text;
   });
 
