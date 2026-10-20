@@ -26,6 +26,41 @@ const CLIENT_SCRIPT = [
   '    document.head.appendChild(style);',
   '  }',
   '',
+  '  function installStoreLoadGuard(){',
+  '    if(window.__sngStoreLoadGuardInstalled || typeof window.load!=="function") return;',
+  '    window.__sngStoreLoadGuardInstalled=true;',
+  '    const nativeLoad=window.load;',
+  '    let inFlight=null;',
+  '    let startedAt=0;',
+  '    window.load=function(){',
+  '      const now=Date.now();',
+  '      if(inFlight && now-startedAt<8000) return inFlight;',
+  '      startedAt=now;',
+  '      try{',
+  '        inFlight=Promise.resolve(nativeLoad.apply(this,arguments)).finally(function(){',
+  '          if(Date.now()-startedAt<8000) inFlight=null;',
+  '        });',
+  '      }catch(error){',
+  '        inFlight=null;',
+  '        throw error;',
+  '      }',
+  '      window.setTimeout(function(){',
+  '        if(inFlight && Date.now()-startedAt>=8000) inFlight=null;',
+  '      },8500);',
+  '      return inFlight;',
+  '    };',
+  '',
+  '    const verify=function(){',
+  '      const grid=document.getElementById("products");',
+  '      const hasProducts=Array.isArray(window.storeProducts) && window.storeProducts.length>0;',
+  '      const hasCards=!!(grid && grid.querySelector(".productCardClickable"));',
+  '      if(!hasProducts && !hasCards && !inFlight){',
+  '        window.load();',
+  '      }',
+  '    };',
+  '    [1500,3500,7000].forEach(function(delay){window.setTimeout(verify,delay);});',
+  '  }',
+  '',
   '  function cleanProfile(){',
   '    const profile=document.getElementById("profileArea");',
   '    if(!profile) return;',
@@ -42,6 +77,7 @@ const CLIENT_SCRIPT = [
   '',
   '  function boot(){',
   '    installPriceStyle();',
+  '    installStoreLoadGuard();',
   '    cleanProfile();',
   '    const profile=document.getElementById("profileArea");',
   '    if(profile && !profile.dataset.sngCleanupObserver){',
@@ -60,13 +96,13 @@ const CLIENT_SCRIPT = [
 express.application.handle = function sngamerUiCleanupHandle(req,res){
   // Express normally decorates the response with res.send(). Some startup/health
   // paths can reach the application with a raw response object; never crash those paths.
-  if(!res || typeof res.send !== "function"){
+  if(!res || typeof res.send!=="function"){
     return originalHandle.call(this,req,res);
   }
-  const originalSend = res.send.bind(res);
-  res.send = function sngamerUiCleanupSend(body){
+  const originalSend=res.send.bind(res);
+  res.send=function sngamerUiCleanupSend(body){
     if((req.path === "/" || req.path === "/index.html") && typeof body === "string" && body.includes("</body>")){
-      body = body.replace("</body>", CLIENT_SCRIPT + "</body>");
+      body=body.replace("</body>",CLIENT_SCRIPT+"</body>");
     }
     return originalSend(body);
   };
