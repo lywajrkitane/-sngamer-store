@@ -54,7 +54,9 @@ async function ensureOrderCustomerColumns() {
         ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,
         ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ,
         ADD COLUMN IF NOT EXISTS cancelled_by TEXT,
-        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        ADD COLUMN IF NOT EXISTS stock_restored_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS stock_reserved_until TIMESTAMPTZ;
     `);
 
     await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);`);
