@@ -137,4 +137,10 @@
   categoryPatch.src = "/category-consistency-v1.js?v=20261017-1810";
   categoryPatch.defer = true;
   document.head.appendChild(categoryPatch);
+
+  // Cart confirmation toast: loaded after app.js so it can safely wrap add().
+  const cartToastPatch = document.createElement("script");
+  cartToastPatch.src = "/cart-toast-v1.js?v=20261020-1";
+  cartToastPatch.defer = true;
+  document.head.appendChild(cartToastPatch);
 })();
