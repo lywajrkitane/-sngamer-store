@@ -31,13 +31,48 @@ function allowRate(key, limit) {
 function sameOrigin(req) {
   const origin = String(req.headers.origin || '').trim();
   if (!origin) return true;
+
   try {
     const originUrl = new URL(origin);
-    const host = String(req.get('host') || '').toLowerCase();
-    return originUrl.host.toLowerCase() === host;
+    const originHost = originUrl.host.toLowerCase();
+    const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim().toLowerCase();
+    const requestHost = String(req.get?.('host') || '').toLowerCase();
+    const renderHost = String(process.env.RENDER_EXTERNAL_HOSTNAME || '').trim().toLowerCase();
+    const configuredHosts = [requestHost, forwardedHost, renderHost].filter(Boolean);
+
+    if (configuredHosts.includes(originHost)) return true;
+
+    const publicUrl = String(process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || process.env.PUBLIC_URL || '').trim();
+    if (publicUrl) {
+      try {
+        if (new URL(publicUrl).host.toLowerCase() === originHost) return true;
+      } catch (_) {}
+    }
+
+    return false;
   } catch (_) {
     return false;
   }
+}
+
+function sendSecurityJson(res, status, payload) {
+  // Express response: use its normal API.
+  if (typeof res?.status === 'function' && typeof res?.json === 'function') {
+    return res.status(status).json(payload);
+  }
+
+  // Defensive fallback for a raw Node ServerResponse. This prevents the
+  // security layer itself from throwing when a preload wraps Express internals.
+  if (typeof res?.writeHead === 'function' && typeof res?.end === 'function') {
+    res.statusCode = status;
+    if (typeof res.setHeader === 'function') {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+    }
+    return res.end(JSON.stringify(payload));
+  }
+
+  return undefined;
 }
 
 function securityMiddleware(req, res, next) {
@@ -62,13 +97,13 @@ function securityMiddleware(req, res, next) {
     const limit = paytechCreate ? MAX_PAYTECH_CREATE : authRoute ? MAX_AUTH : MAX_API;
 
     if (!allowRate(`${ip}:${authRoute ? 'auth' : paytechCreate ? 'paytech' : 'api'}`, limit)) {
-      return res.status(429).json({ error: 'Trop de requêtes. Réessaie dans un moment.' });
+      return sendSecurityJson(res, 429, { error: 'Trop de requêtes. Réessaie dans un moment.' });
     }
 
     const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
     const webhook = requestPath === '/api/paytech/ipn' || requestPath === '/api/paytech/refund-ipn';
     if (mutating && !webhook && !sameOrigin(req)) {
-      return res.status(403).json({ error: 'Origine de requête non autorisée.' });
+      return sendSecurityJson(res, 403, { error: 'Origine de requête non autorisée.' });
     }
   }
 
