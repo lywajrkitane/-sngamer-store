@@ -1,14 +1,12 @@
 /* SNGAMER STORE — category display only
    Keeps the existing filtering logic and product data untouched.
-   The previous version used a MutationObserver that re-appended the same
-   buttons on every mutation, which created a mutation loop and could lock
-   the storefront after a refresh. */
+   Display label: Pièces eFootball. */
 (function () {
   "use strict";
 
   const order = [
     "Tous",
-    "Coins / Pièces eFootball",
+    "Pièces eFootball",
     "Souris",
     "Accessoires",
     "Gaming Phone"
@@ -22,8 +20,9 @@
     if (!buttons.length) return;
 
     buttons.forEach(button => {
-      if (button.textContent.trim() === "Coins") {
-        button.textContent = "Coins / Pièces eFootball";
+      const text = button.textContent.trim();
+      if (text === "Coins" || text === "Coins / Pièces eFootball") {
+        button.textContent = "Pièces eFootball";
       }
     });
 
