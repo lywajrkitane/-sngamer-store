@@ -39,7 +39,8 @@ async function ensureCustomerOrderColumns() {
       ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS cancelled_by TEXT,
-      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      ADD COLUMN IF NOT EXISTS stock_restored_at TIMESTAMPTZ;
   `);
 
   await customerPool.query(`
@@ -146,7 +147,22 @@ function requireAdmin(req, res, next) {
 }
 
 function orderSelect() {
-  return `id,created_at,status,customer,payment,payment_status,refund_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at`;
+  return `id,created_at,status,customer,payment,payment_status,refund_status,items,total,customer_message,tracking_code,refund_requested_at,refunded_at,cancelled_by,updated_at,stock_restored_at`;
+}
+
+// Restore stock exactly once for unpaid customer orders that are cancelled or deleted.
+async function restoreOrderStock(client, order) {
+  if (!order || order.payment_status === "Payé" || order.stock_restored_at) return false;
+  const items = Array.isArray(order.items) ? order.items : [];
+  for (const item of items) {
+    const quantity = Number(item.quantity ?? item.qty);
+    const productId = Number(item.id);
+    if (Number.isInteger(quantity) && quantity > 0 && Number.isInteger(productId)) {
+      await client.query(`UPDATE products SET stock=stock+$1 WHERE id=$2`, [quantity, productId]);
+    }
+  }
+  await client.query(`UPDATE orders SET stock_restored_at=NOW(), updated_at=NOW() WHERE id=$1`, [order.id]);
+  return true;
 }
 
 // Always recover legacy orders for the logged-in account before displaying them.
@@ -310,9 +326,17 @@ function buildRouter() {
         total += subtotal;
         finalItems.push({ id: product.id, name: product.name, price: unitPrice, quantity, subtotal, emoji: product.emoji });
       }
+      // The customer-order route is an independent order path from the PayTech
+      // route. Reserve its stock atomically before exposing the order as created.
+      // This closes the race where two logged-in clients could both pass the
+      // stock check while only one physical unit exists.
+      for (const item of finalItems) {
+        const stockUpdate = await client.query(`UPDATE products SET stock=stock-$1 WHERE id=$2 AND stock >= $1`, [item.quantity, item.id]);
+        if (stockUpdate.rowCount !== 1) throw new Error(`Stock insuffisant pour ${item.name}`);
+      }
       const orderCustomer = { name: customer.name, email: customer.email, phone: customer.phone || "", address: customer.address || "" };
       const result = await client.query(
-        `INSERT INTO orders (customer_id,status,customer,payment,payment_status,items,total,customer_message,tracking_code,updated_at) VALUES ($1,'Nouvelle',$2,$3,'En attente',$4,$5,'','',NOW()) RETURNING ${orderSelect()}`,
+        `INSERT INTO orders (customer_id,status,customer,payment,payment_status,items,total,customer_message,tracking_code,updated_at,stock_restored_at) VALUES ($1,'Nouvelle',$2,$3,'En attente',$4,$5,'','',NOW(),NULL) RETURNING ${orderSelect()}`,
         [customer.id, JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total]
       );
       await client.query("COMMIT");
@@ -325,34 +349,35 @@ function buildRouter() {
   });
 
   router.post("/api/customer/orders/:id/cancel", requireCustomer, async (req, res) => {
+    const client = await customerPool.connect();
     try {
       await linkCustomerOrders(req.session.customerId);
       const id = Number(req.params.id);
-      const result = await customerPool.query(
-        `UPDATE orders SET status='Annulée', cancelled_by='client', updated_at=NOW() WHERE id=$1 AND customer_id=$2 AND status NOT IN ('Livrée','Annulée') RETURNING ${orderSelect()}`,
-        [id, req.session.customerId]
-      );
-      if (!result.rows.length) return res.status(400).json({ error: "Cette commande ne peut plus être annulée." });
-      const order = result.rows[0];
+      await client.query("BEGIN");
+      const locked = await client.query(`SELECT ${orderSelect()} FROM orders WHERE id=$1 AND customer_id=$2 FOR UPDATE`, [id, req.session.customerId]);
+      if (!locked.rows.length) { await client.query("ROLLBACK"); return res.status(400).json({ error: "Cette commande ne peut plus être annulée." }); }
+      const current = locked.rows[0];
+      if (["Livrée","Annulée"].includes(current.status)) { await client.query("ROLLBACK"); return res.status(400).json({ error: "Cette commande ne peut plus être annulée." }); }
+      await client.query(`UPDATE orders SET status='Annulée', cancelled_by='client', updated_at=NOW() WHERE id=$1`, [id]);
       let message = "Commande annulée. Aucun remboursement automatique n'est effectué. Contactez SNGAMER STORE au " + REFUND_PHONE + " pour demander votre remboursement.";
-      if (order.payment_status === "Payé") {
-        const refund = await customerPool.query(
-          `UPDATE orders SET refund_status='Demandé', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1 RETURNING ${orderSelect()}`,
-          [id]
-        );
+      if (current.payment_status === "Payé") {
+        await client.query(`UPDATE orders SET refund_status='Demandé', refund_requested_at=NOW(), updated_at=NOW() WHERE id=$1`, [id]);
         message = "Commande annulée. Votre demande de remboursement est enregistrée. Contactez SNGAMER STORE au " + REFUND_PHONE + " pour le traitement du remboursement.";
-        return res.json({ success: true, message, order: refund.rows[0] });
+      } else {
+        await restoreOrderStock(client, current);
       }
-      res.json({ success: true, message, order });
+      const updated = await client.query(`SELECT ${orderSelect()} FROM orders WHERE id=$1`, [id]);
+      await client.query("COMMIT");
+      res.json({ success: true, message, order: updated.rows[0] });
     } catch (error) {
+      await client.query("ROLLBACK");
       console.error("CUSTOMER_CANCEL_ORDER_ERROR:", error);
       res.status(500).json({ error: "Impossible d'annuler la commande." });
-    }
+    } finally { client.release(); }
   });
 
   router.get("/api/admin/customers", requireAdmin, async (req, res) => {
     try {
-      // Ensure historical orders are linked before returning customer counters.
       await customerPool.query(`
         UPDATE orders o
            SET customer_id = c.id, updated_at = NOW()
@@ -397,18 +422,26 @@ function buildRouter() {
   });
 
   router.patch("/api/admin/orders/:id/customer-update", requireAdmin, async (req, res) => {
+    const client = await customerPool.connect();
     try {
       const status = String(req.body.status || "");
       const customerMessage = String(req.body.customer_message ?? "");
       const trackingCode = String(req.body.tracking_code ?? "");
       if (!ORDER_STATUSES.includes(status)) return res.status(400).json({ error: "Statut invalide" });
-      const result = await customerPool.query(`UPDATE orders SET status=$1,customer_message=$2,tracking_code=$3,updated_at=NOW() WHERE id=$4 RETURNING ${orderSelect()}`, [status, customerMessage, trackingCode, Number(req.params.id)]);
-      if (!result.rows.length) return res.status(404).json({ error: "Commande introuvable" });
-      res.json({ success: true, order: result.rows[0] });
+      await client.query("BEGIN");
+      const locked = await client.query(`SELECT ${orderSelect()} FROM orders WHERE id=$1 FOR UPDATE`, [Number(req.params.id)]);
+      if (!locked.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Commande introuvable" }); }
+      const current = locked.rows[0];
+      const result = await client.query(`UPDATE orders SET status=$1,customer_message=$2,tracking_code=$3,updated_at=NOW() WHERE id=$4 RETURNING ${orderSelect()}`, [status, customerMessage, trackingCode, Number(req.params.id)]);
+      if (status === "Annulée" && current.payment_status !== "Payé") await restoreOrderStock(client, current);
+      const updated = await client.query(`SELECT ${orderSelect()} FROM orders WHERE id=$1`, [Number(req.params.id)]);
+      await client.query("COMMIT");
+      res.json({ success: true, order: updated.rows[0] });
     } catch (error) {
+      await client.query("ROLLBACK");
       console.error("ADMIN_CUSTOMER_UPDATE_ERROR:", error);
       res.status(500).json({ error: "Impossible de mettre à jour les informations client." });
-    }
+    } finally { client.release(); }
   });
 
   router.patch("/api/admin/orders/:id/payment", requireAdmin, async (req, res) => {
@@ -425,15 +458,21 @@ function buildRouter() {
   });
 
   router.delete("/api/admin/orders/:id", requireAdmin, async (req, res) => {
+    const client = await customerPool.connect();
     try {
       const id = Number(req.params.id);
-      const result = await customerPool.query(`DELETE FROM orders WHERE id=$1 RETURNING id`, [id]);
-      if (!result.rows.length) return res.status(404).json({ error: "Commande introuvable" });
+      await client.query("BEGIN");
+      const locked = await client.query(`SELECT id,items,payment_status,stock_restored_at FROM orders WHERE id=$1 FOR UPDATE`, [id]);
+      if (!locked.rows.length) { await client.query("ROLLBACK"); return res.status(404).json({ error: "Commande introuvable" }); }
+      await restoreOrderStock(client, locked.rows[0]);
+      const result = await client.query(`DELETE FROM orders WHERE id=$1 RETURNING id`, [id]);
+      await client.query("COMMIT");
       res.json({ success: true, deletedId: result.rows[0].id });
     } catch (error) {
+      await client.query("ROLLBACK");
       console.error("ADMIN_DELETE_ORDER_ERROR:", error);
       res.status(500).json({ error: "Impossible de supprimer la commande." });
-    }
+    } finally { client.release(); }
   });
 
   return router;
