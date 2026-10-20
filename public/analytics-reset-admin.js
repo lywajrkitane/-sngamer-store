@@ -11,13 +11,27 @@
     if (button) return true;
 
     const refresh = head.querySelector('#sgAnalyticsRefresh');
+    if (!refresh) return false;
+
+    // Keep both controls together on the right, with Reset directly below Refresh.
+    // The reset button deliberately reuses the exact same class as Refresh so it
+    // inherits the same size, color, typography and responsive styling.
+    let actions = head.querySelector('.sg-analytics-actions');
+    if (!actions) {
+      actions = document.createElement('div');
+      actions.className = 'sg-analytics-actions';
+      actions.style.cssText = 'display:flex;flex-direction:column;align-items:stretch;gap:6px;flex:0 0 auto;min-width:max-content';
+      head.insertBefore(actions, refresh);
+      actions.appendChild(refresh);
+    }
+
     button = document.createElement('button');
     button.type = 'button';
     button.id = 'sgAnalyticsReset';
+    button.className = refresh.className || 'sg-analytics-refresh';
     button.textContent = 'Réinitialiser';
     button.title = 'Réinitialiser les statistiques à zéro sans supprimer les produits ni les commandes';
     button.setAttribute('aria-label', 'Réinitialiser les statistiques de la boutique');
-    button.style.cssText = 'border:1px solid rgba(255,184,77,.25);border-radius:10px;padding:9px 12px;background:rgba(255,184,77,.10);color:#ffd38a;font-weight:800;cursor:pointer;white-space:nowrap;margin-left:6px';
 
     button.addEventListener('click', async () => {
       const ok = window.confirm('Réinitialiser les statistiques de la boutique ?\n\nCette action remettra les statistiques et visites à zéro, mais NE supprimera pas les produits, comptes clients ou commandes.');
@@ -50,8 +64,7 @@
       }
     });
 
-    if (refresh?.parentElement) refresh.parentElement.appendChild(button);
-    else head.appendChild(button);
+    actions.appendChild(button);
     return true;
   }
 
