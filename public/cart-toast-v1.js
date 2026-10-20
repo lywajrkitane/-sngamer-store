@@ -17,14 +17,14 @@
         top: 88px;
         right: 18px;
         z-index: 99999;
-        width: min(360px, calc(100vw - 36px));
+        width: min(300px, calc(100vw - 36px));
         box-sizing: border-box;
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 11px 12px 11px 13px;
+        gap: 9px;
+        padding: 9px 10px 9px 11px;
         border: 1px solid rgba(92, 176, 255, .42);
-        border-radius: 14px;
+        border-radius: 13px;
         background: linear-gradient(135deg, rgba(8, 20, 38, .97), rgba(28, 13, 55, .97));
         box-shadow: 0 12px 35px rgba(0, 0, 0, .38), 0 0 24px rgba(65, 116, 255, .16);
         color: #fff;
@@ -42,15 +42,15 @@
       }
 
       #${TOAST_ID} .toastIcon {
-        width: 34px;
-        height: 34px;
-        flex: 0 0 34px;
+        width: 31px;
+        height: 31px;
+        flex: 0 0 31px;
         display: grid;
         place-items: center;
-        border-radius: 10px;
+        border-radius: 9px;
         background: linear-gradient(135deg, #168cff, #8a35ff);
         box-shadow: 0 0 16px rgba(67, 124, 255, .28);
-        font-size: 18px;
+        font-size: 16px;
       }
 
       #${TOAST_ID} .toastContent {
@@ -61,7 +61,7 @@
 
       #${TOAST_ID} .toastTitle {
         margin: 0 0 2px;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
         color: #63b6ff;
         letter-spacing: .02em;
@@ -69,7 +69,7 @@
 
       #${TOAST_ID} .toastProduct {
         margin: 0;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
         color: #f7f9ff;
         overflow: hidden;
@@ -78,14 +78,14 @@
       }
 
       #${TOAST_ID} .toastClose {
-        width: 29px;
-        height: 29px;
-        flex: 0 0 29px;
+        width: 27px;
+        height: 27px;
+        flex: 0 0 27px;
         border: 0;
-        border-radius: 9px;
+        border-radius: 8px;
         background: rgba(255,255,255,.08);
         color: #cbd6e8;
-        font-size: 18px;
+        font-size: 17px;
         line-height: 1;
         cursor: pointer;
       }
@@ -102,8 +102,9 @@
           top: 78px;
           right: 12px;
           left: auto;
-          width: min(320px, calc(100vw - 24px));
-          border-radius: 13px;
+          width: min(270px, calc(100vw - 24px));
+          border-radius: 12px;
+          padding: 8px 9px 8px 10px;
         }
       }
     `;
