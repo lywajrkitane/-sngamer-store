@@ -52,12 +52,13 @@ function securityMiddleware(req, res, next) {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
 
-  if (req.path.startsWith('/api/')) {
+  const requestPath = String(req.path || req.originalUrl || req.url || '').split('?')[0];
+  if (requestPath.startsWith('/api/')) {
     res.setHeader('Cache-Control', 'no-store');
 
     const ip = clientIp(req);
-    const authRoute = /^\/api\/(admin\/login|customer\/(login|register)|login|register)/.test(req.path);
-    const paytechCreate = req.path === '/api/paytech/create';
+    const authRoute = /^\/api\/(admin\/login|customer\/(login|register)|login|register)/.test(requestPath);
+    const paytechCreate = requestPath === '/api/paytech/create';
     const limit = paytechCreate ? MAX_PAYTECH_CREATE : authRoute ? MAX_AUTH : MAX_API;
 
     if (!allowRate(`${ip}:${authRoute ? 'auth' : paytechCreate ? 'paytech' : 'api'}`, limit)) {
@@ -65,7 +66,7 @@ function securityMiddleware(req, res, next) {
     }
 
     const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
-    const webhook = req.path === '/api/paytech/ipn' || req.path === '/api/paytech/refund-ipn';
+    const webhook = requestPath === '/api/paytech/ipn' || requestPath === '/api/paytech/refund-ipn';
     if (mutating && !webhook && !sameOrigin(req)) {
       return res.status(403).json({ error: 'Origine de requête non autorisée.' });
     }
