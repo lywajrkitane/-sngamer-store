@@ -5,6 +5,8 @@
 (() => {
   "use strict";
 
+  let checkoutInProgress = false;
+
   function readPayment() {
     const selectedCard = document.querySelector("#checkout .paymentMethodCard.is-selected[data-payment]");
     const cardValue = selectedCard?.dataset?.payment || "";
@@ -24,7 +26,17 @@
     }
   }
 
+  function restoreButton(button) {
+    if (!button) return;
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.textContent = button.dataset.originalText || "Confirmer la commande";
+  }
+
   async function paytechCheckoutSubmit() {
+    // Prevent double taps/clicks from creating multiple payment sessions.
+    if (checkoutInProgress) return;
+
     const button = document.querySelector("#checkout .checkoutActionBar .primary.full, #checkout .primary.full");
     const name = (document.getElementById("name")?.value || "").trim();
     const phone = (document.getElementById("phone")?.value || "").trim();
@@ -67,10 +79,12 @@
       return;
     }
 
+    checkoutInProgress = true;
     if (button) {
       button.disabled = true;
       button.dataset.originalText = button.textContent;
       button.textContent = "Connexion à PayTech…";
+      button.setAttribute("aria-busy", "true");
     }
     const err = document.getElementById("checkoutDeliveryError");
     if (err) {
@@ -78,10 +92,14 @@
       err.classList.remove("show");
     }
 
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 30000);
+
     try {
       const response = await fetch("/api/paytech/create", {
         method: "POST",
         cache: "no-store",
+        signal: controller.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer: {
@@ -110,16 +128,17 @@
       window.location.assign(data.redirect_url);
     } catch (error) {
       console.error("SNGAMER_PAYTECH_SUBMIT_ERROR", error);
-      showCheckoutMessage(error.message || "Erreur lors de la connexion à PayTech.");
-      if (button) {
-        button.disabled = false;
-        button.textContent = button.dataset.originalText || "Confirmer la commande";
-      }
+      const message = error?.name === "AbortError"
+        ? "La connexion au service de paiement a pris trop de temps. Vérifie ta connexion puis réessaie."
+        : (error.message || "Erreur lors de la connexion à PayTech.");
+      showCheckoutMessage(message);
+      checkoutInProgress = false;
+      restoreButton(button);
+    } finally {
+      window.clearTimeout(timeoutId);
     }
   }
 
-  // Explicit checkout action used by the HTML button.
   window.paytechCheckoutSubmit = paytechCheckoutSubmit;
-  // Fallback for any remaining callers, no longer chained to the legacy handler.
   window.order = paytechCheckoutSubmit;
 })();
