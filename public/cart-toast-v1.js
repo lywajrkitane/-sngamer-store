@@ -17,14 +17,14 @@
         top: 88px;
         right: 18px;
         z-index: 99999;
-        width: min(390px, calc(100vw - 36px));
+        width: min(360px, calc(100vw - 36px));
         box-sizing: border-box;
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 13px 14px 13px 15px;
+        gap: 10px;
+        padding: 11px 12px 11px 13px;
         border: 1px solid rgba(92, 176, 255, .42);
-        border-radius: 16px;
+        border-radius: 14px;
         background: linear-gradient(135deg, rgba(8, 20, 38, .97), rgba(28, 13, 55, .97));
         box-shadow: 0 12px 35px rgba(0, 0, 0, .38), 0 0 24px rgba(65, 116, 255, .16);
         color: #fff;
@@ -42,26 +42,26 @@
       }
 
       #${TOAST_ID} .toastIcon {
-        width: 38px;
-        height: 38px;
-        flex: 0 0 38px;
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
         display: grid;
         place-items: center;
-        border-radius: 12px;
+        border-radius: 10px;
         background: linear-gradient(135deg, #168cff, #8a35ff);
         box-shadow: 0 0 16px rgba(67, 124, 255, .28);
-        font-size: 20px;
+        font-size: 18px;
       }
 
       #${TOAST_ID} .toastContent {
         min-width: 0;
         flex: 1;
-        line-height: 1.25;
+        line-height: 1.2;
       }
 
       #${TOAST_ID} .toastTitle {
-        margin: 0 0 3px;
-        font-size: 13px;
+        margin: 0 0 2px;
+        font-size: 12px;
         font-weight: 800;
         color: #63b6ff;
         letter-spacing: .02em;
@@ -69,7 +69,7 @@
 
       #${TOAST_ID} .toastProduct {
         margin: 0;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
         color: #f7f9ff;
         overflow: hidden;
@@ -78,14 +78,14 @@
       }
 
       #${TOAST_ID} .toastClose {
-        width: 32px;
-        height: 32px;
-        flex: 0 0 32px;
+        width: 29px;
+        height: 29px;
+        flex: 0 0 29px;
         border: 0;
-        border-radius: 10px;
+        border-radius: 9px;
         background: rgba(255,255,255,.08);
         color: #cbd6e8;
-        font-size: 20px;
+        font-size: 18px;
         line-height: 1;
         cursor: pointer;
       }
@@ -101,8 +101,9 @@
         #${TOAST_ID} {
           top: 78px;
           right: 12px;
-          width: calc(100vw - 24px);
-          border-radius: 15px;
+          left: auto;
+          width: min(320px, calc(100vw - 24px));
+          border-radius: 13px;
         }
       }
     `;
