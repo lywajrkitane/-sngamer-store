@@ -8,6 +8,10 @@ function installProductPerformanceFix(app) {
   const injector = express.Router();
   injector.use((req, res, next) => {
     try {
+      // Some startup/health/static paths can reach the middleware with a raw
+      // response object. Leave those responses untouched instead of trying to
+      // bind an Express-only method that is not present.
+      if (!res || typeof res.send !== 'function') return next();
       const originalSend = res.send.bind(res);
       res.send = function (body) {
         try {
