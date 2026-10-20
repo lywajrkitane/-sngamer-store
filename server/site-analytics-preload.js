@@ -155,7 +155,8 @@ function installAnalytics(app) {
 
       const base = { ...totals.rows[0], ...orders.rows[0] };
       const visits30 = Number(base.visits_30d || 0);
-      const orders30 = Number(base.orders || 0);
+      const orders30 = salesDays.rows.reduce((sum, row) => sum + Number(row.orders || 0), 0);
+      base.orders_30d = orders30;
       base.conversion_rate = visits30 > 0 ? Number(((orders30 / visits30) * 100).toFixed(1)) : 0;
 
       res.set('Cache-Control', 'no-store');
