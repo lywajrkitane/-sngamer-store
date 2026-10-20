@@ -249,12 +249,129 @@
     });
   }
 
+  function installFinalResponsiveDashboard() {
+    if (window.__sngFinalResponsiveDashboard) return;
+    window.__sngFinalResponsiveDashboard = true;
+
+    const style = document.createElement('style');
+    style.id = 'sg-final-dashboard-layout-v1';
+    style.textContent = `
+      html,body{max-width:100%;overflow-x:hidden!important}
+      #adminBox{box-sizing:border-box!important;min-width:0!important;max-width:100%!important}
+      #adminBox.sg-v26-mode{box-sizing:border-box!important;min-width:0!important}
+
+      /* Desktop/tablet landscape: the workspace navigation is a real left column. */
+      @media (min-width:900px){
+        main#adminBox{width:min(1480px,calc(100% - 36px))!important;margin:0 auto!important}
+        #adminBox.sg-v26-mode{display:grid!important;grid-template-columns:minmax(200px,220px) minmax(0,1fr)!important;column-gap:22px!important;align-items:start!important}
+        #adminBox.sg-v26-mode>#sg-admin-v26-nav{grid-column:1!important;grid-row:1 / span 100!important;position:sticky!important;top:94px!important;display:flex!important;flex-direction:column!important;width:auto!important;max-width:none!important;margin:0!important;overflow:visible!important}
+        #adminBox.sg-v26-mode>section,#adminBox.sg-v26-mode>.stats{grid-column:2!important;min-width:0!important}
+        #adminBox.sg-v26-mode>.stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+      }
+
+      /* Phones: navigation must never float over the dashboard content. */
+      @media (max-width:899px){
+        main#adminBox{width:calc(100% - 16px)!important;max-width:100%!important;margin:0 auto!important;padding-top:16px!important}
+        #adminBox.sg-v26-mode{display:block!important;overflow:visible!important}
+        #adminBox.sg-v26-mode>#sg-admin-v26-nav{position:relative!important;top:auto!important;z-index:5!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;max-width:100%!important;margin:0 0 14px!important;padding:8px!important;box-sizing:border-box!important;overflow:visible!important}
+        #sg-admin-v26-nav::before{grid-column:1/-1!important;padding:6px 8px 8px!important}
+        #sg-admin-v26-nav button{width:100%!important;min-width:0!important;min-height:43px!important;justify-content:flex-start!important;padding:9px 10px!important;white-space:nowrap!important;overflow:hidden!important}
+        #adminBox.sg-v26-mode>.stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important}
+        #adminBox.sg-v26-mode>section{min-width:0!important;max-width:100%!important}
+      }
+
+      /* Final product-performance table geometry: all columns total exactly 100%. */
+      #sg-product-performance-panel .sg-prod-table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
+      #sg-product-performance-panel .sg-prod-table .sg-col-rank{width:7%!important}
+      #sg-product-performance-panel .sg-prod-table .sg-col-product{width:43%!important}
+      #sg-product-performance-panel .sg-prod-table .sg-col-sold{width:13%!important;text-align:center!important}
+      #sg-product-performance-panel .sg-prod-table .sg-col-ca{width:20%!important;padding-left:10px!important;text-align:left!important}
+      #sg-product-performance-panel .sg-prod-table .sg-col-stock{width:17%!important;text-align:center!important}
+      #sg-product-performance-panel .sg-prod-table th{white-space:nowrap!important;font-size:9px!important;letter-spacing:.04em!important;overflow:hidden!important}
+      #sg-product-performance-panel .sg-prod-table td{overflow:hidden!important}
+      #sg-product-performance-panel .sg-prod-item-name{max-width:8ch!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+      #sg-product-performance-panel .sg-prod-money{white-space:normal!important;line-height:1.12!important}
+
+      @media (max-width:899px){
+        #sg-product-performance-panel .sg-prod-table .sg-col-rank{width:8%!important}
+        #sg-product-performance-panel .sg-prod-table .sg-col-product{width:42%!important}
+        #sg-product-performance-panel .sg-prod-table .sg-col-sold{width:13%!important}
+        #sg-product-performance-panel .sg-prod-table .sg-col-ca{width:20%!important;padding-left:7px!important;padding-right:5px!important}
+        #sg-product-performance-panel .sg-prod-table .sg-col-stock{width:17%!important}
+        #sg-product-performance-panel .sg-prod-table th,#sg-product-performance-panel .sg-prod-table td{padding-left:4px!important;padding-right:4px!important}
+        #sg-product-performance-panel .sg-prod-item{gap:5px!important}
+        #sg-product-performance-panel .sg-prod-thumb,#sg-product-performance-panel .sg-prod-thumb-fallback{width:32px!important;height:32px!important;flex-basis:32px!important}
+        #sg-product-performance-panel .sg-prod-item-name{max-width:7ch!important;font-size:11px!important}
+      }
+
+      @media (max-width:380px){
+        #sg-product-performance-panel .sg-prod-item-name{max-width:6ch!important}
+      }
+
+      /* Small factual catalogue summary, fed directly from /api/products. */
+      #sg-catalog-summary{min-width:0;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:rgba(7,13,23,.68);overflow:hidden}
+      #sg-catalog-summary .sg-catalog-head{padding:12px 13px;border-bottom:1px solid rgba(115,145,190,.10);color:#aebbd0;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+      #sg-catalog-summary .sg-catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px}
+      #sg-catalog-summary .sg-catalog-stat{padding:10px;border-radius:10px;background:rgba(14,25,43,.72);border:1px solid rgba(115,145,190,.10);min-width:0}
+      #sg-catalog-summary .sg-catalog-label{display:block;color:#71829a;font-size:9px;font-weight:800;text-transform:uppercase}
+      #sg-catalog-summary .sg-catalog-value{display:block;margin-top:4px;color:#fff;font-size:18px;font-weight:900}
+      @media (max-width:520px){#sg-catalog-summary .sg-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:7px}#sg-catalog-summary .sg-catalog-stat{padding:8px}#sg-catalog-summary .sg-catalog-label{font-size:8px}#sg-catalog-summary .sg-catalog-value{font-size:15px}}
+    `;
+    document.head.appendChild(style);
+
+    let catalogPromise = null;
+    async function getCatalogStats() {
+      if (window.__sngCatalogStats) return window.__sngCatalogStats;
+      if (catalogPromise) return catalogPromise;
+      catalogPromise = fetch('/api/products', { credentials:'same-origin', cache:'no-store' })
+        .then(r => { if (!r.ok) throw new Error('products'); return r.json(); })
+        .then(data => {
+          const products = Array.isArray(data) ? data : (data?.products || []);
+          const list = Array.isArray(products) ? products : [];
+          const inStock = list.filter(p => Number(p?.stock || 0) > 0).length;
+          const out = list.filter(p => Number(p?.stock || 0) <= 0).length;
+          return window.__sngCatalogStats = { total:list.length, inStock, out };
+        })
+        .catch(() => null);
+      return catalogPromise;
+    }
+
+    async function enhanceProductPanel() {
+      const panel = document.getElementById('sg-product-performance-panel');
+      const layout = panel?.querySelector('.sg-prod-layout');
+      if (!layout || document.getElementById('sg-catalog-summary')) return;
+      const box = document.createElement('div');
+      box.id = 'sg-catalog-summary';
+      box.innerHTML = '<div class="sg-catalog-head">📦 Catalogue produits</div><div class="sg-catalog-grid"><div class="sg-catalog-stat"><span class="sg-catalog-label">Produits</span><span class="sg-catalog-value">—</span></div><div class="sg-catalog-stat"><span class="sg-catalog-label">En stock</span><span class="sg-catalog-value">—</span></div><div class="sg-catalog-stat"><span class="sg-catalog-label">Rupture</span><span class="sg-catalog-value">—</span></div></div>';
+      layout.appendChild(box);
+      const stats = await getCatalogStats();
+      if (!stats || !box.isConnected) return;
+      const values = box.querySelectorAll('.sg-catalog-value');
+      values[0].textContent = String(stats.total);
+      values[1].textContent = String(stats.inStock);
+      values[2].textContent = String(stats.out);
+    }
+
+    const observeProductPanel = () => {
+      enhanceProductPanel();
+      const panel = document.getElementById('sg-product-performance-panel');
+      if (panel && !panel.__sgCatalogObserver) {
+        const mo = new MutationObserver(() => enhanceProductPanel());
+        mo.observe(panel, { childList:true, subtree:true });
+        panel.__sgCatalogObserver = mo;
+      }
+    };
+    window.setInterval(observeProductPanel, 1200);
+    observeProductPanel();
+  }
+
   function boot() {
     const box = adminBox();
     if (!box) {
       window.setTimeout(boot, 250);
       return;
     }
+    installFinalResponsiveDashboard();
     stopOldCoreTimer();
     cleanupAllLegacyOrderPanels();
     installObserver();
