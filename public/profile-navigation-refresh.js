@@ -41,20 +41,16 @@
     document.head.appendChild(style);
   }
 
-  /*
-     Customer account currently rebuilds the profile from /api/customer/me and
-     /api/customer/orders every time Profile is opened. Cache the last successful
-     responses in memory and serve them immediately on subsequent profile opens.
-     The first request still goes to the server normally. This removes the visible
-     loading delay without touching product/category loading.
-  */
+  /* Customer identity can be cached, but order data must always be read from
+     the server. Order status/payment changes happen in the admin dashboard and
+     must be visible immediately in the customer account as well. */
   function installCustomerAccountCache() {
     if (window.__sngamerCustomerAccountCacheInstalled) return;
     window.__sngamerCustomerAccountCacheInstalled = true;
 
     const nativeFetch = window.fetch.bind(window);
     const cache = new Map();
-    const accountPaths = new Set(["/api/customer/me", "/api/customer/orders"]);
+    const identityPath = "/api/customer/me";
 
     function keyFor(input) {
       try {
@@ -65,19 +61,17 @@
 
     window.fetch = function(input, init) {
       const path = keyFor(input);
-      if (!accountPaths.has(path)) return nativeFetch(input, init);
+      if (path !== identityPath) return nativeFetch(input, init);
 
       const method = String((init && init.method) || (input && input.method) || "GET").toUpperCase();
       if (method !== "GET") return nativeFetch(input, init);
 
       const cached = cache.get(path);
       if (cached) {
-        /* Keep the UI instant. Refresh the cache silently in the background. */
         nativeFetch(input, init).then(function(response){
           if (!response.ok) return;
           return response.clone().json().then(function(data){ cache.set(path, data); });
         }).catch(function(){});
-
         return Promise.resolve(new Response(JSON.stringify(cached), {
           status: 200,
           headers: { "Content-Type": "application/json" }
