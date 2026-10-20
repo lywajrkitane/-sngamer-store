@@ -1,4 +1,4 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V13
+/* SNGAMER STORE — ADMIN DATA REFRESH V14
    Single owner for authenticated admin data refresh, refund UI, analytics
    and product-performance mounting.
    Order presentation/filtering belongs to the existing V2.1 Orders workspace.
@@ -7,13 +7,19 @@
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV13';
+  const STATE = '__sngamerAdminAutoRefreshV14';
   if (window[STATE]) return;
   window[STATE] = true;
 
-  const INTERVAL_MS = 10000;
+  // The previous 10-second polling caused the dashboard to generate a large
+  // burst of API requests. That could exhaust the security rate limiter and
+  // make the Activity panel report "Trop de requêtes" even though the server
+  // and database were healthy. Admin data is now refreshed once per minute.
+  const INTERVAL_MS = 60000;
+  const MIN_REFRESH_GAP_MS = 5000;
   let intervalId = null;
   let refreshInFlight = false;
+  let lastRefreshAt = 0;
   let observer = null;
   let lastWorkspace = null;
 
@@ -63,9 +69,6 @@
     document.head.appendChild(script);
   }
 
-  /* Product performance belongs to the authenticated admin data layer.
-     Mount it from the already-loaded admin-data-fix controller so it cannot
-     race the workspace controller or depend on a server HTML injection. */
   function loadProductPerformanceAdmin() {
     if (window.__sngProductPerformanceAdminLoaded || document.querySelector('script[data-sng-product-performance-admin]')) return;
     const script = document.createElement('script');
@@ -171,8 +174,12 @@
     Array.from(root.querySelectorAll('section')).forEach(section => cleanupDuplicateOrderTools(section));
   }
 
-  async function refreshNow(reason) {
+  async function refreshNow(reason, options = {}) {
     if (!isAdminVisible() || refreshInFlight) return;
+
+    const now = Date.now();
+    if (!options.force && now - lastRefreshAt < MIN_REFRESH_GAP_MS) return;
+    lastRefreshAt = now;
     refreshInFlight = true;
     const workspace = currentWorkspace();
     try {
@@ -244,9 +251,9 @@
   }
 
   function scheduleInitialRefreshes() {
-    [0, 400, 1000, 2000, 3500, 6000].forEach(delay => {
-      window.setTimeout(() => refreshNow(`initial-${delay}ms`), delay);
-    });
+    // One delayed initial load is enough; the previous six-load burst was
+    // unnecessary and could consume the API rate-limit window immediately.
+    window.setTimeout(() => refreshNow('initial-500ms'), 500);
   }
 
   function installFinalResponsiveDashboard() {
@@ -260,7 +267,6 @@
       #adminBox{box-sizing:border-box!important;min-width:0!important;max-width:100%!important}
       #adminBox.sg-v26-mode{box-sizing:border-box!important;min-width:0!important}
 
-      /* Desktop/tablet landscape: the workspace navigation is a real left column. */
       @media (min-width:900px){
         main#adminBox{width:min(1480px,calc(100% - 36px))!important;margin:0 auto!important}
         #adminBox.sg-v26-mode{display:grid!important;grid-template-columns:minmax(200px,220px) minmax(0,1fr)!important;column-gap:22px!important;align-items:start!important}
@@ -269,7 +275,6 @@
         #adminBox.sg-v26-mode>.stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}
       }
 
-      /* Phones: navigation must never float over the dashboard content. */
       @media (max-width:899px){
         main#adminBox{width:calc(100% - 16px)!important;max-width:100%!important;margin:0 auto!important;padding-top:16px!important}
         #adminBox.sg-v26-mode{display:block!important;overflow:visible!important}
@@ -280,7 +285,6 @@
         #adminBox.sg-v26-mode>section{min-width:0!important;max-width:100%!important}
       }
 
-      /* Final product-performance table geometry: all columns total exactly 100%. */
       #sg-product-performance-panel .sg-prod-table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
       #sg-product-performance-panel .sg-prod-table .sg-col-rank{width:7%!important}
       #sg-product-performance-panel .sg-prod-table .sg-col-product{width:43%!important}
@@ -308,7 +312,6 @@
         #sg-product-performance-panel .sg-prod-item-name{max-width:6ch!important}
       }
 
-      /* Small factual catalogue summary, fed directly from /api/products. */
       #sg-catalog-summary{min-width:0;border:1px solid rgba(115,145,190,.14);border-radius:13px;background:rgba(7,13,23,.68);overflow:hidden}
       #sg-catalog-summary .sg-catalog-head{padding:12px 13px;border-bottom:1px solid rgba(115,145,190,.10);color:#aebbd0;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
       #sg-catalog-summary .sg-catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px}
@@ -387,7 +390,6 @@
       scheduleInitialRefreshes();
       intervalId = window.setInterval(() => refreshNow('interval'), INTERVAL_MS);
     }
-    refreshNow('boot');
   }
 
   document.addEventListener('visibilitychange', () => {
