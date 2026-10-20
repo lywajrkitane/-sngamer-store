@@ -201,9 +201,9 @@ async function installPaytech(app) {
       const orderCustomer = { name, phone, address, email: String(customer?.email || "").trim(), delivery: customer?.delivery || null };
       const refCommand = `SNG-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
       const inserted = await client.query(
-        `INSERT INTO orders (status,customer,payment,items,total,payment_status,payment_method,paytech_ref)
-         VALUES ('Nouvelle',$1,$2,$3,$4,'En attente',$2,$5) RETURNING id`,
-        [JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total, refCommand]
+        `INSERT INTO orders (status,customer,payment,items,total,payment_status,payment_method,paytech_ref,payment_request_key)
+         VALUES ('Nouvelle',$1,$2,$3,$4,'En attente',$2,$5,$6) RETURNING id`,
+        [JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total, refCommand, paymentRequestKey || null]
       );
       orderId = inserted.rows[0].id;
       await client.query("COMMIT");
