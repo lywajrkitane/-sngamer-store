@@ -14,18 +14,10 @@
       .sgaRefundPolicy p{margin:0;color:#aebbd0;font-size:11px;line-height:1.6}
       .sgaRefundPolicy b{color:#fff}
       .sgaClientCancelDisabled{display:none!important}
-
-      /* Product prices: force the approved premium champagne-gold price on mobile and desktop. */
       #products .card.productCardClickable .priceCurrent,
       #products .card.productCardClickable .price--promo .priceCurrent,
-      #products .card.productCardClickable .price--regular .priceCurrent{
-        color:#F4D58D !important;
-        text-shadow:0 0 14px rgba(244,213,141,.16) !important;
-      }
-      #products .card.productCardClickable .priceCurrent small{
-        color:#a9b9ca !important;
-        text-shadow:none !important;
-      }
+      #products .card.productCardClickable .price--regular .priceCurrent{color:#F4D58D !important;text-shadow:0 0 14px rgba(244,213,141,.16) !important}
+      #products .card.productCardClickable .priceCurrent small{color:#a9b9ca !important;text-shadow:none !important}
     `;
     document.head.appendChild(style);
   }
@@ -43,10 +35,6 @@
     </div>`;
   }
 
-  function cleanLabel(value){
-    return String(value||'').replace(/^\s*[^\p{L}\p{N}]+/u,'').replace(/\s+/g,' ').trim();
-  }
-
   function removeDuplicateOrderMeta(){
     const profile=document.getElementById('profileArea');
     if(!profile) return;
@@ -55,31 +43,19 @@
       const notice=Array.from(card.querySelectorAll('*')).find(function(el){
         return /MESSAGE DE LA BOUTIQUE/i.test((el.textContent||'').trim()) && el.children.length>=1;
       });
+      const isInsideNotice=function(el){return !!(notice && (el===notice || notice.contains(el)))};
 
-      const isInsideNotice=function(el){
-        return !!(notice && (el===notice || notice.contains(el)));
-      };
-
-      const targets=[];
-      const walker=document.createTreeWalker(card,NodeFilter.SHOW_TEXT);
-      let node;
-      while((node=walker.nextNode())){
-        const text=(node.nodeValue||'').replace(/\s+/g,' ').trim();
-        if(!text) continue;
-        if(!/^((🚚\s*)?Suivi\s*[:·]\s*.+|(💬\s*)?Bien reçu)$/i.test(text)) continue;
-        const el=node.parentElement;
-        if(!el || isInsideNotice(el)) continue;
-        targets.push(el);
-      }
-
-      targets.forEach(function(el){
-        let row=el;
-        while(row.parentElement && row.parentElement!==card){
-          const parent=row.parentElement;
-          if(cleanLabel(parent.textContent)!==cleanLabel(row.textContent)) break;
-          row=parent;
+      // The unwanted legacy line is rendered as a <p> with the tracking number
+      // split across text nodes ("Suivi :" + <b>number</b>). Match the
+      // complete element textContent instead of individual text nodes.
+      card.querySelectorAll('p,div,span').forEach(function(el){
+        if(isInsideNotice(el)) return;
+        const text=(el.textContent||'').replace(/\s+/g,' ').trim();
+        if(/^🚚\s*Suivi\s*[:·]\s*\S+$/i.test(text) || /^Suivi\s*[:·]\s*\S+$/i.test(text) || /^💬\s*Bien reçu$/i.test(text) || /^Bien reçu$/i.test(text)){
+          const parent=el.parentElement;
+          if(parent && parent.children.length===1 && !isInsideNotice(parent)) parent.remove();
+          else el.remove();
         }
-        if(!isInsideNotice(row)) row.remove();
       });
     });
   }
@@ -88,26 +64,19 @@
     injectStyles();
     const profile=document.getElementById('profileArea');
     if(!profile) return;
-
     profile.querySelectorAll('.sgaOrder .sgaActions').forEach(el=>{
       if(el.querySelector('[onclick*="sngCancelOrder"]')) el.classList.add('sgaClientCancelDisabled');
     });
-
     removeDuplicateOrderMeta();
-
     const cards=Array.from(profile.querySelectorAll('.sgaCard'));
     const ordersCard=cards.find(card=>card.querySelector('.sgaSectionTitle')?.textContent?.trim()==='Mes commandes');
-    if(ordersCard && !ordersCard.querySelector('[data-sngamer-refund-policy="1"]')){
-      ordersCard.insertAdjacentHTML('beforeend',policyHtml());
-    }
+    if(ordersCard && !ordersCard.querySelector('[data-sngamer-refund-policy="1"]')) ordersCard.insertAdjacentHTML('beforeend',policyHtml());
   }
 
   function guardCancelFunction(){
     if(typeof window.sngCancelOrder!=='function') return;
     if(window.sngCancelOrder.__sngamerPolicyGuard) return;
-    const guarded=function(){
-      alert('Pour toute demande d’annulation ou de remboursement, veuillez contacter SNGAMER STORE avant la livraison de votre commande. Une commande déjà livrée ne peut pas être annulée ni faire l’objet d’un remboursement.');
-    };
+    const guarded=function(){alert('Pour toute demande d’annulation ou de remboursement, veuillez contacter SNGAMER STORE avant la livraison de votre commande. Une commande déjà livrée ne peut pas être annulée ni faire l’objet d’un remboursement.')};
     guarded.__sngamerPolicyGuard=true;
     window.sngCancelOrder=guarded;
   }
