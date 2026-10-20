@@ -48,6 +48,49 @@ jobs:
             node --check "$file"
           done
 
+      - name: Harden admin authentication and session security
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('server/server.js')
+          s = p.read_text(encoding='utf-8')
+
+          old_session = '''app.use(\n  session({\n    secret: process.env.SESSION_SECRET || "sngamer-development-secret",\n    resave: false,\n    saveUninitialized: false,\n    cookie: {\n      httpOnly: true,\n      secure: process.env.NODE_ENV === "production",\n      maxAge: 1000 * 60 * 60 * 24\n    }\n  })\n);'''
+
+          new_session = '''app.use(\n  session({\n    name: "sngamer.sid",\n    secret: process.env.SESSION_SECRET || "sngamer-development-secret",\n    resave: false,\n    saveUninitialized: false,\n    rolling: true,\n    cookie: {\n      httpOnly: true,\n      secure: process.env.NODE_ENV === "production",\n      sameSite: "lax",\n      maxAge: 1000 * 60 * 60 * 8\n    }\n  })\n);'''
+
+          if old_session in s:
+              s = s.replace(old_session, new_session, 1)
+          elif 'name: "sngamer.sid"' not in s:
+              raise SystemExit('Expected session configuration was not found.')
+
+          marker = 'function requireAdmin(req, res, next) {'
+          rate_limit_block = '''const adminLoginAttempts = new Map();\nconst ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000;\nconst ADMIN_LOGIN_MAX_ATTEMPTS = 5;\n\nfunction checkAdminLoginRateLimit(ip) {\n  const now = Date.now();\n  const current = adminLoginAttempts.get(ip);\n  const attempts = current && now - current.startedAt < ADMIN_LOGIN_WINDOW_MS\n    ? current\n    : { startedAt: now, count: 0 };\n\n  if (attempts.count >= ADMIN_LOGIN_MAX_ATTEMPTS) {\n    return false;\n  }\n\n  attempts.count += 1;\n  adminLoginAttempts.set(ip, attempts);\n  return true;\n}\n\n'''
+          if 'const adminLoginAttempts = new Map();' not in s:
+              if marker not in s:
+                  raise SystemExit('Admin authentication marker not found.')
+              s = s.replace(marker, rate_limit_block + marker, 1)
+
+          start = s.find('app.post("/api/admin/login", async (req, res) => {')
+          end_marker = '\napp.post("/api/admin/logout", (req, res) => {'
+          end = s.find(end_marker, start)
+          if start == -1 or end == -1:
+              raise SystemExit('Admin login route boundaries not found.')
+
+          login_route = '''app.post("/api/admin/login", async (req, res) => {\n  try {\n    const { username, password } = req.body || {};\n    const adminUser = process.env.ADMIN_USER;\n    const adminPassword = process.env.ADMIN_PASSWORD;\n\n    if (!adminUser || !adminPassword) {\n      return res.status(500).json({\n        error: "Configuration administrateur manquante"\n      });\n    }\n\n    if (!checkAdminLoginRateLimit(req.ip)) {\n      return res.status(429).json({\n        error: "Trop de tentatives de connexion. Réessayez plus tard."\n      });\n    }\n\n    if (username !== adminUser) {\n      return res.status(401).json({\n        error: "Identifiants incorrects"\n      });\n    }\n\n    let passwordValid = false;\n\n    if (\n      adminPassword.startsWith("$2a$") ||\n      adminPassword.startsWith("$2b$") ||\n      adminPassword.startsWith("$2y$")\n    ) {\n      passwordValid = await bcrypt.compare(password || "", adminPassword);\n    } else {\n      passwordValid = password === adminPassword;\n    }\n\n    if (!passwordValid) {\n      return res.status(401).json({\n        error: "Identifiants incorrects"\n      });\n    }\n\n    await new Promise((resolve, reject) => {\n      req.session.regenerate((error) => {\n        if (error) {\n          reject(error);\n          return;\n        }\n\n        req.session.admin = true;\n        req.session.save((saveError) => {\n          if (saveError) {\n            reject(saveError);\n            return;\n          }\n          resolve();\n        });\n      });\n    });\n\n    adminLoginAttempts.delete(req.ip);\n\n    return res.json({\n      success: true\n    });\n  } catch (error) {\n    console.error("ADMIN_LOGIN_ERROR:", error);\n\n    return res.status(500).json({\n      error: "Erreur de connexion"\n    });\n  }\n});\n'''
+
+          s = s[:start] + login_route + s[end:]
+
+          old_logout = '''app.post("/api/admin/logout", (req, res) => {\n  req.session.destroy(() => {\n    res.json({\n      success: true\n    });\n  });\n});'''
+          new_logout = '''app.post("/api/admin/logout", (req, res) => {\n  req.session.destroy((error) => {\n    res.clearCookie("sngamer.sid");\n\n    if (error) {\n      return res.status(500).json({\n        error: "Impossible de fermer la session"\n      });\n    }\n\n    return res.json({\n      success: true\n    });\n  });\n});'''
+          if old_logout in s:
+              s = s.replace(old_logout, new_logout, 1)
+
+          p.write_text(s, encoding='utf-8')
+          print('Admin authentication hardening applied.')
+
       - name: Refresh admin workspace script version
         shell: python
         run: |
@@ -92,6 +135,6 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js
-          git commit -m 'fix(admin): finalize payment and refund state separation'
+          git add server/server.js public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js .github/workflows/inject-admin-v24.yml
+          git commit -m 'security(admin): harden authentication and sessions'
           git push
