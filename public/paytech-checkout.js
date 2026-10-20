@@ -33,6 +33,23 @@
     button.textContent = button.dataset.originalText || "Confirmer la commande";
   }
 
+  function paymentAttemptKey() {
+    const storageKey = "sngamer.paytech.attempt";
+    try {
+      const current = sessionStorage.getItem(storageKey);
+      if (current && /^[A-Za-z0-9._:-]{16,120}$/.test(current)) return current;
+      const value = (crypto.randomUUID ? crypto.randomUUID() : `sng-${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`);
+      sessionStorage.setItem(storageKey, value);
+      return value;
+    } catch (_) {
+      return `sng-${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+    }
+  }
+
+  function clearPaymentAttemptKey() {
+    try { sessionStorage.removeItem("sngamer.paytech.attempt"); } catch (_) {}
+  }
+
   async function paytechCheckoutSubmit() {
     // Prevent double taps/clicks from creating multiple payment sessions.
     if (checkoutInProgress) return;
@@ -109,6 +126,7 @@
             delivery: { zone, region, address, notes }
           },
           payment,
+          idempotency_key: paymentAttemptKey(),
           items: basket.map((item) => ({
             id: Number(item.id),
             qty: Number(item.qty ?? item.quantity)
@@ -125,6 +143,7 @@
         );
       }
 
+      clearPaymentAttemptKey();
       window.location.assign(data.redirect_url);
     } catch (error) {
       console.error("SNGAMER_PAYTECH_SUBMIT_ERROR", error);

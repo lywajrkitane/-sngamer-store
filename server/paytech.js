@@ -44,6 +44,8 @@ async function installPaytech(app) {
       ADD COLUMN IF NOT EXISTS payment_method TEXT,
       ADD COLUMN IF NOT EXISTS paytech_ref TEXT,
       ADD COLUMN IF NOT EXISTS paytech_token TEXT,
+      ADD COLUMN IF NOT EXISTS payment_request_key TEXT,
+      ADD COLUMN IF NOT EXISTS paytech_redirect_url TEXT,
       ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS refund_status TEXT NOT NULL DEFAULT 'Aucun',
       ADD COLUMN IF NOT EXISTS refund_requested_at TIMESTAMPTZ,
@@ -52,6 +54,11 @@ async function installPaytech(app) {
   `);
 
   await pool.query(`UPDATE orders SET status='Nouvelle' WHERE status='Payée' AND payment_status='Payé'`);
+
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_payment_request_key_unique
+      ON orders(payment_request_key) WHERE payment_request_key IS NOT NULL;
+  `);
 
   await pool.query(`
     DO $$
@@ -144,7 +151,28 @@ async function installPaytech(app) {
       if (!["test", "prod"].includes(env)) return res.status(500).json({ error: "PAYTECH_ENV doit être 'test' ou 'prod'." });
 
       const { customer, payment, items } = req.body || {};
+      const paymentRequestKey = String(req.body?.idempotency_key || "").trim();
       const allowedPayments = ["Wave", "Orange Money"];
+      if (paymentRequestKey && !/^[A-Za-z0-9._:-]{16,120}$/.test(paymentRequestKey)) {
+        return res.status(400).json({ error: "Clé de paiement invalide." });
+      }
+
+      if (paymentRequestKey) {
+        const existing = await pool.query(
+          `SELECT id,payment_status,paytech_token,paytech_redirect_url FROM orders WHERE payment_request_key=$1 LIMIT 1`,
+          [paymentRequestKey]
+        );
+        if (existing.rows.length) {
+          const order = existing.rows[0];
+          if (order.paytech_redirect_url && order.payment_status === "En attente") {
+            return res.status(200).json({ success: true, orderId: order.id, token: order.paytech_token || null, redirect_url: order.paytech_redirect_url, reused: true });
+          }
+          if (order.payment_status === "Payé") {
+            return res.status(409).json({ error: "Cette tentative de paiement a déjà été validée." });
+          }
+          return res.status(409).json({ error: "Cette tentative de paiement est déjà en cours. Réessaie depuis le panier si nécessaire." });
+        }
+      }
       const name = String(customer?.name || "").trim();
       const phone = String(customer?.phone || "").trim();
       const address = String(customer?.address || customer?.delivery?.address || "").trim();
@@ -200,7 +228,7 @@ async function installPaytech(app) {
       let redirectUrl = result.redirect_url;
       const qp = new URLSearchParams({ pn: phoneData.international, nn: phoneData.national, fn: name, tp: payment, nac: "1" });
       redirectUrl += (redirectUrl.includes("?") ? "&" : "?") + qp.toString();
-      await pool.query(`UPDATE orders SET paytech_token=$1 WHERE id=$2`, [result.token || null, orderId]);
+      await pool.query(`UPDATE orders SET paytech_token=$1,paytech_redirect_url=$2 WHERE id=$3`, [result.token || null, redirectUrl, orderId]);
       return res.status(201).json({ success: true, orderId, token: result.token || null, redirect_url: redirectUrl });
     } catch (error) {
       try { await client.query("ROLLBACK"); } catch (_) {}
