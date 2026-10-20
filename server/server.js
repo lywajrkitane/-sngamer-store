@@ -243,13 +243,16 @@ app.set("trust proxy", 1);
 
 app.use(
   session({
+    name: "sngamer.sid",
     secret: process.env.SESSION_SECRET || "sngamer-development-secret",
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 8
     }
   })
 );
@@ -426,6 +429,26 @@ const subtotal = unitPrice * quantity;
    ADMIN AUTH
 ========================= */
 
+const adminLoginAttempts = new Map();
+const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const ADMIN_LOGIN_MAX_ATTEMPTS = 5;
+
+function checkAdminLoginRateLimit(ip) {
+  const now = Date.now();
+  const current = adminLoginAttempts.get(ip);
+  const attempts = current && now - current.startedAt < ADMIN_LOGIN_WINDOW_MS
+    ? current
+    : { startedAt: now, count: 0 };
+
+  if (attempts.count >= ADMIN_LOGIN_MAX_ATTEMPTS) {
+    return false;
+  }
+
+  attempts.count += 1;
+  adminLoginAttempts.set(ip, attempts);
+  return true;
+}
+
 function requireAdmin(req, res, next) {
   if (!req.session.admin) {
     return res.status(401).json({
@@ -437,52 +460,28 @@ function requireAdmin(req, res, next) {
 }
 
 app.post("/api/admin/login", async (req, res) => {
-  const diagnosticStart = Date.now();
-
-  console.log("LOGIN_DIAGNOSTIC: route atteinte");
-
   try {
     const { username, password } = req.body || {};
-
-    console.log(
-      "LOGIN_DIAGNOSTIC: username reçu =",
-      username || "(vide)"
-    );
-
     const adminUser = process.env.ADMIN_USER;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
-    console.log(
-      "LOGIN_DIAGNOSTIC: ADMIN_USER présent =",
-      Boolean(adminUser)
-    );
-
-    console.log(
-      "LOGIN_DIAGNOSTIC: ADMIN_PASSWORD présent =",
-      Boolean(adminPassword)
-    );
-
     if (!adminUser || !adminPassword) {
-      console.log(
-        "LOGIN_DIAGNOSTIC: configuration administrateur manquante"
-      );
-
       return res.status(500).json({
         error: "Configuration administrateur manquante"
       });
     }
 
-    if (username !== adminUser) {
-      console.log("LOGIN_DIAGNOSTIC: mauvais nom utilisateur");
+    if (!checkAdminLoginRateLimit(req.ip)) {
+      return res.status(429).json({
+        error: "Trop de tentatives de connexion. Réessayez plus tard."
+      });
+    }
 
+    if (username !== adminUser) {
       return res.status(401).json({
         error: "Identifiants incorrects"
       });
     }
-
-    console.log(
-      "LOGIN_DIAGNOSTIC: nom utilisateur correct"
-    );
 
     let passwordValid = false;
 
@@ -491,107 +490,60 @@ app.post("/api/admin/login", async (req, res) => {
       adminPassword.startsWith("$2b$") ||
       adminPassword.startsWith("$2y$")
     ) {
-      console.log(
-        "LOGIN_DIAGNOSTIC: vérification bcrypt démarrée"
-      );
-
-      const bcryptTimeout = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve("TIMEOUT");
-        }, 8000);
-      });
-
-      const bcryptCheck = bcrypt.compare(
-        password || "",
-        adminPassword
-      );
-
-      const bcryptResult = await Promise.race([
-        bcryptCheck,
-        bcryptTimeout
-      ]);
-
-      if (bcryptResult === "TIMEOUT") {
-        console.log(
-          "LOGIN_DIAGNOSTIC: bcrypt dépasse 8 secondes"
-        );
-
-        return res.status(500).json({
-          error: "La vérification du mot de passe prend trop de temps."
-        });
-      }
-
-      passwordValid = Boolean(bcryptResult);
-
-      console.log(
-        "LOGIN_DIAGNOSTIC: bcrypt terminé =",
-        passwordValid
-      );
-
+      passwordValid = await bcrypt.compare(password || "", adminPassword);
     } else {
-      console.log(
-        "LOGIN_DIAGNOSTIC: comparaison directe du mot de passe"
-      );
-
-      passwordValid =
-        password === adminPassword;
-
-      console.log(
-        "LOGIN_DIAGNOSTIC: comparaison terminée =",
-        passwordValid
-      );
+      passwordValid = password === adminPassword;
     }
 
     if (!passwordValid) {
-      console.log(
-        "LOGIN_DIAGNOSTIC: mot de passe incorrect"
-      );
-
       return res.status(401).json({
         error: "Identifiants incorrects"
       });
     }
 
-    console.log(
-      "LOGIN_DIAGNOSTIC: mot de passe correct"
-    );
+    await new Promise((resolve, reject) => {
+      req.session.regenerate((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
 
-    console.log(
-      "LOGIN_DIAGNOSTIC: création de session"
-    );
-
-    req.session.admin = true;
-
-    console.log(
-      "LOGIN_DIAGNOSTIC: session créée"
-    );
-
-    res.json({
-      success: true
+        req.session.admin = true;
+        req.session.save((saveError) => {
+          if (saveError) {
+            reject(saveError);
+            return;
+          }
+          resolve();
+        });
+      });
     });
 
-    console.log(
-      "LOGIN_DIAGNOSTIC: réponse envoyée en",
-      Date.now() - diagnosticStart,
-      "ms"
-    );
+    adminLoginAttempts.delete(req.ip);
 
+    return res.json({
+      success: true
+    });
   } catch (error) {
+    console.error("ADMIN_LOGIN_ERROR:", error);
 
-    console.error(
-      "LOGIN_DIAGNOSTIC_ERROR:",
-      error
-    );
-
-    res.status(500).json({
+    return res.status(500).json({
       error: "Erreur de connexion"
     });
   }
 });
 
 app.post("/api/admin/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.json({
+  req.session.destroy((error) => {
+    res.clearCookie("sngamer.sid");
+
+    if (error) {
+      return res.status(500).json({
+        error: "Impossible de fermer la session"
+      });
+    }
+
+    return res.json({
       success: true
     });
   });
