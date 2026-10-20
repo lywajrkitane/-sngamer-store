@@ -1,26 +1,7687 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
-*{box-sizing:border-box}body{margin:0;background:#070a10;color:#f4f7fb;font-family:Arial,Inter,sans-serif}button,input,select{font:inherit}.wrap{max-width:1180px;margin:auto;padding:0 22px}header{position:sticky;top:0;z-index:5;background:#080b11ee;border-bottom:1px solid #1c2634;backdrop-filter:blur(15px)}.nav{min-height:72px;display:flex;align-items:center;gap:18px}.logo{font-size:20px;font-weight:900}.logo span{color:#3194ff}.logo small{font-size:9px;color:#8491a3;letter-spacing:2px}.search{flex:1}.search input{width:100%;background:#111823;border:1px solid #253448;color:#fff;border-radius:10px;padding:12px 15px;outline:none}.nav>button{background:#152236;border:1px solid #29415f;color:#fff;padding:11px 15px;border-radius:10px}.nav b{background:#3194ff;padding:3px 7px;border-radius:20px}.hero{background:radial-gradient(circle at 80% 30%,#0c4684,#080c14 55%);border-bottom:1px solid #172130}.heroIn{min-height:500px;display:grid;grid-template-columns:1fr 1fr;align-items:center}.hero label,label{color:#4ea2ff;font-weight:800;letter-spacing:2px;font-size:11px}.hero h1{font-size:clamp(46px,7vw,80px);line-height:.9;margin:15px 0}.hero h1 span{color:#3194ff}.hero p{max-width:540px;color:#a7b3c3;font-size:18px;line-height:1.5}.primary{background:#3194ff;border:0;color:white;font-weight:900;padding:14px 20px;border-radius:10px;cursor:pointer}.heroVisual{font-size:180px;text-align:center;position:relative;text-shadow:0 30px 50px #000}.heroVisual i{position:absolute;right:5%;top:5%;font-style:normal;font-size:14px;background:#101b2a;border:1px solid #2b4565;padding:12px;border-radius:10px}.bar{display:flex;justify-content:space-between;align-items:center;margin:40px 0 22px;gap:15px}.bar h2{font-size:32px;margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{background:#0d141e;border:1px solid #1c2939;border-radius:15px;overflow:hidden}.pic{height:180px;display:grid;place-items:center;font-size:75px;background:linear-gradient(145deg,#111e2e,#0a0f15)}.info{padding:15px}.info h3{font-size:16px;margin:8px 0}.cat{color:#579fff;font-size:10px;text-transform:uppercase;font-weight:800}.price{font-size:18px;font-weight:900}.stock{color:#738196;font-size:11px;margin-top:5px}.add{width:100%;margin-top:12px;padding:11px;border-radius:9px;background:#152439;color:#fff;border:1px solid #29425f;cursor:pointer;font-weight:800}.add:hover{background:#3194ff}.banner{margin-top:70px;margin-bottom:70px;padding:35px;border:1px solid #21364e;border-radius:20px;background:#0c1827;display:flex;justify-content:space-between;align-items:center;gap:20px}.banner h2{margin:6px 0}.banner p{color:#8e9bad}footer{border-top:1px solid #182332;color:#718096;padding:30px 0}.drawer,.modal{display:none;position:fixed;inset:0;z-index:20}.drawer.show,.modal.show{display:block}.shade{position:absolute;inset:0;background:#000b}.drawer aside{position:absolute;right:0;top:0;height:100%;width:min(430px,100%);background:#0b1119;padding:22px;overflow:auto}.head{display:flex;justify-content:space-between}.head button,.x{background:none;border:0;color:#fff;font-size:28px;cursor:pointer}.cartItem{display:flex;gap:10px;padding:15px 0;border-bottom:1px solid #1a2635}.cartItem .em{font-size:38px}.qty{margin-left:auto}.full{width:100%}.modal{background:#000b;place-items:center}.modal.show{display:grid}.box{position:relative;width:min(500px,92%);background:#0c131d;border:1px solid #26384f;border-radius:16px;padding:25px}.box input,.box select{width:100%;padding:13px;margin:7px 0;background:#111b28;color:#fff;border:1px solid #26384f;border-radius:9px}.x{position:absolute;right:14px;top:8px}.hint{font-size:11px;color:#7d8da0}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.heroIn{grid-template-columns:1fr;padding-top:50px;padding-bottom:50px}.heroVisual{font-size:120px}}@media(max-width:560px){.grid{grid-template-columns:1fr 1fr;gap:10px}.pic{height:135px;font-size:55px}.bar{align-items:start;flex-direction:column}.banner{flex-direction:column;align-items:start}.nav{flex-wrap:wrap}.search{order:3;flex-basis:100%}}.productBox{width:min(950px,94%);max-height:90vh;overflow-y:auto}.productDetail{display:grid;grid-template-columns:1.1fr .9fr;gap:25px}.productGallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.productDetailImage{width:100%;height:220px;object-fit:cover;border-radius:14px;border:1px solid #26384f;background:#111923}.productEmoji{min-height:300px;display:grid;place-items:center;grid-column:1/-1;font-size:100px;background:#111923;border-radius:14px}.productInfo h2{margin:8px 0 12px;font-size:30px}.productDescription{color:#b9c5d4;line-height:1.7;margin:20px 0}.productVideo{margin:20px 0}.productVideo h3{margin-bottom:10px}.productVideo video{width:100%;max-height:300px;border-radius:12px;background:#000}.details{width:100%;margin-top:8px;padding:11px;border:1px solid #2a3b50;border-radius:10px;background:#131d29;color:#fff;cursor:pointer}.details:hover{background:#1b2a3c}@media(max-width:700px){.productDetail{grid-template-columns:1fr}.productDetailImage{height:170px}.productInfo h2{font-size:24px}}.productMainImage{width:100%;background:#111923;border:1px solid #26384f;border-radius:16px;overflow:hidden}.productMainImage img{display:block;width:100%;height:360px;object-fit:cover}.productThumbnails{display:flex;gap:10px;margin-top:12px;overflow-x:auto}.productThumb{flex:0 0 80px;width:80px;height:80px;padding:0;border:2px solid #26384f;border-radius:10px;overflow:hidden;background:#111923;cursor:pointer}.productThumb img{width:100%;height:100%;object-fit:cover;display:block}.productThumb:hover{border-color:#3b95ff}.outOfStock{color:#ff6b6b;font-weight:700}.disabled{opacity:.55;cursor:not-allowed}@media(max-width:700px){.productMainImage img{height:280px}.productThumb{flex-basis:70px;width:70px;height:70px}}.card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.card:hover{transform:translateY(-4px);border-color:#2f8cff;box-shadow:0 12px 30px #0008}.card .pic{position:relative;overflow:hidden}.card .pic img{transition:transform .3s ease}.card:hover .pic img{transform:scale(1.04)}.card .info h3{margin:7px 0 8px;font-size:18px;line-height:1.25}.card .price{font-size:21px;font-weight:800;margin:8px 0}.card .stock{font-size:13px;margin-bottom:10px;color:#8fa1b5}.card .details{font-weight:700;text-align:center;transition:background .2s ease,border-color .2s ease}.card .details:hover{background:#1b2a3c;border-color:#3b95ff}@media(max-width:560px){.card .info{padding:11px}.card .info h3{font-size:15px}.card .price{font-size:17px}.card .stock{font-size:12px}.card .details{font-size:13px;padding:9px}}@media(max-width:700px){.productGallery{display:flex;flex-direction:column;gap:12px}.productMainImage{width:100%}.productMainImage img{width:100%;height:320px;object-fit:contain}.productThumbs{display:flex;justify-content:center;gap:10px;overflow-x:auto}.productThumb{flex:0 0 70px;width:70px;height:70px}
+*{box-sizing:border-box}body{margin:0;background:#070a10;color:#f4f7fb;font-family:Arial,Inter,sans-serif}button,input,select{font:inherit}.wrap{max-width:1180px;margin:auto;padding:0 22px}header{position:sticky;top:0;z-index:5;background:#080b11ee;border-bottom:1px solid #1c2634;backdrop-filter:blur(15px)}.nav{min-height:72px;display:flex;align-items:center;gap:18px}.logo{font-size:20px;font-weight:900}.logo span{color:#3194ff}.logo small{font-size:9px;color:#8491a3;letter-spacing:2px}.search{flex:1}.search input{width:100%;background:#111823;border:1px solid #253448;color:#fff;border-radius:10px;padding:12px 15px;outline:none}.nav>button{background:#152236;border:1px solid #29415f;color:#fff;padding:11px 15px;border-radius:10px}.nav b{background:#3194ff;padding:3px 7px;border-radius:20px}.hero{background:radial-gradient(circle at 80% 30%,#0c4684,#080c14 55%);border-bottom:1px solid #172130}.heroIn{min-height:500px;display:grid;grid-template-columns:1fr 1fr;align-items:center}.hero label,label{color:#4ea2ff;font-weight:800;letter-spacing:2px;font-size:11px}.hero h1{font-size:clamp(46px,7vw,80px);line-height:.9;margin:15px 0}.hero h1 span{color:#3194ff}.hero p{max-width:540px;color:#a7b3c3;font-size:18px;line-height:1.5}.primary{background:#3194ff;border:0;color:white;font-weight:900;padding:14px 20px;border-radius:10px;cursor:pointer}.heroVisual{font-size:180px;text-align:center;position:relative;text-shadow:0 30px 50px #000}.heroVisual i{position:absolute;right:5%;top:5%;font-style:normal;font-size:14px;background:#101b2a;border:1px solid #2b4565;padding:12px;border-radius:10px}.bar{display:flex;justify-content:space-between;align-items:center;margin:40px 0 22px;gap:15px}.bar h2{font-size:32px;margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{background:#0d141e;border:1px solid #1c2939;border-radius:15px;overflow:hidden}.pic{height:180px;display:grid;place-items:center;font-size:75px;background:linear-gradient(145deg,#111e2e,#0a0f15)}.info{padding:15px}.info h3{font-size:16px;margin:8px 0}.cat{color:#579fff;font-size:10px;text-transform:uppercase;font-weight:800}.price{font-size:18px;font-weight:900}.stock{color:#738196;font-size:11px;margin-top:5px}.add{width:100%;margin-top:12px;padding:11px;border-radius:9px;background:#152439;color:#fff;border:1px solid #29425f;cursor:pointer;font-weight:800}.add:hover{background:#3194ff}.banner{margin-top:70px;margin-bottom:70px;padding:35px;border:1px solid #21364e;border-radius:20px;background:#0c1827;display:flex;justify-content:space-between;align-items:center;gap:20px}.banner h2{margin:6px 0}.banner p{color:#8e9bad}footer{border-top:1px solid #182332;color:#718096;padding:30px 0}.drawer,.modal{display:none;position:fixed;inset:0;z-index:20}.drawer.show,.modal.show{display:block}.shade{position:absolute;inset:0;background:#000b}.drawer aside{position:absolute;right:0;top:0;height:100%;width:min(430px,100%);background:#0b1119;padding:22px;overflow:auto}.head{display:flex;justify-content:space-between}.head button,.x{background:none;border:0;color:#fff;font-size:28px;cursor:pointer}.cartItem{display:flex;gap:10px;padding:15px 0;border-bottom:1px solid #1a2635}.cartItem .em{font-size:38px}.qty{margin-left:auto}.full{width:100%}.modal{background:#000b;place-items:center}.modal.show{display:grid}.box{position:relative;width:min(500px,92%);background:#0c131d;border:1px solid #26384f;border-radius:16px;padding:25px}.box input,.box select{width:100%;padding:13px;margin:7px 0;background:#111b28;color:#fff;border:1px solid #26384f;border-radius:9px}.x{position:absolute;right:14px;top:8px}.hint{font-size:11px;color:#7d8da0}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.heroIn{grid-template-columns:1fr;padding-top:50px;padding-bottom:50px}.heroVisual{font-size:120px}}@media(max-width:560px){.grid{grid-template-columns:1fr 1fr;gap:10px}.pic{height:135px;font-size:55px}.bar{align-items:start;flex-direction:column}.banner{flex-direction:column;align-items:start}.nav{flex-wrap:wrap}.search{order:3;flex-basis:100%}}.productBox{
+  width:min(950px,94%);
+  max-height:90vh;
+  overflow-y:auto;
 }
 
-/* SNGAMER premium product-card polish */
-.productCardClickable{position:relative;display:flex;flex-direction:column;min-width:0;background:linear-gradient(180deg,#101a27 0%,#0b121b 100%);border-color:#22344b;box-shadow:0 8px 24px rgba(0,0,0,.16)}
-.productCardClickable .pic{height:210px;background:radial-gradient(circle at 50% 35%,#172b43 0%,#0c1420 62%,#080d14 100%);padding:12px}
-.productCardClickable .pic img,.productCardImage{width:100%;height:100%;object-fit:contain;display:block}
-.productCardClickable .productCardEmoji{font-size:72px;display:grid;place-items:center;width:100%;height:100%}
-.productCardClickable .info{display:flex;flex-direction:column;min-width:0;padding:15px 16px 16px}
-.productCardClickable .cat{min-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.productCardClickable .info h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:40px;margin:7px 0 9px;font-size:17px}
-.productCardClickable .price{min-height:29px}
-.productCardClickable .stock{min-height:18px;margin-bottom:12px}
-.productCardBottom{display:flex;justify-content:flex-end;margin-top:auto}
-.addToCartIcon{width:42px;height:42px;border-radius:12px;border:1px solid #2d4d72;background:#142842;color:#fff;font-size:25px;line-height:1;cursor:pointer;transition:transform .18s ease,background .18s ease,border-color .18s ease}
-.addToCartIcon:hover{transform:translateY(-2px);background:#3194ff;border-color:#3194ff}
-.price--promo .pricePromoTop{display:flex;align-items:center;gap:8px;min-width:0}
-.priceOld{text-decoration:line-through;color:#718197;font-size:12px;font-weight:700;white-space:nowrap}
-.discountBadge{display:inline-flex;align-items:center;justify-content:center;padding:3px 7px;border-radius:999px;background:#ff3b5c22;border:1px solid #ff5b752f;color:#ff7c91;font-size:10px;font-weight:900;white-space:nowrap}
-.priceCurrent{display:block;font-size:21px;line-height:1.15;margin-top:5px;white-space:nowrap}
-.priceCurrent small{font-size:.55em;color:#aab8ca;font-weight:700}
-.outOfStock{margin-top:4px}
-@media(max-width:900px){.productCardClickable .pic{height:190px}}
-@media(max-width:560px){.productCardClickable .pic{height:150px;padding:9px}.productCardClickable .info{padding:11px 11px 12px}.productCardClickable .info h3{font-size:14px;min-height:35px;-webkit-line-clamp:2}.productCardClickable .priceCurrent{font-size:17px}.productCardClickable .priceOld{font-size:10px}.productCardClickable .stock{font-size:11px}.addToCartIcon{width:38px;height:38px;border-radius:11px;font-size:22px}}
-@media(max-width:380px){.productCardClickable .pic{height:135px}.productCardClickable .info h3{font-size:13px}.productCardClickable .priceCurrent{font-size:16px}.grid{gap:8px}}
+.productDetail{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:25px;
+}
+
+.productGallery{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.productDetailImage{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  border-radius:14px;
+  border:1px solid #26384f;
+  background:#111923;
+}
+
+.productEmoji{
+  min-height:300px;
+  display:grid;
+  place-items:center;
+  grid-column:1/-1;
+  font-size:100px;
+  background:#111923;
+  border-radius:14px;
+}
+
+.productInfo h2{
+  margin:8px 0 12px;
+  font-size:30px;
+}
+
+.productDescription{
+  color:#b9c5d4;
+  line-height:1.7;
+  margin:20px 0;
+}
+
+.productVideo{
+  margin:20px 0;
+}
+
+.productVideo h3{
+  margin-bottom:10px;
+}
+
+.productVideo video{
+  width:100%;
+  max-height:300px;
+  border-radius:12px;
+  background:#000;
+}
+
+.details{
+  width:100%;
+  margin-top:8px;
+  padding:11px;
+  border:1px solid #2a3b50;
+  border-radius:10px;
+  background:#131d29;
+  color:#fff;
+  cursor:pointer;
+}
+
+.details:hover{
+  background:#1b2a3c;
+}
+
+@media(max-width:700px){
+  .productDetail{
+    grid-template-columns:1fr;
+  }
+
+  .productDetailImage{
+    height:170px;
+  }
+
+  .productInfo h2{
+    font-size:24px;
+  }
+}.productMainImage{
+  width:100%;
+  background:#111923;
+  border:1px solid #26384f;
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.productMainImage img{
+  display:block;
+  width:100%;
+  height:360px;
+  object-fit:cover;
+}
+
+.productThumbnails{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+  overflow-x:auto;
+}
+
+.productThumb{
+  flex:0 0 80px;
+  width:80px;
+  height:80px;
+  padding:0;
+  border:2px solid #26384f;
+  border-radius:10px;
+  overflow:hidden;
+  background:#111923;
+  cursor:pointer;
+}
+
+.productThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.productThumb:hover{
+  border-color:#3b95ff;
+}
+
+.outOfStock{
+  color:#ff6b6b;
+  font-weight:700;
+}
+
+.disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media(max-width:700px){
+  .productMainImage img{
+    height:280px;
+  }
+
+  .productThumb{
+    flex-basis:70px;
+    width:70px;
+    height:70px;
+  }
+}.card{
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  border-color:#2f8cff;
+  box-shadow:0 12px 30px #0008;
+}
+
+.card .pic{
+  position:relative;
+  overflow:hidden;
+}
+
+.card .pic img{
+  transition:transform .3s ease;
+}
+
+.card:hover .pic img{
+  transform:scale(1.04);
+}
+
+.card .info h3{
+  margin:7px 0 8px;
+  font-size:18px;
+  line-height:1.25;
+}
+
+.card .price{
+  font-size:21px;
+  font-weight:800;
+  margin:8px 0;
+}
+
+.card .stock{
+  font-size:13px;
+  margin-bottom:10px;
+  color:#8fa1b5;
+}
+
+.card .details{
+  font-weight:700;
+  text-align:center;
+  transition:background .2s ease,border-color .2s ease;
+}
+
+.card .details:hover{
+  background:#1b2a3c;
+  border-color:#3b95ff;
+}
+
+@media(max-width:560px){
+  .card .info{
+    padding:11px;
+  }
+
+  .card .info h3{
+    font-size:15px;
+  }
+
+  .card .price{
+    font-size:17px;
+  }
+
+  .card .stock{
+    font-size:12px;
+  }
+
+  .card .details{
+    font-size:13px;
+    padding:9px;
+  }
+}
+@media(max-width:700px){
+    .productGallery{
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .productMainImage{
+        width:100%;
+    }
+
+    .productMainImage img{
+        width:100%;
+        height:320px;
+        object-fit:contain;
+    }
+
+    .productThumbs{
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        overflow-x:auto;
+    }
+
+    .productThumb{
+        flex:0 0 70px;
+        width:70px;
+        height:70px;
+    }
+}
+/* CADRE UNIFORME DES IMAGES PRODUITS */
+.productMainImage{
+  width:100%;
+  aspect-ratio:4/3;
+  background:#080d14;
+  border-radius:14px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.productMainImage img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.productThumb{
+  width:78px;
+  height:78px;
+  flex:0 0 78px;
+  padding:0;
+  overflow:hidden;
+  border-radius:12px;
+  background:#0d141e;
+  border:2px solid #26384f;
+}
+
+.productThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.productThumb:hover{
+  border-color:#3b95ff;
+}
+/* =========================================================
+   SNGAMER STORE — IDENTITÉ VISUELLE PREMIUM
+   Fondation graphique
+   ========================================================= */
+
+:root{
+  --sng-blue:#1687ff;
+  --sng-blue-light:#39a7ff;
+  --sng-red:#e91e63;
+  --sng-magenta:#c2185b;
+  --sng-purple:#7c3aed;
+
+  --sng-bg:#050810;
+  --sng-bg-2:#080d18;
+  --sng-card:#0c1422;
+  --sng-card-2:#101b2c;
+
+  --sng-text:#f5f7fb;
+  --sng-text-soft:#aab6c8;
+  --sng-border:rgba(58,149,255,.18);
+
+  --sng-gradient:linear-gradient(
+    135deg,
+    #1687ff 0%,
+    #7c3aed 55%,
+    #e91e63 100%
+  );
+
+  --sng-shadow:0 12px 35px rgba(0,0,0,.35);
+  --sng-glow:0 0 25px rgba(22,135,255,.18);
+}
+
+
+/* =========================
+   BASE
+   ========================= */
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(22,135,255,.10),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      rgba(233,30,99,.08),
+      transparent 28%
+    ),
+    var(--sng-bg);
+
+  color:var(--sng-text);
+}
+
+
+/* =========================
+   SÉLECTION DU TEXTE
+   ========================= */
+
+::selection{
+  background:var(--sng-blue);
+  color:#fff;
+}
+
+
+/* =========================
+   BARRE DE DÉFILEMENT
+   ========================= */
+
+::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+
+::-webkit-scrollbar-track{
+  background:#050810;
+}
+
+::-webkit-scrollbar-thumb{
+  background:linear-gradient(
+    180deg,
+    var(--sng-blue),
+    var(--sng-purple)
+  );
+  border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background:var(--sng-blue-light);
+}
+
+
+/* =========================
+   BOUTONS
+   ========================= */
+
+button{
+  font-family:inherit;
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    border-color .2s ease,
+    background .2s ease;
+}
+
+button:hover{
+  transform:translateY(-2px);
+}
+
+button:active{
+  transform:translateY(0);
+}
+
+
+/* =========================
+   BOUTONS PRINCIPAUX
+   ========================= */
+
+button.primary,
+.primary{
+  background:var(--sng-gradient) !important;
+  color:#fff !important;
+  border:none !important;
+  box-shadow:var(--sng-glow);
+}
+
+button.primary:hover,
+.primary:hover{
+  box-shadow:
+    0 8px 28px rgba(22,135,255,.25),
+    0 0 25px rgba(233,30,99,.12);
+}
+
+
+/* =========================
+   CHAMPS DE RECHERCHE / FORMULAIRES
+   ========================= */
+
+input,
+select,
+textarea{
+  background:var(--sng-card) !important;
+  color:var(--sng-text) !important;
+  border:1px solid var(--sng-border) !important;
+  border-radius:12px;
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  outline:none;
+  border-color:var(--sng-blue) !important;
+  box-shadow:
+    0 0 0 3px rgba(22,135,255,.10),
+    0 0 20px rgba(22,135,255,.08);
+}
+
+input::placeholder,
+textarea::placeholder{
+  color:#718096;
+}
+
+
+/* =========================
+   LIENS
+   ========================= */
+
+a{
+  transition:
+    color .2s ease,
+    opacity .2s ease;
+}
+
+a:hover{
+  color:var(--sng-blue-light);
+}
+
+
+/* =========================
+   CARTES
+   ========================= */
+
+.card,
+.productCard,
+.product-card{
+  background:
+    linear-gradient(
+      145deg,
+      rgba(16,27,44,.96),
+      rgba(8,14,25,.98)
+    );
+
+  border:1px solid var(--sng-border);
+  box-shadow:var(--sng-shadow);
+
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
+
+.card:hover,
+.productCard:hover,
+.product-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(22,135,255,.45);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.45),
+    0 0 25px rgba(22,135,255,.08);
+}
+/* SNGAMER — cartes produits compactes sur mobile */
+@media (max-width: 600px) {
+  #products > * {
+    padding-bottom: 10px !important;
+  }
+
+  #products > * button {
+    box-sizing: border-box !important;
+    height: auto !important;
+    min-height: 38px !important;
+    padding: 7px 9px !important;
+    margin-top: 6px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    border-radius: 12px !important;
+  }
+
+  #products > * button.primary {
+  min-height: 42px !important;
+  padding: 9px 10px !important;
+  font-size: 19px !important;
+  font-weight: 900 !important;
+  }
+  #products > * h2,
+  #products > * h3,
+  #products > * h4 {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.25 !important;
+  }
+
+  #products > * p {
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
+  }
+}
+
+/* =========================
+   TITRES
+   ========================= */
+
+h1,
+h2,
+h3 {
+  color: var(--sng-text);
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-weight: 800;
+}
+
+h1 {
+  letter-spacing: -1px;
+}
+
+#products h3 {
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.4px;
+}
+
+#products .price,
+#products .product-price,
+#products [class*="price"] {
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}
+
+
+/* =========================
+   ÉLÉMENTS BLEU SNGAMER
+   ========================= */
+
+.sngamer-blue{
+  color:var(--sng-blue-light);
+}
+
+.sngamer-gradient{
+  background:var(--sng-gradient);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media(max-width:700px){
+
+  body{
+    overflow-x:hidden;
+  }
+
+  button{
+    min-height:44px;
+  }
+
+  input,
+  select,
+  textarea{
+    font-size:16px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — HEADER PREMIUM
+   ========================================================= */
+
+.siteHeader{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:rgba(7,9,18,.92);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(0,212,255,.15);
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+
+.siteHeader .nav{
+  min-height:76px;
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+
+/* LOGO */
+.siteHeader .logo{
+  display:flex;
+  align-items:center;
+  gap:0;
+  min-width:max-content;
+  color:#fff;
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-1px;
+  text-decoration:none;
+}
+
+.siteHeader .logo span{
+  color:#00d9ff;
+  text-shadow:
+    0 0 10px rgba(0,217,255,.55),
+    0 0 24px rgba(0,217,255,.25);
+}
+
+.siteHeader .logo small{
+  margin-left:7px;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.5px;
+  color:#fff;
+  background:linear-gradient(135deg,#7c3cff,#ff2da6);
+  box-shadow:0 0 14px rgba(255,45,166,.25);
+}
+
+/* RECHERCHE */
+.siteHeader .search{
+  position:relative;
+  flex:1;
+  max-width:560px;
+  margin-left:auto;
+}
+
+.siteHeader .searchIcon{
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#00d9ff;
+  font-size:22px;
+  line-height:1;
+  pointer-events:none;
+}
+
+.siteHeader .search input{
+  width:100%;
+  height:46px;
+  padding:0 18px 0 48px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  outline:none;
+  color:#fff;
+  background:rgba(255,255,255,.06);
+  transition:.25s ease;
+}
+
+.siteHeader .search input::placeholder{
+  color:#8f96aa;
+}
+
+.siteHeader .search input:focus{
+  border-color:#00d9ff;
+  background:rgba(255,255,255,.08);
+  box-shadow:
+    0 0 0 3px rgba(0,217,255,.10),
+    0 0 24px rgba(0,217,255,.10);
+}
+
+/* PANIER */
+.siteHeader .cartButton{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:46px;
+  padding:0 17px;
+  border:1px solid rgba(0,217,255,.35);
+  border-radius:14px;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  background:linear-gradient(
+    135deg,
+    #087cff 0%,
+    #6845ff 55%,
+    #e72b9d 100%
+  );
+  box-shadow:
+    0 8px 24px rgba(72,68,255,.25),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.siteHeader .cartButton:hover{
+  transform:translateY(-2px);
+  box-shadow:
+    0 12px 30px rgba(72,68,255,.35),
+    0 0 22px rgba(231,43,157,.18);
+}
+
+.siteHeader .cartIcon{
+  font-size:18px;
+}
+
+.siteHeader .cartButton b{
+  min-width:23px;
+  height:23px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 6px;
+  border-radius:50px;
+  color:#fff;
+  background:rgba(0,0,0,.28);
+  font-size:12px;
+}
+
+/* MOBILE */
+@media (max-width:700px){
+
+  .siteHeader .nav{
+    min-height:68px;
+    gap:10px;
+  }
+
+  .siteHeader .logo{
+    font-size:19px;
+  }
+
+  .siteHeader .logo small{
+    margin-left:4px;
+    padding:3px 5px;
+    font-size:8px;
+  }
+
+  .siteHeader .search{
+    min-width:0;
+  }
+
+  .siteHeader .search input{
+    height:42px;
+    padding-left:40px;
+    font-size:13px;
+  }
+
+  .siteHeader .searchIcon{
+    left:12px;
+    font-size:18px;
+  }
+
+  .siteHeader .cartButton{
+    width:42px;
+    min-width:42px;
+    height:42px;
+    min-height:42px;
+    padding:0;
+    gap:0;
+    border-radius:12px;
+  }
+
+  .siteHeader .cartButton > span:not(.cartIcon){
+    display:none;
+  }
+
+  .siteHeader .cartIcon{
+    font-size:17px;
+  }
+
+  .siteHeader .cartButton b{
+    position:absolute;
+    margin:-30px -30px 0 0;
+    min-width:18px;
+    height:18px;
+    padding:0 4px;
+    font-size:10px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CATÉGORIES PREMIUM
+   ========================================================= */
+
+#cats{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  overflow-x:auto;
+  padding:6px 2px 12px;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+
+#cats::-webkit-scrollbar{
+  display:none;
+}
+
+#cats button{
+  flex:0 0 auto;
+  min-height:44px;
+  padding:0 20px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  color:#cfd8e6;
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.025));
+  font-family:inherit;
+  font-size:14px;
+  font-weight:750;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:
+    transform .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+
+#cats button:hover{
+  transform:translateY(-2px);
+  color:#fff;
+  border-color:rgba(0,217,255,.45);
+  background:rgba(0,217,255,.10);
+  box-shadow:
+    0 8px 22px rgba(72,68,255,.25),
+    0 0 18px rgba(231,43,157,.10);
+}
+
+#cats button:active{
+  transform:scale(.97);
+}
+
+#cats button.on{
+  color:#fff;
+  border-color:transparent;
+  background:linear-gradient(
+    135deg,
+    #087cff 0%,
+    #6845ff 55%,
+    #e72b9d 100%
+  );
+  box-shadow:
+    0 8px 22px rgba(72,68,255,.25),
+    0 0 18px rgba(231,43,157,.10);
+}
+
+/* MOBILE */
+@media (max-width:700px){
+
+  #cats{
+    gap:9px;
+    padding-top:5px;
+    padding-bottom:14px;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  #cats button{
+    min-height:42px;
+    padding:0 16px;
+    border-radius:12px;
+    font-size:14px;
+    scroll-snap-align:start;
+  }
+
+  #cats button:active{
+    transform:scale(.96);
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS PREMIUM
+   ========================================================= */
+
+.grid{
+  gap:18px;
+}
+
+.card{
+  position:relative;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(16,27,44,.98),
+      rgba(7,12,22,.98)
+    );
+  border:1px solid rgba(58,149,255,.18);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.28);
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  border-color:rgba(22,135,255,.55);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.45),
+    0 0 25px rgba(22,135,255,.12);
+}
+
+/* IMAGE */
+.card .pic{
+  position:relative;
+  height:210px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(22,135,255,.12),
+      transparent 65%
+    ),
+    #080e18;
+}
+
+.card .pic img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:transform .35s ease;
+}
+
+.card:hover .pic img{
+  transform:scale(1.05);
+}
+
+/* CONTENU */
+.card .info{
+  padding:16px;
+}
+
+.card .cat{
+  display:inline-block;
+  margin-bottom:7px;
+  color:#39a7ff;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.card .info h3{
+  margin:5px 0 10px;
+  color:#f5f7fb;
+  font-size:18px;
+  line-height:1.3;
+  font-weight:800;
+}
+
+.card .price{
+  margin:0;
+  color:#fff;
+  font-size:21px;
+  font-weight:900;
+  letter-spacing:-.3px;
+}
+
+.card .stock{
+  margin-top:6px;
+  color:#8fa1b5;
+  font-size:12px;
+}
+
+/* BOUTON VOIR LE PRODUIT */
+.card .details{
+  width:100%;
+  margin-top:14px;
+  padding:12px 14px;
+  border:1px solid rgba(58,149,255,.22);
+  border-radius:11px;
+  color:#fff;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(22,135,255,.12),
+      rgba(124,58,237,.12)
+    );
+  font-weight:800;
+  cursor:pointer;
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.card .details:hover{
+  transform:translateY(-2px);
+  border-color:rgba(22,135,255,.55);
+  background:
+    linear-gradient(
+      135deg,
+      #1687ff,
+      #7c3aed
+    );
+  box-shadow:0 8px 24px rgba(22,135,255,.18);
+}
+
+/* MOBILE */
+@media(max-width:560px){
+
+  .grid{
+    gap:12px;
+  }
+
+  .card{
+    border-radius:15px;
+  }
+
+  .card .pic{
+    height:150px;
+  }
+
+  .card .info{
+    padding:12px;
+  }
+
+  .card .cat{
+    font-size:9px;
+  }
+
+  .card .info h3{
+    font-size:15px;
+    margin-bottom:8px;
+  }
+
+  .card .price{
+    font-size:17px;
+  }
+
+  .card .stock{
+    font-size:11px;
+  }
+
+  .card .details{
+    margin-top:11px;
+    padding:10px 8px;
+    font-size:12px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — FICHE PRODUIT PREMIUM
+   ========================================================= */
+
+#productModal{
+  padding:18px;
+  background:rgba(2,4,10,.82);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+#productModal .productBox{
+  width:min(1050px,96%);
+  max-height:92vh;
+  padding:22px;
+  overflow-y:auto;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(13,22,37,.98),
+      rgba(5,9,18,.98)
+    );
+  border:1px solid rgba(58,149,255,.28);
+  border-radius:22px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.65),
+    0 0 35px rgba(22,135,255,.10);
+}
+
+/* BOUTON FERMER */
+#productModal .x{
+  z-index:5;
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  right:16px;
+  top:14px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  color:#fff;
+  background:rgba(255,255,255,.06);
+  font-size:25px;
+  transition:.2s ease;
+}
+
+#productModal .x:hover{
+  background:linear-gradient(135deg,#1687ff,#7c3aed);
+  border-color:transparent;
+}
+
+/* STRUCTURE */
+#productModal .productDetail{
+  gap:30px;
+  align-items:start;
+}
+
+/* GALERIE */
+#productModal .productMainImage{
+  border:1px solid rgba(58,149,255,.22);
+  border-radius:18px;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(22,135,255,.12),
+      transparent 65%
+    ),
+    #080d14;
+  box-shadow:
+    inset 0 0 30px rgba(0,0,0,.25);
+}
+
+#productModal .productMainImage img{
+  transition:transform .3s ease;
+}
+
+#productModal .productMainImage:hover img{
+  transform:scale(1.025);
+}
+
+/* MINIATURES */
+#productModal .productThumbnails,
+#productModal .productThumbs{
+  gap:10px;
+  margin-top:12px;
+  padding-bottom:3px;
+}
+
+#productModal .productThumb{
+  border:2px solid rgba(255,255,255,.10);
+  border-radius:11px;
+  background:#0c1422;
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+#productModal .productThumb:hover{
+  transform:translateY(-2px);
+  border-color:#1687ff;
+  box-shadow:0 6px 18px rgba(22,135,255,.18);
+}
+
+/* INFORMATIONS */
+#productModal .productInfo{
+  padding:6px 4px;
+}
+
+#productModal .productInfo h2{
+  margin:8px 0 14px;
+  color:#fff;
+  font-size:clamp(25px,4vw,36px);
+  line-height:1.15;
+  font-weight:900;
+  letter-spacing:-.5px;
+}
+
+#productModal .productInfo .cat{
+  color:#39a7ff;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+
+#productModal .productDescription{
+  margin:18px 0;
+  padding:16px;
+  color:#b9c5d4;
+  line-height:1.7;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;
+}
+
+/* PRIX */
+#productModal .productInfo .price{
+  margin:12px 0;
+  color:#E7C77A;
+  font-size:28px;
+  font-weight:900;
+}
+
+#productModal .productInfo .stock{
+  color:#91a0b4;
+  font-size:13px;
+}
+
+#productModal .productInfo .outOfStock{
+  color:#ff5f6d;
+}
+
+/* BOUTON AJOUTER AU PANIER */
+#productModal .add,
+#productModal .productInfo button:not(.x){
+  min-height:50px;
+  margin-top:16px;
+  border:0;
+  border-radius:13px;
+  color:#fff;
+  background:
+    linear-gradient(
+      135deg,
+      #1687ff 0%,
+      #7c3aed 55%,
+      #e72b9d 100%
+    );
+  font-weight:900;
+  box-shadow:
+    0 10px 28px rgba(72,68,255,.22);
+}
+
+#productModal .add:hover,
+#productModal .productInfo button:not(.x):hover{
+  transform:translateY(-2px);
+  box-shadow:
+    0 14px 32px rgba(72,68,255,.32);
+}
+
+/* VIDÉO */
+#productModal .productVideo{
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+#productModal .productVideo h3{
+  color:#fff;
+  margin:0 0 12px;
+  font-size:18px;
+}
+
+#productModal .productVideo video{
+  width:100%;
+  max-height:360px;
+  border:1px solid rgba(58,149,255,.18);
+  border-radius:15px;
+  background:#000;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+
+/* MOBILE */
+@media(max-width:700px){
+
+  #productModal{
+    padding:10px;
+  }
+
+  #productModal .productBox{
+    width:100%;
+    max-height:94vh;
+    padding:15px;
+    border-radius:18px;
+  }
+
+  #productModal .productDetail{
+    gap:18px;
+  }
+
+  #productModal .productMainImage{
+    aspect-ratio:4/3;
+  }
+
+  #productModal .productMainImage img{
+    height:100%;
+  }
+
+  #productModal .productInfo h2{
+    font-size:24px;
+    padding-right:35px;
+  }
+
+  #productModal .productInfo .price{
+    font-size:23px;
+  }
+
+  #productModal .productDescription{
+    padding:13px;
+    font-size:14px;
+  }
+
+  #productModal .productVideo video{
+    max-height:240px;
+  }
+
+  #productModal .x{
+    width:38px;
+    height:38px;
+    right:10px;
+    top:9px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CORRECTION FICHE PRODUIT MOBILE
+   ========================================================= */
+
+#productModal{
+  align-items:flex-start;
+  padding-top:82px;
+}
+
+#productModal .productBox{
+  position:relative;
+}
+
+/* BOUTON FERMER TOUJOURS ACCESSIBLE */
+#productModal .x{
+  position:sticky !important;
+  top:0;
+  float:right;
+  z-index:50;
+  margin-bottom:-42px;
+}
+
+/* ESPACE POUR ÉVITER QUE L'IMAGE TOUCHE LE BOUTON */
+#productModal .productDetail{
+  padding-top:42px;
+}
+
+@media(max-width:700px){
+
+  #productModal{
+    padding:76px 10px 10px;
+    align-items:flex-start;
+  }
+
+  #productModal .productBox{
+    max-height:calc(100vh - 86px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+
+  #productModal .x{
+    position:sticky !important;
+    top:0;
+    float:right;
+    z-index:100;
+    margin-bottom:-38px;
+    width:38px;
+    height:38px;
+  }
+
+  #productModal .productDetail{
+    padding-top:48px;
+  }
+}
+
+/* =========================================================
+   CORRECTION — FICHE PRODUIT MOBILE
+   AFFICHAGE, ESPACE ET TYPOGRAPHIE
+   ========================================================= */
+
+#productModal {
+  z-index: 10030 !important;
+  font-family: 'Space Grotesk', Arial, sans-serif;
+}
+
+.siteHeader {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10040 !important;
+}
+
+#productModal .productBox,
+#productModal .productBox button,
+#productModal .productBox h2,
+#productModal .productBox h3,
+#productModal .productBox p,
+#productModal .productBox span {
+  font-family: 'Space Grotesk', Arial, sans-serif;
+}
+
+@media (max-width: 700px) {
+  #productModal {
+    position: fixed;
+    inset: 0;
+    padding: 76px 10px 20px;
+    align-items: flex-start;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  #productModal .productBox {
+    box-sizing: border-box;
+    width: 100%;
+    max-height: none;
+    margin-bottom: 20px;
+    padding: 15px 15px 40px;
+    overflow: visible;
+  }
+
+  #productModal .productInfo .add,
+  #productModal .productInfo button:not(.x) {
+    display: block;
+    width: 100%;
+    min-height: 54px;
+    margin-bottom: 20px;
+    font-family: 'Space Grotesk', Arial, sans-serif;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — PANIER PREMIUM
+   ========================================================= */
+
+.drawer aside{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(8,124,255,.10), transparent 35%),
+    radial-gradient(circle at 100% 100%, rgba(231,43,157,.08), transparent 35%),
+    #070d18;
+  border-left:1px solid rgba(75,140,255,.25);
+  box-shadow:-20px 0 60px rgba(0,0,0,.45);
+}
+
+.drawer .head{
+  padding:20px 22px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.drawer .head h2{
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:-.5px;
+}
+
+.drawer .head button{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  font-size:26px;
+}
+
+.cartItem{
+  margin:0 18px;
+  padding:18px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  display:grid;
+  grid-template-columns:58px 1fr auto;
+  gap:14px;
+  align-items:center;
+}
+
+.cartItem .em{
+  width:58px;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:15px;
+  background:linear-gradient(135deg,#0b1d35,#10152a);
+  border:1px solid rgba(55,130,255,.25);
+  font-size:30px;
+}
+
+.cartItem b{
+  display:block;
+  color:#fff;
+  font-size:16px;
+  line-height:1.25;
+  margin-bottom:5px;
+}
+
+.cartItem small{
+  color:#8e9bb0;
+  font-size:13px;
+}
+
+.cartItem .qty{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#fff;
+  font-weight:700;
+  font-size:15px;
+}
+
+.cartItem .qty button{
+  width:36px;
+  height:36px;
+  padding:0;
+  border-radius:10px;
+  border:1px solid rgba(65,130,255,.30);
+  background:#101d31;
+  color:#fff;
+  font-size:21px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.20);
+}
+
+.cartItem .qty button:hover{
+  background:linear-gradient(135deg,#087cff,#6845ff);
+  border-color:transparent;
+}
+
+.drawer aside h3{
+  margin:22px 20px 16px;
+  padding:18px;
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:19px;
+  color:#fff;
+}
+
+.drawer aside h3 span{
+  color:#fff;
+  font-size:21px;
+}
+
+.drawer .primary.full{
+  margin:0 20px 24px;
+  width:calc(100% - 40px);
+  min-height:58px;
+  border:0;
+  border-radius:16px;
+  font-size:18px;
+  font-weight:800;
+  background:linear-gradient(135deg,#087cff,#6845ff 55%,#e72b9d);
+  box-shadow:
+    0 8px 25px rgba(72,68,255,.25),
+    0 0 20px rgba(231,43,157,.08);
+}
+
+.drawer .primary.full:hover{
+  transform:translateY(-2px);
+  box-shadow:
+    0 12px 30px rgba(72,68,255,.35),
+    0 0 25px rgba(231,43,157,.12);
+}
+
+@media(max-width:700px){
+
+  .drawer aside{
+    width:100%;
+    max-width:none;
+  }
+
+  .cartItem{
+    margin:0 14px;
+    padding:16px 0;
+    grid-template-columns:52px 1fr auto;
+    gap:11px;
+  }
+
+  .cartItem .em{
+    width:52px;
+    height:52px;
+    font-size:27px;
+  }
+
+  .cartItem b{
+    font-size:15px;
+  }
+
+  .cartItem small{
+    font-size:12px;
+  }
+
+  .cartItem .qty{
+    gap:5px;
+  }
+
+  .cartItem .qty button{
+    width:34px;
+    height:34px;
+  }
+
+  .drawer aside h3{
+    margin:18px 14px 14px;
+    padding:16px;
+    font-size:17px;
+  }
+
+  .drawer .primary.full{
+    margin:0 14px 20px;
+    width:calc(100% - 28px);
+  }
+}
+/* MINIATURES DES PRODUITS DANS LE PANIER */
+.cartItem .em{
+  width:58px;
+  height:58px;
+  flex:0 0 58px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:15px;
+}
+
+.cartItem .em img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  border-radius:inherit;
+}
+
+@media(max-width:700px){
+  .cartItem .em{
+    width:52px;
+    height:52px;
+    flex-basis:52px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — PANIER SOUS LE HEADER
+   ========================================================= */
+
+.drawer{
+  top:76px;
+  height:calc(100% - 76px);
+}
+
+.drawer aside{
+  height:100%;
+}
+
+@media(max-width:700px){
+  .drawer{
+    top:120px;
+    height:calc(100% - 120px);
+  }
+}
+/* =========================================================
+   SNGAMER STORE — RÉSUMÉ DE COMMANDE
+   ========================================================= */
+
+#checkoutSummary{
+  margin:0 0 24px;
+  padding:20px;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(75,140,255,.20);
+  box-shadow:0 8px 30px rgba(0,0,0,.18);
+}
+
+#checkoutSummary h3{
+  margin:0 0 18px;
+  color:#fff;
+  font-size:21px;
+  font-weight:800;
+}
+
+.checkoutItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  color:#aeb9ca;
+  font-size:15px;
+}
+
+.checkoutItem span{
+  flex:1;
+}
+
+.checkoutItem b{
+  color:#fff;
+  white-space:nowrap;
+  font-size:15px;
+}
+
+.checkoutTotal{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.12);
+}
+
+.checkoutTotal span{
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+}
+
+.checkoutTotal b{
+  color:#fff;
+  font-size:21px;
+  font-weight:800;
+}
+
+@media(max-width:700px){
+  #checkoutSummary{
+    padding:16px;
+    margin-bottom:20px;
+  }
+
+  #checkoutSummary h3{
+    font-size:19px;
+  }
+
+  .checkoutItem{
+    font-size:14px;
+    gap:10px;
+  }
+
+  .checkoutItem b{
+    font-size:14px;
+  }
+
+  .checkoutTotal span{
+    font-size:17px;
+  }
+
+  .checkoutTotal b{
+    font-size:19px;
+  }
+}
+
+/* =========================================
+   SNGAMER STORE — CHECKOUT PROPRE & MOBILE
+   ========================================= */
+
+#checkout{
+  position:fixed;
+  top:76px;
+  left:0;
+  right:0;
+  height:calc(100% - 76px);
+  box-sizing:border-box;
+  padding:24px 16px 30px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  align-items:flex-start;
+  justify-content:center;
+  -webkit-overflow-scrolling:touch;
+}
+
+#checkout .box{
+  width:min(500px,100%);
+  max-height:none;
+  margin:0 auto;
+  box-sizing:border-box;
+}
+
+/* MOBILE */
+@media(max-width:700px){
+
+  #checkout{
+    top:120px;
+    height:calc(100% - 120px);
+    padding:20px 14px 30px;
+    align-items:flex-start;
+    justify-content:center;
+  }
+
+  #checkout .box{
+    width:100%;
+    max-width:100%;
+  }
+
+}
+/* =========================================================
+   SNGAMER STORE — RECHERCHE MOBILE PREMIUM
+   ========================================================= */
+
+@media (max-width:700px){
+
+  .siteHeader .nav{
+    flex-wrap:wrap;
+    row-gap:10px;
+  }
+
+  .siteHeader .logo{
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  .siteHeader .cartButton{
+    flex:0 0 42px;
+  }
+
+  .siteHeader .search{
+    order:3;
+    flex:0 0 100%;
+    width:100%;
+    max-width:none;
+    margin-left:0;
+  }
+
+  .siteHeader .search input{
+    width:100%;
+  }
+
+}
+/* ==============================
+   HERO — ZONE PROMOTION
+   ============================== */
+
+.heroVisual{
+  width:100%;
+  max-width:520px;
+  min-height:320px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  font-size:0;
+}
+
+.promoPlaceholder{
+  width:100%;
+  height:320px;
+  box-sizing:border-box;
+  border:1px solid rgba(75,140,255,.35);
+  border-radius:24px;
+  background:
+    linear-gradient(145deg, rgba(22,38,65,.95), rgba(8,14,24,.98));
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.30),
+    0 0 35px rgba(40,120,255,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.promoPlaceholder span{
+  display:block;
+  width:100%;
+  padding:20px;
+  box-sizing:border-box;
+  color:#8fa4bf;
+  font-size:18px;
+  font-weight:800;
+  line-height:1.3;
+  letter-spacing:1px;
+  text-align:center;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:700px){
+  .heroVisual{
+    width:100%;
+    max-width:none;
+    min-height:240px;
+    margin-top:20px;
+  }
+
+  .promoPlaceholder{
+    width:100%;
+    height:240px;
+    border-radius:20px;
+  }
+
+  .promoPlaceholder span{
+    font-size:16px;
+    padding:16px;
+  }
+}
+/* ==============================
+   HERO — IMAGE PROMOTIONNELLE
+   ============================== */
+
+.promoPlaceholder img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center center;
+  border-radius:inherit;
+}
+
+/* Version mobile */
+@media(max-width:700px){
+  .promoPlaceholder img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center center;
+  }
+}
+/* ==============================
+   HERO — CARROUSEL PROMOTIONNEL
+   ============================== */
+
+.promoCarousel{
+  width:100%;
+  height:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  display:flex;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+
+.promoCarousel::-webkit-scrollbar{
+  display:none;
+}
+
+.promoSlide{
+  width:100%;
+  height:100%;
+  flex:0 0 100%;
+  scroll-snap-align:center;
+  scroll-snap-stop:always;
+  overflow:hidden;
+  border-radius:inherit;
+}
+
+.promoSlide img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center center;
+  border-radius:inherit;
+}
+
+.promoDots{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:12px;
+}
+
+.promoDots button{
+  width:8px;
+  height:8px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.30);
+  cursor:pointer;
+  transition:.25s ease;
+}
+
+.promoDots button.active{
+  width:24px;
+  border-radius:10px;
+  background:linear-gradient(90deg,#2f8cff,#d62cff);
+}
+
+@media(max-width:700px){
+
+  .promoCarousel{
+    width:100%;
+    height:100%;
+  }
+
+  .promoSlide{
+    flex-basis:100%;
+  }
+
+  .promoDots{
+    margin-top:10px;
+    gap:7px;
+  }
+
+  .promoDots button{
+    width:7px;
+    height:7px;
+  }
+
+  .promoDots button.active{
+    width:21px;
+  }
+}
+/* =================================
+   HERO — FINITION DU CARROUSEL
+   ================================= */
+
+.promoCarousel{
+  border-radius:24px;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+.promoSlide{
+  border-radius:24px;
+  overflow:hidden;
+}
+
+.promoSlide img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center center;
+  border-radius:24px;
+}
+
+@media(max-width:700px){
+  .promoCarousel{
+    border-radius:20px;
+  }
+
+  .promoSlide{
+    border-radius:20px;
+  }
+
+  .promoSlide img{
+    border-radius:20px;
+  }
+}
+/* =========================================
+   HERO — CARROUSEL PROMOTIONNEL FINAL
+   ========================================= */
+
+.heroVisual{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+}
+
+.promoCarousel{
+  width:100%;
+  display:flex;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  border-radius:24px;
+}
+
+.promoCarousel::-webkit-scrollbar{
+  display:none;
+}
+
+.promoSlide{
+  flex:0 0 100%;
+  width:100%;
+  min-width:100%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  overflow:hidden;
+  border-radius:24px;
+}
+
+.promoSlide img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+}
+
+.promoDots{
+  width:100%;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:12px;
+  padding:4px 0 8px;
+  position:relative;
+  z-index:10;
+}
+
+.promoDots button{
+  display:block !important;
+  width:8px !important;
+  height:8px !important;
+  min-width:8px;
+  min-height:8px;
+  padding:0 !important;
+  margin:0;
+  border:0 !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,.35) !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  cursor:pointer;
+  transition:.25s ease;
+}
+
+.promoDots button.active{
+  width:24px !important;
+  height:8px !important;
+  min-width:24px;
+  border-radius:10px !important;
+  background:linear-gradient(
+    90deg,
+    #2f8cff,
+    #c62cff
+  ) !important;
+}
+
+@media(max-width:700px){
+
+  .heroVisual{
+    width:100%;
+  }
+
+  .promoCarousel{
+    width:100%;
+    border-radius:24px;
+  }
+
+  .promoSlide{
+    flex:0 0 100%;
+    width:100%;
+    min-width:100%;
+    border-radius:24px;
+  }
+
+  .promoSlide img{
+    width:100%;
+    height:auto;
+    border-radius:24px;
+  }
+
+  .promoDots{
+    margin-top:12px;
+    padding-bottom:10px;
+  }
+    }
+/* =========================================
+   HERO — POSITION DES INDICATEURS
+   ========================================= */
+
+.heroVisual{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.heroVisual .promoCarousel{
+  width:100%;
+}
+
+.heroVisual .promoDots{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:12px;
+}
+
+@media(max-width:700px){
+  .heroVisual .promoDots{
+    width:100%;
+    justify-content:center;
+    margin-top:12px;
+    gap:8px;
+  }
+}
+/* =========================================
+   HERO — INDICATEURS DU CARROUSEL
+   ========================================= */
+
+.heroVisual{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+}
+
+.promoCarousel{
+  width:100%;
+  display:flex;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  border-radius:24px;
+}
+
+.promoCarousel::-webkit-scrollbar{
+  display:none;
+}
+
+.promoSlide{
+  flex:0 0 100%;
+  width:100%;
+  min-width:100%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  overflow:hidden;
+  border-radius:24px;
+}
+
+.promoSlide img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+}
+
+.promoDots{
+  position:static !important;
+  left:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  width:100% !important;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin:12px 0 0;
+  padding:4px 0 8px;
+  z-index:auto;
+}
+
+.promoDots button{
+  display:block !important;
+  width:8px !important;
+  height:8px !important;
+  min-width:8px;
+  min-height:8px;
+  padding:0 !important;
+  margin:0;
+  border:0 !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,.35) !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.promoDots button.active{
+  width:24px !important;
+  min-width:24px;
+  height:8px !important;
+  border-radius:10px !important;
+  background:linear-gradient(
+    90deg,
+    #2f8cff,
+    #c62cff
+  ) !important;
+}
+
+@media(max-width:700px){
+
+  .promoCarousel{
+    width:100%;
+    border-radius:24px;
+  }
+
+  .promoSlide{
+    flex:0 0 100%;
+    width:100%;
+    min-width:100%;
+    border-radius:24px;
+  }
+
+  .promoSlide img{
+    width:100%;
+    height:auto;
+    border-radius:24px;
+  }
+
+  .promoDots{
+    position:static !important;
+    width:100% !important;
+    margin-top:12px;
+    padding-bottom:10px;
+  }
+}
+/* =========================================
+   HERO — STRUCTURE PROMOTIONNELLE PROPRE
+   ========================================= */
+
+.promoArea{
+  width:100%;
+  max-width:520px;
+  min-width:0;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start;
+  box-sizing:border-box;
+}
+
+.promoArea .promoCarousel{
+  width:100% !important;
+  max-width:520px;
+  flex:0 0 auto;
+  display:flex;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  border-radius:24px;
+}
+
+.promoArea .promoCarousel::-webkit-scrollbar{
+  display:none;
+}
+
+.promoArea .promoSlide{
+  flex:0 0 100%;
+  width:100%;
+  min-width:100%;
+  overflow:hidden;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  border-radius:24px;
+}
+
+.promoArea .promoSlide img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+}
+
+.promoArea .promoDots{
+  position:relative !important;
+  z-index:5;
+  width:100% !important;
+  max-width:520px;
+  min-height:24px;
+  flex:0 0 auto !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px;
+  margin:12px 0 0 !important;
+  padding:4px 0 8px !important;
+  box-sizing:border-box;
+  overflow:visible !important;
+}
+
+.promoArea .promoDots button{
+  display:block !important;
+  position:relative;
+  width:8px !important;
+  min-width:8px !important;
+  height:8px !important;
+  min-height:8px !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,.35) !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  box-sizing:border-box;
+}
+
+.promoArea .promoDots button.active{
+  width:24px !important;
+  min-width:24px !important;
+  height:8px !important;
+  min-height:8px !important;
+  border-radius:10px !important;
+  background:linear-gradient(
+    90deg,
+    #2f8cff,
+    #c62cff
+  ) !important;
+}
+
+@media(max-width:700px){
+
+  .promoArea .promoDots{
+    width:100% !important;
+    max-width:100%;
+    min-height:24px;
+    margin:12px 0 0 !important;
+    padding:4px 0 8px !important;
+  }
+
+}
+/* =========================================
+   HERO — VIDÉO PROMOTIONNELLE
+   ========================================= */
+
+.promoArea .promoSlide video{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+}
+/* =========================================
+   PHASE 2 — MÉDIAS PROMOTIONNELS UNIFORMES
+   Format 16:9
+   ========================================= */
+
+.promoArea .promoCarousel{
+  width:100% !important;
+  aspect-ratio:16 / 9 !important;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+.promoArea .promoSlide{
+  flex:0 0 100% !important;
+  width:100% !important;
+  min-width:100% !important;
+  height:100% !important;
+  aspect-ratio:16 / 9 !important;
+  overflow:hidden;
+  border-radius:24px;
+}
+
+.promoArea .promoSlide img,
+.promoArea .promoSlide video{
+  width:100% !important;
+  height:100% !important;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+}
+
+@media(max-width:700px){
+
+  .promoArea .promoCarousel{
+    width:100% !important;
+    max-width:100%;
+    aspect-ratio:16 / 9 !important;
+  }
+
+  .promoArea .promoSlide{
+    aspect-ratio:16 / 9 !important;
+    border-radius:20px;
+  }
+
+  .promoArea .promoSlide img,
+  .promoArea .promoSlide video{
+    border-radius:20px;
+  }
+
+}
+/* SNGAMER — Cartes produits plus compactes sur mobile */
+@media (max-width: 700px) {
+  #products .productCard,
+  #products .product-card {
+    padding-bottom: 10px !important;
+  }
+
+  #products .productCard button,
+  #products .product-card button {
+    min-height: 38px !important;
+    padding: 9px 10px !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    border-radius: 12px !important;
+  }
+
+  #products .productCard .primary,
+  #products .product-card .primary {
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+    font-size: 15px !important;
+  }
+
+  #products .productCard h3,
+  #products .product-card h3 {
+    font-size: 17px !important;
+    line-height: 1.3 !important;
+    margin: 8px 0 !important;
+  }
+
+  #products .productCard p,
+  #products .product-card p {
+    margin: 6px 0 !important;
+  }
+}
+/* SNGAMER — Animation premium des produits */
+@keyframes sngamerProductEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#products > * {
+  animation: sngamerProductEnter 420ms ease-out backwards;
+}
+
+#products > *:nth-child(2) { animation-delay: 50ms; }
+#products > *:nth-child(3) { animation-delay: 100ms; }
+#products > *:nth-child(4) { animation-delay: 150ms; }
+#products > *:nth-child(5) { animation-delay: 200ms; }
+#products > *:nth-child(6) { animation-delay: 250ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  #products > * {
+    animation: none !important;
+  }
+}
+/* SNGAMER — TYPOGRAPHIE GAMING DES PRODUITS */
+
+#products .productCard h3,
+#products .product-card h3,
+#products .productCard .product-title,
+#products .product-card .product-title {
+  font-family: "Arial Narrow", "Trebuchet MS", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.4px !important;
+  line-height: 1.3 !important;
+}
+
+#products .productCard .price,
+#products .product-card .price,
+#products .productCard .product-price,
+#products .product-card .product-price {
+  font-family: "Arial", sans-serif !important;
+  font-size: 23px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+#products .productCard .category,
+#products .product-card .category,
+#products .productCard .product-category,
+#products .product-card .product-category {
+  font-family: "Arial Narrow", "Trebuchet MS", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+}
+/* SNGAMER — TYPOGRAPHIE GAMING : RAJDHANI + ORBITRON */
+
+#products .card .info .cat {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.4px !important;
+  text-transform: uppercase !important;
+  color: #55b8ff !important;
+}
+
+#products .card .info h3 {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1.25 !important;
+  color: #f5f7ff !important;
+}
+
+#products .card .info .price,
+#products .card .info .price strong {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  font-variant-numeric: tabular-nums !important;
+  color: #E7C77A !important;
+}
+
+@media (max-width: 560px) {
+  #products .card .info .cat {
+    font-size: 10px !important;
+  }
+
+  #products .card .info h3 {
+    font-size: 18px !important;
+  }
+
+  #products .card .info .price,
+  #products .card .info .price strong {
+    font-size: 15px !important;
+  }
+}
+/* SNGAMER — NAVIGATION MOBILE PREMIUM */
+
+.mobileBottomNav {
+  background: rgba(8, 12, 24, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(85, 184, 255, 0.18);
+}
+
+.mobileBottomNav .bottomNavItem {
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.mobileBottomNav .bottomNavIcon {
+  transition: transform 0.25s ease;
+  filter: grayscale(1);
+}
+
+.mobileBottomNav .bottomNavItem.active {
+  color: #55b8ff;
+}
+
+.mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+  transform: translateY(-4px);
+}
+/* SNGAMER — BARRE MOBILE PREMIUM FIXE */
+
+.mobileBottomNav {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  gap: 2px !important;
+
+  padding: 8px 5px calc(8px + env(safe-area-inset-bottom)) !important;
+
+  background: rgba(7, 10, 18, 0.97) !important;
+  border-top: 1px solid rgba(85, 184, 255, 0.22) !important;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35) !important;
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.mobileBottomNav .bottomNavItem {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 58px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+
+  padding: 5px 2px !important;
+  margin: 0 !important;
+
+  color: #8793a8 !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+
+  font-family: "Space Grotesk", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+
+  white-space: nowrap !important;
+  box-shadow: none !important;
+
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease !important;
+}
+
+.mobileBottomNav .bottomNavIcon {
+  display: block !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+  filter: grayscale(1) !important;
+
+  transition: transform 0.25s ease !important;
+}
+
+.mobileBottomNav .bottomNavItem.active {
+  color: #55b8ff !important;
+  background: rgba(49, 148, 255, 0.10) !important;
+  border-color: rgba(85, 184, 255, 0.15) !important;
+  transform: translateY(-4px) !important;
+}
+
+.mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+  transform: translateY(-2px) !important;
+}
+
+@media (min-width: 768px) {
+  .mobileBottomNav {
+    display: none !important;
+  }
+}
+/* SNGAMER — NAVIGATION PREMIUM V2 */
+
+@media (max-width: 700px) {
+  body {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .mobileBottomNav {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: calc(78px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+
+    padding: 0 5px calc(5px + env(safe-area-inset-bottom)) !important;
+
+    overflow: visible !important;
+    background: rgba(6, 11, 22, 0.98) !important;
+    border-top: 1px solid rgba(77, 190, 255, 0.25) !important;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .mobileBottomNav .bottomNavItem {
+    position: relative !important;
+    overflow: visible !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    box-sizing: border-box !important;
+
+    display: grid !important;
+    grid-template-rows: 34px 14px !important;
+    align-content: end !important;
+    justify-items: center !important;
+    align-items: center !important;
+    gap: 4px !important;
+
+    padding: 0 1px 3px !important;
+    margin: 0 !important;
+
+    color: #8794aa !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+
+    font-family: "Space Grotesk", sans-serif !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    line-height: 14px !important;
+    white-space: nowrap !important;
+
+    transform: none !important;
+    transition: color 0.25s ease !important;
+  }
+
+  .mobileBottomNav .bottomNavIcon {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 46px !important;
+    height: 34px !important;
+
+    display: grid !important;
+    place-items: center !important;
+
+    margin: 0 !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    filter: grayscale(1) !important;
+    transform: translateY(0) !important;
+    transition: transform 0.25s ease !important;
+  }
+
+  .mobileBottomNav .bottomNavItem > span:last-child {
+    display: block !important;
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    height: 14px !important;
+    line-height: 14px !important;
+    text-align: center !important;
+    font-size: 9px !important;
+    letter-spacing: -0.2px !important;
+    white-space: nowrap !important;
+  }
+
+  .mobileBottomNav .bottomNavItem::before {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 0 !important;
+    top: -14px !important;
+    left: 50% !important;
+    width: 44px !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
+
+    border: 2px solid rgba(74, 199, 255, 0.95) !important;
+    border-radius: 50% !important;
+    background: radial-gradient(
+      circle,
+      rgba(36, 151, 220, 0.32),
+      rgba(8, 20, 39, 0.98) 72%
+    ) !important;
+
+    box-shadow:
+      0 0 10px rgba(55, 190, 255, 0.65),
+      0 0 24px rgba(55, 190, 255, 0.32),
+      inset 0 0 12px rgba(55, 190, 255, 0.2) !important;
+
+    opacity: 0 !important;
+    transform: translateX(-50%) scale(0.65) !important;
+    pointer-events: none !important;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active {
+    color: #55c9ff !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    transform: none !important;
+    text-shadow: 0 0 12px rgba(65, 190, 255, 0.25) !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active::before {
+    opacity: 1 !important;
+    transform: translateX(-50%) scale(1) !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+    transform: translateY(-8px) !important;
+  }
+}
+
+@media (min-width: 701px) {
+  .mobileBottomNav {
+    display: none !important;
+  }
+}
+/* SNGAMER — CERCLE LUMINEUX ANIMÉ */
+
+@keyframes sngamerActiveRingRotate {
+  from {
+    transform: translateX(-50%) rotate(0deg) scale(1);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg) scale(1);
+  }
+}
+
+.mobileBottomNav .bottomNavItem::before {
+  background: conic-gradient(
+    from 0deg,
+    #43d9ff,
+    #3677ff,
+    #a34dff,
+    transparent 65%,
+    transparent 82%,
+    #43d9ff
+  ) !important;
+
+  border: 2px solid rgba(67, 217, 255, 0.8) !important;
+
+  box-shadow:
+    0 0 12px rgba(67, 217, 255, 0.65),
+    0 0 26px rgba(67, 130, 255, 0.35),
+    inset 0 0 10px rgba(67, 217, 255, 0.25) !important;
+}
+
+.mobileBottomNav .bottomNavItem.active::before {
+  animation: sngamerActiveRingRotate 3s linear infinite !important;
+}
+/* SNGAMER — CERCLE UNIQUE, MOBILE PREMIUM */
+
+@keyframes sngamerMovingRingSpin {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+@media (max-width: 700px) {
+  .mobileBottomNav {
+    position: fixed !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+  }
+
+  /* Un seul cercle partagé par les cinq icônes */
+  .mobileBottomNav::before {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 0 !important;
+
+    top: 4px !important;
+    left: var(--ring-x, 10%) !important;
+    width: 44px !important;
+    height: 44px !important;
+
+    border-radius: 50% !important;
+    background: conic-gradient(
+      from 0deg,
+      #43d9ff,
+      #3677ff,
+      #a34dff,
+      transparent 75%,
+      #43d9ff
+    ) !important;
+
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 3px),
+      #000 calc(100% - 2px)
+    );
+    mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 3px),
+      #000 calc(100% - 2px)
+    );
+
+    box-shadow:
+      0 0 12px rgba(67, 217, 255, 0.7),
+      0 0 25px rgba(67, 130, 255, 0.4) !important;
+
+    opacity: 0 !important;
+    pointer-events: none !important;
+
+    transition:
+      left 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s ease !important;
+  }
+
+  .mobileBottomNav.has-active-ring::before {
+    opacity: 1 !important;
+    animation: sngamerMovingRingSpin 3s linear infinite !important;
+  }
+
+  /* Supprime les anciens cercles individuels */
+  .mobileBottomNav .bottomNavItem::before {
+    content: none !important;
+  }
+
+  .mobileBottomNav .bottomNavItem {
+    position: relative !important;
+    z-index: 1 !important;
+    transform: none !important;
+  }
+
+  .mobileBottomNav .bottomNavItem.active .bottomNavIcon {
+    transform: translateY(-8px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobileBottomNav.has-active-ring::before {
+    animation-duration: 8s !important;
+  }
+}
+/* SNGAMER — ICÔNES VECTORIELLES PREMIUM */
+.mobileBottomNav .bottomNavIcon {
+  filter: none !important;
+}
+
+.mobileBottomNav .bottomNavIcon svg {
+  display: block;
+  width: 25px;
+  height: 25px;
+  color: currentColor;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+/* SNGAMER — CARTES COINS PREMIUM */
+
+#navSubcategories {
+  gap: 16px !important;
+  margin-top: 22px !important;
+}
+
+#navSubcategories .coinCategoryIntro {
+  grid-column: 1 / -1;
+  padding: 4px 2px 8px;
+}
+
+#navSubcategories .coinCategoryEyebrow {
+  color: #58c8ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2.2px;
+}
+
+#navSubcategories .coinCategoryIntro h3 {
+  margin: 9px 0 7px;
+  color: #f5f8ff;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+#navSubcategories .coinCategoryIntro p {
+  margin: 0;
+  color: #96a8c0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#navSubcategories .coinCategoryCard {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  min-height: 94px !important;
+  box-sizing: border-box !important;
+  padding: 17px !important;
+  color: #f4f7ff !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(40,120,255,.15), transparent 55%),
+    linear-gradient(145deg, #101c2e, #080e19) !important;
+  border: 1px solid #263a57 !important;
+  border-radius: 20px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 10px 26px rgba(0,0,0,.18) !important;
+  transition: border-color .25s ease, box-shadow .25s ease,
+    transform .25s ease !important;
+}
+
+#navSubcategories .coinCategoryCard:active {
+  transform: scale(.98) !important;
+}
+
+#navSubcategories .coinCategoryIcon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 54px !important;
+  width: 54px !important;
+  height: 54px !important;
+  color: #6bcaff !important;
+  background: linear-gradient(145deg, #172f50, #101d33) !important;
+  border: 1px solid rgba(88,190,255,.22) !important;
+  border-radius: 16px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+#navSubcategories .coinCategoryIcon svg {
+  display: block !important;
+  width: 27px !important;
+  height: 27px !important;
+}
+
+#navSubcategories .coinCategoryText {
+  display: flex !important;
+  flex: 1 !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+
+#navSubcategories .coinCategoryText strong {
+  color: #f5f7ff !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.2px !important;
+}
+
+#navSubcategories .coinCategoryText small {
+  color: #91a5bf !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+#navSubcategories .coinCategoryArrow {
+  color: #58c8ff !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+}
+
+#navSubcategories .coinCategoryCard[aria-pressed="true"] {
+  border-color: #45c7ff !important;
+  box-shadow:
+    0 0 0 1px rgba(69,199,255,.2),
+    0 0 22px rgba(42,139,255,.14),
+    inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+@media (max-width: 560px) {
+  #navSubcategories .coinCategoryCard {
+    min-height: 86px !important;
+    padding: 14px !important;
+  }
+
+  #navSubcategories .coinCategoryIntro h3 {
+    font-size: 23px;
+  }
+}
+/* SNGAMER — BOUTON CHANGER DE PLATEFORME PREMIUM */
+
+#navSubcategories .coinPlatformCurrent {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 76px !important;
+  box-sizing: border-box !important;
+  padding: 14px !important;
+
+  color: #f5f7ff !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 0 0, rgba(45,140,255,.18), transparent 58%),
+    linear-gradient(145deg, #101d30, #080e19) !important;
+
+  border: 1px solid #2c4668 !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 8px 24px rgba(0,0,0,.22) !important;
+
+  font-family: "Space Grotesk", sans-serif !important;
+  transition: border-color .25s ease, box-shadow .25s ease,
+    transform .2s ease !important;
+}
+
+#navSubcategories .coinPlatformCurrent:active {
+  transform: scale(.985) !important;
+}
+
+#navSubcategories .coinPlatformCurrentIcon {
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+
+  color: #65d1ff !important;
+  background: linear-gradient(145deg, #18365a, #101c32) !important;
+  border: 1px solid rgba(85,184,255,.3) !important;
+  border-radius: 13px !important;
+  font-size: 23px !important;
+}
+
+#navSubcategories .coinPlatformCurrentText {
+  display: flex !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+#navSubcategories .coinPlatformCurrentText strong {
+  color: #f5f7ff !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+#navSubcategories .coinPlatformCurrentText small {
+  color: #91a5bf !important;
+  font-size: 11px !important;
+}
+
+#navSubcategories .coinPlatformChange {
+  color: #65d1ff !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+#navSubcategories .coinPlatformCurrent:hover {
+  border-color: #49bfff !important;
+  box-shadow:
+    0 0 0 1px rgba(73,191,255,.12),
+    0 0 24px rgba(43,130,255,.16) !important;
+}
+
+/* FENÊTRE DE CHANGEMENT DE PLATEFORME */
+
+#navSubcategories.coinPickerOpen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10020 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 18px !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.coinPickerBackdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10020 !important;
+  background: rgba(2,6,15,.78) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  pointer-events: auto !important;
+}
+
+.coinPickerDialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%,-50%) !important;
+  z-index: 10021 !important;
+
+  width: calc(100% - 36px) !important;
+  max-width: 440px !important;
+  box-sizing: border-box !important;
+  padding: 25px 18px 20px !important;
+
+  background:
+    radial-gradient(circle at 100% 0, rgba(115,65,255,.13), transparent 48%),
+    linear-gradient(145deg, #111e31, #070c16) !important;
+
+  border: 1px solid #304968 !important;
+  border-radius: 24px !important;
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.55),
+    0 0 30px rgba(49,137,255,.1) !important;
+
+  pointer-events: auto !important;
+}
+
+.coinPickerDialog h3 {
+  margin: 12px 0 8px !important;
+  color: #f5f7ff !important;
+  font-size: 23px !important;
+  font-weight: 800 !important;
+}
+
+.coinPickerDialog p {
+  margin: 0 0 20px !important;
+  color: #96a8c0 !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+
+.coinPickerDialog .coinCategoryCard {
+  margin-top: 12px !important;
+}
+
+.coinPickerClose {
+  display: grid !important;
+  place-items: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  margin: 0 0 18px auto !important;
+
+  color: #dceaff !important;
+  background: #17253a !important;
+  border: 1px solid #304968 !important;
+  border-radius: 12px !important;
+  font-size: 23px !important;
+}
+/* =====================================================
+   SNGAMER STORE — PIED DE PAGE PROFESSIONNEL
+   ===================================================== */
+
+.store-footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 42px;
+  margin-top: 60px;
+  margin-bottom: 35px;
+  padding: 30px 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(115, 48, 255, .10), transparent 32%),
+    radial-gradient(circle at 0% 100%, rgba(20, 150, 255, .10), transparent 35%),
+    #0b1422;
+  border: 1px solid #233650;
+  border-radius: 22px;
+}
+
+.store-footer-content h2 {
+  margin: 12px 0;
+  color: #f5f7ff;
+  font-size: clamp(23px, 5vw, 32px);
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.store-footer-content p {
+  color: #a5b3c7;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.store-about {
+  max-width: 760px;
+}
+
+.store-about .primary {
+  margin-top: 12px;
+  background: linear-gradient(110deg, #258cff, #7b35ee, #e32391);
+  border-radius: 12px;
+  padding: 15px 22px;
+}
+
+.store-order-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.store-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 17px;
+  background: rgba(17, 30, 49, .85);
+  border: 1px solid #233750;
+  border-radius: 15px;
+}
+
+.store-step > span {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  color: #68c9ff;
+  background: #102b47;
+  border: 1px solid #28547c;
+  border-radius: 11px;
+  font-weight: 900;
+}
+
+.store-step h3 {
+  margin: 2px 0 7px;
+  color: #f4f7ff;
+  font-size: 15px;
+}
+
+.store-step p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.store-social-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.store-social {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 15px 13px;
+  color: #f4f7ff;
+  text-decoration: none;
+  background: #101b2b;
+  border: 1px solid #293d58;
+  border-radius: 15px;
+  transition: transform .2s ease, border-color .2s ease;
+}
+
+.store-social:hover {
+  transform: translateY(-3px);
+  border-color: #43aaff;
+}
+
+.store-social-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  color: #66c8ff;
+  background: #172b43;
+  border-radius: 12px;
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.store-social > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.store-social strong {
+  font-size: 14px;
+}
+
+.store-social small {
+  color: #95a7bd;
+  font-size: 11px;
+}
+
+.store-social-arrow {
+  margin-left: auto;
+  color: #63c7ff;
+  font-size: 19px;
+}
+
+.store-social.whatsapp .store-social-icon {
+  color: #45e58a;
+}
+
+.store-social.facebook .store-social-icon {
+  color: #70a8ff;
+}
+
+.store-social.youtube .store-social-icon {
+  color: #ff6576;
+}
+
+footer {
+  padding: 28px 0 45px;
+  color: #8494aa;
+  text-align: center;
+  border-top: 1px solid #1d2b3e;
+  line-height: 1.7;
+}
+
+@media (max-width: 560px) {
+  .store-footer-content {
+    gap: 32px;
+    margin-top: 38px;
+    padding: 24px 17px;
+    border-radius: 19px;
+  }
+
+  .store-order-steps,
+  .store-social-links {
+    grid-template-columns: 1fr;
+  }
+
+  .store-step {
+    padding: 15px;
+  }
+
+  .store-social {
+    padding: 14px;
+  }
+}
+/* SNGAMER — ALIGNEMENT DES CARTES PRODUITS */
+
+#products.grid {
+  align-items: stretch;
+}
+
+#products .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#products .card .info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+#products .card .info h3 {
+  min-height: 2.6em;
+  line-height: 1.3;
+}
+
+#products .card .info > div[style*="flex-direction:column"] {
+  margin-top: auto !important;
+  padding-top: 12px;
+}
+
+@media (max-width: 560px) {
+  #products .card .info h3 {
+    min-height: 2.6em;
+  }
+}
+/* CORRECTION PANIER MOBILE — SNGAMER STORE */
+@media (max-width: 700px) {
+  .drawer {
+    top: 120px !important;
+    bottom: 90px !important;
+    height: auto !important;
+  }
+
+  .drawer aside {
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding-bottom: 20px !important;
+    box-sizing: border-box !important;
+  }
+
+  .drawer .primary.full {
+    display: block !important;
+    position: relative !important;
+    margin-bottom: 20px !important;
+    width: calc(100% - 28px) !important;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS PREMIUM V1
+   Ne modifie aucune logique JavaScript
+   ========================================================= */
+
+.card{
+  position:relative;
+  background:
+    linear-gradient(180deg,#101827 0%,#0b111b 100%) !important;
+  border:1px solid rgba(91,157,255,.16) !important;
+  border-radius:18px !important;
+  overflow:hidden;
+  box-shadow:0 8px 28px rgba(0,0,0,.25);
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+  border-color:rgba(57,167,255,.55) !important;
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.40),
+    0 0 25px rgba(22,135,255,.10);
+}
+
+/* IMAGE PRODUIT */
+
+.card .pic{
+  height:205px !important;
+  position:relative;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(42,130,255,.13),
+      transparent 55%
+    ),
+    #080e17 !important;
+  border-bottom:1px solid rgba(91,157,255,.10);
+  overflow:hidden;
+}
+
+.card .pic img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  padding:12px;
+  transition:transform .35s ease;
+}
+
+.card:hover .pic img{
+  transform:scale(1.05);
+}
+
+/* EMOJI SI AUCUNE IMAGE */
+
+.card .pic{
+  font-size:72px;
+}
+
+/* INFORMATIONS */
+
+.card .info{
+  padding:17px !important;
+}
+
+/* CATÉGORIE */
+
+.card .cat{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:5px 9px;
+  border-radius:7px;
+  background:rgba(22,135,255,.10);
+  border:1px solid rgba(22,135,255,.16);
+  color:#55aaff !important;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.1px;
+}
+
+/* NOM DU PRODUIT */
+
+.card .info h3{
+  margin:12px 0 9px !important;
+  color:#f7f9fc;
+  font-size:18px !important;
+  font-weight:700;
+  line-height:1.3;
+  min-height:47px;
+}
+
+/* PRIX */
+
+.card .price{
+  margin:8px 0 7px !important;
+  color:#ffffff;
+  font-size:21px !important;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+
+/* STOCK */
+
+.card .stock{
+  display:inline-flex;
+  align-items:center;
+  min-height:27px;
+  margin:3px 0 10px !important;
+  padding:5px 9px;
+  border-radius:7px;
+  background:rgba(67,210,137,.08);
+  border:1px solid rgba(67,210,137,.15);
+  color:#72d9a0 !important;
+  font-size:11px !important;
+  font-weight:700;
+}
+
+/* RUPTURE DE STOCK */
+
+.card .stock.outOfStock{
+  background:rgba(255,77,109,.08);
+  border-color:rgba(255,77,109,.18);
+  color:#ff7188 !important;
+}
+
+/* BOUTON ACHETER */
+
+.card .add{
+  min-height:45px;
+  border-radius:11px !important;
+  font-weight:800 !important;
+  border:1px solid rgba(71,139,255,.55) !important;
+  background:
+    linear-gradient(
+      100deg,
+      #1677ff,
+      #713cff
+    ) !important;
+  box-shadow:0 5px 18px rgba(55,115,255,.20);
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    filter .2s ease;
+}
+
+.card .add:hover:not(:disabled){
+  transform:translateY(-2px);
+  filter:brightness(1.08);
+  box-shadow:
+    0 8px 24px rgba(55,115,255,.32);
+}
+
+.card .add:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  filter:grayscale(.25);
+  box-shadow:none;
+}
+
+/* BOUTON VOIR */
+
+.card .details{
+  min-height:43px;
+  border-radius:11px !important;
+  background:#111c2b !important;
+  border:1px solid rgba(91,157,255,.18) !important;
+  color:#dce7f5 !important;
+  font-weight:700;
+}
+
+.card .details:hover{
+  background:#18283d !important;
+  border-color:rgba(91,157,255,.45) !important;
+}
+
+/* PANIER */
+
+.card .add + div .add{
+  background:#111c2b !important;
+  border:1px solid rgba(91,157,255,.18) !important;
+  box-shadow:none;
+  font-size:13px !important;
+}
+
+.card .add + div .add:hover:not(:disabled){
+  background:#18283d !important;
+  border-color:rgba(91,157,255,.45) !important;
+}
+
+/* MOBILE */
+
+@media(max-width:560px){
+
+  .card{
+    border-radius:15px !important;
+  }
+
+  .card .pic{
+    height:155px !important;
+  }
+
+  .card .pic img{
+    padding:9px;
+  }
+
+  .card .info{
+    padding:12px !important;
+  }
+
+  .card .info h3{
+    font-size:15px !important;
+    min-height:39px;
+  }
+
+  .card .price{
+    font-size:17px !important;
+  }
+
+  .card .stock{
+    font-size:10px !important;
+  }
+
+  .card .add{
+    min-height:40px;
+    font-size:14px !important;
+  }
+
+  .card .details{
+    min-height:40px;
+    font-size:12px !important;
+  }
+  }
+/* =========================================================
+   SNGAMER STORE — PRODUCT CARD PREMIUM
+   ========================================================= */
+
+#products .card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(145deg, rgba(17, 28, 45, .98), rgba(7, 13, 23, .98));
+  border: 1px solid rgba(70, 117, 180, .28);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.03);
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+#products .card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(63, 145, 255, .65);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.42),
+    0 0 24px rgba(49,148,255,.10);
+}
+
+#products .card .pic {
+  position: relative;
+  height: 190px;
+  min-height: 190px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 30%, #16263d, #080e17 72%);
+}
+
+#products .productCardImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+
+#products .card:hover .productCardImage {
+  transform: scale(1.045);
+}
+
+#products .productCardEmoji {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 76px;
+}
+
+#products .card .info {
+  display: flex;
+  flex-direction: column;
+  padding: 17px;
+}
+
+#products .card .cat {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  min-height: 25px;
+  padding: 5px 9px;
+  margin-bottom: 7px;
+  border: 1px solid rgba(71, 139, 255, .25);
+  border-radius: 999px;
+  background: rgba(49,148,255,.08);
+  color: #63a9ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+#products .card .info h3 {
+  margin: 5px 0 9px;
+  color: #f7faff;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+#products .card .price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 12px;
+  color: #f7faff;
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(22,135,255,.18);
+}
+
+#products .card .price::after {
+  content: "FCFA";
+  color: #8fa7c2;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+#products .card .price--promo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 16px 0 12px;
+}
+
+#products .card .priceOld {
+  color: #718096;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  opacity: .85;
+}
+
+#products .card .priceCurrent {
+  color: #ffd166;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  text-shadow: 0 0 14px rgba(255,209,102,.18);
+}
+
+#products .card .discountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: linear-gradient(135deg,#e91e63,#c2185b);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  box-shadow: 0 5px 14px rgba(233,30,99,.20);
+}
+
+#products .card .price--promo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 32px;
+}
+
+
+#products .card .stock {
+  margin: 1px 0 10px;
+  color: #8292a7;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#products .card .stock.outOfStock {
+  color: #ff6b6b;
+  font-weight: 800;
+}
+
+#products .productActions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 5px;
+}
+
+#products .buyButton {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(104,159,255,.65);
+  border-radius: 12px;
+  background: linear-gradient(105deg, #1677ff, #713cff);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  box-shadow: 0 7px 18px rgba(44,105,255,.20);
+  cursor: pointer;
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    opacity .16s ease;
+}
+
+#products .buyButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(65,115,255,.34);
+}
+
+#products .buyButton:active:not(:disabled) {
+  transform: scale(.985);
+}
+
+#products .buyButton:disabled,
+#products .cartButton:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#products .secondaryActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+#products .cartButton,
+#products .viewButton {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 0;
+  padding: 10px 7px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#products .cartButton {
+  background: rgba(21,36,57,.9);
+  border: 1px solid rgba(66,93,124,.7);
+}
+
+#products .cartButton:hover:not(:disabled) {
+  background: rgba(37,62,91,.95);
+  border-color: rgba(72,139,255,.65);
+}
+
+#products .viewButton {
+  background: rgba(19,29,41,.95);
+  border: 1px solid rgba(66,83,105,.75);
+  color: #f3f7fc;
+}
+
+#products .viewButton:hover {
+  background: rgba(31,48,69,.95);
+  border-color: rgba(72,139,255,.65);
+}
+
+@media(max-width:560px) {
+
+  #products .card .pic {
+    height: 90px !important;
+    min-height: 145px;
+  }
+
+  #products .card .info {
+    padding: 12px;
+  }
+
+  #products .card .cat {
+    min-height: 22px;
+    padding: 4px 7px;
+    font-size: 9px;
+  }
+
+  #products .card .info h3 {
+    font-size: 15px;
+    margin-bottom: 7px;
+  }
+
+  #products .card .price,
+  #products .card .priceCurrent {
+    font-size: 17px;
+  }
+
+  #products .card .priceOld {
+    font-size: 11px;
+  }
+
+  #products .card .stock {
+    font-size: 11px;
+  }
+
+  #products .buyButton {
+    min-height: 42px;
+    font-size: 14px;
+  }
+
+  #products .cartButton,
+  #products .viewButton {
+    min-height: 38px;
+    font-size: 12px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS COMPACTES
+   ========================================================= */
+
+#products .productCardClickable {
+  cursor: pointer;
+}
+
+#products .productCardClickable:focus-visible {
+  outline: 2px solid #3d8bff;
+  outline-offset: 2px;
+}
+
+/* IMAGE PLUS COMPACTE */
+#products .card .pic {
+  height: 115px;
+  min-height: 115px;
+}
+
+#products .productCardEmoji {
+  font-size: 55px;
+}
+
+/* INFORMATIONS PLUS COMPACTES */
+#products .card .info {
+  padding: 10px;
+}
+
+#products .card .cat {
+  min-height: 20px;
+  padding: 3px 7px;
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+
+#products .card .info h3 {
+  margin: 3px 0 5px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* PRIX */
+#products .card .price {
+  margin: 8px 0 6px;
+  font-size: 17px;
+}
+
+#products .card .priceCurrent {
+  font-size: 17px;
+}
+
+/* STOCK : PLUS DE CADRE */
+#products .card .stock {
+  margin: 2px 0 6px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #55d98b !important;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#products .card .stock.outOfStock {
+  color: #ff6b6b !important;
+}
+
+/* BOUTON + */
+#products .productCardBottom {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 3px;
+}
+
+#products .addToCartIcon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(76,145,255,.55);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1677ff, #713cff);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(44,105,255,.22);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+#products .addToCartIcon:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 18px rgba(44,105,255,.35);
+}
+
+#products .addToCartIcon:active {
+  transform: scale(.94);
+}
+
+/* MOBILE : ENCORE PLUS COMPACT */
+@media (max-width: 560px) {
+
+  #products .card .pic {
+    height: 105px;
+    min-height: 105px;
+  }
+
+  #products .card .info {
+    padding: 9px;
+  }
+
+  #products .card .cat {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+
+  #products .card .info h3 {
+    font-size: 13px;
+    line-height: 1.18;
+    margin: 3px 0 4px;
+  }
+
+  #products .card .price,
+  #products .card .priceCurrent {
+    font-size: 16px;
+  }
+
+  #products .card .price {
+    margin: 7px 0 5px;
+  }
+
+  #products .card .stock {
+    font-size: 9px;
+    margin-bottom: 5px !important;
+  }
+
+  #products .addToCartIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS COMPACTES
+   ========================================================= */
+
+.productCardClickable{
+  cursor:pointer;
+  min-width:0;
+}
+
+.productCardClickable .pic{
+  height:110px !important;
+  min-height:110px !important;
+  padding:0 !important;
+}
+
+.productCardClickable .pic img,
+.productCardImage{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.productCardEmoji{
+  font-size:48px;
+}
+
+.productCardClickable .info{
+  padding:9px !important;
+}
+
+.productCardClickable .cat{
+  font-size:8px !important;
+  line-height:1.2;
+  margin-bottom:3px;
+}
+
+.productCardClickable .info h3{
+  font-size:13px !important;
+  line-height:1.2;
+  margin:4px 0 !important;
+}
+
+.productCardClickable .price{
+  font-size:16px !important;
+  margin:5px 0 !important;
+}
+
+.productCardClickable .priceCurrent{
+  font-size:16px !important;
+}
+
+.productCardClickable .priceOld{
+  font-size:10px !important;
+}
+
+.productCardClickable .discountBadge{
+  font-size:8px !important;
+  padding:2px 4px !important;
+}
+
+/* DISPONIBLE : texte simple, sans cadre */
+.productCardClickable .stock{
+  margin:3px 0 5px !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  color:#55d98b !important;
+  font-size:9px !important;
+  font-weight:700;
+}
+
+.productCardClickable .stock.outOfStock{
+  color:#55d98b !important;
+}
+
+/* BOUTON + */
+.productCardBottom{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  margin-top:3px;
+}
+
+.addToCartIcon{
+  width:30px !important;
+  height:30px !important;
+  min-width:30px;
+  padding:0 !important;
+  margin:0 !important;
+  border-radius:50% !important;
+  border:1px solid rgba(58,149,255,.5) !important;
+  background:var(--sng-gradient) !important;
+  color:#fff !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:21px !important;
+  line-height:1 !important;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(22,135,255,.25);
+}
+
+.addToCartIcon:hover{
+  transform:scale(1.08);
+}
+
+/* MOBILE */
+@media(max-width:560px){
+
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:8px !important;
+  }
+
+  .productCardClickable .pic{
+    height:100px !important;
+    min-height:100px !important;
+  }
+
+  .productCardClickable .info{
+    padding:8px !important;
+  }
+
+  .productCardClickable .info h3{
+    font-size:12px !important;
+  }
+
+  .productCardClickable .price,
+  .productCardClickable .priceCurrent{
+    font-size:14px !important;
+  }
+
+  .productCardClickable .stock{
+    font-size:8px !important;
+  }
+
+  .addToCartIcon{
+    width:28px !important;
+    height:28px !important;
+    min-width:28px;
+    font-size:20px !important;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — PRODUITS COMPACTS FINAL
+   ========================================================= */
+
+#products .productCardClickable {
+  cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* IMAGE */
+#products .productCardClickable .pic {
+  position: relative !important;
+  height: 85px !important;
+  min-height: 85px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#products .productCardClickable .pic img,
+#products .productCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* INFORMATIONS */
+#products .productCardClickable .info {
+  padding: 4px !important;
+}
+
+#products .productCardClickable .cat {
+  font-size: 8px !important;
+  line-height: 1.1;
+  margin-bottom: 2px;
+  padding: 0 !important;
+}
+
+#products .productCardClickable .info h3 {
+  font-size: 11px !important;
+  line-height: 1.1;
+  margin: 2px 0 3px;
+}
+
+/* PRIX */
+#products .productCardClickable .price,
+#products .productCardClickable .priceCurrent {
+  font-size: 12px !important;
+  margin: 1px 0 2px !important;
+}
+
+/* STOCK : VERT, SANS CADRE */
+#products .stock,
+#products .stock.outOfStock,
+#products .stock.stock-out {
+  margin: 1px 0 2px !important;
+  padding: 0 !important;
+  color: #35d07f !important;
+  font-size: 8px !important;
+  font-weight: 700;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* BOUTON PLUS */
+#products .addToCartIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 19px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1976ff, #673cff);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow: 0 4px 10px rgba(44,105,255,.25);
+}
+
+/* ANCIENS BOUTONS SUPPRIMÉS */
+#products .cartButton,
+#products .viewButton {
+  display: none !important;
+}
+
+/* TOUTE LA CARTE EST CLIQUABLE */
+#products .productCardClickable {
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 560px) {
+
+  #products .productCardClickable .pic {
+    height: 80px !important;
+    min-height: 80px !important;
+  }
+
+  #products .productCardClickable .info {
+    padding: 6px !important;
+  }
+
+  #products .productCardClickable .info h3 {
+    font-size: 11px !important;
+    line-height: 1.15;
+  }
+
+  #products .productCardClickable .price,
+  #products .productCardClickable .priceCurrent {
+    font-size: 13px !important;
+  }
+
+  #products .stock,
+  #products .stock.outOfStock {
+    font-size: 8px !important;
+  }
+
+  #products .addToCartIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — PRODUITS COMPACTS FINAL
+   ========================================================= */
+
+#products .productCardClickable {
+  cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* IMAGE */
+#products .productCardClickable .pic {
+  position: relative !important;
+  height: 82px !important;
+  min-height: 82px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#products .productCardClickable .pic img,
+#products .productCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* INFORMATIONS */
+#products .productCardClickable .info {
+  padding: 4px !important;
+}
+
+#products .productCardClickable .cat {
+  font-size: 8px !important;
+  line-height: 1.1;
+  margin: 0 0 2px !important;
+  padding: 0 !important;
+}
+
+#products .productCardClickable .info h3 {
+  font-size: 11px !important;
+  line-height: 1.1;
+  margin: 2px 0 2px !important;
+}
+
+/* PRIX */
+#products .productCardClickable .price,
+#products .productCardClickable .priceCurrent {
+  font-size: 12px !important;
+  line-height: 1.1;
+  margin: 1px 0 2px !important;
+}
+
+/* STOCK : VERT, SANS CADRE */
+#products .stock,
+#products .stock.outOfStock,
+#products .stock.stock-out {
+  margin: 1px 0 2px !important;
+  padding: 0 !important;
+  color: #35d07f !important;
+  font-size: 8px !important;
+  line-height: 1.1;
+  font-weight: 700;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* BOUTON PLUS */
+#products .addToCartIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1976ff, #673cff);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow: 0 3px 8px rgba(44,105,255,.22);
+}
+
+/* ANCIENS BOUTONS SUPPRIMÉS */
+#products .cartButton,
+#products .viewButton {
+  display: none !important;
+}
+
+/* TOUTE LA CARTE EST CLIQUABLE */
+#products .productCardClickable {
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 560px) {
+
+  #products .productCardClickable .pic {
+    height: 78px !important;
+    min-height: 78px !important;
+  }
+
+  #products .productCardClickable .info {
+    padding: 4px !important;
+  }
+
+  #products .productCardClickable .info h3 {
+    font-size: 11px !important;
+    line-height: 1.1;
+    margin: 2px 0 !important;
+  }
+
+  #products .productCardClickable .price,
+  #products .productCardClickable .priceCurrent {
+    font-size: 12px !important;
+    margin: 1px 0 2px !important;
+  }
+
+  #products .stock,
+  #products .stock.outOfStock,
+  #products .stock.stock-out {
+    font-size: 8px !important;
+    margin: 1px 0 2px !important;
+  }
+
+  #products .addToCartIcon {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — AJUSTEMENT PRODUITS FINAL
+   ========================================================= */
+
+#products .productCardClickable {
+  width: 100%;
+  min-width: 0;
+}
+
+/* IMAGE PRODUIT */
+#products .productCardClickable .pic {
+  height: 145px !important;
+  min-height: 145px !important;
+  padding: 6px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* IMAGE PRODUIT — AJUSTEMENT PREMIUM FINAL */
+#products .productCardClickable .pic img,
+#products .productCardImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain !important;
+  object-position: center;
+  padding: 0 !important;
+  margin: 0 auto;
+  transition: transform .3s ease;
+}
+
+#products .productCardClickable:hover .productCardImage {
+  transform: scale(1.04);
+}
+
+/* AGRANDISSEMENT AU SURVOL */
+#products .productCardClickable:hover .productCardImage {
+  transform: scale(1.04);
+}
+
+
+/* INFORMATIONS : on les descend naturellement sous l'image */
+#products .productCardClickable .info {
+  padding: 10px !important;
+}
+
+#products .productCardClickable .cat {
+  font-size: 9px !important;
+  margin-bottom: 5px !important;
+  padding: 3px 7px !important;
+}
+
+#products .productCardClickable .info h3 {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  margin: 4px 0 6px !important;
+}
+
+#products .productCardClickable .price,
+#products .productCardClickable .priceCurrent {
+  font-size: 16px !important;
+  margin: 5px 0 !important;
+}
+
+#products .productCardClickable .stock {
+  font-size: 9px !important;
+  margin: 3px 0 5px !important;
+}
+
+/* MOBILE */
+@media (max-width: 560px) {
+
+  #products .grid,
+  #products .products-grid,
+  #products .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  #products .productCardClickable .pic {
+    height: 140px !important;
+    min-height: 140px !important;
+  }
+
+  #products .productCardClickable .info {
+    padding: 9px !important;
+  }
+
+  #products .productCardClickable .cat {
+    font-size: 8px !important;
+  }
+
+  #products .productCardClickable .info h3 {
+    font-size: 13px !important;
+  }
+
+  #products .productCardClickable .price,
+  #products .productCardClickable .priceCurrent {
+    font-size: 15px !important;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — ANIMATION PREMIUM FICHE PRODUIT
+   ========================================================= */
+
+/* ANIMATION DE LA FENÊTRE */
+#productModal .productBox {
+  opacity: 0;
+  transform: translateY(18px) scale(.96);
+  transition:
+    opacity .24s ease,
+    transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* OUVERTURE */
+#productModal.show .productBox {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* FERMETURE ET CONFORT */
+@media (prefers-reduced-motion: reduce) {
+  #productModal .productBox {
+    transition: none;
+  }
+}
+/* =========================================================
+   ANIMATION PREMIUM — OUVERTURE FICHE PRODUIT
+========================================================= */
+
+#productModal .productBox {
+  opacity: 0;
+  transform: translateY(20px) scale(.96);
+  transition:
+    opacity .22s ease,
+    transform .30s cubic-bezier(.2,.8,.2,1);
+}
+
+#productModal.show .productBox {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+#productModal .shade {
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+
+#productModal.show .shade {
+  opacity: 1;
+}
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS : IMAGE + PRIX PREMIUM
+   ========================================================= */
+
+#products .card .pic {
+  height: 210px;
+  padding: 12px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(58,149,255,.16);
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(22,135,255,.14),
+      transparent 68%
+    ),
+    #080e18;
+}
+
+#products .card .pic img,
+#products .productCardImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 8px 22px rgba(0,0,0,.16);
+}
+
+#products .card:hover .pic img {
+  transform: scale(1.025);
+}
+
+/* PRIX PROMOTIONNEL */
+#products .price--promo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+#products .pricePromoTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+#products .priceOld {
+  color: #7f8b9d;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+#products .discountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 7px;
+  color: #fff;
+  background: linear-gradient(135deg,#e72b9d,#ff3d71);
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 5px 14px rgba(231,43,157,.20);
+}
+
+#products .priceCurrent {
+  display: block;
+  margin-top: 1px;
+  color: #f3d477;
+  font-size: 25px;
+  line-height: 1.15;
+  font-weight: 950;
+  letter-spacing: -.5px;
+}
+
+#products .priceCurrent small {
+  color: #aeb9ca;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+
+#products .price--regular .priceCurrent {
+  margin-top: 8px;
+}
+
+/* MOBILE */
+@media(max-width:560px) {
+  #products .card .pic {
+    height: 150px;
+    padding: 9px;
+  }
+
+  #products .card .pic img,
+  #products .productCardImage {
+    border-radius: 10px;
+  }
+
+  #products .price--promo {
+    margin-top: 10px;
+  }
+
+  #products .priceOld {
+    font-size: 11px;
+  }
+
+  #products .discountBadge {
+    min-height: 21px;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+
+  #products .priceCurrent {
+    font-size: 21px;
+  }
+
+  #products .priceCurrent small {
+    font-size: 10px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CORRECTION FINALE CARTES PRODUITS
+   Images 4:3 + prix + boutons parfaitement alignés
+   ========================================================= */
+
+/* Carte : hauteur cohérente */
+#products .card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Image exactement compatible avec le recadrage admin 4:3 */
+#products .card .pic {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  padding: 0;
+  overflow: hidden;
+  display: block;
+  background: #080d14;
+  border-bottom: 1px solid rgba(58,149,255,.16);
+}
+
+/* L'image recadrée remplit exactement son cadre */
+#products .card .pic img,
+#products .card .productCardImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0;
+}
+
+/* Empêche le zoom de casser le cadre */
+#products .card:hover .pic img {
+  transform: scale(1.025);
+}
+
+/* Contenu de la carte */
+#products .card .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nom */
+#products .card .info h3 {
+  min-height: 42px;
+}
+
+/* Prix */
+#products .card .price {
+  min-height: 64px;
+}
+
+/* Supprime le FCFA ajouté automatiquement par l'ancien CSS */
+#products .card .price::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Prix promotionnel */
+#products .card .price--promo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  margin-top: 8px;
+}
+
+#products .card .pricePromoTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#products .card .priceOld {
+  color: #7f8b9d;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: line-through;
+}
+
+#products .card .discountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 7px;
+  background: linear-gradient(135deg,#e72b9d,#ff3d71);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+#products .card .priceCurrent {
+  display: block;
+  color: #f3d477;
+  font-size: 25px;
+  line-height: 1.1;
+  font-weight: 950;
+}
+
+#products .card .priceCurrent small {
+  color: #aeb9ca;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* Stock */
+#products .card .stock {
+  min-height: 20px;
+}
+
+/* Bouton + toujours en bas et parfaitement aligné */
+#products .card .productCardBottom {
+  margin-top: auto;
+  min-height: 54px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+/* Bouton panier */
+#products .card .addToCartIcon {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg,#1687ff,#7c3aed 55%,#e91e63);
+  color: #fff;
+  font-size: 29px;
+  line-height: 1;
+  box-shadow: 0 8px 24px rgba(22,135,255,.22);
+}
+
+/* Mobile */
+@media(max-width:560px) {
+
+  #products .card .pic {
+    aspect-ratio: 4 / 3;
+  }
+
+  #products .card .info h3 {
+    min-height: 38px;
+    font-size: 15px;
+  }
+
+  #products .card .priceCurrent {
+    font-size: 22px;
+  }
+
+  #products .card .price {
+    min-height: 60px;
+  }
+
+  #products .card .productCardBottom {
+    min-height: 52px;
+  }
+
+  #products .card .addToCartIcon {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    border-radius: 15px;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CADRES IMAGES + BOUTONS ALIGNÉS
+   ========================================================= */
+
+#products .card.productCardClickable{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  overflow:hidden;
+}
+
+/* CADRE IMAGE 4:3 — exactement comme le recadrage admin */
+#products .card.productCardClickable > .pic{
+  width:100%;
+  aspect-ratio:4 / 3;
+  height:auto;
+  min-height:0;
+  padding:0;
+  margin:0;
+  display:block;
+  position:relative;
+  overflow:hidden;
+
+  background:#080d14;
+
+  /* coins arrondis propres, pas excessifs */
+  border-radius:15px 15px 0 0;
+
+  border-bottom:1px solid rgba(58,149,255,.16);
+}
+
+/* IMAGE : reste entièrement dans son cadre */
+#products .card.productCardClickable > .pic .productCardImage{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+
+  margin:0;
+  padding:0;
+
+  object-fit:cover;
+  object-position:center;
+
+  border:0;
+  border-radius:0;
+
+  box-shadow:none;
+
+  transition:transform .3s ease;
+}
+
+/* Petit effet premium sans débordement */
+#products .card.productCardClickable:hover > .pic .productCardImage{
+  transform:scale(1.025);
+}
+
+/* Le contenu de toutes les cartes occupe la même structure */
+#products .card.productCardClickable > .info{
+  flex:1 1 auto;
+  min-height:0;
+
+  display:flex;
+  flex-direction:column;
+}
+
+/* Hauteur régulière pour les noms */
+#products .card.productCardClickable > .info > h3{
+  min-height:2.5em;
+}
+
+/* Stock */
+#products .card.productCardClickable > .info > .stock{
+  min-height:20px;
+}
+
+/* BOUTON PANIER : TOUJOURS À DROITE ET EN BAS */
+#products .card.productCardClickable .productCardBottom{
+  margin-top:auto;
+
+  min-height:58px;
+  width:100%;
+
+  display:flex;
+  justify-content:flex-end;
+  align-items:flex-end;
+
+  padding-top:10px;
+}
+
+/* Taille uniforme des boutons */
+#products .card.productCardClickable .addToCartIcon{
+  width:52px;
+  height:52px;
+
+  min-width:52px;
+  min-height:52px;
+
+  margin:0;
+  padding:0;
+
+  flex:0 0 52px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:0;
+  border-radius:16px;
+
+  background:linear-gradient(
+    135deg,
+    #1687ff 0%,
+    #7c3aed 55%,
+    #e91e63 100%
+  );
+
+  color:#fff;
+  font-size:29px;
+  line-height:1;
+
+  box-shadow:0 8px 24px rgba(22,135,255,.22);
+}
+
+/* Supprime définitivement tout FCFA ajouté par CSS */
+#products .card.productCardClickable .price::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* FCFA du prix correctement dimensionné */
+#products .card.productCardClickable .priceCurrent small{
+  margin-left:7px;
+  color:#aeb9ca;
+  font-size:12px;
+  font-weight:800;
+}
+
+@media(max-width:560px){
+
+  #products .card.productCardClickable > .pic{
+    aspect-ratio:4 / 3;
+    border-radius:14px 14px 0 0;
+  }
+
+  #products .card.productCardClickable .productCardBottom{
+    min-height:54px;
+  }
+
+  #products .card.productCardClickable .addToCartIcon{
+    width:48px;
+    height:48px;
+
+    min-width:48px;
+    min-height:48px;
+
+    flex-basis:48px;
+
+    border-radius:15px;
+    font-size:27px;
+  }
+}
+/* =========================================================
+   IMAGE PRODUIT — FORMAT PLEINE ZONE
+   ========================================================= */
+
+#products .card .pic {
+  position: relative !important;
+  width: 100% !important;
+  height: 220px !important;
+  min-height: 220px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  overflow: hidden !important;
+
+  display: block !important;
+
+  background: #0b111b !important;
+
+  border-radius: 15px 15px 0 0 !important;
+}
+
+#products .card .pic .productCardImage,
+#products .card .pic img {
+  display: block !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: none !important;
+  max-height: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  border: 0 !important;
+
+  border-radius: 15px 15px 0 0 !important;
+
+  transform: none;
+}
+
+/* Petit zoom premium uniquement au survol */
+#products .card:hover .pic .productCardImage,
+#products .card:hover .pic img {
+  transform: scale(1.025) !important;
+}
+
+/* Mobile */
+@media (max-width: 560px) {
+  #products .card .pic {
+    height: 175px !important;
+    min-height: 175px !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+
+  #products .card .pic .productCardImage,
+  #products .card .pic img {
+    border-radius: 14px 14px 0 0 !important;
+  }
+}
+
+
+/* ================================
+   IMAGE PRINCIPALE PRODUIT
+   CADRE PLEIN + BORDURES ARRONDIES
+   ================================ */
+
+#products .card .pic {
+    width: 100%;
+    height: 240px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    background: #080d14;
+    border-radius: 18px 18px 0 0;
+}
+
+/* L'image remplit entièrement le cadre */
+#products .card .pic img,
+#products .card .pic .productCardImage {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    max-height: none;
+
+    object-fit: cover;
+    object-position: center;
+
+    border: 0;
+    border-radius: 18px 18px 0 0;
+
+    transform: none;
+    transition: transform 0.25s ease;
+}
+
+/* Petit effet premium au survol */
+#products .card:hover .pic img,
+#products .card:hover .pic .productCardImage {
+    transform: scale(1.02);
+}
+
+/* ================================
+   VERSION MOBILE
+   ================================ */
+
+@media (max-width: 560px) {
+
+    #products .card .pic {
+        height: 175px;
+        border-radius: 14px 14px 0 0;
+    }
+
+    #products .card .pic img,
+    #products .card .pic .productCardImage {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 14px 14px 0 0;
+    }
+}
+/* =========================================================
+   SNGAMER STORE — CARTES PRODUITS PREMIUM
+   ========================================================= */
+
+#products .card.productCardClickable{
+  display:flex !important;
+  flex-direction:column !important;
+  height:100% !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+
+#products .card.productCardClickable > .pic{
+  width:100% !important;
+  height:220px !important;
+  min-height:220px !important;
+  flex:0 0 220px !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  border-radius:16px 16px 0 0 !important;
+}
+
+#products .card.productCardClickable > .pic img,
+#products .card.productCardClickable > .pic .productCardImage{
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border:0 !important;
+  border-radius:16px 16px 0 0 !important;
+}
+
+/* Structure : catégorie / nom / stock / prix + bouton */
+#products .card.productCardClickable > .info{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+
+  grid-template-areas:
+    "cat cat"
+    "title title"
+    "stock stock"
+    "price action" !important;
+
+  grid-template-rows:auto auto auto 1fr !important;
+
+  column-gap:12px !important;
+  row-gap:0 !important;
+
+  flex:1 1 auto !important;
+  min-height:190px !important;
+
+  padding:14px 16px 16px !important;
+}
+
+#products .card.productCardClickable > .info > .cat{
+  grid-area:cat !important;
+  margin:0 0 7px !important;
+
+  font-size:10px !important;
+  line-height:1.2 !important;
+  letter-spacing:1.2px !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+#products .card.productCardClickable > .info > h3{
+  grid-area:title !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  font-size:17px !important;
+  line-height:1.25 !important;
+  font-weight:800 !important;
+
+  min-height:43px !important;
+
+  display:-webkit-box !important;
+  -webkit-box-orient:vertical !important;
+  -webkit-line-clamp:2 !important;
+  overflow:hidden !important;
+}
+
+/* DISPONIBILITÉ : juste après le nom */
+#products .card.productCardClickable > .info > .stock{
+  grid-area:stock !important;
+
+  margin:8px 0 0 !important;
+  min-height:18px !important;
+
+  font-size:12px !important;
+  line-height:1.35 !important;
+  font-weight:700 !important;
+}
+
+#products .card.productCardClickable > .info > .stock:not(.outOfStock){
+  color:#55d98b !important;
+}
+
+#products .card.productCardClickable > .info > .stock.outOfStock{
+  color:#ff626c !important;
+}
+
+/* PRIX : TOUJOURS EN BAS */
+#products .card.productCardClickable > .info > .price{
+  grid-area:price !important;
+
+  align-self:end !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  min-width:0 !important;
+
+  font-size:21px !important;
+  line-height:1.05 !important;
+  font-weight:900 !important;
+}
+
+#products .card.productCardClickable .priceCurrent{
+  display:inline-flex !important;
+  align-items:baseline !important;
+
+  gap:7px !important;
+
+  margin:0 !important;
+
+  font-size:21px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+
+  color:#f4c95d !important;
+
+  white-space:nowrap !important;
+}
+
+#products .card.productCardClickable .priceCurrent small{
+  margin:0 !important;
+
+  color:#aeb9ca !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+}
+
+/* PROMOTION */
+#products .card.productCardClickable .price--promo{
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:flex-end !important;
+
+  gap:5px !important;
+}
+
+#products .card.productCardClickable .pricePromoTop{
+  display:flex !important;
+  align-items:center !important;
+
+  gap:7px !important;
+}
+
+#products .card.productCardClickable .priceOld{
+  color:#7f8da2 !important;
+
+  font-size:11px !important;
+  font-weight:700 !important;
+
+  text-decoration:line-through !important;
+  white-space:nowrap !important;
+}
+
+#products .card.productCardClickable .discountBadge{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  padding:3px 6px !important;
+
+  border-radius:6px !important;
+
+  background:rgba(233,30,99,.14) !important;
+  color:#ff6b8b !important;
+
+  font-size:9px !important;
+  font-weight:900 !important;
+}
+
+/* BOUTON + : même ligne que le prix */
+#products .card.productCardClickable > .info > .productCardBottom{
+  grid-area:action !important;
+
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:flex-end !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  align-self:end !important;
+}
+
+#products .card.productCardClickable .addToCartIcon{
+  width:48px !important;
+  height:48px !important;
+
+  min-width:48px !important;
+  min-height:48px !important;
+
+  padding:0 !important;
+  margin:0 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border:1px solid rgba(96,165,250,.28) !important;
+  border-radius:15px !important;
+
+  background:linear-gradient(
+    135deg,
+    #2563eb,
+    #9333ea
+  ) !important;
+
+  color:#fff !important;
+
+  font-size:26px !important;
+  line-height:1 !important;
+
+  box-shadow:0 7px 18px rgba(37,99,235,.22) !important;
+}
+
+/* MOBILE */
+@media (max-width:560px){
+
+  #products .card.productCardClickable > .pic{
+    height:155px !important;
+min-height:155px !important;
+flex-basis:155px !important;
+
+    border-radius:14px 14px 0 0 !important;
+  }
+
+  #products .card.productCardClickable > .pic img,
+  #products .card.productCardClickable > .pic .productCardImage{
+    border-radius:14px 14px 0 0 !important;
+  }
+
+  #products .card.productCardClickable > .info{
+    min-height:145px !important;
+
+    padding:12px 12px 13px !important;
+
+    column-gap:9px !important;
+  }
+
+  #products .card.productCardClickable > .info > .cat{
+    font-size:9px !important;
+  }
+
+  #products .card.productCardClickable > .info > h3{
+    font-size:15px !important;
+    line-height:1.22 !important;
+    min-height:37px !important;
+  }
+
+  #products .card.productCardClickable > .info > .stock{
+    font-size:11px !important;
+  }
+
+  #products .card.productCardClickable > .info > .price,
+  #products .card.productCardClickable .priceCurrent{
+    font-size:17px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small{
+    font-size:10px !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon{
+    width:44px !important;
+height:44px !important;
+
+min-width:44px !important;
+min-height:44px !important;
+
+    border-radius:14px !important;
+    font-size:25px !important;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CARTES COMPACTES ET ALIGNÉES
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  /* Toutes les cartes conservent une structure uniforme */
+  #products.grid {
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  #products .card.productCardClickable {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    height: 100% !important;
+  }
+
+  /* IMAGE : hauteur réduite et identique */
+  #products .card.productCardClickable > .pic {
+    height: 155px !important;
+    min-height: 155px !important;
+    flex: 0 0 155px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+
+  #products .card.productCardClickable > .pic img,
+  #products .card.productCardClickable > .pic .productCardImage {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: inherit !important;
+  }
+
+  /* ESPACE INFORMATIONS */
+  #products .card.productCardClickable > .info {
+    display: grid !important;
+
+    grid-template-columns: minmax(0, 1fr) 40px !important;
+
+    grid-template-areas:
+      "cat cat"
+      "title title"
+      "stock stock"
+      "price action" !important;
+
+    grid-template-rows: auto auto auto 1fr !important;
+
+    flex: 1 1 auto !important;
+    min-height: 140px !important;
+
+    padding: 10px !important;
+    column-gap: 7px !important;
+    row-gap: 0 !important;
+  }
+
+  /* CATÉGORIE : cadre adapté à la longueur du texte */
+  #products .card.productCardClickable > .info > .cat {
+    grid-area: cat !important;
+
+    display: inline-block !important;
+    justify-self: start !important;
+
+    width: max-content !important;
+    max-width: 100% !important;
+
+    margin: 0 0 6px !important;
+    padding: 5px 9px !important;
+
+    font-size: 9px !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0.6px !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+
+    border-radius: 999px !important;
+  }
+
+  /* NOM : deux lignes maximum */
+  #products .card.productCardClickable > .info > h3 {
+    grid-area: title !important;
+
+    min-width: 0 !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* DISPONIBILITÉ : toujours après le nom */
+  #products .card.productCardClickable > .info > .stock {
+    grid-area: stock !important;
+
+    display: block !important;
+
+    min-height: 16px !important;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+  }
+
+  /* PRIX : zone basse de la carte */
+  #products .card.productCardClickable > .info > .price {
+    grid-area: price !important;
+
+    align-self: end !important;
+
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 15px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Les deux prix restent empilés en promotion */
+  #products .card.productCardClickable .price--regular,
+  #products .card.productCardClickable .price--promo {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+
+  /* Ancien prix barré et réduction */
+  #products .card.productCardClickable .pricePromoTop {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px 5px !important;
+  }
+
+  #products .card.productCardClickable .priceOld {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  #products .card.productCardClickable .discountBadge {
+    padding: 2px 5px !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Prix actuel, bien visible */
+  #products .card.productCardClickable .priceCurrent {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+
+    font-size: clamp(13px, 3.8vw, 16px) !important;
+    line-height: 1.05 !important;
+
+    white-space: nowrap !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small {
+    font-size: 9px !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* BOUTON + : petit, aligné à droite */
+  #products .card.productCardClickable > .info > .productCardBottom {
+    grid-area: action !important;
+
+    align-self: end !important;
+    justify-self: end !important;
+
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+
+    width: 40px !important;
+    min-width: 40px !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon {
+    width: 38px !important;
+    height: 38px !important;
+
+    min-width: 38px !important;
+    min-height: 38px !important;
+
+    flex: 0 0 38px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 11px !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — PRODUCT CARDS FINAL
+   STRUCTURE UNIFORME + MOBILE COMPACT
+   ========================================================= */
+
+/* CARTE */
+#products .card.productCardClickable {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 390px !important;
+  min-height: 390px !important;
+  overflow: hidden !important;
+}
+
+/* IMAGE */
+#products .card.productCardClickable > .pic {
+  width: 100% !important;
+  height: 210px !important;
+  min-height: 210px !important;
+  flex: 0 0 210px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  background: #080d14 !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+#products .card.productCardClickable > .pic img,
+#products .card.productCardClickable > .pic .productCardImage {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* CONTENU */
+#products .card.productCardClickable > .info {
+  position: relative !important;
+
+  display: grid !important;
+
+  grid-template-columns: minmax(0, 1fr) 46px !important;
+
+  grid-template-areas:
+    "cat cat"
+    "title title"
+    "stock stock"
+    "price action" !important;
+
+  grid-template-rows:
+    auto
+    auto
+    auto
+    1fr !important;
+
+  flex: 1 1 auto !important;
+
+  min-height: 180px !important;
+
+  padding: 11px 12px 12px !important;
+
+  column-gap: 8px !important;
+  row-gap: 0 !important;
+}
+
+/* CATÉGORIE
+   Le cadre épouse automatiquement le texte */
+#products .card.productCardClickable > .info > .cat {
+  grid-area: cat !important;
+
+  display: inline-flex !important;
+
+  justify-self: start !important;
+  align-self: start !important;
+
+  width: max-content !important;
+  max-width: 100% !important;
+
+  min-height: 0 !important;
+
+  margin: 0 0 5px !important;
+
+  padding: 4px 9px !important;
+
+  border-radius: 999px !important;
+
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+  letter-spacing: .7px !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* NOM DU PRODUIT */
+#products .card.productCardClickable > .info > h3 {
+  grid-area: title !important;
+
+  min-width: 0 !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+
+  overflow: hidden !important;
+}
+
+/* STOCK
+   TOUJOURS juste après le nom */
+#products .card.productCardClickable > .info > .stock {
+  grid-area: stock !important;
+
+  display: block !important;
+
+  min-height: 16px !important;
+
+  margin: 5px 0 0 !important;
+  padding: 0 !important;
+
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#products .card.productCardClickable > .info > .stock:not(.outOfStock) {
+  color: #55d98b !important;
+}
+
+#products .card.productCardClickable > .info > .stock.outOfStock {
+  color: #ff626c !important;
+}
+
+/* PRIX
+   TOUJOURS EN BAS À GAUCHE */
+#products .card.productCardClickable > .info > .price {
+  grid-area: price !important;
+
+  align-self: end !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+
+  font-size: 19px !important;
+  line-height: 1 !important;
+}
+
+/* PRIX NORMAL */
+#products .card.productCardClickable .price--regular {
+  min-height: 30px !important;
+}
+
+/* PRIX PROMOTIONNEL */
+#products .card.productCardClickable .price--promo {
+  min-height: 54px !important;
+  gap: 4px !important;
+}
+
+/* ANCIEN PRIX + RÉDUCTION */
+#products .card.productCardClickable .pricePromoTop {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-height: 18px !important;
+}
+
+#products .card.productCardClickable .priceOld {
+  color: #7f8da2 !important;
+
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+
+  text-decoration: line-through !important;
+
+  white-space: nowrap !important;
+}
+
+#products .card.productCardClickable .discountBadge {
+  min-height: 20px !important;
+
+  padding: 2px 6px !important;
+
+  border-radius: 6px !important;
+
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+/* PRIX ACTUEL */
+#products .card.productCardClickable .priceCurrent {
+  display: inline-flex !important;
+  align-items: baseline !important;
+
+  gap: 5px !important;
+
+  margin: 0 !important;
+
+  color: #f4c95d !important;
+
+  font-size: 19px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+}
+
+#products .card.productCardClickable .priceCurrent small {
+  margin: 0 !important;
+
+  color: #aeb9ca !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+/* BOUTON +
+   MÊME NIVEAU QUE LE PRIX */
+#products .card.productCardClickable > .info > .productCardBottom {
+  grid-area: action !important;
+
+  align-self: end !important;
+  justify-self: end !important;
+
+  width: 38px !important;
+  min-width: 38px !important;
+
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+}
+
+/* BOUTON + PETIT */
+#products .card.productCardClickable .addToCartIcon {
+  width: 38px !important;
+  height: 38px !important;
+
+  min-width: 38px !important;
+  min-height: 38px !important;
+
+  flex: 0 0 38px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border-radius: 11px !important;
+
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  #products.grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 10px !important;
+
+    align-items: stretch !important;
+  }
+
+  /* TOUTES LES CARTES : MÊME TAILLE */
+  #products .card.productCardClickable {
+    height: 320px !important;
+    min-height: 320px !important;
+  }
+
+  /* IMAGE PLUS PETITE */
+  #products .card.productCardClickable > .pic {
+    height: 140px !important;
+    min-height: 140px !important;
+    flex-basis: 140px !important;
+
+    border-radius:
+      14px 14px 0 0 !important;
+  }
+
+  /* CONTENU */
+  #products .card.productCardClickable > .info {
+    min-height: 180px !important;
+
+    padding: 10px !important;
+
+    grid-template-columns:
+      minmax(0, 1fr) 40px !important;
+  }
+
+  /* CATÉGORIE */
+  #products .card.productCardClickable > .info > .cat {
+    margin-bottom: 5px !important;
+
+    padding: 4px 8px !important;
+
+    font-size: 8px !important;
+  }
+
+  /* NOM */
+  #products .card.productCardClickable > .info > h3 {
+    font-size: 14px !important;
+
+    min-height: 34px !important;
+    max-height: 34px !important;
+  }
+
+  /* STOCK */
+  #products .card.productCardClickable > .info > .stock {
+    font-size: 10px !important;
+
+    margin-top: 5px !important;
+  }
+
+  /* PROMOTION */
+  #products .card.productCardClickable .price--promo {
+    min-height: 50px !important;
+  }
+
+  #products .card.productCardClickable .priceOld {
+    font-size: 9px !important;
+  }
+
+  #products .card.productCardClickable .discountBadge {
+    min-height: 18px !important;
+
+    padding: 2px 5px !important;
+
+    font-size: 8px !important;
+  }
+
+  /* PRIX ACTUEL */
+  #products .card.productCardClickable .priceCurrent {
+    font-size: 17px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small {
+    font-size: 9px !important;
+  }
+
+  /* BOUTON + */
+  #products .card.productCardClickable .addToCartIcon {
+    width: 36px !important;
+    height: 36px !important;
+
+    min-width: 36px !important;
+    min-height: 36px !important;
+
+    flex-basis: 36px !important;
+
+    border-radius: 10px !important;
+
+    font-size: 21px !important;
+  }
+  }
+/* =========================================================
+   SNGAMER STORE — PRODUCT CARDS FINAL V3
+   Structure uniforme sur toutes les lignes
+   ========================================================= */
+
+#products.grid{
+  align-items:stretch !important;
+}
+
+/* =========================
+   CARTE PRODUIT
+   ========================= */
+
+#products .card.productCardClickable{
+  display:flex !important;
+  flex-direction:column !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:470px !important;
+  min-height:470px !important;
+  max-height:470px !important;
+  overflow:hidden !important;
+}
+
+/* =========================
+   IMAGE
+   ========================= */
+
+#products .card.productCardClickable > .pic{
+  width:100% !important;
+  height:175px !important;
+  min-height:175px !important;
+  max-height:175px !important;
+  flex:0 0 175px !important;
+  padding:0 !important;
+  margin:0 !important;
+  overflow:hidden !important;
+  display:block !important;
+  background:#080d14 !important;
+  border-radius:15px 15px 0 0 !important;
+}
+
+#products .card.productCardClickable > .pic img,
+#products .card.productCardClickable > .pic .productCardImage{
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  border-radius:0 !important;
+}
+
+/* =========================
+   STRUCTURE INTERNE
+   ========================= */
+
+#products .card.productCardClickable > .info{
+  display:grid !important;
+
+  grid-template-columns:minmax(0,1fr) 42px !important;
+
+  grid-template-areas:
+    "cat cat"
+    "title title"
+    "stock stock"
+    "price action" !important;
+
+  grid-template-rows:auto auto auto 1fr !important;
+
+  flex:1 1 auto !important;
+  min-height:0 !important;
+
+  padding:11px 12px 12px !important;
+
+  column-gap:8px !important;
+  row-gap:0 !important;
+}
+
+/* =========================
+   CATÉGORIE
+   Le cadre épouse le texte
+   ========================= */
+
+#products .card.productCardClickable > .info > .cat{
+  grid-area:cat !important;
+
+  display:inline-flex !important;
+  align-items:center !important;
+
+  justify-self:start !important;
+  align-self:start !important;
+
+  width:max-content !important;
+  max-width:100% !important;
+  min-width:0 !important;
+
+  min-height:0 !important;
+
+  margin:0 0 6px !important;
+  padding:4px 8px !important;
+
+  border-radius:999px !important;
+
+  font-size:9px !important;
+  line-height:1.1 !important;
+  letter-spacing:.6px !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* =========================
+   NOM
+   ========================= */
+
+#products .card.productCardClickable > .info > h3{
+  grid-area:title !important;
+
+  min-width:0 !important;
+  min-height:36px !important;
+  max-height:36px !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  font-size:15px !important;
+  line-height:1.2 !important;
+  font-weight:800 !important;
+
+  display:-webkit-box !important;
+  -webkit-box-orient:vertical !important;
+  -webkit-line-clamp:2 !important;
+
+  overflow:hidden !important;
+}
+
+/* =========================
+   STOCK
+   TOUJOURS APRÈS LE NOM
+   ========================= */
+
+#products .card.productCardClickable > .info > .stock{
+  grid-area:stock !important;
+
+  display:block !important;
+
+  min-height:16px !important;
+
+  margin:5px 0 0 !important;
+  padding:0 !important;
+
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+
+  font-size:10px !important;
+  line-height:1.2 !important;
+  font-weight:700 !important;
+}
+
+#products .card.productCardClickable > .info > .stock:not(.outOfStock){
+  color:#55d98b !important;
+}
+
+#products .card.productCardClickable > .info > .stock.outOfStock{
+  color:#ff626c !important;
+}
+
+/* =========================
+   PRIX
+   TOUJOURS EN BAS À GAUCHE
+   ========================= */
+
+#products .card.productCardClickable > .info > .price{
+  grid-area:price !important;
+
+  align-self:end !important;
+  justify-self:start !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:flex-end !important;
+
+  font-size:18px !important;
+  line-height:1 !important;
+}
+
+/* =========================
+   PROMOTION
+   ANCIEN PRIX EN HAUT
+   PRIX PROMO EN BAS
+   ========================= */
+
+#products .card.productCardClickable .price--promo{
+  min-height:52px !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:flex-end !important;
+
+  gap:4px !important;
+  margin:0 !important;
+}
+
+#products .card.productCardClickable .pricePromoTop{
+  display:flex !important;
+  align-items:center !important;
+
+  gap:6px !important;
+  min-height:17px !important;
+}
+
+#products .card.productCardClickable .priceOld{
+  color:#7f8da2 !important;
+
+  font-size:10px !important;
+  line-height:1.1 !important;
+  font-weight:700 !important;
+
+  text-decoration:line-through !important;
+  white-space:nowrap !important;
+}
+
+#products .card.productCardClickable .discountBadge{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  min-height:19px !important;
+
+  padding:2px 6px !important;
+
+  border-radius:6px !important;
+
+  background:linear-gradient(135deg,#e72b9d,#ff3d71) !important;
+
+  color:#fff !important;
+
+  font-size:9px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+}
+
+#products .card.productCardClickable .priceCurrent{
+  display:inline-flex !important;
+  align-items:baseline !important;
+
+  gap:5px !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  color:#f4c95d !important;
+
+  font-size:20px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+
+  white-space:nowrap !important;
+}
+
+#products .card.productCardClickable .priceCurrent small{
+  margin:0 !important;
+
+  color:#aeb9ca !important;
+
+  font-size:10px !important;
+  font-weight:800 !important;
+}
+
+/* =========================
+   BOUTON +
+   PETIT ET ALIGNÉ AU PRIX
+   ========================= */
+
+#products .card.productCardClickable > .info > .productCardBottom{
+  grid-area:action !important;
+
+  align-self:end !important;
+  justify-self:end !important;
+
+  width:42px !important;
+  min-width:42px !important;
+
+  min-height:0 !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:flex-end !important;
+}
+
+#products .card.productCardClickable .addToCartIcon{
+  width:38px !important;
+  height:38px !important;
+
+  min-width:38px !important;
+  min-height:38px !important;
+
+  flex:0 0 38px !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  border:1px solid rgba(96,165,250,.28) !important;
+  border-radius:11px !important;
+
+  background:linear-gradient(135deg,#2563eb,#9333ea) !important;
+
+  color:#fff !important;
+
+  font-size:22px !important;
+  line-height:1 !important;
+
+  box-shadow:0 5px 14px rgba(37,99,235,.20) !important;
+}
+
+/* Empêche l'ancien CSS d'ajouter FCFA */
+#products .card.productCardClickable .price::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* =========================================================
+   MOBILE — 2 COLONNES UNIFORMES
+   ========================================================= */
+
+@media(max-width:560px){
+
+  #products.grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+
+    grid-auto-rows:500px !important;
+
+    gap:10px !important;
+
+    align-items:stretch !important;
+  }
+
+  #products .card.productCardClickable{
+    height:500px !important;
+    min-height:500px !important;
+    max-height:500px !important;
+
+    border-radius:14px !important;
+  }
+
+  #products .card.productCardClickable > .pic{
+    height:160px !important;
+    min-height:160px !important;
+    max-height:160px !important;
+
+    flex-basis:160px !important;
+
+    border-radius:14px 14px 0 0 !important;
+  }
+
+  #products .card.productCardClickable > .info{
+    height:340px !important;
+    min-height:340px !important;
+
+    padding:10px !important;
+
+    grid-template-columns:minmax(0,1fr) 40px !important;
+
+    column-gap:7px !important;
+  }
+
+  #products .card.productCardClickable > .info > .cat{
+    font-size:9px !important;
+    padding:4px 8px !important;
+  }
+
+  #products .card.productCardClickable > .info > h3{
+    min-height:36px !important;
+    max-height:36px !important;
+
+    font-size:14px !important;
+  }
+
+  #products .card.productCardClickable > .info > .stock{
+    font-size:10px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent{
+    font-size:17px !important;
+  }
+
+  #products .card.productCardClickable .priceOld{
+    font-size:9px !important;
+  }
+
+  #products .card.productCardClickable .discountBadge{
+    font-size:8px !important;
+    padding:2px 5px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small{
+    font-size:9px !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon{
+    width:36px !important;
+    height:36px !important;
+
+    min-width:36px !important;
+    min-height:36px !important;
+
+    flex-basis:36px !important;
+
+    border-radius:10px !important;
+
+    font-size:21px !important;
+  }
+}
+
+/* Très petits écrans */
+@media(max-width:380px){
+
+  #products.grid{
+    grid-auto-rows:470px !important;
+  }
+
+  #products .card.productCardClickable{
+    height:470px !important;
+    min-height:470px !important;
+    max-height:470px !important;
+  }
+
+  #products .card.productCardClickable > .pic{
+    height:145px !important;
+    min-height:145px !important;
+    max-height:145px !important;
+    flex-basis:145px !important;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CORRECTION FINALE DES CARTES PRODUITS
+   Version mobile professionnelle
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  /* -----------------------------------------
+     CONTENEUR DU CATALOGUE
+     Même largeur visuelle que la référence
+     ----------------------------------------- */
+
+  #products {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+
+
+  /* -----------------------------------------
+     CARTE PRODUIT
+     SUPPRESSION DES HAUTEURS QUI ÉTIRENT
+     LES CARTES
+     ----------------------------------------- */
+
+  #products .card,
+  #products .productCard,
+  #products .productCardClickable {
+
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    align-self: stretch !important;
+
+    overflow: hidden !important;
+
+    border-radius: 14px !important;
+  }
+
+
+  /* -----------------------------------------
+     IMAGE PRODUIT
+     TAILLE COMPACTE ET IDENTIQUE
+     ----------------------------------------- */
+
+  #products .card .pic {
+
+    width: 100% !important;
+
+    height: 135px !important;
+    min-height: 135px !important;
+    max-height: 135px !important;
+
+    aspect-ratio: 1 / 1 !important;
+
+    flex: 0 0 135px !important;
+
+    overflow: hidden !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+
+  #products .card .pic img,
+  #products .card .productCardImage {
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 100% !important;
+    max-height: 100% !important;
+
+    object-fit: cover !important;
+
+    display: block !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+
+  /* -----------------------------------------
+     EMOJI / IMAGE PAR DÉFAUT
+     ----------------------------------------- */
+
+  #products .card .productCardEmoji {
+
+    width: 100% !important;
+    height: 100% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    font-size: 48px !important;
+  }
+
+
+  /* -----------------------------------------
+     BLOC INFORMATIONS
+     FIN DE L'ESPACE VIDE
+     ----------------------------------------- */
+
+  #products .card .info {
+
+    position: relative !important;
+
+    display: block !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 155px !important;
+    max-height: none !important;
+
+    flex: 0 0 auto !important;
+
+    padding: 10px !important;
+
+    padding-bottom: 48px !important;
+
+    overflow: visible !important;
+  }
+
+
+  /* -----------------------------------------
+     CATÉGORIE
+     LE CADRE S'ADAPTE AU MOT
+     ----------------------------------------- */
+
+  #products .card .cat {
+
+    display: inline-flex !important;
+
+    width: fit-content !important;
+    max-width: 100% !important;
+
+    min-width: 0 !important;
+
+    height: auto !important;
+
+    padding: 5px 9px !important;
+
+    margin: 0 0 6px 0 !important;
+
+    border-radius: 20px !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+
+  /* -----------------------------------------
+     NOM DU PRODUIT
+     ----------------------------------------- */
+
+  #products .card .info h3 {
+
+    width: 100% !important;
+
+    margin: 4px 0 7px !important;
+
+    padding: 0 !important;
+
+    min-height: 0 !important;
+    max-height: none !important;
+
+    font-size: 15px !important;
+    line-height: 1.22 !important;
+
+    font-weight: 700 !important;
+
+    overflow-wrap: anywhere !important;
+  }
+
+
+  /* -----------------------------------------
+     PRIX
+     ----------------------------------------- */
+
+  #products .card .price {
+
+    width: 100% !important;
+
+    margin: 5px 0 4px !important;
+
+    padding: 0 !important;
+
+    font-size: 16px !important;
+
+    line-height: 1.15 !important;
+  }
+
+
+  #products .card .priceCurrent {
+
+    display: block !important;
+
+    margin: 0 !important;
+
+    font-size: 17px !important;
+    line-height: 1.15 !important;
+
+    font-weight: 900 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  #products .card .priceCurrent small {
+
+    font-size: 9px !important;
+
+    font-weight: 700 !important;
+  }
+
+
+  /* -----------------------------------------
+     PROMOTION
+     ANCIEN PRIX TOUJOURS EN HAUT
+     NOUVEAU PRIX TOUJOURS EN BAS
+     ----------------------------------------- */
+
+  #products .card .pricePromoTop {
+
+    width: 100% !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: space-between !important;
+
+    gap: 5px !important;
+
+    margin: 0 0 3px !important;
+  }
+
+
+  #products .card .priceOld {
+
+    display: block !important;
+
+    margin: 0 !important;
+
+    font-size: 11px !important;
+
+    line-height: 1.1 !important;
+
+    text-decoration: line-through !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  #products .card .discountBadge {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 4px 6px !important;
+
+    min-width: 32px !important;
+
+    border-radius: 7px !important;
+
+    font-size: 9px !important;
+    line-height: 1 !important;
+
+    flex-shrink: 0 !important;
+  }
+
+
+  #products .card .price--promo .priceCurrent {
+
+    margin-top: 1px !important;
+
+    font-size: 17px !important;
+  }
+
+
+  /* -----------------------------------------
+     STOCK
+     TOUJOURS AU MÊME ENDROIT
+     ----------------------------------------- */
+
+  #products .card .stock {
+
+    position: static !important;
+
+    display: block !important;
+
+    width: 100% !important;
+
+    margin: 5px 0 0 !important;
+    padding: 0 !important;
+
+    min-height: 0 !important;
+
+    font-size: 10px !important;
+
+    line-height: 1.2 !important;
+
+    color: #55d98a !important;
+  }
+
+
+  #products .card .stock.outOfStock,
+  #products .card .outOfStock {
+
+    color: #ff5b70 !important;
+
+    font-weight: 700 !important;
+  }
+
+
+  /* -----------------------------------------
+     ZÉRO FLEX / ZÉRO POSITIONNEMENT BIZARRE
+     POUR LE BAS DE CARTE
+     ----------------------------------------- */
+
+  #products .card .productCardBottom {
+
+    position: absolute !important;
+
+    right: 9px !important;
+    bottom: 9px !important;
+    left: auto !important;
+
+    width: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+
+  /* -----------------------------------------
+     BOUTON +
+     PLUS PETIT ET NE CACHE PLUS LE CFA
+     ----------------------------------------- */
+
+  #products .card .addToCartIcon {
+
+    width: 34px !important;
+    height: 34px !important;
+
+    min-width: 34px !important;
+    min-height: 34px !important;
+
+    max-width: 34px !important;
+    max-height: 34px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border-radius: 10px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    font-size: 23px !important;
+
+    line-height: 1 !important;
+
+    flex-shrink: 0 !important;
+  }
+
+
+  /* -----------------------------------------
+     PAS DE TRANSFORMATION QUI AGRANDIT
+     LES CARTES
+     ----------------------------------------- */
+
+  #products .card:hover {
+
+    transform: none !important;
+
+    box-shadow: none !important;
+  }
+
+
+  #products .card:hover .pic img,
+  #products .card:hover .productCardImage {
+
+    transform: none !important;
+  }
+}
+/* =========================================================
+   SNGAMER STORE — CORRECTION FINALE DES CARTES PRODUITS
+   Ne pas supprimer les anciennes règles.
+   Ce bloc les surcharge proprement.
+   ========================================================= */
+
+/* ---------- GRILLE ---------- */
+
+#products.grid {
+  grid-auto-rows: auto !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+/* ---------- CARTE ---------- */
+
+#products .card.productCardClickable {
+  display: flex !important;
+  flex-direction: column !important;
+
+  width: 100% !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  align-self: stretch !important;
+
+  overflow: hidden !important;
+  border-radius: 15px !important;
+}
+
+/* ---------- IMAGE ---------- */
+
+#products .card.productCardClickable > .pic {
+  width: 100% !important;
+
+  height: 180px !important;
+  min-height: 180px !important;
+  max-height: 180px !important;
+
+  aspect-ratio: auto !important;
+
+  flex: 0 0 180px !important;
+
+  overflow: hidden !important;
+}
+
+#products .card.productCardClickable > .pic img,
+#products .card.productCardClickable .productCardImage {
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: cover !important;
+  object-position: center !important;
+
+  display: block !important;
+}
+
+/* ---------- BLOC INFORMATIONS ---------- */
+
+#products .card.productCardClickable > .info {
+  display: grid !important;
+
+  grid-template-columns: minmax(0, 1fr) 42px !important;
+
+  grid-template-areas:
+    "cat cat"
+    "title title"
+    "stock stock"
+    "price action" !important;
+
+  align-content: start !important;
+
+  padding: 10px !important;
+
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+/* ---------- CATÉGORIE ---------- */
+
+#products .card.productCardClickable > .info > .cat {
+  grid-area: cat !important;
+
+  width: max-content !important;
+  max-width: 100% !important;
+
+  min-width: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 5px 10px !important;
+
+  margin: 0 0 6px 0 !important;
+
+  border: 1px solid rgba(70,150,255,.35) !important;
+  border-radius: 999px !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+}
+
+/* ---------- NOM DU PRODUIT ---------- */
+
+#products .card.productCardClickable > .info > h3 {
+  grid-area: title !important;
+
+  margin: 0 0 5px 0 !important;
+
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+
+  min-height: 0 !important;
+  max-height: 36px !important;
+
+  overflow: hidden !important;
+
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+/* ---------- STOCK ---------- */
+
+#products .card.productCardClickable > .info > .stock {
+  grid-area: stock !important;
+
+  min-height: 0 !important;
+
+  margin: 0 0 7px 0 !important;
+  padding: 0 !important;
+
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+
+  color: #55d98b !important;
+}
+
+#products .card.productCardClickable > .info > .stock.outOfStock {
+  color: #ff5c70 !important;
+  font-weight: 800 !important;
+}
+
+/* ---------- PRIX ---------- */
+
+#products .card.productCardClickable > .info > .price {
+  grid-area: price !important;
+
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  align-self: end !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+
+  gap: 3px !important;
+}
+
+/* Prix normal */
+
+#products .card.productCardClickable .price--regular {
+  justify-content: flex-end !important;
+}
+
+#products .card.productCardClickable .priceCurrent {
+  display: block !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 17px !important;
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+
+  color: #f1d477 !important;
+}
+
+#products .card.productCardClickable .priceCurrent small {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+
+  color: #aeb7c5 !important;
+}
+
+/* ---------- PROMOTION ---------- */
+
+#products .card.productCardClickable .price--promo {
+  display: flex !important;
+  flex-direction: column !important;
+
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+
+  gap: 3px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ancien prix + réduction */
+
+#products .card.productCardClickable .pricePromoTop {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: flex-start !important;
+
+  gap: 6px !important;
+
+  width: auto !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ancien prix */
+
+#products .card.productCardClickable .priceOld {
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+
+  color: #778294 !important;
+
+  text-decoration: line-through !important;
+
+  white-space: nowrap !important;
+}
+
+/* Badge réduction */
+
+#products .card.productCardClickable .discountBadge {
+  position: static !important;
+
+  display: inline-flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  margin: 0 !important;
+
+  padding: 3px 6px !important;
+
+  border-radius: 7px !important;
+
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+}
+
+/* Nouveau prix */
+
+#products .card.productCardClickable .price--promo .priceCurrent {
+  font-size: 17px !important;
+  line-height: 1.1 !important;
+}
+
+/* ---------- BOUTON + ---------- */
+
+#products .card.productCardClickable > .info > .productCardBottom {
+  grid-area: action !important;
+
+  display: flex !important;
+
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+
+  width: 100% !important;
+
+  min-height: 0 !important;
+  height: auto !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  align-self: end !important;
+}
+
+/* Petit bouton carré */
+
+#products .card.productCardClickable .addToCartIcon {
+  width: 40px !important;
+  height: 40px !important;
+
+  min-width: 40px !important;
+  min-height: 40px !important;
+
+  max-width: 40px !important;
+  max-height: 40px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 12px !important;
+
+  font-size: 25px !important;
+  line-height: 1 !important;
+
+  flex-shrink: 0 !important;
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 560px) {
+
+  #products.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+
+    grid-auto-rows: auto !important;
+
+    gap: 10px !important;
+
+    align-items: stretch !important;
+  }
+
+  #products .card.productCardClickable {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    width: 100% !important;
+  }
+
+  /* Image beaucoup plus compacte */
+  #products .card.productCardClickable > .pic {
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+
+    flex: 0 0 150px !important;
+
+    aspect-ratio: auto !important;
+  }
+
+  #products .card.productCardClickable > .info {
+    padding: 9px !important;
+
+    grid-template-columns: minmax(0, 1fr) 40px !important;
+  }
+
+  #products .card.productCardClickable > .info > .cat {
+    padding: 4px 9px !important;
+
+    margin-bottom: 5px !important;
+
+    font-size: 9px !important;
+  }
+
+  #products .card.productCardClickable > .info > h3 {
+    font-size: 14px !important;
+    line-height: 1.18 !important;
+
+    max-height: 34px !important;
+
+    margin-bottom: 4px !important;
+  }
+
+  #products .card.productCardClickable > .info > .stock {
+    font-size: 10px !important;
+
+    margin-bottom: 6px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent {
+    font-size: 16px !important;
+  }
+
+  #products .card.productCardClickable .priceCurrent small {
+    font-size: 9px !important;
+  }
+
+  #products .card.productCardClickable .priceOld {
+    font-size: 10px !important;
+  }
+
+  #products .card.productCardClickable .discountBadge {
+    font-size: 8px !important;
+
+    padding: 3px 5px !important;
+  }
+
+  #products .card.productCardClickable .addToCartIcon {
+    width: 38px !important;
+    height: 38px !important;
+
+    min-width: 38px !important;
+    min-height: 38px !important;
+
+    max-width: 38px !important;
+    max-height: 38px !important;
+
+    border-radius: 11px !important;
+
+    font-size: 23px !important;
+  }
+}
+/* CORRECTION BADGE PROMOTION — SNGAMER STORE */
+
+#products .productCardClickable .pricePromoTop {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  width: calc(100% - 76px) !important;
+  max-width: calc(100% - 76px) !important;
+  min-width: 0 !important;
+}
+
+#products .productCardClickable .discountBadge {
+  flex: 0 0 auto !important;
+  min-width: 38px !important;
+  height: 26px !important;
+  padding: 0 7px !important;
+  margin: 0 !important;
+  border-radius: 9px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 560px) {
+  #products .productCardClickable .pricePromoTop {
+    width: calc(100% - 70px) !important;
+    max-width: calc(100% - 70px) !important;
+  }
+
+  #products .productCardClickable .discountBadge {
+    min-width: 36px !important;
+    height: 24px !important;
+    padding: 0 6px !important;
+    font-size: 9px !important;
+  }
+}
+/* SNGAMER — DERNIER AJUSTEMENT BOUTON + */
+
+@media (max-width: 560px) {
+  #products .card .productCardBottom {
+    right: 5px !important;
+    bottom: 7px !important;
+  }
+
+  #products .card .addToCartIcon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    max-width: 30px !important;
+    max-height: 30px !important;
+
+    border-radius: 9px !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+}
+/* PRIX PREMIUM SNGAMER STORE */
+#products .card .info .price,
+#products .card .info .price strong,
+#products .price,
+#products .product-price {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 800 !important;
+  color: #F4D58D !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.2px;
+}
