@@ -1,14 +1,13 @@
-/* SNGAMER STORE — ADMIN DATA REFRESH V12
-   Single owner for authenticated admin data refresh, refund UI and analytics.
+/* SNGAMER STORE — ADMIN DATA REFRESH V13
+   Single owner for authenticated admin data refresh, refund UI, analytics
+   and product-performance mounting.
    Order presentation/filtering belongs to the existing V2.1 Orders workspace.
    Do not inject a second order search/filter toolbar here.
-   Remove legacy standalone and reduced order filter panels, including those
-   accidentally left inside the canonical Orders section.
 */
 (function () {
   'use strict';
 
-  const STATE = '__sngamerAdminAutoRefreshV12';
+  const STATE = '__sngamerAdminAutoRefreshV13';
   if (window[STATE]) return;
   window[STATE] = true;
 
@@ -61,6 +60,23 @@
       console.debug('SNGAMER: site analytics admin loaded');
     };
     script.onerror = () => console.error('SNGAMER: unable to load site analytics admin');
+    document.head.appendChild(script);
+  }
+
+  /* Product performance belongs to the authenticated admin data layer.
+     Mount it from the already-loaded admin-data-fix controller so it cannot
+     race the workspace controller or depend on a server HTML injection. */
+  function loadProductPerformanceAdmin() {
+    if (window.__sngProductPerformanceAdminLoaded || document.querySelector('script[data-sng-product-performance-admin]')) return;
+    const script = document.createElement('script');
+    script.src = '/product-analytics-admin.js?v=20261020-products4';
+    script.async = false;
+    script.dataset.sngProductPerformanceAdmin = '1';
+    script.onload = () => {
+      window.__sngProductPerformanceAdminLoaded = true;
+      console.debug('SNGAMER: product performance admin loaded');
+    };
+    script.onerror = () => console.error('SNGAMER: unable to load product performance admin');
     document.head.appendChild(script);
   }
 
@@ -161,8 +177,10 @@
     const workspace = currentWorkspace();
     try {
       cleanupAllLegacyOrderPanels();
+      loadProductPerformanceAdmin();
       await runLoader('loadAll');
       cleanupAllLegacyOrderPanels();
+      loadProductPerformanceAdmin();
       if (currentWorkspace() === 'orders' || workspace === 'orders') {
         if (typeof window.loadOrders === 'function') await runLoader('loadOrders');
         cleanupAllLegacyOrderPanels();
@@ -190,6 +208,7 @@
     observer = new MutationObserver(() => {
       if (!isAdminVisible()) return;
       cleanupAllLegacyOrderPanels();
+      loadProductPerformanceAdmin();
       const workspace = currentWorkspace();
       if (workspace !== lastWorkspace) refreshNow('workspace-change');
     });
@@ -242,6 +261,7 @@
     bootPaymentSelectorGuard();
     loadRefundUiV2();
     loadAnalyticsAdmin();
+    loadProductPerformanceAdmin();
     if (!isAdminVisible()) {
       window.setTimeout(boot, 250);
       return;
@@ -258,6 +278,7 @@
       cleanupAllLegacyOrderPanels();
       loadRefundUiV2();
       loadAnalyticsAdmin();
+      loadProductPerformanceAdmin();
       refreshNow('visibility');
     }
   });
@@ -265,12 +286,14 @@
     cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();
+    loadProductPerformanceAdmin();
     refreshNow('pageshow');
   });
   window.addEventListener('focus', () => {
     cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();
+    loadProductPerformanceAdmin();
     refreshNow('focus');
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
