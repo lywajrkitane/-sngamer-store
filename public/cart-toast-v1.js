@@ -17,7 +17,7 @@
         top: 88px;
         right: 18px;
         z-index: 99999;
-        width: min(300px, calc(100vw - 36px));
+        width: min(260px, calc(100vw - 36px));
         box-sizing: border-box;
         display: flex;
         align-items: center;
@@ -26,7 +26,7 @@
         border: 1px solid rgba(92, 176, 255, .42);
         border-radius: 13px;
         background: linear-gradient(135deg, rgba(8, 20, 38, .97), rgba(28, 13, 55, .97));
-        box-shadow: 0 12px 35px rgba(0, 0, 0, .38), 0 0 24px rgba(65, 116, 255, .16);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, .36), 0 0 20px rgba(65, 116, 255, .14);
         color: #fff;
         font-family: inherit;
         opacity: 0;
@@ -42,21 +42,21 @@
       }
 
       #${TOAST_ID} .toastIcon {
-        width: 31px;
-        height: 31px;
-        flex: 0 0 31px;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
         display: grid;
         place-items: center;
         border-radius: 9px;
         background: linear-gradient(135deg, #168cff, #8a35ff);
-        box-shadow: 0 0 16px rgba(67, 124, 255, .28);
+        box-shadow: 0 0 14px rgba(67, 124, 255, .25);
         font-size: 16px;
       }
 
       #${TOAST_ID} .toastContent {
         min-width: 0;
         flex: 1;
-        line-height: 1.2;
+        line-height: 1.18;
       }
 
       #${TOAST_ID} .toastTitle {
@@ -78,9 +78,9 @@
       }
 
       #${TOAST_ID} .toastClose {
-        width: 27px;
-        height: 27px;
-        flex: 0 0 27px;
+        width: 26px;
+        height: 26px;
+        flex: 0 0 26px;
         border: 0;
         border-radius: 8px;
         background: rgba(255,255,255,.08);
@@ -102,7 +102,7 @@
           top: 78px;
           right: 12px;
           left: auto;
-          width: min(270px, calc(100vw - 24px));
+          width: min(240px, calc(100vw - 24px));
           border-radius: 12px;
           padding: 8px 9px 8px 10px;
         }
