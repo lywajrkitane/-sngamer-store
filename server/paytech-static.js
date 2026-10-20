@@ -47,6 +47,15 @@ express.static = function paytechAwareStatic(root, options) {
       let html = fs.readFileSync(indexPath, "utf8");
       const scriptTag = '<script src="/paytech-checkout.js?v=20261017-2010"></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${scriptTag}</body>`);
+
+      const refreshRecoveryTag = '<script src="/store-refresh-recovery.js?v=20261020-refresh1"></script>';
+      if (!html.includes("/store-refresh-recovery.js")) {
+        html = html.replace(/<\/body>/i, `${refreshRecoveryTag}</body>`);
+      }
+
+      res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
       res.type("html").send(html);
     } catch (error) {
       console.error("PAYTECH_STATIC_INJECTION_ERROR:", error);
