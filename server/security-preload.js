@@ -8,6 +8,29 @@ const MAX_API = 180;
 const MAX_AUTH = 30;
 const MAX_PAYTECH_CREATE = 12;
 
+// Harden express-session defaults before the application creates its session middleware.
+// This keeps the existing authentication flow intact while adding SameSite protection.
+try {
+  const sessionModule = require('express-session');
+  const originalSession = sessionModule;
+  const hardenedSession = function hardenedSession(options = {}) {
+    const cookie = options.cookie && typeof options.cookie === 'object' ? options.cookie : {};
+    return originalSession({
+      ...options,
+      cookie: {
+        ...cookie,
+        httpOnly: true,
+        sameSite: cookie.sameSite || 'lax',
+        secure: cookie.secure ?? (process.env.NODE_ENV === 'production')
+      }
+    });
+  };
+  Object.assign(hardenedSession, originalSession);
+  require.cache[require.resolve('express-session')].exports = hardenedSession;
+} catch (error) {
+  console.error('SECURITY_SESSION_PATCH_ERROR:', error);
+}
+
 function clientIp(req) {
   return req.ip || req.socket?.remoteAddress || 'unknown';
 }
@@ -56,13 +79,10 @@ function sameOrigin(req) {
 }
 
 function sendSecurityJson(res, status, payload) {
-  // Express response: use its normal API.
   if (typeof res?.status === 'function' && typeof res?.json === 'function') {
     return res.status(status).json(payload);
   }
 
-  // Defensive fallback for a raw Node ServerResponse. This prevents the
-  // security layer itself from throwing when a preload wraps Express internals.
   if (typeof res?.writeHead === 'function' && typeof res?.end === 'function') {
     res.statusCode = status;
     if (typeof res.setHeader === 'function') {
@@ -81,6 +101,16 @@ function securityMiddleware(req, res, next) {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+
+  // HTML is the application shell. Do not let browsers serve an older shell first
+  // while Render has already deployed a newer version. Static assets keep their
+  // normal caching behaviour.
+  const acceptsHtml = String(req.headers.accept || '').includes('text/html');
+  if (acceptsHtml && !String(req.path || req.url || '').startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
 
   const proto = String(req.headers['x-forwarded-proto'] || req.protocol || '').split(',')[0].trim();
   if (proto === 'https') {
@@ -122,6 +152,9 @@ express.application.listen = function securityPatchedListen(...args) {
     }
   }
 
+  // Do not expose Express implementation details to clients.
+  if (typeof app.disable === 'function') app.disable('x-powered-by');
+
   const stack = app._router && app._router.stack;
   if (stack && !stack.some(layer => layer && layer.handle === securityMiddleware)) {
     const router = express.Router();
@@ -132,4 +165,4 @@ express.application.listen = function securityPatchedListen(...args) {
   return originalListen.apply(app, args);
 };
 
-console.log('SNGAMER_SECURITY: security headers, API rate limits, same-origin checks and production session-secret guard enabled');
+console.log('SNGAMER_SECURITY: security headers, API rate limits, same-origin checks, hardened sessions, stale-HTML protection and production session-secret guard enabled');
