@@ -43,6 +43,10 @@
     </div>`;
   }
 
+  function cleanLabel(value){
+    return String(value||'').replace(/^\s*[^\p{L}\p{N}]+/u,'').replace(/\s+/g,' ').trim();
+  }
+
   function removeDuplicateOrderMeta(){
     const profile=document.getElementById('profileArea');
     if(!profile) return;
@@ -72,9 +76,7 @@
         let row=el;
         while(row.parentElement && row.parentElement!==card){
           const parent=row.parentElement;
-          const parentText=(parent.textContent||'').replace(/\s+/g,' ').trim();
-          const rowText=(row.textContent||'').replace(/\s+/g,' ').trim();
-          if(parentText!==rowText) break;
+          if(cleanLabel(parent.textContent)!==cleanLabel(row.textContent)) break;
           row=parent;
         }
         if(!isInsideNotice(row)) row.remove();
