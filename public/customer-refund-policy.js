@@ -14,6 +14,18 @@
       .sgaRefundPolicy p{margin:0;color:#aebbd0;font-size:11px;line-height:1.6}
       .sgaRefundPolicy b{color:#fff}
       .sgaClientCancelDisabled{display:none!important}
+
+      /* Product prices: force the approved premium champagne-gold price on mobile and desktop. */
+      #products .card.productCardClickable .priceCurrent,
+      #products .card.productCardClickable .price--promo .priceCurrent,
+      #products .card.productCardClickable .price--regular .priceCurrent{
+        color:#F4D58D !important;
+        text-shadow:0 0 14px rgba(244,213,141,.16) !important;
+      }
+      #products .card.productCardClickable .priceCurrent small{
+        color:#a9b9ca !important;
+        text-shadow:none !important;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -31,6 +43,45 @@
     </div>`;
   }
 
+  function removeDuplicateOrderMeta(){
+    const profile=document.getElementById('profileArea');
+    if(!profile) return;
+
+    profile.querySelectorAll('.sgaOrder').forEach(function(card){
+      const notice=Array.from(card.querySelectorAll('*')).find(function(el){
+        return /MESSAGE DE LA BOUTIQUE/i.test((el.textContent||'').trim()) && el.children.length>=1;
+      });
+
+      const isInsideNotice=function(el){
+        return !!(notice && (el===notice || notice.contains(el)));
+      };
+
+      const targets=[];
+      const walker=document.createTreeWalker(card,NodeFilter.SHOW_TEXT);
+      let node;
+      while((node=walker.nextNode())){
+        const text=(node.nodeValue||'').replace(/\s+/g,' ').trim();
+        if(!text) continue;
+        if(!/^((🚚\s*)?Suivi\s*[:·]\s*.+|(💬\s*)?Bien reçu)$/i.test(text)) continue;
+        const el=node.parentElement;
+        if(!el || isInsideNotice(el)) continue;
+        targets.push(el);
+      }
+
+      targets.forEach(function(el){
+        let row=el;
+        while(row.parentElement && row.parentElement!==card){
+          const parent=row.parentElement;
+          const parentText=(parent.textContent||'').replace(/\s+/g,' ').trim();
+          const rowText=(row.textContent||'').replace(/\s+/g,' ').trim();
+          if(parentText!==rowText) break;
+          row=parent;
+        }
+        if(!isInsideNotice(row)) row.remove();
+      });
+    });
+  }
+
   function apply(){
     injectStyles();
     const profile=document.getElementById('profileArea');
@@ -39,6 +90,8 @@
     profile.querySelectorAll('.sgaOrder .sgaActions').forEach(el=>{
       if(el.querySelector('[onclick*="sngCancelOrder"]')) el.classList.add('sgaClientCancelDisabled');
     });
+
+    removeDuplicateOrderMeta();
 
     const cards=Array.from(profile.querySelectorAll('.sgaCard'));
     const ordersCard=cards.find(card=>card.querySelector('.sgaSectionTitle')?.textContent?.trim()==='Mes commandes');
