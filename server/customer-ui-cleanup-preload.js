@@ -2,9 +2,10 @@ const express = require("express");
 
 // SNGAMER STORE — narrowly scoped storefront/profile cleanup.
 // This preload only decorates existing HTML responses; it does not alter business logic.
-// Important: patch Express's response prototype, not application.handle's raw Node response.
-const originalSend = express.response.send;
+const originalHandle = express.application.handle;
 
+// Build the injected client script from ordinary strings instead of a template literal.
+// This avoids accidental parser conflicts with CSS selectors such as #products.
 const CLIENT_SCRIPT = [
   '<script id="sngamer-client-cleanup">',
   '(function(){',
@@ -56,10 +57,13 @@ const CLIENT_SCRIPT = [
   '</script>'
 ].join("\\n");
 
-express.response.send = function sngamerUiCleanupSend(body){
-  const req = this.req;
-  if(req && (req.path === "/" || req.path === "/index.html") && typeof body === "string" && body.includes("</body>")){
-    body = body.replace("</body>", CLIENT_SCRIPT + "</body>");
-  }
-  return originalSend.call(this, body);
+express.application.handle = function sngamerUiCleanupHandle(req,res){
+  const originalSend = res.send.bind(res);
+  res.send = function sngamerUiCleanupSend(body){
+    if((req.path === "/" || req.path === "/index.html") && typeof body === "string" && body.includes("</body>")){
+      body = body.replace("</body>", CLIENT_SCRIPT + "</body>");
+    }
+    return originalSend(body);
+  };
+  return originalHandle.call(this,req,res);
 };
