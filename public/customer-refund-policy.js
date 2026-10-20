@@ -45,9 +45,6 @@
       });
       const isInsideNotice=function(el){return !!(notice && (el===notice || notice.contains(el)))};
 
-      // The unwanted legacy line is rendered as a <p> with the tracking number
-      // split across text nodes ("Suivi :" + <b>number</b>). Match the
-      // complete element textContent instead of individual text nodes.
       card.querySelectorAll('p,div,span').forEach(function(el){
         if(isInsideNotice(el)) return;
         const text=(el.textContent||'').replace(/\s+/g,' ').trim();
@@ -91,4 +88,26 @@
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
+})();
+
+/* Public e-commerce policies — rendered from the existing policy asset so no new page route is required. */
+(function(){
+  'use strict';
+  const policies={
+    privacy:['Politique de confidentialité','<h3>Données collectées</h3><p>SNGAMER STORE peut collecter le nom, e-mail, téléphone, adresse et les informations nécessaires au compte, à la commande et au suivi.</p><h3>Utilisation</h3><p>Ces données servent à gérer les comptes, traiter les commandes, confirmer les paiements, organiser la livraison, assurer le support et sécuriser la boutique.</p><h3>Sécurité</h3><p>Les mots de passe sont protégés côté serveur. Des mesures techniques sont utilisées pour limiter les accès et requêtes non autorisés.</p><h3>Demandes</h3><p>Pour toute demande concernant vos données ou votre compte, contactez SNGAMER STORE via le contact officiel de la boutique.</p>'],
+    terms:['Conditions générales de vente','<h3>Commande</h3><p>Le client doit vérifier les produits, quantités, coordonnées et montant avant de confirmer sa commande.</p><h3>Prix et disponibilité</h3><p>Les prix et disponibilités affichés peuvent évoluer. Le prix affiché lors de la validation fait foi pour la commande.</p><h3>Paiement</h3><p>Une commande payée est confirmée après validation du paiement par le système utilisé.</p><h3>Livraison</h3><p>Les modalités, délais et éventuels frais dépendent de la destination et sont communiqués lors du traitement.</p><h3>Annulation</h3><p>Les demandes d’annulation ou remboursement sont examinées selon l’état de la commande. Une commande déjà livrée ne peut pas être annulée ni remboursée selon la politique actuelle.</p>'],
+    delivery:['Politique de livraison','<h3>Préparation</h3><p>Après confirmation de la commande et du paiement, SNGAMER STORE prépare la commande avant son expédition.</p><h3>Adresse</h3><p>Le client est responsable de l’exactitude de son nom, téléphone et adresse ou quartier.</p><h3>Suivi</h3><p>Lorsqu’un numéro de suivi est disponible, il peut être affiché dans l’espace client avec l’état de la commande.</p><h3>Difficulté</h3><p>En cas de problème de livraison, contactez SNGAMER STORE pour vérification et assistance.</p>'],
+    payment:['Politique de paiement','<h3>Moyens de paiement</h3><p>Les moyens de paiement disponibles sont ceux affichés dans le parcours de commande.</p><h3>Validation</h3><p>Une ouverture de la page de paiement ne constitue pas un paiement réussi. Le statut est confirmé après validation par le système de paiement.</p><h3>Sécurité</h3><p>Ne transmettez jamais votre mot de passe, code PIN, OTP ou autre donnée confidentielle de paiement à une personne.</p>'],
+    refund:['Annulation et remboursement','<h3>Demande</h3><p>Contactez SNGAMER STORE avant la livraison pour toute demande d’annulation ou de remboursement.</p><h3>Examen</h3><p>Chaque demande est examinée selon l’état de la commande et son paiement.</p><h3>Commande livrée</h3><p>Une commande déjà livrée ne peut pas être annulée ni faire l’objet d’un remboursement selon la politique commerciale actuelle.</p><h3>Contact</h3><p><a href="https://wa.me/221786127985" target="_blank" rel="noopener noreferrer">WhatsApp SNGAMER STORE</a></p>']
+  };
+  function mount(){
+    if(document.getElementById('sngPublicPolicies')) return;
+    const footer=document.querySelector('footer'); if(!footer) return;
+    const style=document.createElement('style');style.textContent='.sngPolicyLinks{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px auto 6px}.sngPolicyLinks button{border:1px solid rgba(87,164,255,.28);background:#0d182b;color:#a9c9ef;border-radius:999px;padding:8px 12px;font:600 11px inherit;cursor:pointer}.sngPolicyOverlay{position:fixed;inset:0;z-index:10000;background:rgba(2,5,12,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:.2s}.sngPolicyOverlay.open{opacity:1;pointer-events:auto}.sngPolicyModal{width:min(760px,100%);max-height:88vh;overflow:auto;border:1px solid rgba(82,159,255,.3);border-radius:22px;background:#0c1628;color:#dce5f2;padding:22px;box-shadow:0 20px 70px #0008}.sngPolicyTop{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-22px;background:#0c1628;padding-bottom:15px}.sngPolicyTop h2{margin:0;color:#fff;font-size:22px}.sngPolicyClose{background:#18233a;color:#fff;border:1px solid #ffffff26;border-radius:12px;width:40px;height:40px;font-size:24px;cursor:pointer}.sngPolicyContent h3{color:#fff;font-size:14px;margin:20px 0 7px}.sngPolicyContent p{color:#aebbd0;font-size:13px;line-height:1.7;margin:0 0 8px}.sngPolicyContent a{color:#69b6ff}';document.head.appendChild(style);
+    const links=document.createElement('div');links.id='sngPublicPolicies';links.className='sngPolicyLinks';links.innerHTML='<button data-policy="privacy">Confidentialité</button><button data-policy="terms">CGV</button><button data-policy="delivery">Livraison</button><button data-policy="payment">Paiement</button><button data-policy="refund">Annulation & remboursement</button>';
+    const overlay=document.createElement('div');overlay.id='sngPolicyOverlay';overlay.className='sngPolicyOverlay';overlay.innerHTML='<div class="sngPolicyModal"><div class="sngPolicyTop"><h2 id="sngPolicyTitle"></h2><button class="sngPolicyClose" type="button">×</button></div><div id="sngPolicyContent" class="sngPolicyContent"></div></div>';
+    document.body.appendChild(overlay);footer.parentNode.insertBefore(links,footer);
+    const close=()=>{overlay.classList.remove('open');document.body.style.overflow=''};links.onclick=e=>{const k=e.target.closest('[data-policy]')?.dataset.policy;if(!k)return;document.getElementById('sngPolicyTitle').textContent=policies[k][0];document.getElementById('sngPolicyContent').innerHTML=policies[k][1];overlay.classList.add('open');document.body.style.overflow='hidden'};overlay.onclick=e=>{if(e.target===overlay)close()};overlay.querySelector('.sngPolicyClose').onclick=close;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
