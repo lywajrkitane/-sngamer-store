@@ -91,6 +91,70 @@ jobs:
           p.write_text(s, encoding='utf-8')
           print('Admin authentication hardening applied.')
 
+      - name: Harden PayTech payment flow
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('server/paytech.js')
+          s = p.read_text(encoding='utf-8')
+
+          old_columns = '''      ADD COLUMN IF NOT EXISTS paytech_token TEXT,\n      ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ,'''
+          new_columns = '''      ADD COLUMN IF NOT EXISTS paytech_token TEXT,\n      ADD COLUMN IF NOT EXISTS payment_request_key TEXT,\n      ADD COLUMN IF NOT EXISTS paytech_redirect_url TEXT,\n      ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ,'''
+          if old_columns in s and 'payment_request_key TEXT' not in s:
+              s = s.replace(old_columns, new_columns, 1)
+
+          index_marker = '''  await pool.query(`UPDATE orders SET status='Nouvelle' WHERE status='Payée' AND payment_status='Payé'`);'''
+          index_block = '''  await pool.query(`UPDATE orders SET status='Nouvelle' WHERE status='Payée' AND payment_status='Payé'`);\n\n  await pool.query(`\n    CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_payment_request_key_unique\n      ON orders(payment_request_key) WHERE payment_request_key IS NOT NULL;\n  `);'''
+          if 'idx_orders_payment_request_key_unique' not in s:
+              if index_marker not in s:
+                  raise SystemExit('PayTech index insertion marker not found.')
+              s = s.replace(index_marker, index_block, 1)
+
+          old_body = '''      const { customer, payment, items } = req.body || {};\n      const allowedPayments = ["Wave", "Orange Money"];'''
+          new_body = '''      const { customer, payment, items } = req.body || {};\n      const paymentRequestKey = String(req.body?.idempotency_key || "").trim();\n      const allowedPayments = ["Wave", "Orange Money"];\n      if (paymentRequestKey && !/^[A-Za-z0-9._:-]{16,120}$/.test(paymentRequestKey)) {\n        return res.status(400).json({ error: "Clé de paiement invalide." });\n      }\n\n      if (paymentRequestKey) {\n        const existing = await pool.query(\n          `SELECT id,payment_status,paytech_token,paytech_redirect_url FROM orders WHERE payment_request_key=$1 LIMIT 1`,\n          [paymentRequestKey]\n        );\n        if (existing.rows.length) {\n          const order = existing.rows[0];\n          if (order.paytech_redirect_url && order.payment_status === "En attente") {\n            return res.status(200).json({ success: true, orderId: order.id, token: order.paytech_token || null, redirect_url: order.paytech_redirect_url, reused: true });\n          }\n          if (order.payment_status === "Payé") {\n            return res.status(409).json({ error: "Cette tentative de paiement a déjà été validée." });\n          }\n          return res.status(409).json({ error: "Cette tentative de paiement est déjà en cours. Réessaie depuis le panier si nécessaire." });\n        }\n      }'''
+          if old_body in s and 'const paymentRequestKey = String(req.body?.idempotency_key' not in s:
+              s = s.replace(old_body, new_body, 1)
+
+          old_insert = '''`INSERT INTO orders (status,customer,payment,items,total,payment_status,payment_method,paytech_ref)\n         VALUES ('Nouvelle',$1,$2,$3,$4,'En attente',$2,$5) RETURNING id`,\n        [JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total, refCommand]'''
+          new_insert = '''`INSERT INTO orders (status,customer,payment,items,total,payment_status,payment_method,paytech_ref,payment_request_key)\n         VALUES ('Nouvelle',$1,$2,$3,$4,'En attente',$2,$5,$6) RETURNING id`,\n        [JSON.stringify(orderCustomer), payment, JSON.stringify(finalItems), total, refCommand, paymentRequestKey || null]'''
+          if old_insert in s and 'payment_request_key)' not in s:
+              s = s.replace(old_insert, new_insert, 1)
+
+          old_update = '''      await pool.query(`UPDATE orders SET paytech_token=$1 WHERE id=$2`, [result.token || null, orderId]);\n      return res.status(201).json({ success: true, orderId, token: result.token || null, redirect_url: redirectUrl });'''
+          new_update = '''      await pool.query(`UPDATE orders SET paytech_token=$1,paytech_redirect_url=$2 WHERE id=$3`, [result.token || null, redirectUrl, orderId]);\n      return res.status(201).json({ success: true, orderId, token: result.token || null, redirect_url: redirectUrl });'''
+          if old_update in s and 'paytech_redirect_url=$2' not in s:
+              s = s.replace(old_update, new_update, 1)
+
+          p.write_text(s, encoding='utf-8')
+
+          checkout = Path('public/paytech-checkout.js')
+          c = checkout.read_text(encoding='utf-8')
+          marker = '''  async function paytechCheckoutSubmit() {\n    // Prevent double taps/clicks from creating multiple payment sessions.\n    if (checkoutInProgress) return;'''
+          replacement = '''  function paymentAttemptKey() {\n    const storageKey = "sngamer.paytech.attempt";\n    try {\n      const current = sessionStorage.getItem(storageKey);\n      if (current && /^[A-Za-z0-9._:-]{16,120}$/.test(current)) return current;\n      const value = (crypto.randomUUID ? crypto.randomUUID() : `sng-${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`);\n      sessionStorage.setItem(storageKey, value);\n      return value;\n    } catch (_) {\n      return `sng-${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;\n    }\n  }\n\n  function clearPaymentAttemptKey() {\n    try { sessionStorage.removeItem("sngamer.paytech.attempt"); } catch (_) {}\n  }\n\n  async function paytechCheckoutSubmit() {\n    // Prevent double taps/clicks from creating multiple payment sessions.\n    if (checkoutInProgress) return;'''
+          if marker in c and 'function paymentAttemptKey()' not in c:
+              c = c.replace(marker, replacement, 1)
+
+          old_fetch_body = '''          payment,\n          items: basket.map((item) => ({'''
+          new_fetch_body = '''          payment,\n          idempotency_key: paymentAttemptKey(),\n          items: basket.map((item) => ({'''
+          if old_fetch_body in c and 'idempotency_key: paymentAttemptKey()' not in c:
+              c = c.replace(old_fetch_body, new_fetch_body, 1)
+
+          old_success = '''      window.location.assign(data.redirect_url);'''
+          new_success = '''      clearPaymentAttemptKey();\n      window.location.assign(data.redirect_url);'''
+          if old_success in c and 'clearPaymentAttemptKey();\n      window.location.assign' not in c:
+              c = c.replace(old_success, new_success, 1)
+
+          checkout.write_text(c, encoding='utf-8')
+          print('PayTech idempotency hardening applied.')
+
+      - name: Validate hardened payment code
+        shell: bash
+        run: |
+          set -e
+          node --check server/paytech.js
+          node --check public/paytech-checkout.js
+
       - name: Refresh admin workspace script version
         shell: python
         run: |
@@ -135,6 +199,6 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add server/server.js public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js .github/workflows/inject-admin-v24.yml
-          git commit -m 'security(admin): harden authentication and sessions'
+          git add server/server.js server/paytech.js public/paytech-checkout.js public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js .github/workflows/inject-admin-v24.yml
+          git commit -m 'security(payment): harden PayTech checkout idempotency'
           git push
