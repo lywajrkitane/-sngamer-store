@@ -12,29 +12,22 @@ const CLIENT_SCRIPT = String.raw`
     if(document.getElementById("sngPremiumPriceStyle")) return;
     const style=document.createElement("style");
     style.id="sngPremiumPriceStyle";
-    style.textContent=`
-      #products .card.productCardClickable .priceCurrent{
-        color:#63d9ff !important;
-        text-shadow:0 0 14px rgba(68,200,255,.18);
-      }
-      #products .card.productCardClickable .priceCurrent small{
-        color:#a9b9ca !important;
-        text-shadow:none;
-      }
-    `;
+    style.textContent=""+
+      "#products .card.productCardClickable .priceCurrent{"+
+        "color:#63d9ff !important;"+
+        "text-shadow:0 0 14px rgba(68,200,255,.18);"+
+      "}"+
+      "#products .card.productCardClickable .priceCurrent small{"+
+        "color:#a9b9ca !important;"+
+        "text-shadow:none;"+
+      "}";
     document.head.appendChild(style);
   }
 
   function cleanProfile(){
     const profile=document.getElementById("profileArea");
     if(!profile) return;
-
-    // The premium notice already contains the admin message + tracking reference.
-    // Keep the message, but never repeat the tracking reference inside that notice.
     profile.querySelectorAll(".sngCustomerOrderNotice .sngCustomerOrderTracking").forEach(el=>el.remove());
-
-    // The legacy order metadata repeats the same tracking/message information.
-    // Remove only exact standalone duplicate rows; payment/status/tracking timeline stay intact.
     profile.querySelectorAll(".sgaOrder *").forEach(el=>{
       if(el.closest(".sngCustomerOrderNotice,.sngTracking")) return;
       if(el.children.length) return;
