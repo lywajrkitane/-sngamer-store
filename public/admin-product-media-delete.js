@@ -76,6 +76,7 @@
       showEmpty(preview);
       preview.dataset.sngMediaDeleted = '1';
       preview.dataset.sngMediaUrl = '';
+      button.closest('.sng-media-delete-wrap')?.remove();
     } catch (error) {
       alert(error.message || 'Impossible de supprimer le média.');
       button.disabled = false;
@@ -89,10 +90,14 @@
     if (!input || !preview) return;
 
     const existing = preview.parentElement?.querySelector('.sng-media-delete-wrap[data-slot="' + slot + '"]');
-    if (existing) existing.remove();
-
     const url = currentUrl(preview);
-    if (!url) return;
+
+    if (!url) {
+      existing?.remove();
+      return;
+    }
+
+    if (existing) return;
 
     const wrap = document.createElement('div');
     wrap.className = 'sng-media-delete-wrap';
@@ -126,11 +131,9 @@
     const observer = new MutationObserver(refresh);
     observer.observe(modal, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
-    MEDIA.forEach(([inputId, previewId]) => {
+    MEDIA.forEach(([inputId]) => {
       const input = document.getElementById(inputId);
-      if (input) input.addEventListener('change', () => {
-        setTimeout(refresh, 0);
-      });
+      if (input) input.addEventListener('change', () => setTimeout(refresh, 0));
     });
 
     refresh();
