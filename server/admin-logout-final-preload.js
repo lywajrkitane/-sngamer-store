@@ -2,8 +2,7 @@
 
 // Final guard for the shared admin/customer session.
 // The application historically uses one express-session cookie for both areas.
-// Admin logout must therefore remove ONLY the admin identity and must never
-// destroy the shared session or clear sngamer.sid while a customer is signed in.
+// Admin authentication must therefore never erase an already signed-in customer.
 const express = require('express');
 
 if (!express.application.__sngamerFinalAdminLogoutPatch) {
@@ -17,6 +16,61 @@ if (!express.application.__sngamerFinalAdminLogoutPatch) {
     try {
       const stack = app._router && app._router.stack;
       if (Array.isArray(stack)) {
+        // ADMIN LOGIN: preserve an existing customer session while the
+        // original handler validates the administrator credentials.
+        for (const layer of stack) {
+          const route = layer && layer.route;
+          if (!route || route.path !== '/api/admin/login' || !route.methods?.post) continue;
+          if (route.__sngamerFinalLoginPatched) continue;
+
+          const routeLayers = Array.isArray(route.stack) ? route.stack.slice() : [];
+          if (!routeLayers.length) continue;
+
+          route.__sngamerFinalLoginPatched = true;
+          const originalHandler = routeLayers[0].handle;
+          const primaryLayer = routeLayers[0];
+
+          primaryLayer.handle = function finalAdminLoginHandler(req, res, next) {
+            if (!req.session || !req.session.customerId) {
+              return originalHandler(req, res, next);
+            }
+
+            const originalRegenerate = req.session.regenerate;
+            let restored = false;
+
+            // The original admin route calls regenerate(). When a customer is
+            // already signed in, keep this same PostgreSQL-backed session so
+            // customerId/customerName cannot be lost during admin login.
+            req.session.regenerate = function preserveCustomerSession(callback) {
+              return callback(null);
+            };
+
+            const restoreRegenerate = () => {
+              if (restored) return;
+              restored = true;
+              req.session.regenerate = originalRegenerate;
+            };
+
+            try {
+              const result = originalHandler(req, res, next);
+              if (result && typeof result.finally === 'function') {
+                return result.finally(restoreRegenerate);
+              }
+              restoreRegenerate();
+              return result;
+            } catch (error) {
+              restoreRegenerate();
+              throw error;
+            }
+          };
+
+          route.stack = routeLayers;
+          console.log('SNGAMER_FINAL_ADMIN_LOGIN_PATCH: customer session preserved');
+          break;
+        }
+
+        // ADMIN LOGOUT: remove ONLY the admin identity. Never destroy or
+        // clear the shared session while a customer is signed in.
         for (const layer of stack) {
           const route = layer && layer.route;
           if (!route || route.path !== '/api/admin/logout' || !route.methods?.post) continue;
@@ -59,10 +113,7 @@ if (!express.application.__sngamerFinalAdminLogoutPatch) {
             return runOriginal();
           };
 
-          // Only the replacement handler is needed. Keeping the remaining
-          // legacy handlers would allow a second response/destroy() call.
           route.stack = [primaryLayer];
-
           console.log('SNGAMER_FINAL_ADMIN_LOGOUT_PATCH: active');
           break;
         }
