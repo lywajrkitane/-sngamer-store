@@ -3298,6 +3298,28 @@ async function loadAll() {
   box-sizing:border-box;
 }
 
+#editProductModal .edit-product-close{
+  position:absolute !important;
+  top:16px !important;
+  right:16px !important;
+  z-index:50 !important;
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  font-size:27px;
+  line-height:1;
+  cursor:pointer;
+  pointer-events:auto !important;
+}
+#editProductModal .edit-product-header{padding-right:52px}
+#orderDetailsModal .order-details-close{z-index:50 !important;pointer-events:auto !important}
+
 @media(max-width:700px){
 
   .edit-product-modal{
@@ -3856,5 +3878,26 @@ async function loadAll() {
 <script src="/admin-data-fix.js?v=20261018-1220"></script>
 <script src="/premium-dialogs-v1.js?v=20261018-1835"></script>
 <script src="/premium-select-guard-v1.js?v=20261018-1835"></script>
+<script id="sng-admin-modal-close-guard-v1">
+(function(){
+  function bindClose(modalSelector,buttonSelector){
+    const modal=document.querySelector(modalSelector);
+    const button=modal&&modal.querySelector(buttonSelector);
+    if(!modal||!button||button.dataset.sngCloseGuard==="1")return;
+    button.dataset.sngCloseGuard="1";
+    button.type="button";
+    button.addEventListener("click",function(event){
+      event.preventDefault();
+      modal.classList.remove("show");
+    },true);
+  }
+  function boot(){
+    bindClose("#editProductModal",".edit-product-close");
+    bindClose("#orderDetailsModal",".order-details-close");
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});
+  else boot();
+})();
+</script>
 </body>
 </html>
