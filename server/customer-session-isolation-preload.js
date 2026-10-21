@@ -1,9 +1,56 @@
 'use strict';
 
-// The admin and customer areas share the same browser session cookie.
+// Admin and customer currently share the same browser session cookie.
 // Keep the customer identity alive when the admin session is rotated or
-// when the admin logs out.
+// when the admin logs out. This preload is intentionally defensive because
+// legacy admin logout code still calls session.destroy()/clearCookie().
 const expressSession = require('express-session');
+const express = require('express');
+
+// Route-level guard: intercept the admin logout handler at registration time.
+// This runs before server.js can execute its legacy destroy()/clearCookie()
+// implementation, so the customer session cannot be lost.
+const originalApplicationPost = express.application.post;
+if (!express.application.__sngamerAdminLogoutRoutePatched) {
+  express.application.__sngamerAdminLogoutRoutePatched = true;
+
+  express.application.post = function patchedPost(path, ...handlers) {
+    if (path === '/api/admin/logout' && handlers.length > 0) {
+      const originalHandlers = handlers.slice();
+
+      return originalApplicationPost.call(this, path, (req, res, next) => {
+        if (req.session && req.session.customerId) {
+          delete req.session.admin;
+          return req.session.save((saveError) => {
+            if (saveError) {
+              console.error('SNGAMER_ADMIN_LOGOUT_CUSTOMER_PRESERVE_ERROR:', saveError);
+              return res.status(500).json({
+                error: 'Impossible de fermer la session administrateur'
+              });
+            }
+
+            return res.json({
+              success: true,
+              customerSessionPreserved: true
+            });
+          });
+        }
+
+        // No customer is signed in, so retain the original logout behavior.
+        let index = 0;
+        const runOriginal = (err) => {
+          if (err) return next(err);
+          const handler = originalHandlers[index++];
+          if (!handler) return next();
+          return handler(req, res, runOriginal);
+        };
+        return runOriginal();
+      });
+    }
+
+    return originalApplicationPost.call(this, path, ...handlers);
+  };
+}
 
 const patchedSession = function customerSafeSession(options = {}) {
   const middleware = expressSession(options);
@@ -35,10 +82,6 @@ const patchedSession = function customerSafeSession(options = {}) {
           });
         };
 
-        // A customer session must never be destroyed by an admin logout.
-        // This is intentionally based only on customerId, not on the admin
-        // flag, because the admin flag may already have been cleared by
-        // another middleware before legacy logout code runs.
         const originalDestroy = req.session.destroy.bind(req.session);
         req.session.destroy = function preserveCustomerOnDestroy(callback) {
           if (req.session.customerId) {
@@ -51,23 +94,7 @@ const patchedSession = function customerSafeSession(options = {}) {
 
       installSessionGuards();
 
-      // HARD GUARD: intercept every POST variant of the admin logout endpoint
-      // before server.js can call destroy() or clearCookie(). Use originalUrl
-      // as the primary check so this remains reliable even if Express has not
-      // populated req.path yet.
-      const requestPath = String(req.originalUrl || req.url || '').split('?')[0];
-      if (req.method === 'POST' && requestPath === '/api/admin/logout' && req.session.customerId) {
-        delete req.session.admin;
-        return req.session.save((saveError) => {
-          if (saveError) {
-            console.error('SNGAMER_ADMIN_LOGOUT_SAVE_ERROR:', saveError);
-            return res.status(500).json({ error: 'Impossible de fermer la session administrateur' });
-          }
-          return res.json({ success: true, customerSessionPreserved: true });
-        });
-      }
-
-      // Legacy logout code may still attempt to clear the shared cookie.
+      // Legacy code may still try to clear the shared cookie.
       if (!res.__sngamerCustomerCookieGuardPatched) {
         const originalClearCookie = res.clearCookie.bind(res);
         res.clearCookie = function preserveCustomerCookie(name, options) {
