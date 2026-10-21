@@ -64,8 +64,103 @@
 @media(min-width:701px){.sngFavoritesGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
   `;document.head.appendChild(style)}
 
-  async function renderFavoritesCard(){const root=[...document.querySelectorAll('main,section,div')].find(el=>/Espace client/i.test(el.textContent||'')&&el.children.length>1);if(!root||root.querySelector('.sngFavoritesCard'))return;const me=await customer();if(!me)return;const r=await nativeFetch('/api/customer/favorites',{credentials:'same-origin',cache:'no-store'});if(!r.ok)return;const d=await r.json(),list=Array.isArray(d.products)?d.products:[];const card=document.createElement('section');card.className='sngFavoritesCard';card.innerHTML='<h3>❤️ Mes favoris</h3>'+(list.length?'<div class="sngFavoritesGrid">'+list.slice(0,8).map(p=>`<button type="button" class="sngFavoriteItem" data-fav-id="${Number(p.id)}">${p.image1_url?`<img src="${esc(p.image1_url)}" alt="${esc(p.name)}">`:'<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:38px">'+esc(p.emoji||'🎮')+'</div>'}<strong>${esc(p.name||'Produit')}</strong><small>${money(Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?p.promo_price:p.price)}</small></button>`).join('')+'</div>':'<div class="sngFavEmpty">Tu n’as encore aucun produit favori. Ajoute un produit avec le bouton ♡ depuis sa fiche.</div>');const anchor=root.querySelector('h1,h2,h3')?.parentElement||root.firstElementChild;if(anchor)anchor.after(card);else root.prepend(card);card.querySelectorAll('[data-fav-id]').forEach(b=>b.addEventListener('click',()=>{if(typeof window.openProduct==='function')window.openProduct(Number(b.dataset.favId))}))}
-  window.sngRefreshFavorites=async function(){favoritesLoaded=false;await loadFavorites();document.querySelectorAll('.sngFavoritesCard').forEach(x=>x.remove());setTimeout(renderFavoritesCard,80)};
+  function removeLeakedFavoritesCards(profileRoot) {
+    document.querySelectorAll('.sngFavoritesCard').forEach(card => {
+      if (!profileRoot || !profileRoot.contains(card)) card.remove();
+    });
+  }
+
+  async function renderFavoritesCard() {
+    const profileRoot = document.getElementById('profileArea');
+    const section = String(window.activeStoreSection || document.body?.dataset.storeSection || 'home');
+    const profileActive = section === 'profile' || document.body?.dataset.storeSection === 'profile';
+
+    // Favorites belong only to the customer profile. Never attach them to
+    // main#shop or another ancestor that merely contains the profile title.
+    if (!profileRoot || !profileActive) {
+      removeLeakedFavoritesCards(profileRoot);
+      return;
+    }
+
+    const existingCards = Array.from(profileRoot.querySelectorAll('.sngFavoritesCard'));
+    existingCards.slice(1).forEach(card => card.remove());
+    if (existingCards.length) {
+      removeLeakedFavoritesCards(profileRoot);
+      return;
+    }
+    if (profileRoot.dataset.sngFavoritesLoading === '1') return;
+    profileRoot.dataset.sngFavoritesLoading = '1';
+
+    try {
+      const me = await customer();
+      if (!me) return;
+      const response = await nativeFetch('/api/customer/favorites', {
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      const list = Array.isArray(data.products) ? data.products : [];
+
+      // The user may navigate away while the request is in flight.
+      const currentSection = String(window.activeStoreSection || document.body?.dataset.storeSection || 'home');
+      if (!profileRoot.isConnected ||
+          document.getElementById('profileArea') !== profileRoot ||
+          (currentSection !== 'profile' && document.body?.dataset.storeSection !== 'profile')) {
+        removeLeakedFavoritesCards(profileRoot);
+        return;
+      }
+
+      const alreadyInserted = profileRoot.querySelector('.sngFavoritesCard');
+      if (alreadyInserted) {
+        profileRoot.querySelectorAll('.sngFavoritesCard').forEach((card, index) => {
+          if (index > 0) card.remove();
+        });
+        removeLeakedFavoritesCards(profileRoot);
+        return;
+      }
+
+      const card = document.createElement('section');
+      card.className = 'sngFavoritesCard';
+      card.dataset.sngFavoritesCard = '1';
+      card.innerHTML = '<h3>❤️ Mes favoris</h3>' + (
+        list.length
+          ? '<div class="sngFavoritesGrid">' + list.slice(0, 8).map(p =>
+              `<button type="button" class="sngFavoriteItem" data-fav-id="${Number(p.id)}">` +
+                (p.image1_url
+                  ? `<img src="${esc(p.image1_url)}" alt="${esc(p.name)}">`
+                  : '<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:38px">' + esc(p.emoji || '🎮') + '</div>') +
+                `<strong>${esc(p.name || 'Produit')}</strong><small>${money(Boolean(p.promo_active) && Number(p.promo_price) > 0 && Number(p.promo_price) < Number(p.price) ? p.promo_price : p.price)}</small></button>`
+            ).join('') + '</div>'
+          : '<div class="sngFavEmpty">Tu n’as encore aucun produit favori. Ajoute un produit avec le bouton ♡ depuis sa fiche.</div>'
+      );
+
+      // Insert exactly once inside #profileArea, below the profile header.
+      const header = profileRoot.querySelector('.sngProfileHeader');
+      if (header) header.insertAdjacentElement('afterend', card);
+      else profileRoot.appendChild(card);
+
+      card.querySelectorAll('[data-fav-id]').forEach(button => {
+        button.addEventListener('click', () => {
+          if (typeof window.openProduct === 'function') window.openProduct(Number(button.dataset.favId));
+        });
+      });
+      removeLeakedFavoritesCards(profileRoot);
+    } catch (error) {
+      console.error('SNGAMER_FAVORITES_RENDER_ERROR', error);
+    } finally {
+      delete profileRoot.dataset.sngFavoritesLoading;
+    }
+  }
+
+  window.sngRefreshFavorites = async function () {
+    favoritesLoaded = false;
+    await loadFavorites();
+    const profileRoot = document.getElementById('profileArea');
+    if (profileRoot) profileRoot.querySelectorAll('.sngFavoritesCard').forEach(card => card.remove());
+    removeLeakedFavoritesCards(profileRoot);
+    await renderFavoritesCard();
+  };
   function patchOpenProduct(){if(typeof window.openProduct!=='function')return false;if(window.__sngProductSocialPatched)return true;const original=window.openProduct;window.openProduct=function(id){currentProductId=Number(id);const result=original.apply(this,arguments);setTimeout(injectSocial,30);setTimeout(injectSocial,220);return result};window.__sngProductSocialPatched=true;const hash=location.hash.match(/^#product=(\d+)$/);if(hash)setTimeout(()=>window.openProduct(Number(hash[1])),350);return true}
   function watch(){installStyles();patchOpenProduct();renderFavoritesCard();if(!window.__sngProductSocialObserver){window.__sngProductSocialObserver=new MutationObserver(()=>{patchOpenProduct();renderFavoritesCard()});window.__sngProductSocialObserver.observe(document.body,{childList:true,subtree:true})}}
   window.addEventListener('hashchange',()=>{const m=location.hash.match(/^#product=(\d+)$/);if(m&&typeof window.openProduct==='function')window.openProduct(Number(m[1]))});
