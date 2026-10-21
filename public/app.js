@@ -539,8 +539,26 @@ function selectProductImage(index){
 }
 
 function closeProduct(){
-  document.querySelector("#productModal").classList.remove("show");
+  const modal = document.getElementById("productModal");
+  if (modal) {
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
 }
+window.closeProduct = closeProduct;
+
+// Reliable close-button binding for touch browsers as well as desktop.
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById("productModal");
+  const closeButton = modal?.querySelector(".productBox > .x");
+  if (!modal || !closeButton || closeButton.dataset.sngCloseBound === "1") return;
+  closeButton.dataset.sngCloseBound = "1";
+  closeButton.type = "button";
+  closeButton.addEventListener("click", function (event) {
+    event.preventDefault();
+    closeProduct();
+  }, true);
+});
 /* =================================
 /* =================================
    HERO — CARROUSEL PROMOTIONNEL
