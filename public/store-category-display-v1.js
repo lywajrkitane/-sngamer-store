@@ -131,7 +131,7 @@
       body.sngStrictCategoryPage > .store-footer-content { display:none !important; }
 
       /* Favorites: a plain, real heart — no pill, gradient, frame or custom shape. */
-      .sngSocialBtn.sngFavBtn {
+      html body .sngSocialBtn.sngFavBtn {
         width:34px !important;
         min-width:34px !important;
         max-width:34px !important;
@@ -153,14 +153,14 @@
         justify-content:center !important;
         transform:none !important;
       }
-      .sngSocialBtn.sngFavBtn:hover,
-      .sngSocialBtn.sngFavBtn:active {
+      html body .sngSocialBtn.sngFavBtn:hover,
+      html body .sngSocialBtn.sngFavBtn:active {
         background:transparent !important;
         border:0 !important;
         box-shadow:none !important;
       }
-      .sngSocialBtn.sngFavBtn.isFavorite { color:#ff4f86 !important; background:transparent !important; border:0 !important; }
-      .sngSocialBtn.sngFavBtn:disabled { opacity:.55 !important; }
+      html body .sngSocialBtn.sngFavBtn.isFavorite { color:#ff4f86 !important; background:transparent !important; border:0 !important; }
+      html body .sngSocialBtn.sngFavBtn:disabled { opacity:.55 !important; }
     `;
     document.head.appendChild(style);
 
