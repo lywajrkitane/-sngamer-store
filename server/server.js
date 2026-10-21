@@ -241,9 +241,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("trust proxy", 1);
 
-const CUSTOMER_SESSION_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
-const ADMIN_SESSION_MAX_AGE = 8 * 60 * 60 * 1000;
-
 app.use(
   session({
     name: "sngamer.sid",
@@ -255,7 +252,7 @@ app.use(
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: CUSTOMER_SESSION_MAX_AGE
+      maxAge: 1000 * 60 * 60 * 8
     }
   })
 );
@@ -583,8 +580,7 @@ app.get(
           refunded_at,
           refund_provider_message,
           items,
-          total,
-          customer_id
+          total
         FROM orders
         ORDER BY created_at DESC
       `);
@@ -592,25 +588,1006 @@ app.get(
       res.json(result.rows);
     } catch (error) {
       console.error("ADMIN_ORDERS_ERROR:", error);
-      res.status(500).json({ error: "Impossible de charger les commandes" });
+
+      res.status(500).json({
+        error: "Impossible de charger les commandes"
+      });
+    }
+  }
+);
+
+app.patch(
+  "/api/admin/orders/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const orderId = Number(req.params.id);
+      const { status } = req.body;
+
+      const allowedStatuses = [
+  "Nouvelle",
+  "Confirmée",
+  "En préparation",
+  "Expédiée",
+  "Livrée",
+  "Annulée"
+];
+
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          error: "Statut invalide"
+        });
+      }
+
+      const result = await db(
+        `
+        UPDATE orders
+        SET status = $1
+        WHERE id = $2
+        RETURNING *
+        `,
+        [status, orderId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Commande introuvable"
+        });
+      }
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("UPDATE_ORDER_ERROR:", error);
+
+      res.status(500).json({
+        error: "Impossible de modifier la commande"
+      });
     }
   }
 );
 
 /* =========================
-   SERVER START
+   ADMIN PRODUCTS
 ========================= */
 
-async function startServer() {
-  try {
-    await initDb();
-    app.listen(PORT, () => {
-      console.log(`SNGAMER Store running on port ${PORT}`);
+app.post("/api/admin/products", requireAdmin, async (req, res) => {
+  const {
+  name,
+  category,
+  platform,
+  price,
+  stock,
+  emoji,
+  description,
+  promo_price,
+  promo_active,
+  campaign_id
+} = req.body;
+
+  const p = {
+  name: String(name || "").trim(),
+  category: String(category || "Accessoires").trim(),
+  platform: category === "Coins" ? String(platform || "").trim() : null,
+  price: Number(price),
+  stock: Number(stock),
+  emoji: emoji || "🎮",
+  description: String(description || "").trim(),
+  promo_price:
+    promo_price !== null && promo_price !== undefined && promo_price !== ""
+      ? Number(promo_price)
+      : null,
+  promo_active: Boolean(promo_active),
+  campaign_id:
+    campaign_id !== null && campaign_id !== undefined && campaign_id !== ""
+      ? Number(campaign_id)
+      : null
+  };
+
+  if (
+    !p.name ||
+    !Number.isFinite(p.price) ||
+    p.price < 0 ||
+    !Number.isInteger(p.stock) ||
+    p.stock < 0
+  ) {
+    return res.status(400).json({
+      error: "Produit invalide"
     });
-  } catch (error) {
-    console.error("STARTUP_ERROR:", error);
-    process.exit(1);
   }
+  if (
+  p.promo_price !== null &&
+  (
+    !Number.isFinite(p.promo_price) ||
+    p.promo_price <= 0 ||
+    p.promo_price >= p.price
+  )
+) {
+  return res.status(400).json({
+    error: "Le prix promotionnel doit être positif et inférieur au prix normal."
+  });
 }
 
-startServer();
+if (
+  p.promo_active &&
+  p.promo_price === null
+) {
+  return res.status(400).json({
+    error: "Indiquez un prix promotionnel pour activer la promotion."
+  });
+}
+
+  try {
+    const r = await db(
+   `
+  INSERT INTO products
+    (
+      name,
+      category,
+      platform,
+      price,
+      stock,
+      emoji,
+      description,
+      promo_price,
+      promo_active,
+      campaign_id
+    )
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+  RETURNING *
+  `,
+  [
+    p.name,
+    p.category,
+    p.platform,
+    p.price,
+    p.stock,
+    p.emoji,
+    p.description,
+    p.promo_price,
+    p.promo_active,
+    p.campaign_id
+  ]
+    );
+
+    res.json({
+      success: true,
+      product: r.rows[0]
+    });
+
+  } catch (error) {
+    console.error("CREATE_PRODUCT_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible d'ajouter le produit"
+    });
+  }
+});
+/* =========================================
+   CAMPAGNES — ADMIN API
+========================================= */
+
+// Récupérer toutes les campagnes
+app.get("/api/admin/campaigns", requireAdmin, async (req, res) => {
+  try {
+    const result = await db(`
+      SELECT
+        c.id,
+        c.name,
+        c.sticker,
+        c.right_sticker,
+        c.description,
+        c.active,
+        c.start_date,
+        c.end_date,
+        c.created_at,
+        COUNT(p.id)::int AS products_count
+      FROM campaigns c
+      LEFT JOIN products p
+        ON p.campaign_id = c.id
+      GROUP BY c.id
+      ORDER BY c.created_at DESC
+    `);
+
+    res.json(result.rows);
+
+  } catch (error) {
+
+    console.error("GET_CAMPAIGNS_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de charger les campagnes"
+    });
+
+  }
+});
+
+
+// Créer une campagne
+app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
+
+  const {
+  name,
+  sticker = "",
+  right_sticker: rightSticker = "",
+  description = "",
+  active = false,
+  start_date = null,
+  end_date = null
+} = req.body;
+
+  if (!name || !name.trim()) {
+
+    return res.status(400).json({
+      error: "Le nom de la campagne est obligatoire"
+    });
+
+  }
+
+  try {
+
+    const result = await db(
+      `
+      INSERT INTO campaigns
+        (name, sticker, right_sticker, description, active, start_date, end_date)
+      VALUES
+        ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING
+        id,
+        name,
+        sticker,
+        right_sticker,
+        description,
+        active,
+        start_date,
+        end_date,
+        created_at
+    `,
+    [
+      name.trim(),
+      sticker,
+      rightSticker,
+      description,
+      Boolean(active),
+      start_date || null,
+      end_date || null
+    ]
+  );
+
+
+    res.status(201).json({
+      success: true,
+      campaign: result.rows[0]
+    });
+
+  } catch (error) {
+
+    console.error("CREATE_CAMPAIGN_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de créer la campagne"
+    });
+
+  }
+
+});
+
+
+// Modifier une campagne
+app.patch("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
+
+  const { id } = req.params;
+
+  const {
+    name,
+    sticker,
+    right_sticker,
+    description,
+    active,
+    start_date,
+    end_date
+} = req.body;
+
+  try {
+
+    
+const result = await db(
+  `
+    UPDATE campaigns
+    SET
+      name = COALESCE($1, name),
+      sticker = COALESCE($2, sticker),
+      right_sticker = COALESCE($3, right_sticker),
+      description = COALESCE($4, description),
+      active = COALESCE($5, active),
+      start_date = COALESCE($6, start_date),
+end_date = COALESCE($7, end_date)
+    WHERE id = $8
+    RETURNING
+      id,
+      name,
+      sticker,
+      right_sticker,
+      description,
+      active,
+      start_date,
+      end_date,
+      created_at
+  `,
+  [
+    name !== undefined ? name.trim() : null,
+    sticker !== undefined ? sticker : null,
+    right_sticker !== undefined ? right_sticker : null,
+    description !== undefined ? description : null,
+    active !== undefined ? Boolean(active) : null,
+    start_date || null,
+    end_date || null,
+    id
+  ]
+);
+
+
+    if (!result.rows.length) {
+
+      return res.status(404).json({
+        error: "Campagne introuvable"
+      });
+
+    }
+
+    res.json({
+      success: true,
+      campaign: result.rows[0]
+    });
+
+  } catch (error) {
+
+    console.error("UPDATE_CAMPAIGN_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de modifier la campagne"
+    });
+
+  }
+
+});
+
+
+// Supprimer une campagne
+app.delete("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+
+    const result = await db(
+      `
+      DELETE FROM campaigns
+      WHERE id = $1
+      RETURNING id
+      `,
+      [id]
+    );
+
+    if (!result.rows.length) {
+
+      return res.status(404).json({
+        error: "Campagne introuvable"
+      });
+
+    }
+
+    res.json({
+      success: true
+    });
+
+  } catch (error) {
+
+    console.error("DELETE_CAMPAIGN_ERROR:", error);
+
+    res.status(500).json({
+      error: "Impossible de supprimer la campagne"
+    });
+
+  }
+
+});
+app.patch(
+  "/api/admin/products/:id",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const productId = Number(req.params.id);
+
+      if (!Number.isInteger(productId)) {
+
+        return res.status(400).json({
+          error: "ID produit invalide"
+        });
+
+      }
+
+      const {
+  name,
+  category,
+  platform,
+  price,
+  stock,
+  emoji,
+  description,
+  promo_price,
+  promo_active,
+  campaign_id
+} = req.body;
+
+
+      /*
+       * =========================================
+       * VALIDATION DES PROMOTIONS
+       * =========================================
+       */
+
+      const promoPriceProvided =
+        promo_price !== undefined;
+
+      const promoActiveProvided =
+        promo_active !== undefined;
+
+      const campaignIdProvided =
+        campaign_id !== undefined;
+
+
+      let promoPriceValue = null;
+
+      if (promoPriceProvided) {
+
+        if (
+          promo_price !== null &&
+          promo_price !== ""
+        ) {
+
+          promoPriceValue = Number(promo_price);
+
+          if (
+            !Number.isFinite(promoPriceValue) ||
+            promoPriceValue < 0
+          ) {
+
+            return res.status(400).json({
+              error: "Prix promotionnel invalide"
+            });
+
+          }
+
+        }
+
+      }
+
+
+      let campaignIdValue = null;
+
+      if (campaignIdProvided) {
+
+        if (
+          campaign_id !== null &&
+          campaign_id !== ""
+        ) {
+
+          campaignIdValue = Number(campaign_id);
+
+          if (
+            !Number.isInteger(campaignIdValue) ||
+            campaignIdValue <= 0
+          ) {
+
+            return res.status(400).json({
+              error: "Campagne invalide"
+            });
+
+          }
+
+        }
+
+      }
+
+
+      /*
+       * =========================================
+       * VÉRIFICATION DE LA CAMPAGNE
+       * =========================================
+       */
+
+      if (
+        campaignIdProvided &&
+        campaignIdValue !== null
+      ) {
+
+        const campaign = await db(
+          `
+          SELECT id
+          FROM campaigns
+          WHERE id = $1
+          `,
+          [campaignIdValue]
+        );
+
+        if (!campaign.rows.length) {
+
+          return res.status(404).json({
+            error: "Campagne introuvable"
+          });
+
+        }
+
+      }
+
+
+      /*
+       * =========================================
+       * MISE À JOUR DU PRODUIT
+       * =========================================
+       */
+
+      const result = await db(
+        `
+                UPDATE products
+        SET
+          name = COALESCE($1, name),
+          category = COALESCE($2, category),
+          platform = COALESCE($3, platform),
+          price = COALESCE($4, price),
+          stock = COALESCE($5, stock),
+          emoji = COALESCE($6, emoji),
+          description = COALESCE($7, description),
+
+          promo_price =
+            CASE
+              WHEN $8 = true THEN $9
+              ELSE promo_price
+            END,
+
+          promo_active =
+            CASE
+              WHEN $10 = true THEN $11
+              ELSE promo_active
+            END,
+
+          campaign_id =
+            CASE
+              WHEN $12 = true THEN $13
+              ELSE campaign_id
+            END
+
+        WHERE id = $14
+        RETURNING *
+        `,
+        [
+          name ?? null,
+          category ?? null,
+          platform !== undefined
+            ? (category === "Coins" ? String(platform || "").trim() || null : null)
+            : null,
+          price !== undefined ? Number(price) : null,
+          stock !== undefined ? Number(stock) : null,
+          emoji ?? null,
+          description ?? null,
+          promoPriceProvided,
+          promoPriceValue,
+          promoActiveProvided,
+          promo_active !== undefined ? Boolean(promo_active) : null,
+          campaignIdProvided,
+          campaignIdValue,
+          productId
+        ]
+      );
+
+
+      /*
+       * =========================================
+       * PRODUIT INTROUVABLE
+       * =========================================
+       */
+
+      if (result.rows.length === 0) {
+
+        return res.status(404).json({
+          error: "Produit introuvable"
+        });
+
+      }
+
+
+      /*
+       * =========================================
+       * RÉPONSE
+       * =========================================
+       */
+
+      res.json(result.rows[0]);
+
+
+    } catch (error) {
+
+      console.error(
+        "UPDATE_PRODUCT_ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Impossible de modifier le produit"
+      });
+
+    }
+
+  }
+);
+
+app.delete(
+  "/api/admin/products/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const productId = Number(req.params.id);
+
+      const result = await db(
+        `
+        DELETE FROM products
+        WHERE id = $1
+        RETURNING id
+        `,
+        [productId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Produit introuvable"
+        });
+      }
+
+      res.json({
+        success: true
+      });
+    } catch (error) {
+      console.error("DELETE_PRODUCT_ERROR:", error);
+
+      res.status(500).json({
+        error: "Impossible de supprimer le produit"
+      });
+    }
+  }
+);
+app.post(
+  "/api/admin/products/:id/media",
+  requireAdmin,
+  (req, res) => {
+    upload.fields([
+      { name: "image1", maxCount: 1 },
+      { name: "image2", maxCount: 1 },
+      { name: "image3", maxCount: 1 },
+      { name: "video", maxCount: 1 }
+    ])(req, res, async (uploadError) => {
+      if (uploadError) {
+        console.error("MEDIA_UPLOAD_ERROR:", uploadError);
+        return res.status(400).json({
+          error: uploadError.message || "Erreur lors de l'envoi des fichiers"
+        });
+      }
+
+      try {
+        const productId = Number(req.params.id);
+
+        if (!Number.isInteger(productId) || productId <= 0) {
+          return res.status(400).json({
+            error: "ID produit invalide"
+          });
+        }
+
+        const productResult = await db(
+          "SELECT id FROM products WHERE id = $1",
+          [productId]
+        );
+
+        if (productResult.rows.length === 0) {
+          return res.status(404).json({
+            error: "Produit introuvable"
+          });
+        }
+
+        const files = req.files || {};
+
+        const image1 = files.image1?.[0];
+        const image2 = files.image2?.[0];
+        const image3 = files.image3?.[0];
+        const video = files.video?.[0];
+
+        if (!image1 && !image2 && !image3 && !video) {
+          return res.status(400).json({
+            error: "Aucun fichier envoyé"
+          });
+        }
+
+        const uploaded = {};
+
+        if (image1) {
+  const result = await uploadToCloudinary(
+    image1.buffer,
+    "image",
+    `sngamer-store/products/${productId}`
+  );
+
+  uploaded.image1_url = result.secure_url;
+
+  const mainImageResult = await db(
+    `
+    SELECT main_image_url
+    FROM products
+    WHERE id = $1
+    `,
+    [productId]
+  );
+
+  if (
+    mainImageResult.rows.length &&
+    !mainImageResult.rows[0].main_image_url
+  ) {
+    uploaded.main_image_url = result.secure_url;
+  }
+        }
+
+        if (image2) {
+          const result = await uploadToCloudinary(
+            image2.buffer,
+            "image",
+            `sngamer-store/products/${productId}`
+          );
+          uploaded.image2_url = result.secure_url;
+        }
+
+        if (image3) {
+          const result = await uploadToCloudinary(
+            image3.buffer,
+            "image",
+            `sngamer-store/products/${productId}`
+          );
+          uploaded.image3_url = result.secure_url;
+        }
+
+        if (video) {
+          const result = await uploadToCloudinary(
+            video.buffer,
+            "video",
+            `sngamer-store/products/${productId}`
+          );
+          uploaded.video_url = result.secure_url;
+        }
+
+        const fields = [];
+        const values = [];
+        let index = 1;
+
+        for (const [column, value] of Object.entries(uploaded)) {
+          fields.push(`${column} = $${index}`);
+          values.push(value);
+          index++;
+        }
+
+        values.push(productId);
+
+        const result = await db(
+          `
+          UPDATE products
+          SET ${fields.join(", ")}
+          WHERE id = $${index}
+          RETURNING *
+          `,
+          values
+        );
+
+        return res.json({
+          success: true,
+          product: result.rows[0]
+        });
+      } catch (error) {
+        console.error("PRODUCT_MEDIA_ERROR:", error);
+
+        return res.status(500).json({
+          error: "Impossible d'enregistrer les médias du produit"
+        });
+      }
+    });
+  }
+);
+// =========================================
+// MÉDIAS PROMOTIONNELS DU CARROUSEL
+// =========================================
+
+app.post(
+  "/api/admin/promo-media",
+  requireAdmin,
+  (req, res) => {
+    upload.single("media")(req, res, async (uploadError) => {
+
+      if (uploadError) {
+        console.error("PROMO_MEDIA_UPLOAD_ERROR:", uploadError);
+
+        return res.status(400).json({
+          error: uploadError.message || "Erreur lors de l'upload."
+        });
+      }
+
+      try {
+        const slot = Number(req.body.slot);
+        const file = req.file;
+
+        if (![1, 2, 3].includes(slot)) {
+          return res.status(400).json({
+            error: "Slot promotionnel invalide."
+          });
+        }
+
+        if (!file) {
+          return res.status(400).json({
+            error: "Aucun fichier sélectionné."
+          });
+        }
+
+        let mediaType;
+
+        if (file.mimetype.startsWith("image/")) {
+          mediaType = "image";
+        } else if (file.mimetype.startsWith("video/")) {
+          mediaType = "video";
+        } else {
+          return res.status(400).json({
+            error: "Format de média non autorisé."
+          });
+        }
+
+        const result = await uploadToCloudinary(
+          file.buffer,
+          mediaType,
+          "sngamer-store/promotions"
+        );
+
+        
+const campaignId = req.body.campaign_id
+  ? Number(req.body.campaign_id)
+  : null;
+
+const productId = req.body.product_id
+  ? Number(req.body.product_id)
+  : null;
+
+const promoResult = await db(
+  `
+  INSERT INTO promo_media
+    (slot, media_type, url, campaign_id, product_id, updated_at)
+  VALUES
+    ($1, $2, $3, $4, $5, NOW())
+  ON CONFLICT (slot)
+  DO UPDATE SET
+    media_type = EXCLUDED.media_type,
+    url = EXCLUDED.url,
+    campaign_id = EXCLUDED.campaign_id,
+    product_id = EXCLUDED.product_id,
+    updated_at = NOW()
+  RETURNING *
+  `,
+  [
+    slot,
+    mediaType,
+    result.secure_url,
+    campaignId,
+    productId
+  ]
+);
+
+
+        return res.json({
+          success: true,
+          promo: promoResult.rows[0]
+        });
+
+      } catch (error) {
+        console.error("PROMO_MEDIA_ERROR:", error);
+
+        return res.status(500).json({
+          error: "Impossible d'enregistrer le média promotionnel."
+        });
+      }
+    });
+  }
+);
+// =========================================
+// RÉCUPÉRER LES MÉDIAS PROMOTIONNELS
+// =========================================
+
+app.get("/api/promo-media", async (req, res) => {
+  try {
+    const result = await db(`
+  SELECT
+    pm.slot,
+    pm.media_type,
+    pm.url,
+    pm.updated_at,
+    pm.campaign_id,
+    pm.product_id,
+
+    c.name AS campaign_name,
+    c.sticker AS campaign_sticker,
+    c.right_sticker AS campaign_right_sticker,
+    c.active AS campaign_active,
+    c.start_date AS campaign_start_date,
+    c.end_date AS campaign_end_date,
+
+    p.name AS product_name,
+    p.price AS product_price,
+    p.promo_price AS product_promo_price,
+    p.promo_active AS product_promo_active,
+    p.emoji AS product_emoji
+
+  FROM promo_media pm
+
+  INNER JOIN campaigns c
+    ON c.id = pm.campaign_id
+
+  LEFT JOIN products p
+    ON p.id = pm.product_id
+
+  WHERE c.active = true
+
+    AND (
+      c.start_date IS NULL
+      OR c.start_date <= NOW()
+    )
+
+    AND (
+      c.end_date IS NULL
+      OR c.end_date > NOW()
+    )
+
+  ORDER BY pm.slot ASC
+`);
+
+    return res.json({
+      success: true,
+      promos: result.rows
+    });
+
+  } catch (error) {
+    console.error("PROMO_MEDIA_GET_ERROR:", error);
+
+    return res.status(500).json({
+      error: "Impossible de récupérer les médias promotionnels."
+    });
+  }
+});
+/* =========================
+   FRONTEND
+========================= */
+
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "..", "public", "index.html")
+  );
+});
+
+/* =========================
+   START SERVER
+========================= */
+
+initDb()
+  .then(() => {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(
+        `SNGAMER STORE running on port ${PORT}`
+      );
+    });
+  })
+  .catch((error) => {
+    console.error("DATABASE_INITIALIZATION_ERROR:", error);
+    process.exit(1);
+  });
