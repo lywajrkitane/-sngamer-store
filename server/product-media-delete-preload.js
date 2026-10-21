@@ -1,22 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 
-(function installProductMediaDeleteRoute() {
+(function installProductMediaDelete() {
   try {
-    const file = path.join(__dirname, 'server.js');
-    if (!fs.existsSync(file)) return;
+    const serverFile = path.join(__dirname, 'server.js');
+    if (fs.existsSync(serverFile)) {
+      let text = fs.readFileSync(serverFile, 'utf8');
+      const marker = '/* SNGAMER PRODUCT MEDIA DELETE ROUTE V1 */';
 
-    let text = fs.readFileSync(file, 'utf8');
-    const marker = '/* SNGAMER PRODUCT MEDIA DELETE ROUTE V1 */';
-    if (text.includes(marker)) return;
-
-    const anchor = 'app.post(\n  "/api/admin/products/:id/media",';
-    if (!text.includes(anchor)) {
-      console.error('[product-media-delete] media upload route not found; route not installed');
-      return;
-    }
-
-    const route = `
+      if (!text.includes(marker)) {
+        const anchor = 'app.post(\n  "/api/admin/products/:id/media",';
+        if (!text.includes(anchor)) {
+          console.error('[product-media-delete] media upload route not found; route not installed');
+        } else {
+          const route = `
 ${marker}
 app.delete(
   "/api/admin/products/:id/media/:slot",
@@ -79,9 +76,26 @@ app.delete(
 
 `;
 
-    text = text.replace(anchor, route + anchor);
-    fs.writeFileSync(file, text, 'utf8');
-    console.log('[product-media-delete] delete-media route installed');
+          text = text.replace(anchor, route + anchor);
+          fs.writeFileSync(serverFile, text, 'utf8');
+          console.log('[product-media-delete] delete-media route installed');
+        }
+      }
+    }
+
+    const htmlFile = path.join(__dirname, '..', 'public', 'admin-dashboard.html');
+    if (fs.existsSync(htmlFile)) {
+      let html = fs.readFileSync(htmlFile, 'utf8');
+      const htmlMarker = 'admin-product-media-delete.js?v=20261021';
+      if (!html.includes(htmlMarker)) {
+        const script = '<script src="/admin-product-media-delete.js?v=20261021"></script>';
+        if (html.includes('</body>')) {
+          html = html.replace('</body>', script + '\n</body>');
+          fs.writeFileSync(htmlFile, html, 'utf8');
+          console.log('[product-media-delete] dashboard script installed');
+        }
+      }
+    }
   } catch (error) {
     console.error('[product-media-delete] preload failed:', error);
   }
