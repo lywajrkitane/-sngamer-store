@@ -82,12 +82,62 @@
     document.body.appendChild(script);
   }
 
+  function enrichProductPurchaseMeta(){
+    const modal=document.getElementById("productModal");
+    const detail=document.getElementById("productDetail");
+    if(!modal||!detail||!modal.classList.contains("show")||!Array.isArray(window.products))return;
+    const title=detail.querySelector(".productInfo h2,.productInfo h1,h2,h1");
+    const name=title?title.textContent.trim():"";
+    if(!name)return;
+    const p=window.products.find(x=>String(x.name||"").trim()===name)||window.products.find(x=>String(x.name||"").trim().toLowerCase()===name.toLowerCase());
+    if(!p)return;
+    const info=detail.querySelector(".productInfo")||detail;
+    let box=detail.querySelector(".sngProductPurchaseMeta");
+    if(!box){box=document.createElement("div");box.className="sngProductPurchaseMeta";const add=info.querySelector(".add");if(add)info.insertBefore(box,add);else info.appendChild(box)}
+    const normal=Number(p.price)||0;
+    const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<normal;
+    const saving=promoActive?normal-Number(p.promo_price):0;
+    const percent=promoActive?Math.round((saving/normal)*100):0;
+    const stock=Math.max(0,Number(p.stock)||0);
+    const fmt=v=>new Intl.NumberFormat("fr-FR").format(Math.round(v))+" FCFA";
+    box.innerHTML=`<div class="sngPurchaseMetaRow"><span class="sngStockPill ${stock>0?"is-stock":"is-out"}"><i></i>${stock>0?`En stock · ${stock} disponible${stock>1?"s":""}`:"Rupture de stock"}</span>${promoActive?`<span class="sngSavingPill">Économie ${fmt(saving)} · -${percent}%</span>`:""}</div>`;
+    const addBtn=info.querySelector(".add");
+    if(addBtn){addBtn.disabled=stock<=0;addBtn.setAttribute("aria-disabled",stock<=0?"true":"false");if(stock<=0)addBtn.textContent="Produit indisponible";}
+  }
+
+  function installProductMetaStyle(){
+    if(document.getElementById("sngProductMetaStyle"))return;
+    const s=document.createElement("style");s.id="sngProductMetaStyle";s.textContent=`
+      #productModal .sngProductPurchaseMeta{margin:14px 0 2px;padding:0}
+      #productModal .sngPurchaseMetaRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+      #productModal .sngStockPill,#productModal .sngSavingPill{display:inline-flex;align-items:center;min-height:34px;padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;line-height:1.15;border:1px solid rgba(100,150,210,.2);background:rgba(8,15,27,.72)}
+      #productModal .sngStockPill{color:#b9c9dc}.sngStockPill i{width:7px;height:7px;border-radius:50%;margin-right:7px;background:#35e58a;box-shadow:0 0 9px rgba(53,229,138,.55)}
+      #productModal .sngStockPill.is-out{color:#ff9d9d}.sngStockPill.is-out i{background:#ff5757;box-shadow:0 0 9px rgba(255,87,87,.45)}
+      #productModal .sngSavingPill{color:#ffe8a6;border-color:rgba(255,190,70,.22);background:rgba(255,170,40,.08)}
+      #productModal .productInfo .add:disabled{opacity:.62;cursor:not-allowed;filter:saturate(.65)}
+      @media(max-width:700px){#productModal .sngPurchaseMetaRow{gap:7px}#productModal .sngStockPill,#productModal .sngSavingPill{font-size:12px;min-height:32px;padding:6px 10px}}
+    `;document.head.appendChild(s);
+  }
+
+  function startProductEnhancement(){
+    installProductMetaStyle();
+    const modal=document.getElementById("productModal");
+    if(modal&&!modal.dataset.sngMetaObserver){
+      modal.dataset.sngMetaObserver="1";
+      new MutationObserver(()=>requestAnimationFrame(enrichProductPurchaseMeta)).observe(modal,{subtree:true,childList:true,attributes:true,attributeFilter:["class"]});
+    }
+    setTimeout(enrichProductPurchaseMeta,80);
+    setTimeout(enrichProductPurchaseMeta,300);
+  }
+
   document.addEventListener("DOMContentLoaded",()=>{
     polishPaymentUI();
     loadPaytechBridge();
+    startProductEnhancement();
   });
   setTimeout(()=>{
     polishPaymentUI();
     loadPaytechBridge();
+    startProductEnhancement();
   },250);
 })();
