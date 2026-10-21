@@ -75,6 +75,13 @@ function patchPayTech() {
 
   source = requireReplace(
     source,
+    '      ADD COLUMN IF NOT EXISTS refund_provider_message TEXT',
+    '      ADD COLUMN IF NOT EXISTS refund_provider_message TEXT,\n      ADD COLUMN IF NOT EXISTS stock_reserved_until TIMESTAMPTZ',
+    'stock reservation column migration'
+  );
+
+  source = requireReplace(
+    source,
     'SELECT id,payment_status,paytech_token,paytech_redirect_url FROM orders WHERE payment_request_key=$1 LIMIT 1',
     'SELECT id,payment_status,paytech_token,paytech_redirect_url,paytech_ref FROM orders WHERE payment_request_key=$1 LIMIT 1',
     'idempotent payment lookup'
