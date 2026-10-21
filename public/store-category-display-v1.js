@@ -1,23 +1,15 @@
-/* SNGAMER STORE — category display only
-   Keeps the existing filtering logic and product data untouched.
-
-   CATEGORY PAGE RULE:
-   - Home keeps the category chips.
-   - A bottom-navigation category page shows only its own products.
-   - No other category chips/navigation are shown on a category page.
-   - The shared storefront footer remains visible on every section.
-   - The Favorites control is a simple real heart glyph.
+/* SNGAMER STORE — stable section/category guard
+   Single-purpose, no global MutationObserver.
+   - Home keeps category chips.
+   - Bottom-nav category pages show only their own category products.
+   - Shared footer is never hidden by this file.
+   - Favorite remains a plain real heart.
+   - Empty promo space cannot stretch the Home hero.
 */
 (function () {
   "use strict";
 
-  const order = [
-    "Tous",
-    "Pièces eFootball",
-    "Souris",
-    "Accessoires",
-    "Gaming Phone"
-  ];
+  const order = ["Tous", "Pièces eFootball", "Souris", "Accessoires", "Gaming Phone"];
 
   function normalizeCategory(value) {
     return String(value == null ? "" : value)
@@ -27,9 +19,6 @@
       .replace(/[\u0300-\u036f]/g, "");
   }
 
-  /* The admin-selected category is authoritative on category pages.
-     Do not turn a product explicitly saved as "Souris" into "Accessoires"
-     merely because its name contains the word souris. */
   function strictCategory(product) {
     const raw = normalizeCategory(product && product.category);
     if (raw === "coins" || raw === "pieces efootball" || raw === "piece efootball") return "Coins";
@@ -57,8 +46,8 @@
   function patchCategories() {
     const area = document.getElementById("cats");
     if (!area) return;
-
     const section = String(window.activeStoreSection || document.body?.dataset.storeSection || "home");
+
     if (section !== "home") {
       area.hidden = true;
       area.style.display = "none";
@@ -67,8 +56,6 @@
     }
 
     const buttons = Array.from(area.querySelectorAll(".catbtn"));
-    if (!buttons.length) return;
-
     buttons.forEach(button => {
       const text = button.textContent.trim();
       if (text === "Coins" || text === "Coins / Pièces eFootball") button.textContent = "Pièces eFootball";
@@ -96,28 +83,35 @@
     if (catsArea) {
       catsArea.hidden = categoryPage;
       catsArea.style.display = categoryPage ? "none" : "";
-      if (categoryPage && catsArea.childElementCount) catsArea.replaceChildren();
+      if (categoryPage) catsArea.replaceChildren();
     }
     if (subcats) {
       subcats.hidden = true;
       subcats.style.display = "none";
       if (subcats.childElementCount) subcats.replaceChildren();
     }
-
     document.body.classList.toggle("sngStrictCategoryPage", categoryPage);
   }
 
-  function installCategoryIsolation() {
-    if (document.getElementById("sngStrictCategoryStyles")) return;
-
+  function installStyles() {
+    if (document.getElementById("sngStableSectionStyles")) return;
     const style = document.createElement("style");
-    style.id = "sngStrictCategoryStyles";
+    style.id = "sngStableSectionStyles";
     style.textContent = `
+      /* Category pages: no horizontal category selector and no Home hero. */
       body.sngStrictCategoryPage #cats,
-      body.sngStrictCategoryPage #navSubcategories { display:none !important; }
+      body.sngStrictCategoryPage #navSubcategories,
       body.sngStrictCategoryPage > .hero { display:none !important; }
 
-      /* Favorites: a plain real heart — no pill, gradient, frame or custom shape. */
+      /* Do not let an empty/uninitialized promo slot reserve hundreds of pixels. */
+      .hero:not(.has-active-promo):not(.has-no-promo) .promoArea { display:none !important; }
+      .hero:not(.has-active-promo):not(.has-no-promo) .heroIn {
+        min-height:auto !important;
+        padding-top:28px !important;
+        padding-bottom:30px !important;
+      }
+
+      /* Plain real heart: no pill, frame, gradient or custom button shape. */
       html body .sngSocialBtn.sngFavBtn {
         width:34px !important;
         min-width:34px !important;
@@ -132,60 +126,54 @@
         box-shadow:none !important;
         color:#dce7f4 !important;
         font-family:Arial,Helvetica,sans-serif !important;
-        font-size:27px !important;
+        font-size:28px !important;
         font-weight:400 !important;
         line-height:34px !important;
         display:inline-flex !important;
         align-items:center !important;
         justify-content:center !important;
+        gap:0 !important;
         transform:none !important;
       }
       html body .sngSocialBtn.sngFavBtn:hover,
-      html body .sngSocialBtn.sngFavBtn:active {
-        background:transparent !important;
+      html body .sngSocialBtn.sngFavBtn:active,
+      html body .sngSocialBtn.sngFavBtn.isFavorite {
         border:0 !important;
+        background:transparent !important;
         box-shadow:none !important;
       }
-      html body .sngSocialBtn.sngFavBtn.isFavorite { color:#ff4f86 !important; background:transparent !important; border:0 !important; }
-      html body .sngSocialBtn.sngFavBtn:disabled { opacity:.55 !important; }
+      html body .sngSocialBtn.sngFavBtn.isFavorite { color:#ff4f86 !important; }
+      html body .sngSocialBtn.sngFavBtn .sngFavIcon { display:none !important; }
     `;
     document.head.appendChild(style);
-
-    const observer = new MutationObserver(function () {
-      patchGlobalCategoryLogic();
-      enforceCategoryPage();
-      patchCategories();
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 
   function install() {
     patchGlobalCategoryLogic();
-    installCategoryIsolation();
+    installStyles();
 
-    if (window.__sngamerCategoryDisplayInstalled) {
+    if (window.__sngamerStableCategoryDisplayInstalled) {
       patchCategories();
       enforceCategoryPage();
       return;
     }
 
-    if (typeof window.cats !== "function") {
-      window.setTimeout(install, 50);
+    if (typeof window.cats === "function") {
+      const originalCats = window.cats;
+      window.cats = function () {
+        const result = originalCats.apply(this, arguments);
+        patchGlobalCategoryLogic();
+        patchCategories();
+        enforceCategoryPage();
+        return result;
+      };
+      window.__sngamerStableCategoryDisplayInstalled = true;
+      patchCategories();
+      enforceCategoryPage();
       return;
     }
 
-    const originalCats = window.cats;
-    window.cats = function () {
-      const result = originalCats.apply(this, arguments);
-      patchGlobalCategoryLogic();
-      patchCategories();
-      enforceCategoryPage();
-      return result;
-    };
-
-    window.__sngamerCategoryDisplayInstalled = true;
-    patchCategories();
-    enforceCategoryPage();
+    window.setTimeout(install, 50);
   }
 
   install();
