@@ -14,20 +14,10 @@
     if (!form || !modal || form.dataset.sngPolishReady === '1') return;
     form.dataset.sngPolishReady = '1';
 
-    const grid = form.querySelector('.edit-product-grid');
-    if (grid && !$('#sngEditPricingSummary', form)) {
-      const summary = document.createElement('div');
-      summary.id = 'sngEditPricingSummary';
-      summary.className = 'sng-edit-pricing-summary';
-      summary.setAttribute('aria-live', 'polite');
-      summary.innerHTML = [
-        '<div class="sng-edit-price-card"><span class="sng-edit-price-label">Prix normal</span><strong class="sng-edit-price-value" id="sngEditNormalDisplay">—</strong></div>',
-        '<div class="sng-edit-price-card"><span class="sng-edit-price-label">Prix promotionnel</span><strong class="sng-edit-price-value" id="sngEditPromoDisplay">—</strong></div>',
-        '<div class="sng-edit-price-card"><span class="sng-edit-price-label">Vous économisez</span><strong class="sng-edit-price-value" id="sngEditSavingDisplay">—</strong></div>',
-        '<p class="sng-edit-pricing-status" id="sngEditPricingStatus">Renseigne les prix pour voir l’aperçu.</p>'
-      ].join('');
-      grid.insertAdjacentElement('afterend', summary);
-    }
+    // The edit form already contains the professional price/reduction block.
+    // Do not create a second pricing summary on top of it.
+    const duplicateSummary = $('#sngEditPricingSummary', form);
+    if (duplicateSummary) duplicateSummary.remove();
 
     const byId = id => document.getElementById(id);
     const fields = {
@@ -48,6 +38,7 @@
       const old = field && field.querySelector('.sng-edit-field-error');
       if (old) old.remove();
     }
+
     function setError(input, message){
       if (!input) return;
       clearError(input);
@@ -59,12 +50,6 @@
       note.textContent = message;
       field.appendChild(note);
     }
-    function status(message, kind=''){
-      const el = byId('sngEditPricingStatus');
-      if (!el) return;
-      el.textContent = message;
-      el.className = 'sng-edit-pricing-status' + (kind ? ' ' + kind : '');
-    }
 
     function updatePricing(){
       if (!fields.price || !fields.promo || !fields.active) return;
@@ -72,36 +57,14 @@
       const promoRaw = fields.promo.value.trim();
       const normal = normalRaw === '' ? NaN : Number(normalRaw);
       const promo = promoRaw === '' ? null : Number(promoRaw);
-      const active = fields.active.checked;
-      const normalDisplay = byId('sngEditNormalDisplay');
-      const promoDisplay = byId('sngEditPromoDisplay');
-      const savingDisplay = byId('sngEditSavingDisplay');
-      if (normalDisplay) normalDisplay.textContent = money(normal);
-      if (promoDisplay) promoDisplay.textContent = promo === null ? 'Non défini' : money(promo);
-      if (savingDisplay) savingDisplay.textContent = '—';
-
-      if (!Number.isFinite(normal) || normal <= 0) {
-        status('Saisis un prix normal supérieur à 0 FCFA pour calculer la réduction.', 'warn');
-        return;
-      }
-      if (promo === null) {
-        if (active) status('La promotion est cochée : ajoute un prix promotionnel inférieur au prix normal.', 'bad');
-        else status('Aucune promotion renseignée. Le prix normal sera appliqué.', '');
-        return;
-      }
-      if (!Number.isFinite(promo) || promo <= 0 || promo >= normal) {
-        status('Prix promotionnel invalide : il doit être positif et strictement inférieur au prix normal.', 'bad');
-        return;
-      }
-      const discount = Math.round((normal - promo) / normal * 100);
-      if (savingDisplay) savingDisplay.textContent = money(normal - promo);
       const discountInput = byId('editProductDiscount');
+
+      if (discountInput) discountInput.value = '';
+      if (!Number.isFinite(normal) || normal <= 0) return;
+      if (promo === null || !Number.isFinite(promo) || promo <= 0 || promo >= normal) return;
+
+      const discount = Math.round((normal - promo) / normal * 100);
       if (discountInput) discountInput.value = discount + '%';
-      if (active) {
-        status('Promotion active : -' + discount + '% (vous économisez ' + money(normal-promo) + ').', 'good');
-      } else {
-        status('Prix promotionnel valide mais inactif. Coche « Activer la promotion » pour l’afficher en boutique.', 'warn');
-      }
     }
 
     function validate(){
@@ -150,7 +113,6 @@
         event.stopImmediatePropagation();
         const first = errors[0];
         first?.focus({preventScroll:false});
-        return;
       }
     }, true);
 
