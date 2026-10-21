@@ -1,8 +1,8 @@
 /* SNGAMER STORE — FINAL SECTION SHELL GUARD */
 (function () {
   'use strict';
-  if (window.__sngStoreShellFinalV4) return;
-  window.__sngStoreShellFinalV4 = true;
+  if (window.__sngStoreShellFinalV5) return;
+  window.__sngStoreShellFinalV5 = true;
   const nativeFetch = window.fetch.bind(window);
 
   function section() { return String(window.activeStoreSection || document.body?.dataset.storeSection || 'home'); }
@@ -113,6 +113,55 @@
       .sngFavoritesGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
       .sngFavoriteItem{min-width:0!important}
       .sngFavoritePlaceholder{width:100%!important;aspect-ratio:1/1!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:38px!important;border-radius:11px!important;background:rgba(255,255,255,.035)!important}
+
+      /* Gaming identity: a very subtle controller-symbol trail follows each product card. */
+      .card{position:relative!important;isolation:isolate!important;overflow:visible!important}
+      .card::before{
+        content:"";
+        position:absolute;
+        inset:-1px;
+        z-index:2;
+        border-radius:inherit;
+        padding:1px;
+        background:conic-gradient(from 0deg,transparent 0deg,transparent 245deg,rgba(49,148,255,.16) 280deg,rgba(124,58,237,.20) 305deg,rgba(233,30,99,.14) 325deg,transparent 360deg);
+        -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+        -webkit-mask-composite:xor;
+        mask-composite:exclude;
+        opacity:.55;
+        pointer-events:none;
+        animation:sngControllerContour 6s linear infinite;
+      }
+      .card::after{
+        content:"△  ○  ×  □";
+        position:absolute;
+        z-index:3;
+        left:8px;
+        top:4px;
+        color:rgba(104,178,255,.52);
+        font-family:Arial,Helvetica,sans-serif;
+        font-size:8px;
+        font-weight:700;
+        letter-spacing:3px;
+        line-height:1;
+        text-shadow:0 0 7px rgba(49,148,255,.30);
+        opacity:.38;
+        pointer-events:none;
+        white-space:nowrap;
+        animation:sngControllerSymbols 7s ease-in-out infinite;
+      }
+      @keyframes sngControllerContour{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      @keyframes sngControllerSymbols{
+        0%,100%{transform:translate(0,0);opacity:.12}
+        18%{transform:translate(20px,0);opacity:.40}
+        40%{transform:translate(58px,0);opacity:.24}
+        60%{transform:translate(92px,0);opacity:.42}
+        78%{transform:translate(126px,0);opacity:.16}
+      }
+      @media(prefers-reduced-motion:reduce){
+        .card::before{animation:none;opacity:.28}
+        .card::after{animation:none;opacity:.20}
+      }
+
       @media(max-width:700px){
         .sngFavoritesCard{padding:14px!important}
         .sngFavoritesCarousel{position:relative!important;width:100%!important}
