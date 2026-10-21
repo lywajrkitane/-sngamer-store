@@ -48,11 +48,11 @@ body[data-store-section]:not([data-store-section="coins"]) #navSubcategories {
   display: none !important;
 }
 
-/* Remove the large Home spacing when a category or the profile is selected. */
-body[data-store-section]:not([data-store-section="home"]) #shop {
+/* Keep every section compact: no artificial 60vh block before the shared footer. */
+body[data-store-section] #shop {
   padding-top: 16px !important;
-  padding-bottom: 88px !important;
-  min-height: 60vh;
+  padding-bottom: 20px !important;
+  min-height: auto !important;
 }
 
 body[data-store-section]:not([data-store-section="home"]) #shop > .bar {
