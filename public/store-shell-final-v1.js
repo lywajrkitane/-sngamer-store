@@ -1,12 +1,12 @@
 /* SNGAMER STORE — FINAL SECTION SHELL GUARD
-   This is intentionally a small last-pass guard loaded after the storefront
-   scripts. It protects the public shell rules from later navigation/profile
-   code accidentally hiding shared site content.
+   One-time safety pass only. No global MutationObserver is used here.
+   The previous observer could react to its own favorite-heart DOM updates
+   and create unnecessary repeated work on the storefront.
 */
 (function () {
   'use strict';
-  if (window.__sngStoreShellFinalV1) return;
-  window.__sngStoreShellFinalV1 = true;
+  if (window.__sngStoreShellFinalV2) return;
+  window.__sngStoreShellFinalV2 = true;
 
   function section() {
     return String(window.activeStoreSection || document.body?.dataset.storeSection || 'home');
@@ -16,7 +16,6 @@
     const current = section();
     const isHome = current === 'home';
     const isProfile = current === 'profile';
-    const isCategory = !isHome && !isProfile;
 
     const footerContent = document.querySelector('body > .store-footer-content');
     const footer = document.querySelector('body > footer');
@@ -26,45 +25,43 @@
     const products = document.getElementById('products');
     const profile = document.getElementById('profileArea');
 
-    // Shared public footer: ALWAYS present on Home, every category and Profile.
+    // The footer is shared by every public section.
     [footerContent, footer].forEach(function (node) {
       if (!node) return;
       node.hidden = false;
-      node.style.setProperty('display', 'block', 'important');
+      node.style.removeProperty('display');
     });
 
-    // Hero and horizontal category filters are Home-only.
-    if (hero) {
-      hero.hidden = !isHome;
-      hero.style.setProperty('display', isHome ? 'block' : 'none', 'important');
-    }
+    // Hero and horizontal category filters belong to Home only.
+    if (hero) hero.hidden = !isHome;
     if (cats) {
       cats.hidden = !isHome;
-      cats.style.setProperty('display', isHome ? '' : 'none', 'important');
+      if (!isHome) cats.style.display = 'none';
+      else cats.style.removeProperty('display');
     }
     if (subcats) {
       subcats.hidden = true;
-      subcats.style.setProperty('display', 'none', 'important');
+      subcats.style.display = 'none';
     }
 
-    // Profile owns the content area; product grid stays hidden there.
     if (products) {
-      products.style.setProperty('display', isProfile ? 'none' : '', 'important');
+      products.style.display = isProfile ? 'none' : '';
     }
     if (profile) {
       profile.hidden = !isProfile;
-      profile.style.setProperty('display', isProfile ? 'block' : 'none', 'important');
+      profile.style.display = isProfile ? 'block' : 'none';
     }
 
     document.body.classList.toggle('sngFinalHomeView', isHome);
-    document.body.classList.toggle('sngFinalCategoryView', isCategory);
+    document.body.classList.toggle('sngFinalCategoryView', !isHome && !isProfile);
     document.body.classList.toggle('sngFinalProfileView', isProfile);
   }
 
   function enforceFavorite() {
     document.querySelectorAll('.sngFavBtn').forEach(function (btn) {
       const active = btn.classList.contains('isFavorite') || btn.getAttribute('aria-pressed') === 'true';
-      btn.innerHTML = active ? '♥' : '♡';
+      const heart = active ? '♥' : '♡';
+      if (btn.textContent.trim() !== heart) btn.textContent = heart;
       btn.setAttribute('aria-label', active ? 'Retirer des favoris' : 'Ajouter aux favoris');
       btn.title = active ? 'Retirer des favoris' : 'Ajouter aux favoris';
     });
@@ -75,14 +72,6 @@
     const style = document.createElement('style');
     style.id = 'sngStoreShellFinalStyles';
     style.textContent = `
-      body.sngFinalCategoryView > .store-footer-content,
-      body.sngFinalProfileView > .store-footer-content,
-      body.sngFinalCategoryView > footer,
-      body.sngFinalProfileView > footer {
-        display:block !important;
-        visibility:visible !important;
-        opacity:1 !important;
-      }
       .sngSocialBtn.sngFavBtn,
       html body .sngSocialBtn.sngFavBtn {
         width:34px !important;
@@ -131,20 +120,10 @@
     installStyles();
     enforceShell();
     enforceFavorite();
-    const observer = new MutationObserver(function () {
-      enforceShell();
-      enforceFavorite();
-    });
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['data-store-section', 'hidden', 'aria-pressed']
-    });
-    window.setTimeout(enforceShell, 100);
-    window.setTimeout(enforceShell, 500);
-    window.setTimeout(enforceFavorite, 100);
-    window.setTimeout(enforceFavorite, 500);
+    window.setTimeout(enforceShell, 250);
+    window.setTimeout(enforceFavorite, 250);
+    window.setTimeout(enforceShell, 750);
+    window.setTimeout(enforceFavorite, 750);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
