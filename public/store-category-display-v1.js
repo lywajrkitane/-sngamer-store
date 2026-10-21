@@ -21,7 +21,7 @@
 
   function strictCategory(product) {
     const raw = normalizeCategory(product && product.category);
-    if (raw === "coins" || raw === "pieces efootball" || raw === "piece efootball") return "Coins";
+    if (raw === "coins" || raw === "pieces efootball" || raw === "piece efootball") return "Pièces eFootball";
     if (raw === "gaming phone" || raw === "gaming phones") return "Gaming Phone";
     if (raw === "accessoires" || raw === "accessoire") return "Accessoires";
     if (raw === "souris" || raw === "mouse") return "Souris";
@@ -34,7 +34,7 @@
     const category = strictCategory(product);
     if (section === "accessories") return category === "Accessoires";
     if (section === "phones") return category === "Gaming Phone";
-    if (section === "coins") return category === "Coins";
+    if (section === "coins") return category === "Pièces eFootball";
     return true;
   }
 
