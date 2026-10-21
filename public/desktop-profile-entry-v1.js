@@ -22,25 +22,18 @@
       @media (min-width: 769px) {
         /* Keep the brand on the left and the navigation controls as one compact group on the far right. */
         .siteHeader .nav { justify-content:flex-start !important; }
-
-        /* Normal store view: the icon group starts after the brand and is pushed to the far right. */
         .siteHeader .nav > .sngDesktopProfileButton { margin-left:auto !important; }
-
         .siteHeader .nav > .searchPremiumButton,
         .siteHeader .nav > .sngDesktopStoreButton,
         .siteHeader .nav > .cartButton { margin-left:0 !important; }
-
-        /* Profile view: the profile button disappears, so the remaining controls must still stay together on the far right. */
         body.sngDesktopProfileMode .siteHeader .nav > .searchPremiumButton { margin-left:auto !important; }
         body.sngDesktopProfileMode .siteHeader .nav > .sngDesktopStoreButton,
         body.sngDesktopProfileMode .siteHeader .nav > .cartButton { margin-left:0 !important; }
-
         .siteHeader .nav > .searchPremiumButton { order:3 !important; }
         .siteHeader .nav > .sngDesktopProfileButton { order:2 !important; }
         .siteHeader .nav > .sngDesktopStoreButton { order:4 !important; }
         .siteHeader .nav > .cartButton { order:5 !important; }
 
-        /* All header controls use the same compact premium language. */
         .siteHeader .nav > .sngDesktopProfileButton,
         .siteHeader .nav > .sngDesktopStoreButton,
         .siteHeader .nav > .cartButton,
@@ -71,7 +64,6 @@
           color:#fff !important;
           box-shadow:0 10px 28px rgba(44,91,255,.20),inset 0 1px 0 rgba(255,255,255,.12),0 0 24px rgba(74,103,255,.12) !important;
         }
-
         .siteHeader .nav > .cartButton:hover,
         .siteHeader .nav > .sngDesktopProfileButton:hover,
         .siteHeader .nav > .searchPremiumButton:hover,
@@ -80,12 +72,10 @@
           filter:brightness(1.07) saturate(1.08);
           box-shadow:0 14px 34px rgba(44,91,255,.28),inset 0 1px 0 rgba(255,255,255,.16),0 0 30px rgba(74,103,255,.18) !important;
         }
-
         .siteHeader .nav > .cartButton:active,
         .siteHeader .nav > .sngDesktopProfileButton:active,
         .siteHeader .nav > .searchPremiumButton:active,
         .siteHeader .nav > .sngDesktopStoreButton:active { transform:translateY(0) scale(.97); }
-
         .siteHeader .nav > .cartButton > span:not(.cartIcon) { display:none !important; }
         .siteHeader .nav > .cartButton .cartIcon { display:inline-flex !important; width:22px; height:22px; align-items:center; justify-content:center; font-size:19px; line-height:1; }
         .siteHeader .nav > .cartButton b {
@@ -109,12 +99,9 @@
           box-shadow:0 12px 34px rgba(54,76,220,.30),inset 0 1px 0 rgba(255,255,255,.18),0 0 30px rgba(74,103,255,.20) !important;
         }
         .sngDesktopProfileButton.is-hidden { display:none !important; }
-
-        /* Search is already converted to the premium icon button by search-polish.js. */
         .siteHeader .nav > .searchPremiumButton { order:3 !important; }
         .siteHeader .nav > .searchPremiumButton svg { width:22px !important; height:22px !important; }
 
-        /* Compact premium store-return control: icon only, visible only in Profile. */
         .sngDesktopStoreButton {
           display:none !important;
           border:1px solid rgba(132,188,255,.42) !important;
@@ -126,9 +113,9 @@
         .sngDesktopStoreIcon svg { width:22px;height:22px; }
 
         #profileArea.sngDesktopProfileArea { width:100%; max-width:none; }
-        body.sngDesktopProfileMode .hero,
-        body.sngDesktopProfileMode .store-footer-content,
-        body.sngDesktopProfileMode footer { display:none !important; }
+        /* The shared storefront footer is part of the public site shell and
+           remains visible in Profile exactly as it is on other sections. */
+        body.sngDesktopProfileMode .hero { display:none !important; }
         body.sngDesktopProfileMode #shop { padding-top:30px; padding-bottom:70px; }
         body.sngDesktopProfileMode #products { display:none !important; }
         body.sngDesktopProfileMode #cats,
