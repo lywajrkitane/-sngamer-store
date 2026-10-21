@@ -47,17 +47,40 @@
   function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" })[c]; }); }
   function money(value) { return new Intl.NumberFormat("fr-FR").format(Number(value) || 0) + " FCFA"; }
 
-  /* Restore the single public navigation entry point expected by the mobile
-     bottom bar, coin navigation, refresh recovery and desktop profile entry.
+  function setSectionChrome(section) {
+    const isHome = section === "home";
+    const isProfile = section === "profile";
+    const hero = document.querySelector("body > .hero");
+    const footerContent = document.querySelector("body > .store-footer-content");
+    const cats = document.getElementById("cats");
+    const subcats = document.getElementById("navSubcategories");
 
-     Important: app.js keeps its section state in a private lexical variable.
-     Older navigation code only changed window.activeStoreSection, so the
-     buttons appeared clickable but render() continued to render the home
-     section. We therefore use the existing filterBy() renderer for storefront
-     sections as the authoritative visual filter, while keeping the global
-     section value for profile/visibility guards. */
+    // Home-only content must never leak into category or profile views.
+    if (hero) hero.hidden = !isHome;
+    if (footerContent) footerContent.hidden = !isHome;
+
+    // Category chips belong only to the Home catalogue. Category pages have
+    // one title + their products, with no secondary category navigation.
+    if (cats) {
+      cats.hidden = !isHome;
+      cats.style.display = isHome ? "" : "none";
+      if (!isHome) cats.innerHTML = "";
+    }
+    if (subcats) {
+      subcats.hidden = true;
+      subcats.style.display = "none";
+      subcats.innerHTML = "";
+    }
+
+    document.body.classList.toggle("sngHomeView", isHome);
+    document.body.classList.toggle("sngCategoryView", !isHome && !isProfile);
+    document.body.classList.toggle("sngProfileView", isProfile);
+  }
+
+  /* Restore the single public navigation entry point expected by the mobile
+     bottom bar, coin navigation, refresh recovery and desktop profile entry. */
   function installStoreNavigation() {
-    if (window.__sngamerStoreNavigationV1) return;
+    if (window.__sngamerStoreNavigationV2) return;
     window.navigateStore = function (section) {
       const valid = new Set(["home", "accessories", "phones", "coins", "profile"]);
       section = valid.has(section) ? section : "home";
@@ -74,26 +97,31 @@
       const profile = document.getElementById("profileArea");
       const grid = document.getElementById("products");
 
+      setSectionChrome(section);
+
       if (section === "profile") {
         if (title) title.textContent = "Mon espace client";
-        if (cats) cats.innerHTML = "";
-        if (subcats) subcats.hidden = true;
+        if (cats) { cats.innerHTML = ""; cats.hidden = true; cats.style.display = "none"; }
+        if (subcats) { subcats.hidden = true; subcats.style.display = "none"; subcats.innerHTML = ""; }
         if (grid) grid.replaceChildren();
         if (profile) { profile.hidden = false; profile.style.display = "block"; loadCustomerProfile(profile); }
       } else {
-        if (profile) { profile.hidden = true; profile.style.display = "none"; }
-        if (subcats) subcats.hidden = section !== "coins";
+        if (profile) { profile.hidden = true; profile.style.display = "none"; profile.replaceChildren(); delete profile.dataset.sngProfileLoading; }
+        if (subcats) { subcats.hidden = true; subcats.style.display = "none"; }
         if (title) title.textContent = section === "home" ? "Nos produits" : section === "accessories" ? "Accessoires" : section === "phones" ? "Gaming Phone" : "Pièces eFootball";
 
-        /* app.js's render() filters by its private `filter` state. Use the
-           existing filterBy() API so the actual product list changes instead
-           of only changing the active icon/title. */
         if (typeof window.filterBy === "function") {
           const targetFilter = section === "home" ? "Tous" : section === "accessories" ? "Accessoires" : section === "phones" ? "Gaming Phone" : "Coins";
           window.filterBy(targetFilter);
-        } else {
-          if (typeof window.render === "function") window.render();
-          if (typeof window.cats === "function") window.cats();
+        } else if (typeof window.render === "function") {
+          window.render();
+        }
+
+        // filterBy() may rebuild Home category chips. Immediately restore the
+        // strict category-page rule after the renderer finishes.
+        if (section !== "home") {
+          if (cats) { cats.innerHTML = ""; cats.hidden = true; cats.style.display = "none"; }
+          if (subcats) { subcats.innerHTML = ""; subcats.hidden = true; subcats.style.display = "none"; }
         }
       }
 
@@ -105,7 +133,7 @@
       const shop = document.getElementById("shop");
       if (shop && !window.__sngamerNavigationRestoring) requestAnimationFrame(function () { shop.scrollIntoView({ behavior: "smooth", block: "start" }); });
     };
-    window.__sngamerStoreNavigationV1 = true;
+    window.__sngamerStoreNavigationV2 = true;
   }
 
   async function loadCustomerProfile(profile) {
@@ -142,7 +170,31 @@
     } finally { delete profile.dataset.sngProfileLoading; }
   }
 
-  function boot() { installStoreNavigation(); watchCheckout(); }
+  function installIsolationCSS() {
+    if (document.getElementById("sngSectionIsolationV2")) return;
+    const style = document.createElement("style");
+    style.id = "sngSectionIsolationV2";
+    style.textContent = `
+      body.sngCategoryView > .hero,
+      body.sngProfileView > .hero,
+      body.sngCategoryView > .store-footer-content,
+      body.sngProfileView > .store-footer-content { display:none !important; }
+      body.sngCategoryView #cats,
+      body.sngCategoryView #navSubcategories,
+      body.sngProfileView #cats,
+      body.sngProfileView #navSubcategories,
+      body.sngProfileView #products { display:none !important; }
+      body.sngCategoryView #profileArea { display:none !important; }
+      body.sngProfileView #profileArea { display:block !important; visibility:visible !important; }
+      body.sngCategoryView #shop,
+      body.sngProfileView #shop { min-height:calc(100vh - 150px); }
+      body.sngCategoryView #shop > .bar,
+      body.sngProfileView #shop > .bar { margin-bottom:18px; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function boot() { installIsolationCSS(); installStoreNavigation(); watchCheckout(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true }); else boot();
   window.setTimeout(prepareCheckoutLayout, 250);
 })();
