@@ -46,40 +46,57 @@
     }
 
     const sync = function () {
-      const profile = document.getElementById("profileArea");
+      const body = document.body;
+      if (!body) return;
+
       const raw = window.activeStoreSection;
       const section = STORE_SECTIONS.has(raw) ? raw : "home";
       const isProfile = section === "profile";
 
-      document.body.setAttribute("data-store-section", section);
-      document.body.classList.toggle("sngDesktopProfileMode", isProfile);
-      if (profile) {
-        profile.classList.toggle("sngDesktopProfileArea", isProfile);
-        // Remove inline display values left by older profile renderers when
-        // returning to the storefront. CSS !important is the final guard.
-        if (!isProfile) {
+      // IMPORTANT: only write attributes when their value really changes.
+      // Writing the same data-store-section value inside a MutationObserver
+      // can schedule the observer again and freeze scrolling/taps on mobile.
+      if (body.getAttribute("data-store-section") !== section) {
+        body.setAttribute("data-store-section", section);
+      }
+      if (body.classList.contains("sngDesktopProfileMode") !== isProfile) {
+        body.classList.toggle("sngDesktopProfileMode", isProfile);
+      }
+
+      const profile = document.getElementById("profileArea");
+      if (!profile) return;
+
+      if (isProfile) {
+        if (profile.hidden) profile.hidden = false;
+        if (profile.style.getPropertyValue("display")) profile.style.removeProperty("display");
+        if (profile.style.getPropertyValue("visibility")) profile.style.removeProperty("visibility");
+        profile.classList.add("sngDesktopProfileArea");
+      } else {
+        if (!profile.hidden) profile.hidden = true;
+        if (profile.style.getPropertyValue("display") !== "none" ||
+            profile.style.getPropertyPriority("display") !== "important") {
           profile.style.setProperty("display", "none", "important");
-          profile.style.setProperty("visibility", "hidden", "important");
-        } else {
-          profile.style.removeProperty("display");
-          profile.style.removeProperty("visibility");
         }
+        if (profile.style.getPropertyValue("visibility") !== "hidden" ||
+            profile.style.getPropertyPriority("visibility") !== "important") {
+          profile.style.setProperty("visibility", "hidden", "important");
+        }
+        profile.classList.remove("sngDesktopProfileArea");
       }
     };
 
     sync();
 
-    if (!window.__sngamerProfileVisibilitySync) {
-      window.__sngamerProfileVisibilitySync = true;
-      window.__sngamerProfileVisibilitySyncTimer = setInterval(sync, 120);
-    }
-
-    // Also react immediately when navigation code changes the section.
+    // Navigation writes data-store-section, so this observer only needs
+    // to reconcile genuine external changes. sync() is idempotent and will not
+    // rewrite unchanged body attributes, preventing a MutationObserver loop.
     if (!window.__sngamerProfileVisibilityObserver) {
-      window.__sngamerProfileVisibilityObserver = new MutationObserver(sync);
+      window.__sngamerProfileVisibilityObserver = new MutationObserver(function () {
+        sync();
+      });
       window.__sngamerProfileVisibilityObserver.observe(document.body, {
         attributes: true,
-        attributeFilter: ["class", "style", "data-store-section"]
+        attributeFilter: ["class", "data-store-section"]
       });
     }
   }
