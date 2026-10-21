@@ -1,20 +1,52 @@
 'use strict';
 
-// Admin and customer currently share the same browser session cookie.
-// Keep the customer identity alive when the admin session is rotated or
-// when the admin logs out. This preload is intentionally defensive because
-// legacy admin logout code still calls session.destroy()/clearCookie().
+// Admin and customer share the same browser session cookie. Keep the
+// customer identity alive when the admin session is regenerated or logged
+// out from the same browser.
 const expressSession = require('express-session');
 const express = require('express');
 
-// Route-level guard: intercept the admin logout handler at registration time.
-// This runs before server.js can execute its legacy destroy()/clearCookie()
-// implementation, so the customer session cannot be lost.
+// Route-level guard: protect both admin login and logout. The application
+// historically regenerates/destroys the shared session for admin auth; doing
+// that without carrying customerId over logs the customer out as a side effect.
 const originalApplicationPost = express.application.post;
-if (!express.application.__sngamerAdminLogoutRoutePatched) {
-  express.application.__sngamerAdminLogoutRoutePatched = true;
+if (!express.application.__sngamerAdminCustomerSessionPatched) {
+  express.application.__sngamerAdminCustomerSessionPatched = true;
 
   express.application.post = function patchedPost(path, ...handlers) {
+    if (path === '/api/admin/login' && handlers.length > 0) {
+      const originalHandlers = handlers.slice();
+
+      return originalApplicationPost.call(this, path, (req, res, next) => {
+        if (req.session && req.session.customerId) {
+          const customerId = req.session.customerId;
+          const customerName = req.session.customerName || '';
+          const originalRegenerate = req.session.regenerate.bind(req.session);
+
+          // The admin login route calls regenerate() internally. Wrap that
+          // exact call so the new session receives the customer identity too.
+          req.session.regenerate = function preserveCustomerOnAdminLogin(callback) {
+            return originalRegenerate((error) => {
+              if (error) return callback(error);
+
+              req.session.customerId = customerId;
+              req.session.customerName = customerName;
+              return callback(null);
+            });
+          };
+        }
+
+        let index = 0;
+        const runOriginal = (err) => {
+          if (err) return next(err);
+          const handler = originalHandlers[index++];
+          if (!handler) return next();
+          return handler(req, res, runOriginal);
+        };
+        return runOriginal();
+      });
+    }
+
     if (path === '/api/admin/logout' && handlers.length > 0) {
       const originalHandlers = handlers.slice();
 
@@ -116,4 +148,4 @@ Object.assign(patchedSession, expressSession);
 
 require.cache[require.resolve('express-session')].exports = patchedSession;
 
-console.log('SNGAMER_SESSION_ISOLATION: customer identity preserved across admin session rotation/logout');
+console.log('SNGAMER_SESSION_ISOLATION: customer identity preserved across admin login rotation and logout');
