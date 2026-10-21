@@ -44,13 +44,18 @@
     }
   }
 
-  function esc(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" })[c]; });
-  }
+  function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" })[c]; }); }
   function money(value) { return new Intl.NumberFormat("fr-FR").format(Number(value) || 0) + " FCFA"; }
 
   /* Restore the single public navigation entry point expected by the mobile
-     bottom bar, coin navigation, refresh recovery and desktop profile entry. */
+     bottom bar, coin navigation, refresh recovery and desktop profile entry.
+
+     Important: app.js keeps its section state in a private lexical variable.
+     Older navigation code only changed window.activeStoreSection, so the
+     buttons appeared clickable but render() continued to render the home
+     section. We therefore use the existing filterBy() renderer for storefront
+     sections as the authoritative visual filter, while keeping the global
+     section value for profile/visibility guards. */
   function installStoreNavigation() {
     if (window.__sngamerStoreNavigationV1) return;
     window.navigateStore = function (section) {
@@ -79,9 +84,17 @@
         if (profile) { profile.hidden = true; profile.style.display = "none"; }
         if (subcats) subcats.hidden = section !== "coins";
         if (title) title.textContent = section === "home" ? "Nos produits" : section === "accessories" ? "Accessoires" : section === "phones" ? "Gaming Phone" : "Pièces eFootball";
-        if (section === "home") { try { filter = "Tous"; } catch (_) {} }
-        if (typeof window.render === "function") window.render();
-        if (typeof window.cats === "function") window.cats();
+
+        /* app.js's render() filters by its private `filter` state. Use the
+           existing filterBy() API so the actual product list changes instead
+           of only changing the active icon/title. */
+        if (typeof window.filterBy === "function") {
+          const targetFilter = section === "home" ? "Tous" : section === "accessories" ? "Accessoires" : section === "phones" ? "Gaming Phone" : "Coins";
+          window.filterBy(targetFilter);
+        } else {
+          if (typeof window.render === "function") window.render();
+          if (typeof window.cats === "function") window.cats();
+        }
       }
 
       try {
