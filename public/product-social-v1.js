@@ -75,19 +75,22 @@
     const section = String(window.activeStoreSection || document.body?.dataset.storeSection || 'home');
     const profileActive = section === 'profile' || document.body?.dataset.storeSection === 'profile';
 
-    // Favorites belong only to the customer profile. Never attach them to
-    // main#shop or another ancestor that merely contains the profile title.
+    // This card must live inside the client profile, never in the storefront.
     if (!profileRoot || !profileActive) {
       removeLeakedFavoritesCards(profileRoot);
       return;
     }
 
+    // Keep exactly one card and move it to the top of the profile every time.
     const existingCards = Array.from(profileRoot.querySelectorAll('.sngFavoritesCard'));
-    existingCards.slice(1).forEach(card => card.remove());
     if (existingCards.length) {
+      const card = existingCards[0];
+      existingCards.slice(1).forEach(item => item.remove());
+      if (profileRoot.firstElementChild !== card) profileRoot.insertBefore(card, profileRoot.firstElementChild);
       removeLeakedFavoritesCards(profileRoot);
       return;
     }
+
     if (profileRoot.dataset.sngFavoritesLoading === '1') return;
     profileRoot.dataset.sngFavoritesLoading = '1';
 
@@ -102,7 +105,7 @@
       const data = await response.json();
       const list = Array.isArray(data.products) ? data.products : [];
 
-      // The user may navigate away while the request is in flight.
+      // Do not insert asynchronous results after the customer has left Profile.
       const currentSection = String(window.activeStoreSection || document.body?.dataset.storeSection || 'home');
       if (!profileRoot.isConnected ||
           document.getElementById('profileArea') !== profileRoot ||
@@ -111,11 +114,11 @@
         return;
       }
 
-      const alreadyInserted = profileRoot.querySelector('.sngFavoritesCard');
-      if (alreadyInserted) {
-        profileRoot.querySelectorAll('.sngFavoritesCard').forEach((card, index) => {
-          if (index > 0) card.remove();
-        });
+      const duplicateCheck = Array.from(profileRoot.querySelectorAll('.sngFavoritesCard'));
+      if (duplicateCheck.length) {
+        const card = duplicateCheck[0];
+        duplicateCheck.slice(1).forEach(item => item.remove());
+        if (profileRoot.firstElementChild !== card) profileRoot.insertBefore(card, profileRoot.firstElementChild);
         removeLeakedFavoritesCards(profileRoot);
         return;
       }
@@ -135,10 +138,9 @@
           : '<div class="sngFavEmpty">Tu n’as encore aucun produit favori. Ajoute un produit avec le bouton ♡ depuis sa fiche.</div>'
       );
 
-      // Insert exactly once inside #profileArea, below the profile header.
-      const header = profileRoot.querySelector('.sngProfileHeader');
-      if (header) header.insertAdjacentElement('afterend', card);
-      else profileRoot.appendChild(card);
+      // The profile title is outside #profileArea; this is the first content
+      // inside it, so favorites always appear immediately under the title.
+      profileRoot.prepend(card);
 
       card.querySelectorAll('[data-fav-id]').forEach(button => {
         button.addEventListener('click', () => {
