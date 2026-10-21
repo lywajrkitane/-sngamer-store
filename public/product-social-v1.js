@@ -19,7 +19,7 @@
   async function reviews(id){try{const r=await nativeFetch('/api/products/'+encodeURIComponent(id)+'/reviews',{credentials:'same-origin',cache:'no-store'});return r.ok?await r.json():{average:0,count:0,reviews:[]}}catch(_){return{average:0,count:0,reviews:[]}}}
   async function rateProduct(id,rating){const me=await customer();if(!me){await notify('Connecte-toi à ton espace client pour noter ce produit.',{title:'Noter le produit',icon:'⭐',confirmText:'Compris'});return}try{const r=await nativeFetch('/api/products/'+encodeURIComponent(id)+'/reviews',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({rating:Number(rating)})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Impossible d’enregistrer ta note.');renderRating(id,d.average,d.count,d.myRating);notify('Merci ! Ta note a bien été enregistrée.',{title:'Avis enregistré',icon:'⭐',confirmText:'OK'})}catch(e){notify(e.message||'Impossible d’enregistrer ta note.',{title:'Notation',icon:'⚠️',confirmText:'Fermer'})}}
 
-  function renderRating(id,avg,count,myRating){const box=document.querySelector('.sngProductSocial[data-product-id="'+CSS.escape(String(id))+'"]');if(!box)return;const mine=Number(myRating)||0;const stars=box.querySelector('.sngRatingStars'),summary=box.querySelector('.sngRatingSummary');if(stars){stars.innerHTML=[1,2,3,4,5].map(i=>`<button type="button" class="sngStar ${i<=mine?'selected':''}" data-star="${i}" aria-label="${i} étoile${i>1?'s':''}">${i<=mine?'★':'☆'}</button>`).join('');stars.querySelectorAll('.sngStar').forEach(b=>b.addEventListener('click',()=>rateProduct(id,Number(b.dataset.star))))}if(summary)summary.textContent=count?(Number(avg)||0).toFixed(1)+' / 5 · '+count+' avis':'Pas encore de note'}
+  function renderRating(id,avg,count,myRating){const box=document.querySelector('.sngProductSocial[data-product-id="'+CSS.escape(String(id))+'"]');if(!box)return;const mine=Number(myRating)||0,stars=box.querySelector('.sngRatingStars'),summary=box.querySelector('.sngRatingSummary');if(stars){stars.innerHTML=[1,2,3,4,5].map(i=>`<button type="button" class="sngStar ${i<=mine?'selected':''}" data-star="${i}" aria-label="${i} étoile${i>1?'s':''}">${i<=mine?'★':'☆'}</button>`).join('');stars.querySelectorAll('.sngStar').forEach(b=>b.addEventListener('click',()=>rateProduct(id,Number(b.dataset.star))))}if(summary)summary.textContent=count?(Number(avg)||0).toFixed(1)+' / 5 · '+count+' avis':'Pas encore de note'}
 
   async function injectSocial(){
     const detail=document.querySelector('#productDetail');
@@ -34,32 +34,34 @@
       const box=document.createElement('section');box.className='sngProductSocial';box.dataset.productId=String(currentProductId);
       box.innerHTML=`<div class="sngSocialActions"><button type="button" class="sngSocialBtn sngFavBtn" aria-label="Ajouter aux favoris" aria-pressed="false"><span class="sngFavIcon">♡</span><span>Favori</span></button><button type="button" class="sngSocialBtn sngShareBtn" aria-label="Partager ce produit"><span class="sngShareIcon">↗</span><span>Partager</span></button></div><div class="sngRatingBlock"><div class="sngRatingTitle">Note du produit</div><div class="sngRatingRow"><div class="sngRatingStars"></div><span class="sngRatingSummary">Chargement…</span></div><div class="sngRatingHint">Connecte-toi pour laisser ou modifier ta note.</div></div>`;
       const info=detail.querySelector('.productInfo')||detail;
+      const descriptionBlock=info.querySelector('.productDescriptionBlock');
       const stockMeta=info.querySelector('.sngProductPurchaseMeta');
-      const description=info.querySelector('.productDescription');
-      if(stockMeta)stockMeta.insertAdjacentElement('afterend',box);else if(description)description.insertAdjacentElement('beforebegin',box);else info.appendChild(box);
+      if(descriptionBlock)descriptionBlock.insertAdjacentElement('beforebegin',box);
+      else if(stockMeta)stockMeta.insertAdjacentElement('afterend',box);
+      else info.appendChild(box);
       const fav=box.querySelector('.sngFavBtn'),share=box.querySelector('.sngShareBtn');renderFavoriteState(fav,Number(currentProductId));fav.addEventListener('click',()=>toggleFavorite(Number(currentProductId),fav));share.addEventListener('click',()=>shareProduct(p));
       const data=await reviews(Number(currentProductId));renderRating(Number(currentProductId),data.average,data.count,data.myRating);
     }finally{delete detail.dataset.sngSocialInjecting}
   }
 
   function installStyles(){if(document.getElementById('sngProductSocialStyles'))return;const style=document.createElement('style');style.id='sngProductSocialStyles';style.textContent=`
-.sngProductSocial{width:100%;box-sizing:border-box;margin:14px 0 16px;padding:12px 14px;border:1px solid rgba(96,165,250,.18);border-radius:16px;background:rgba(8,15,27,.72)}
-.sngSocialActions{display:flex;gap:10px;align-items:center}
-.sngSocialBtn{min-height:40px;height:40px;padding:0 15px;border:1px solid rgba(110,150,205,.22);border-radius:11px;background:rgba(255,255,255,.045);color:#eaf1fb;font:inherit;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:.18s ease;flex:0 1 auto}
-.sngSocialBtn:hover{background:rgba(255,255,255,.08);border-color:rgba(120,170,235,.38)}
+.sngProductSocial{width:100%;box-sizing:border-box;margin:12px 0 10px;padding:0;background:transparent;border:0;border-radius:0}
+.sngSocialActions{display:flex;gap:8px;align-items:center}
+.sngSocialBtn{min-height:36px;height:36px;padding:0 11px;border:1px solid rgba(110,150,205,.2);border-radius:10px;background:rgba(255,255,255,.035);color:#dce7f5;font:inherit;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.18s ease;flex:0 0 auto}
+.sngSocialBtn:hover{background:rgba(255,255,255,.07);border-color:rgba(120,170,235,.34)}
 .sngSocialBtn:active{transform:scale(.98)}
-.sngSocialBtn.isFavorite{border-color:rgba(255,92,151,.45);color:#ff86b6;background:rgba(255,70,135,.08)}
-.sngFavIcon,.sngShareIcon{font-size:18px;line-height:1}
-.sngRatingBlock{margin-top:11px;padding-top:11px;border-top:1px solid rgba(255,255,255,.07)}
-.sngRatingTitle{font-weight:850;color:#fff;font-size:14px;margin-bottom:6px}
-.sngRatingRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.sngRatingStars{display:flex;align-items:center;gap:1px}
-.sngStar{appearance:none;border:0!important;background:transparent!important;box-shadow:none!important;outline:0;padding:0 1px;color:#7f8ea4;font-size:25px;line-height:1;cursor:pointer}
-.sngStar.selected{color:#ffd34e;text-shadow:0 0 8px rgba(255,211,78,.18)}
+.sngSocialBtn.isFavorite{border-color:rgba(255,92,151,.4);color:#ff86b6;background:rgba(255,70,135,.07)}
+.sngFavIcon,.sngShareIcon{font-size:16px;line-height:1}
+.sngRatingBlock{margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.055)}
+.sngRatingTitle{font-weight:850;color:#fff;font-size:14px;margin-bottom:4px}
+.sngRatingRow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sngRatingStars{display:flex;align-items:center;gap:0}
+.sngStar{appearance:none;border:0!important;background:transparent!important;box-shadow:none!important;outline:0;padding:0 1px;color:#7f8ea4;font-size:24px;line-height:1;cursor:pointer}
+.sngStar.selected{color:#ffd34e;text-shadow:0 0 7px rgba(255,211,78,.16)}
 .sngRatingSummary{font-size:12px;color:#9caec5;font-weight:750}
-.sngRatingHint{margin-top:6px;color:#71849d;font-size:11px}
+.sngRatingHint{margin-top:5px;color:#71849d;font-size:11px}
 .sngFavoritesCard{margin-top:18px;padding:16px;border:1px solid rgba(80,150,255,.18);border-radius:20px;background:linear-gradient(145deg,#0d1b2d,#160d27);color:#fff}.sngFavoritesCard h3{margin:0 0 12px;font-size:19px}.sngFavoritesGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.sngFavoriteItem{border:1px solid rgba(100,145,210,.18);border-radius:15px;padding:9px;background:rgba(255,255,255,.035);cursor:pointer}.sngFavoriteItem img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:11px;display:block}.sngFavoriteItem strong{display:block;margin-top:7px;font-size:12px;line-height:1.3}.sngFavoriteItem small{display:block;margin-top:3px;color:#8fa1b8;font-size:11px}.sngFavEmpty{color:#8fa1b8;font-size:13px;line-height:1.5}.sngFavSeeAll{margin-top:11px;width:100%;min-height:42px;border:1px solid rgba(87,140,230,.25);border-radius:13px;background:rgba(255,255,255,.04);color:#fff;font:inherit;font-weight:800;cursor:pointer}
-@media(max-width:520px){.sngProductSocial{padding:11px 12px}.sngSocialActions{gap:8px}.sngSocialBtn{min-height:38px;height:38px;padding:0 12px;font-size:12px}.sngFavIcon,.sngShareIcon{font-size:17px}.sngStar{font-size:24px}}
+@media(max-width:520px){.sngProductSocial{margin:10px 0 8px}.sngSocialActions{gap:7px}.sngSocialBtn{min-height:34px;height:34px;padding:0 10px;font-size:11px}.sngFavIcon,.sngShareIcon{font-size:15px}.sngStar{font-size:23px}}
 @media(min-width:701px){.sngFavoritesGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 `;document.head.appendChild(style)}
 
