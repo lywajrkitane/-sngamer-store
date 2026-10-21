@@ -72,3 +72,36 @@
     font-size: 11px !important;
   }
 }
+
+/* SNGAMER STORE — subtle premium product-card contour glow */
+.card{
+  position:relative;
+  isolation:isolate;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:0;
+  border-radius:inherit;
+  padding:1px;
+  background:conic-gradient(from 0deg,transparent 0deg,transparent 255deg,rgba(49,148,255,.34) 285deg,rgba(124,58,237,.28) 310deg,rgba(233,30,99,.20) 330deg,transparent 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  opacity:.42;
+  pointer-events:none;
+  animation:sngCardContourGlow 5.5s linear infinite;
+}
+
+.card > *{position:relative;z-index:1}
+
+@keyframes sngCardContourGlow{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .card::before{animation:none;opacity:.25}
+}
