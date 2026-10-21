@@ -15,8 +15,8 @@
       return "Gaming Phone";
     }
 
-    if (key === "coins" || key === "coin") {
-      return "Coins";
+    if (key === "coins" || key === "coin" || key === "pieces efootball" || key === "piece efootball") {
+      return "Pièces eFootball";
     }
 
     // For any future/custom category, keep the exact value saved in the dashboard.
