@@ -522,7 +522,6 @@ app.post("/api/admin/login", async (req, res) => {
       });
     });
 
-    req.session.cookie.maxAge = ADMIN_SESSION_MAX_AGE;
     adminLoginAttempts.delete(req.ip);
 
     return res.json({
