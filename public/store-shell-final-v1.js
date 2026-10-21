@@ -139,7 +139,7 @@
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['class', 'hidden', 'style', 'aria-pressed']
+      attributeFilter: ['data-store-section', 'hidden', 'aria-pressed']
     });
     window.setTimeout(enforceShell, 100);
     window.setTimeout(enforceShell, 500);
