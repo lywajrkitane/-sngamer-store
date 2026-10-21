@@ -144,6 +144,13 @@
       }
       html body .sngSocialBtn.sngFavBtn.isFavorite { color:#ff4f86 !important; }
       html body .sngSocialBtn.sngFavBtn .sngFavIcon { display:none !important; }
+
+      /* The bottom navigation is fixed; leave the complete shared footer
+         scrollable instead of allowing the bar to cover its last rows. */
+      @media (max-width:700px) {
+        body > .store-footer-content { margin-bottom:110px !important; }
+        body > footer { padding-bottom:120px !important; }
+      }
     `;
     document.head.appendChild(style);
   }
