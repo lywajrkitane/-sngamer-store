@@ -3,6 +3,7 @@
   "use strict";
 
   const STORAGE_KEY = "sg_profile_return_section";
+  const STORE_SECTIONS = new Set(["home", "accessories", "phones", "coins", "profile"]);
 
   function injectPremiumCoinIcon() {
     const apply = function () {
@@ -31,14 +32,56 @@
 
   function installVisibilityGuard() {
     try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
-    if (document.getElementById("sngProfileVisibilityGuard")) return;
-    const style = document.createElement("style");
-    style.id = "sngProfileVisibilityGuard";
-    style.textContent = `
-      body:not([data-store-section="profile"]) #profileArea{display:none!important;visibility:hidden!important}
-      body[data-store-section="profile"] #profileArea{display:block!important;visibility:visible!important}
-    `;
-    document.head.appendChild(style);
+    if (!document.getElementById("sngProfileVisibilityGuard")) {
+      const style = document.createElement("style");
+      style.id = "sngProfileVisibilityGuard";
+      style.textContent = `
+        /* Customer profile must NEVER leak into the storefront. */
+        body:not([data-store-section="profile"]) #profileArea,
+        body:not(.sngDesktopProfileMode) #profileArea { display:none!important; visibility:hidden!important; }
+        body[data-store-section="profile"] #profileArea,
+        body.sngDesktopProfileMode #profileArea { display:block!important; visibility:visible!important; }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const sync = function () {
+      const profile = document.getElementById("profileArea");
+      const raw = window.activeStoreSection;
+      const section = STORE_SECTIONS.has(raw) ? raw : "home";
+      const isProfile = section === "profile";
+
+      document.body.setAttribute("data-store-section", section);
+      document.body.classList.toggle("sngDesktopProfileMode", isProfile);
+      if (profile) {
+        profile.classList.toggle("sngDesktopProfileArea", isProfile);
+        // Remove inline display values left by older profile renderers when
+        // returning to the storefront. CSS !important is the final guard.
+        if (!isProfile) {
+          profile.style.setProperty("display", "none", "important");
+          profile.style.setProperty("visibility", "hidden", "important");
+        } else {
+          profile.style.removeProperty("display");
+          profile.style.removeProperty("visibility");
+        }
+      }
+    };
+
+    sync();
+
+    if (!window.__sngamerProfileVisibilitySync) {
+      window.__sngamerProfileVisibilitySync = true;
+      window.__sngamerProfileVisibilitySyncTimer = setInterval(sync, 120);
+    }
+
+    // Also react immediately when navigation code changes the section.
+    if (!window.__sngamerProfileVisibilityObserver) {
+      window.__sngamerProfileVisibilityObserver = new MutationObserver(sync);
+      window.__sngamerProfileVisibilityObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ["class", "style", "data-store-section"]
+      });
+    }
   }
 
   /* Customer identity can be cached, but order data must always be read from
