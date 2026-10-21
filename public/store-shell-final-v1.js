@@ -26,11 +26,16 @@
     const profile = document.getElementById('profileArea');
 
     // The footer is shared by every public section.
-    [footerContent, footer].forEach(function (node) {
-      if (!node) return;
-      node.hidden = false;
-      node.style.removeProperty('display');
-    });
+    if (footerContent) {
+      footerContent.hidden = false;
+      footerContent.style.removeProperty('display');
+    }
+    // The old standalone copyright strip is intentionally removed; the shared
+    // storefront content above already contains the complete footer information.
+    if (footer) {
+      footer.hidden = true;
+      footer.style.display = 'none';
+    }
 
     // Hero and horizontal category filters belong to Home only.
     if (hero) hero.hidden = !isHome;
@@ -72,6 +77,24 @@
     const style = document.createElement('style');
     style.id = 'sngStoreShellFinalStyles';
     style.textContent = `
+      /* Keep the shared information/policies area close to the preceding content. */
+      body > .store-footer-content {
+        margin-bottom:20px !important;
+      }
+      #sngPublicPolicies {
+        margin-top:18px !important;
+        margin-bottom:0 !important;
+        padding-bottom:20px !important;
+      }
+      body > footer {
+        display:none !important;
+        height:0 !important;
+        min-height:0 !important;
+        margin:0 !important;
+        padding:0 !important;
+        border:0 !important;
+      }
+
       .sngSocialBtn.sngFavBtn,
       html body .sngSocialBtn.sngFavBtn {
         width:34px !important;
