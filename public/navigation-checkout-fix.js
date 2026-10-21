@@ -55,9 +55,14 @@
     const cats = document.getElementById("cats");
     const subcats = document.getElementById("navSubcategories");
 
-    // Home-only content must never leak into category or profile views.
+    // The hero/campaign block belongs to Accueil only.
     if (hero) hero.hidden = !isHome;
-    if (footerContent) footerContent.hidden = !isHome;
+
+    // The full storefront footer is shared by every section, including Profile.
+    // Never hide it when navigating away from Home.
+    if (footerContent) footerContent.hidden = false;
+    const footer = document.querySelector("body > footer");
+    if (footer) footer.hidden = false;
 
     // Category chips belong only to the Home catalogue. Category pages have
     // one title + their products, with no secondary category navigation.
@@ -176,9 +181,7 @@
     style.id = "sngSectionIsolationV2";
     style.textContent = `
       body.sngCategoryView > .hero,
-      body.sngProfileView > .hero,
-      body.sngCategoryView > .store-footer-content,
-      body.sngProfileView > .store-footer-content { display:none !important; }
+      body.sngProfileView > .hero { display:none !important; }
       body.sngCategoryView #cats,
       body.sngCategoryView #navSubcategories,
       body.sngProfileView #cats,
