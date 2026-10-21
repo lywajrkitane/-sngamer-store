@@ -1,0 +1,73 @@
+/* SNGAMER STORE — section-scoped layout
+   The shared header and bottom navigation stay visible.
+   Hero/campaign/about content belongs only to Accueil.
+   Each bottom-nav section owns its own content region. */
+
+body[data-store-section="home"] .hero,
+body:not([data-store-section]) .hero {
+  display: block !important;
+}
+
+body[data-store-section]:not([data-store-section="home"]) .hero,
+body[data-store-section]:not([data-store-section="home"]) .store-footer-content,
+body[data-store-section]:not([data-store-section="home"]) footer {
+  display: none !important;
+}
+
+/* The horizontal category chips filter the Home catalogue; bottom navigation
+   already selects the top-level product section on the other views. */
+body[data-store-section]:not([data-store-section="home"]) #cats {
+  display: none !important;
+}
+
+/* The customer profile is a separate view, not a layer over the storefront. */
+body:not([data-store-section="profile"]) #profileArea {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body[data-store-section="profile"] #profileArea {
+  display: block !important;
+  visibility: visible !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body[data-store-section="profile"] #products,
+body[data-store-section="profile"] #cats,
+body[data-store-section="profile"] #navSubcategories {
+  display: none !important;
+}
+
+body[data-store-section]:not([data-store-section="coins"]) #navSubcategories {
+  display: none !important;
+}
+
+/* Remove the large Home spacing when a category or the profile is selected. */
+body[data-store-section]:not([data-store-section="home"]) #shop {
+  padding-top: 16px !important;
+  padding-bottom: 88px !important;
+  min-height: 60vh;
+}
+
+body[data-store-section]:not([data-store-section="home"]) #shop > .bar {
+  margin: 16px 0 18px !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+body[data-store-section]:not([data-store-section="home"]) #sectionTitle {
+  margin: 0 !important;
+}
+
+/* Make the favorites card land neatly beneath "Mon espace client". */
+body[data-store-section="profile"] #profileArea > .sngFavoritesCard:first-child {
+  margin-top: 0 !important;
+  margin-bottom: 18px !important;
+}
+
+/* The persistent site header is intentionally never hidden by section rules. */
+.siteHeader {
+  display: block;
+}
