@@ -23,7 +23,7 @@
       summary.innerHTML = [
         '<div class="sng-edit-price-card"><span class="sng-edit-price-label">Prix normal</span><strong class="sng-edit-price-value" id="sngEditNormalDisplay">—</strong></div>',
         '<div class="sng-edit-price-card"><span class="sng-edit-price-label">Prix promotionnel</span><strong class="sng-edit-price-value" id="sngEditPromoDisplay">—</strong></div>',
-        '<div class="sng-edit-price-card"><span class="sng-edit-price-label">Économie / unité</span><strong class="sng-edit-price-value" id="sngEditSavingDisplay">—</strong></div>',
+        '<div class="sng-edit-price-card"><span class="sng-edit-price-label">Vous économisez</span><strong class="sng-edit-price-value" id="sngEditSavingDisplay">—</strong></div>',
         '<p class="sng-edit-pricing-status" id="sngEditPricingStatus">Renseigne les prix pour voir l’aperçu.</p>'
       ].join('');
       grid.insertAdjacentElement('afterend', summary);
@@ -41,7 +41,6 @@
       description: byId('editProductDescription')
     };
 
-    const errIds = new Set(Object.keys(fields));
     function clearError(input){
       if (!input) return;
       input.removeAttribute('aria-invalid');
@@ -99,7 +98,7 @@
       const discountInput = byId('editProductDiscount');
       if (discountInput) discountInput.value = discount + '%';
       if (active) {
-        status('Promotion active : -' + discount + '% (' + money(normal-promo) + ' économisés par unité).', 'good');
+        status('Promotion active : -' + discount + '% (vous économisez ' + money(normal-promo) + ').', 'good');
       } else {
         status('Prix promotionnel valide mais inactif. Coche « Activer la promotion » pour l’afficher en boutique.', 'warn');
       }
@@ -132,7 +131,6 @@
       return errors;
     }
 
-    // Inline feedback while typing; keep the established save logic untouched.
     [fields.name, fields.category, fields.platform, fields.price, fields.stock, fields.promo, fields.active].forEach(input => {
       if (!input) return;
       input.addEventListener('input', () => {
@@ -145,7 +143,6 @@
       });
     });
 
-    // Validate in capture phase before the legacy save handler can submit.
     form.addEventListener('submit', event => {
       const errors = validate();
       if (errors.length) {
@@ -169,7 +166,6 @@
       const isVideo = input.accept.includes('video');
       const videoExtension = /\.(mp4|webm|mov|m4v|ogv|mkv|avi)$/i.test(file.name);
       const imageExtension = /\.(jpe?g|png|gif|webp|avif|bmp|heic|heif)$/i.test(file.name);
-      // Some mobile file providers return an empty MIME type; fall back to the extension.
       const validType = isVideo
         ? (file.type ? file.type.startsWith('video/') : videoExtension)
         : (file.type ? file.type.startsWith('image/') : imageExtension);
@@ -195,8 +191,6 @@
       if (input) input.addEventListener('change', () => addSelectedFileNotice(input));
     });
 
-    // Values are populated by the existing editProduct(id) function right before
-    // the modal is shown, so refresh the preview on open without touching data.
     const observer = new MutationObserver(records => {
       if (records.some(record => record.attributeName === 'class') && modal.classList.contains('show')) {
         Object.values(fields).forEach(clearError);
