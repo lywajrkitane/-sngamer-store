@@ -167,7 +167,12 @@
       const file = input.files && input.files[0];
       if (!file) return;
       const isVideo = input.accept.includes('video');
-      const validType = isVideo ? file.type.startsWith('video/') : file.type.startsWith('image/');
+      const videoExtension = /\.(mp4|webm|mov|m4v|ogv|mkv|avi)$/i.test(file.name);
+      const imageExtension = /\.(jpe?g|png|gif|webp|avif|bmp|heic|heif)$/i.test(file.name);
+      // Some mobile file providers return an empty MIME type; fall back to the extension.
+      const validType = isVideo
+        ? (file.type ? file.type.startsWith('video/') : videoExtension)
+        : (file.type ? file.type.startsWith('image/') : imageExtension);
       if (!validType) {
         input.value = '';
         const note = document.createElement('small');
