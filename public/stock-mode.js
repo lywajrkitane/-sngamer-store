@@ -35,10 +35,6 @@
   function forcePremium(el) {
     if (!el) return;
 
-    // IMPORTANT: only touch the DOM when something really changed.
-    // The previous version wrote textContent on every MutationObserver pass,
-    // which created a self-triggering mutation loop and could make refreshes
-    // appear to never finish.
     const needsText = el.textContent !== LABEL;
     const needsClass = !el.classList.contains("onOrderStock") || el.classList.contains("outOfStock");
     const needsColor = el.style.getPropertyValue("color") !== PINK || el.style.getPropertyPriority("color") !== "important";
@@ -67,9 +63,6 @@
         product.__realStock = Number(product.stock) || 0;
       }
 
-      // On-order products are purchasable without consuming physical stock.
-      // Keep the real database stock separately and expose a large client-side
-      // availability value so the existing cart logic remains compatible.
       product.stock = 999999;
     }
 
@@ -115,8 +108,6 @@
 
     let scheduled = false;
     const observer = new MutationObserver(() => {
-      // Batch DOM changes into one pass instead of recursively reacting to
-      // every individual text/class/style mutation.
       if (scheduled) return;
       scheduled = true;
 
@@ -131,32 +122,91 @@
     window.__sngStockObserverInstalled = true;
   }
 
-  function installAdmin() {
-    const stock = document.getElementById("pStock");
-    if (!stock || document.getElementById("pStockMode")) return;
+  function addAvailabilitySelect(stockInput, id, existingMode) {
+    if (!stockInput || document.getElementById(id)) return null;
 
     const wrapper = document.createElement("div");
-    wrapper.style.cssText = "display:flex;flex-direction:column;gap:5px;min-width:0";
+    wrapper.style.cssText = "display:flex;flex-direction:column;gap:5px;min-width:0;margin-top:6px";
 
     const label = document.createElement("label");
     label.textContent = "Disponibilité";
     label.style.cssText = "font-size:12px;font-weight:700;color:#9fb3cc";
 
     const select = document.createElement("select");
-    select.id = "pStockMode";
+    select.id = id;
     select.innerHTML = `
       <option value="stock">En stock</option>
       <option value="on_order">Sur commande</option>
       <option value="out">Rupture de stock</option>
     `;
     select.style.cssText = "width:100%;padding:12px;border-radius:8px;border:1px solid #344150;background:#0b0f14;color:#fff";
+    if (existingMode) select.value = existingMode;
 
     wrapper.append(label, select);
-    stock.insertAdjacentElement("afterend", wrapper);
+    stockInput.insertAdjacentElement("afterend", wrapper);
 
     select.addEventListener("change", () => {
-      if (select.value !== "stock") stock.value = "0";
+      if (select.value !== "stock") stockInput.value = "0";
     });
+
+    return select;
+  }
+
+  function inferMode(product) {
+    const explicit = String(product?.stock_mode || "").trim();
+    if (["stock", "on_order", "out"].includes(explicit)) return explicit;
+    return Number(product?.stock) > 0 ? "stock" : "out";
+  }
+
+  function installEditAdmin() {
+    const stock = document.getElementById("editProductStock");
+    const modal = document.getElementById("editProductModal");
+    if (!stock || !modal) return;
+
+    let select = document.getElementById("editProductStockMode");
+    if (!select) {
+      const productId = Number(document.getElementById("editProductId")?.value || 0);
+      const product = Array.isArray(window.storeProducts)
+        ? window.storeProducts.find(p => Number(p.id) === productId)
+        : null;
+      select = addAvailabilitySelect(stock, "editProductStockMode", inferMode(product));
+    }
+
+    if (!select) return;
+
+    function syncFromEditedProduct() {
+      const id = Number(document.getElementById("editProductId")?.value || 0);
+      const product = Array.isArray(window.storeProducts)
+        ? window.storeProducts.find(p => Number(p.id) === id)
+        : null;
+      if (product) select.value = inferMode(product);
+    }
+
+    syncFromEditedProduct();
+
+    if (!window.__sngEditStockModalObserver && typeof MutationObserver !== "undefined") {
+      const observer = new MutationObserver(records => {
+        if (records.some(record => record.attributeName === "class") && modal.classList.contains("show")) {
+          setTimeout(syncFromEditedProduct, 0);
+        }
+      });
+      observer.observe(modal, { attributes: true, attributeFilter: ["class"] });
+      window.__sngEditStockModalObserver = true;
+    }
+  }
+
+  function installAdmin() {
+    const stock = document.getElementById("pStock");
+    if (stock && !document.getElementById("pStockMode")) {
+      const select = addAvailabilitySelect(stock, "pStockMode", "stock");
+      if (select) {
+        select.addEventListener("change", () => {
+          if (select.value !== "stock") stock.value = "0";
+        });
+      }
+    }
+
+    installEditAdmin();
 
     if (!window.__sngStockFetchWrapped) {
       const originalFetch = window.fetch.bind(window);
@@ -168,6 +218,7 @@
           init?.method || (typeof input !== "string" ? input?.method : "GET") || "GET"
         ).toUpperCase();
 
+        // New product: save the selected availability mode after creation.
         if (method === "POST" && url.includes("/api/admin/products") && !url.includes("/media")) {
           try {
             const data = await response.clone().json();
@@ -181,9 +232,24 @@
                 body: JSON.stringify({ stock_mode: mode })
               });
             }
-          } catch (_) {
-            // Keep the original admin request result intact.
-          }
+          } catch (_) {}
+        }
+
+        // Existing product: save the selected availability mode after editing.
+        const editMatch = url.match(/\/api\/admin\/products\/([^/?#]+)$/);
+        if ((method === "PUT" || method === "PATCH") && editMatch && !url.includes("/stock-mode")) {
+          try {
+            const id = document.getElementById("editProductId")?.value || decodeURIComponent(editMatch[1]);
+            const mode = document.getElementById("editProductStockMode")?.value || "stock";
+
+            if (response.ok && id) {
+              await originalFetch(`/api/admin/products/${encodeURIComponent(id)}/stock-mode`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stock_mode: mode })
+              });
+            }
+          } catch (_) {}
         }
 
         return response;
@@ -215,6 +281,7 @@
 
   function start() {
     injectOnOrderStyle();
+    installAdmin();
     if (!install()) setTimeout(start, 150);
   }
 
