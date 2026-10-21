@@ -13,15 +13,11 @@ const patchedSession = function customerSafeSession(options = {}) {
       if (err) return next(err);
 
       const installSessionGuards = () => {
-        if (!req.session || req.session.__sngamerCustomerIsolationPatched) {
-          return;
-        }
+        if (!req.session || req.session.__sngamerCustomerIsolationPatched) return;
 
         req.session.__sngamerCustomerIsolationPatched = true;
 
         // Keep the customer identity across express-session's regenerate().
-        // IMPORTANT: regenerate() replaces req.session, so these guards must
-        // be installed again on the newly-created session object.
         const originalRegenerate = req.session.regenerate.bind(req.session);
         req.session.regenerate = function preserveCustomerOnRegenerate(callback) {
           const customerId = req.session.customerId;
@@ -35,15 +31,13 @@ const patchedSession = function customerSafeSession(options = {}) {
               req.session.customerName = customerName;
             }
 
-            // express-session replaced req.session, so restore the guards
-            // before the caller continues using the regenerated session.
+            // regenerate() replaces req.session, so reinstall the guards.
             installSessionGuards();
             return callback(null);
           });
         };
 
-        // Admin logout must remove only the admin identity when a customer
-        // remains signed in. Otherwise the shared session is destroyed.
+        // Keep the customer alive if any legacy code still calls destroy().
         const originalDestroy = req.session.destroy.bind(req.session);
         req.session.destroy = function preserveCustomerOnAdminDestroy(callback) {
           if (req.session.admin && req.session.customerId) {
@@ -56,7 +50,21 @@ const patchedSession = function customerSafeSession(options = {}) {
 
       installSessionGuards();
 
-      // The admin logout route historically clears the shared browser cookie.
+      // HARD GUARD: handle the admin logout endpoint here when a customer is
+      // also signed in. This runs before the route in server.js, so the old
+      // destroy()+clearCookie implementation cannot delete the customer session.
+      if (req.method === 'POST' && req.path === '/api/admin/logout' && req.session.customerId) {
+        delete req.session.admin;
+        return req.session.save((saveError) => {
+          if (saveError) {
+            console.error('SNGAMER_ADMIN_LOGOUT_SAVE_ERROR:', saveError);
+            return res.status(500).json({ error: 'Impossible de fermer la session administrateur' });
+          }
+          return res.json({ success: true, customerSessionPreserved: true });
+        });
+      }
+
+      // The legacy admin logout route clears the shared browser cookie.
       // Keep it when a customer identity is still present.
       if (!res.__sngamerCustomerCookieGuardPatched) {
         const originalClearCookie = res.clearCookie.bind(res);
