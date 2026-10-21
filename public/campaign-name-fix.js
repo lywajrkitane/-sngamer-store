@@ -7,9 +7,6 @@
     "exclusive"
   ]);
 
-  // Campagne actuellement activée dans le tableau de bord.
-  // Elle sert uniquement de dernier secours si l'API publique ne renvoie
-  // pas encore campaign_name sur le produit promotionnel.
   const CURRENT_CAMPAIGN_FALLBACK = "Black Friday";
 
   function clean(value) {
@@ -49,9 +46,6 @@
       };
     }
 
-    // Le produit promotionnel peut exister avant que son campaign_id soit
-    // correctement associé côté API publique. Dans ce cas, utilise le nom
-    // de la campagne actuellement active au lieu d'afficher le placeholder.
     const hasActivePromo = productRows.some((row) =>
       row &&
       (row.promo_active === true || row.promo_active === "true" || row.promo_active === 1 || row.promo_active === "1") &&
@@ -60,11 +54,7 @@
     );
 
     if (hasActivePromo) {
-      return {
-        name: CURRENT_CAMPAIGN_FALLBACK,
-        left: "",
-        right: ""
-      };
+      return { name: CURRENT_CAMPAIGN_FALLBACK, left: "", right: "" };
     }
 
     return null;
@@ -87,14 +77,59 @@
       node.textContent = display || campaign.name;
     });
 
-    // On conserve le libellé visuel existant « OFFRE EXCLUSIVE ».
-    // Seul le nom de la campagne doit remplacer le placeholder « Offre exclusive ».
-
     return true;
+  }
+
+  function installCampaignOverflowFix() {
+    const STYLE_ID = "sngamer-campaign-overflow-fix-v1";
+    if (document.getElementById(STYLE_ID)) return;
+
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = `
+      /* Keep the campaign card self-contained when product names are long. */
+      #sngamerCampaignCarousel .campaignCard {
+        overflow: hidden !important;
+        min-width: 0 !important;
+      }
+      #sngamerCampaignCarousel .campaignCopy {
+        min-width: 0 !important;
+        width: 0 !important;
+        flex: 1 1 0% !important;
+        overflow: hidden !important;
+      }
+      #sngamerCampaignCarousel .campaignTitle,
+      #sngamerCampaignCarousel .campaignProduct {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+      }
+      #sngamerCampaignCarousel .campaignPrice {
+        flex: 0 0 auto !important;
+        min-width: max-content !important;
+        max-width: none !important;
+        white-space: nowrap !important;
+      }
+      #sngamerCampaignCarousel .campaignMedia {
+        flex: 0 0 58px !important;
+      }
+      @media (max-width:560px) {
+        #sngamerCampaignCarousel .campaignMedia {
+          flex-basis: 48px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   async function loadCampaignName() {
     try {
+      installCampaignOverflowFix();
+
       const [productsResponse, promosResponse] = await Promise.all([
         fetch("/api/products?campaign_banner=1", { cache: "no-store" }),
         fetch("/api/promo-media", { cache: "no-store" })
@@ -110,6 +145,7 @@
         let attempts = 0;
         const timer = setInterval(() => {
           attempts += 1;
+          installCampaignOverflowFix();
           if (applyCampaign(campaign) || attempts >= 30) {
             clearInterval(timer);
           }
@@ -121,6 +157,7 @@
   }
 
   function start() {
+    installCampaignOverflowFix();
     loadCampaignName();
     window.addEventListener("load", loadCampaignName, { once: true });
   }
@@ -131,14 +168,11 @@
     start();
   }
 
-  // Category consistency patch: load after app.js so the category saved in
-  // the admin dashboard becomes the single source of truth everywhere.
   const categoryPatch = document.createElement("script");
   categoryPatch.src = "/category-consistency-v1.js?v=20261017-1810";
   categoryPatch.defer = true;
   document.head.appendChild(categoryPatch);
 
-  // Cart confirmation toast: loaded after app.js so it can safely wrap add().
   const cartToastPatch = document.createElement("script");
   cartToastPatch.src = "/cart-toast-v1.js?v=20261020-1";
   cartToastPatch.defer = true;
