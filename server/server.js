@@ -501,22 +501,11 @@ app.post("/api/admin/login", async (req, res) => {
       });
     }
 
-    // Keep the customer identity when an administrator signs in from the
-    // same browser. Both areas share the session cookie, so a normal
-    // session regeneration must explicitly carry the customer context over.
-    const customerId = req.session.customerId;
-    const customerName = req.session.customerName;
-
     await new Promise((resolve, reject) => {
       req.session.regenerate((error) => {
         if (error) {
           reject(error);
           return;
-        }
-
-        if (customerId) {
-          req.session.customerId = customerId;
-          req.session.customerName = customerName || "";
         }
 
         req.session.admin = true;
@@ -533,8 +522,7 @@ app.post("/api/admin/login", async (req, res) => {
     adminLoginAttempts.delete(req.ip);
 
     return res.json({
-      success: true,
-      customerSessionPreserved: Boolean(customerId)
+      success: true
     });
   } catch (error) {
     console.error("ADMIN_LOGIN_ERROR:", error);
