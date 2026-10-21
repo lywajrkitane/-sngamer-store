@@ -62,7 +62,7 @@ function injectCustomerSpaceScript(app) {
     if (!fs.existsSync(indexPath)) return next();
     try {
       let html = fs.readFileSync(indexPath, "utf8");
-      const paytechTag = '<script src="/paytech-checkout.js?v=20261017-2010"></script>';
+      const paytechTag = '<script src="/paytech-checkout.js?v=20261021-stockcancel1"></script>';
       const customerTag = '<script src="/customer-space-enhancements.js?v=20261018-1450" defer></script>';
       const pushTag = '<script src="/customer-push.js?v=20261018-1600" defer></script>';
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
