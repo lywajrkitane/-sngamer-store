@@ -4,7 +4,9 @@ const express = require('express');
 const originalListen = express.application.listen;
 const buckets = new Map();
 const WINDOW_MS = 60_000;
-const MAX_API = 180;
+// Keep legitimate multi-tab/admin browsing from tripping the global API limiter.
+// Mutating/authenticated operations remain much stricter below.
+const MAX_API = 600;
 const MAX_AUTH = 30;
 const MAX_PAYTECH_CREATE = 12;
 
