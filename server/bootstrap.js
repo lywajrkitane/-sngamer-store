@@ -185,7 +185,7 @@ express.application.listen = function patchedListen(...args) {
           html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/admin-v21.css?v=20261016-2300"></head>');
         }
         if (!html.includes("admin-v21.js")) {
-          html = html.replace(/<\/body>/i, '<script src="/admin-v21.js?v=20261021-orders4" defer></script></body>');
+          html = html.replace(/<\/body>/i, '<script src="/admin-v21.js?v=20261021-orders5" defer></script></body>');
         }
 
         html = html.replace(/<script[^>]+admin-v24-workspace\.js[^>]*><\/script>/gi, "");
