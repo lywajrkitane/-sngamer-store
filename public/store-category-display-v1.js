@@ -1,12 +1,12 @@
 /* SNGAMER STORE — category display only
    Keeps the existing filtering logic and product data untouched.
-   Display label: Pièces eFootball.
 
    CATEGORY PAGE RULE:
    - Home keeps the category chips.
    - A bottom-navigation category page shows only its own products.
    - No other category chips/navigation are shown on a category page.
-   - The Favorites control stays a simple real heart glyph.
+   - The shared storefront footer remains visible on every section.
+   - The Favorites control is a simple real heart glyph.
 */
 (function () {
   "use strict";
@@ -50,8 +50,6 @@
   }
 
   function patchGlobalCategoryLogic() {
-    /* app.js declares these as global functions. Replacing their global
-       bindings makes the existing render() use the strict category rule. */
     window.storeCategory = strictCategory;
     window.matchesStoreSection = strictSectionMatch;
   }
@@ -73,30 +71,20 @@
 
     buttons.forEach(button => {
       const text = button.textContent.trim();
-      if (text === "Coins" || text === "Coins / Pièces eFootball") {
-        button.textContent = "Pièces eFootball";
-      }
+      if (text === "Coins" || text === "Coins / Pièces eFootball") button.textContent = "Pièces eFootball";
     });
 
     const rank = text => {
       const index = order.indexOf(text);
       return index === -1 ? 999 : index;
     };
-
-    const desired = [...buttons].sort((a, b) => {
-      const ra = rank(a.textContent.trim());
-      const rb = rank(b.textContent.trim());
-      return ra - rb;
-    });
-
+    const desired = [...buttons].sort((a, b) => rank(a.textContent.trim()) - rank(b.textContent.trim()));
     const current = Array.from(area.querySelectorAll(".catbtn"));
-    const needsReorder = desired.some((button, index) => button !== current[index]);
-
-    if (!needsReorder) return;
-
-    const fragment = document.createDocumentFragment();
-    desired.forEach(button => fragment.appendChild(button));
-    area.appendChild(fragment);
+    if (desired.some((button, index) => button !== current[index])) {
+      const fragment = document.createDocumentFragment();
+      desired.forEach(button => fragment.appendChild(button));
+      area.appendChild(fragment);
+    }
   }
 
   function enforceCategoryPage() {
@@ -127,10 +115,9 @@
     style.textContent = `
       body.sngStrictCategoryPage #cats,
       body.sngStrictCategoryPage #navSubcategories { display:none !important; }
-      body.sngStrictCategoryPage > .hero,
-      body.sngStrictCategoryPage > .store-footer-content { display:none !important; }
+      body.sngStrictCategoryPage > .hero { display:none !important; }
 
-      /* Favorites: a plain, real heart — no pill, gradient, frame or custom shape. */
+      /* Favorites: a plain real heart — no pill, gradient, frame or custom shape. */
       html body .sngSocialBtn.sngFavBtn {
         width:34px !important;
         min-width:34px !important;
