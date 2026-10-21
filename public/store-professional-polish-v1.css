@@ -1,5 +1,5 @@
 /* SNGAMER STORE — targeted storefront polish
-   Scope: product prices + home category controls only.
+   Scope: product prices + home category controls + subtle gaming motifs.
    Do not alter card structure, image sizing, stock placement or cart controls.
 */
 
@@ -56,29 +56,17 @@
   box-shadow: 0 0 16px rgba(244, 213, 141, .12), inset 0 0 0 1px rgba(244,213,141,.08);
 }
 
-#cats .catbtn:active {
-  transform: scale(.98);
-}
+#cats .catbtn:active { transform: scale(.98); }
 
 @media (max-width: 700px) {
-  #cats {
-    gap: 7px;
-    padding-bottom: 7px;
-  }
-
-  #cats .catbtn {
-    padding: 8px 13px !important;
-    min-height: 36px;
-    font-size: 11px !important;
-  }
+  #cats { gap: 7px; padding-bottom: 7px; }
+  #cats .catbtn { padding: 8px 13px !important; min-height: 36px; font-size: 11px !important; }
 }
 
 /*
-   SNGAMER GAMING MOTIFS
-   The previous contour glow is intentionally removed from the image/card edge.
-   The four controller symbols now live ONLY in the visible information area
-   (name / price / stock), where they remain readable even when the product
-   image is dark or busy.
+   SNGAMER GAMING MOTIFS — INFORMATION AREA ONLY
+   No effect is allowed on the product image.
+   Symbols are separate and staggered, never a line.
 */
 #products .card.productCardClickable .info{
   position:relative;
@@ -86,12 +74,26 @@
   overflow:hidden;
 }
 
+/* Kill any older product-card/image contour animation that may still be
+   supplied by an earlier stylesheet. This is deliberately scoped to products. */
+#products .card.productCardClickable::before,
+#products .card.productCardClickable::after,
+#products .card.productCardClickable .pic::before,
+#products .card.productCardClickable .pic::after{
+  content:none !important;
+  display:none !important;
+  animation:none !important;
+  background:none !important;
+  box-shadow:none !important;
+  opacity:0 !important;
+}
+
 #products .card.productCardClickable .info::before,
 #products .card.productCardClickable .info::after,
 #products .card.productCardClickable .price::before,
 #products .card.productCardClickable .price::after{
   position:absolute;
-  z-index:0;
+  z-index:1;
   pointer-events:none;
   font-family:Arial,Helvetica,sans-serif;
   font-weight:700;
@@ -103,76 +105,85 @@
 
 #products .card.productCardClickable .info > *{
   position:relative;
-  z-index:1;
+  z-index:2;
 }
 
-/* Four symbols are deliberately separated — never rendered as one row. */
+/* Keep the Add button completely clean and above every motif. */
+#products .card.productCardClickable .add,
+#products .card.productCardClickable button.add,
+#products .card.productCardClickable .info .add{
+  position:relative !important;
+  z-index:20 !important;
+  isolation:isolate;
+  box-shadow:none;
+}
+
 #products .card.productCardClickable .info::before{
   content:"△";
   top:10px;
   right:10px;
-  font-size:23px;
-  color:rgba(90,184,255,.72);
+  font-size:25px;
+  color:rgba(90,184,255,.68);
   animation:sngGameTriangle 6.8s ease-in-out infinite;
 }
 
 #products .card.productCardClickable .info::after{
   content:"○";
-  top:38px;
+  top:42px;
   left:9px;
-  font-size:24px;
-  color:rgba(233,92,150,.68);
+  font-size:26px;
+  color:rgba(233,92,150,.64);
   animation:sngGameCircle 7.4s ease-in-out infinite 1.35s;
 }
 
 #products .card.productCardClickable .price{
   position:relative;
-  z-index:2;
+  z-index:3;
 }
 
 #products .card.productCardClickable .price::before{
   content:"×";
-  right:13px;
-  bottom:4px;
-  font-size:25px;
-  color:rgba(244,213,141,.70);
+  right:12px;
+  bottom:2px;
+  font-size:27px;
+  color:rgba(244,213,141,.64);
   animation:sngGameCross 7.1s ease-in-out infinite 2.55s;
 }
 
 #products .card.productCardClickable .price::after{
   content:"□";
   left:42%;
-  bottom:1px;
-  font-size:22px;
-  color:rgba(138,92,255,.70);
+  bottom:0;
+  font-size:25px;
+  color:rgba(138,92,255,.64);
   animation:sngGameSquare 7.7s ease-in-out infinite 3.65s;
 }
 
 @keyframes sngGameTriangle{
   0%,100%{opacity:0;transform:translate(4px,4px) scale(.72) rotate(-8deg)}
-  12%{opacity:.72}
-  38%{opacity:.42;transform:translate(-7px,12px) scale(1) rotate(5deg)}
+  12%{opacity:.68}
+  38%{opacity:.36;transform:translate(-7px,12px) scale(1) rotate(5deg)}
   52%{opacity:0;transform:translate(-10px,5px) scale(.82) rotate(10deg)}
 }
 
 @keyframes sngGameCircle{
   0%,100%{opacity:0;transform:translate(-4px,3px) scale(.70) rotate(0deg)}
-  14%{opacity:.68}
-  40%{opacity:.38;transform:translate(8px,-7px) scale(1.03) rotate(-12deg)}
+  14%{opacity:.64}
+  40%{opacity:.34;transform:translate(8px,-7px) scale(1.03) rotate(-12deg)}
   55%{opacity:0;transform:translate(13px,4px) scale(.82) rotate(8deg)}
 }
 
 @keyframes sngGameCross{
   0%,100%{opacity:0;transform:translate(4px,2px) scale(.72) rotate(-12deg)}
-  13%{opacity:.70}
-  39%{opacity:.40;transform:translate(-8px,-8px) scale(1.04) rotate(10deg)}
+  13%{opacity:.66}
+  39%{opacity:.34;transform:translate(-8px,-8px) scale(1.04) rotate(10deg)}
   54%{opacity:0;transform:translate(-13px,-1px) scale(.80) rotate(18deg)}
 }
 
 @keyframes sngGameSquare{
   0%,100%{opacity:0;transform:translate(-4px,4px) scale(.72) rotate(8deg)}
-  15%{opacity:.68}
-  41%{opacity:.38;transform:translate(9px,-6px) scale(1.02) rotate(-8deg)}
+  15%{opacity:.64}
+  41%{opacity:.32;transform:translate(9px,-6px) scale(1.02) rotate(-8deg)}
   57%{opacity:0;transform:translate(14px,3px) scale(.80) rotate(-16deg)}
 }
 
@@ -182,6 +193,6 @@
   #products .card.productCardClickable .price::before,
   #products .card.productCardClickable .price::after{
     animation:none;
-    opacity:.30;
+    opacity:.26;
   }
 }
