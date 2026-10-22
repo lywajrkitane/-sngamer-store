@@ -185,3 +185,179 @@
 
   install();
 })();
+
+/* SNGAMER STORE — Pièces eFootball platform subcategories recovery */
+(function () {
+  "use strict";
+
+  let platform = null;
+  let originalRender = null;
+  let originalNavigate = null;
+  let originalMatches = null;
+
+  function normalize(value) {
+    return String(value == null ? "" : value)
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function isCoinSection() {
+    return String(window.activeStoreSection || document.body?.dataset.storeSection || "home") === "coins";
+  }
+
+  function platformMatch(product) {
+    if (!platform) return true;
+    return normalize(product && product.platform) === normalize(platform);
+  }
+
+  function ensureStyles() {
+    if (document.getElementById("sngCoinSubcategoryStylesV1")) return;
+    const style = document.createElement("style");
+    style.id = "sngCoinSubcategoryStylesV1";
+    style.textContent = `
+      body[data-store-section="coins"] #navSubcategories {
+        display:flex !important;
+        visibility:visible !important;
+        opacity:1 !important;
+        position:relative !important;
+        width:100% !important;
+        margin:0 0 22px !important;
+        padding:0 !important;
+        gap:10px !important;
+        align-items:stretch !important;
+        flex-wrap:wrap !important;
+      }
+      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat {
+        flex:1 1 0 !important;
+        min-width:150px !important;
+        min-height:52px !important;
+        padding:12px 16px !important;
+        border:1px solid rgba(76,151,230,.28) !important;
+        border-radius:16px !important;
+        background:linear-gradient(145deg,rgba(14,28,48,.92),rgba(12,18,34,.96)) !important;
+        color:#b9c9dc !important;
+        font:800 14px/1.1 Arial,sans-serif !important;
+        letter-spacing:.3px !important;
+        cursor:pointer !important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 20px rgba(0,0,0,.12) !important;
+        transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease !important;
+      }
+      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat:hover {
+        transform:translateY(-1px) !important;
+        border-color:rgba(89,190,255,.65) !important;
+        color:#fff !important;
+      }
+      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat.is-active {
+        color:#fff !important;
+        border-color:rgba(89,190,255,.95) !important;
+        background:linear-gradient(135deg,rgba(30,126,255,.42),rgba(105,58,237,.45),rgba(208,35,158,.28)) !important;
+        box-shadow:0 0 18px rgba(28,150,255,.20),inset 0 0 18px rgba(109,205,255,.07) !important;
+      }
+      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat small {
+        display:block !important;
+        margin-top:5px !important;
+        color:inherit !important;
+        opacity:.72 !important;
+        font-size:11px !important;
+        font-weight:700 !important;
+      }
+      @media(max-width:700px){
+        body[data-store-section="coins"] #navSubcategories{gap:8px !important;margin-bottom:18px !important;}
+        body[data-store-section="coins"] #navSubcategories .sngCoinSubcat{min-width:calc(50% - 4px) !important;min-height:50px !important;padding:11px 10px !important;font-size:13px !important;}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function updateSubcategories() {
+    const area = document.getElementById("navSubcategories");
+    if (!area) return;
+    ensureStyles();
+
+    if (!isCoinSection()) {
+      area.hidden = true;
+      area.style.removeProperty("display");
+      area.replaceChildren();
+      return;
+    }
+
+    area.hidden = false;
+    area.style.setProperty("display", "flex", "important");
+    area.innerHTML = `
+      <button type="button" class="sngCoinSubcat ${platform === "Android" ? "is-active" : ""}" aria-pressed="${platform === "Android"}" onclick="window.sngSelectCoinPlatform('Android')">
+        Pièces eFootball Android
+        <small>Android</small>
+      </button>
+      <button type="button" class="sngCoinSubcat ${platform === "iPhone" ? "is-active" : ""}" aria-pressed="${platform === "iPhone"}" onclick="window.sngSelectCoinPlatform('iPhone')">
+        Pièces eFootball iPhone
+        <small>iPhone / iOS</small>
+      </button>`;
+  }
+
+  function renderWithPlatform() {
+    if (!originalRender) return;
+    if (!isCoinSection() || !platform) {
+      originalRender.apply(this, arguments);
+      updateSubcategories();
+      return;
+    }
+
+    const previousMatches = window.matchesStoreSection;
+    const baseMatches = originalMatches || previousMatches;
+    window.matchesStoreSection = function (product) {
+      return baseMatches(product) && platformMatch(product);
+    };
+    try {
+      originalRender.apply(this, arguments);
+    } finally {
+      window.matchesStoreSection = previousMatches;
+    }
+    updateSubcategories();
+  }
+
+  function selectPlatform(value) {
+    platform = value === "Android" || value === "iPhone" ? value : null;
+    renderWithPlatform();
+  }
+
+  function install() {
+    ensureStyles();
+    originalRender = window.render;
+    originalNavigate = window.navigateStore;
+    originalMatches = window.matchesStoreSection;
+
+    if (typeof originalRender !== "function" || typeof originalNavigate !== "function" || typeof originalMatches !== "function") {
+      window.setTimeout(install, 50);
+      return;
+    }
+
+    if (!window.__sngCoinSubcategoriesV1) {
+      window.render = renderWithPlatform;
+      window.sngSelectCoinPlatform = selectPlatform;
+
+      window.navigateStore = function (section) {
+        if (section !== "coins") platform = null;
+        const result = originalNavigate.apply(this, arguments);
+        if (section === "coins") {
+          updateSubcategories();
+          renderWithPlatform();
+        } else {
+          updateSubcategories();
+        }
+        return result;
+      };
+
+      window.__sngCoinSubcategoriesV1 = true;
+    }
+
+    updateSubcategories();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", install, { once:true });
+  } else {
+    install();
+  }
+})();
