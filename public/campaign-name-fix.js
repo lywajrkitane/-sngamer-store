@@ -169,7 +169,7 @@
   }
 
   const categoryPatch = document.createElement("script");
-  categoryPatch.src = "/category-consistency-v1.js?v=20261017-1810";
+  categoryPatch.src = "/category-consistency-v1.js?v=20261022-univers1";
   categoryPatch.defer = true;
   document.head.appendChild(categoryPatch);
 
