@@ -83,7 +83,8 @@
 
       if (!name) { setError(fields.name, 'Le nom du produit est obligatoire.'); errors.push(fields.name); }
       if (!category) { setError(fields.category, 'Choisis une catégorie.'); errors.push(fields.category); }
-      if (category === 'Coins' && !platform) { setError(fields.platform, 'Choisis Android ou iPhone.'); errors.push(fields.platform); }
+      if (category === 'Coins' && !platform) { setError(fields.platform, 'Choisis Android ou iPhone pour les Pièces eFootball.'); errors.push(fields.platform); }
+      if (category === 'Univers Gaming' && !platform) { setError(fields.platform, 'Choisis PC Gaming, Gaming Phone ou Console.'); errors.push(fields.platform); }
       if (!Number.isFinite(price) || price <= 0) { setError(fields.price, 'Le prix normal doit être supérieur à 0 FCFA.'); errors.push(fields.price); }
       if (!Number.isInteger(stock) || stock < 0) { setError(fields.stock, 'Le stock doit être un nombre entier positif ou égal à 0.'); errors.push(fields.stock); }
       if (active && promo === null) { setError(fields.promo, 'Indique un prix promotionnel avant d’activer la promotion.'); errors.push(fields.promo); }
