@@ -21,11 +21,11 @@
   }
 
   function loadHeroMedia(){
-    if(document.querySelector('script[data-sngamer-hero-media-v2]')) return;
+    if(document.querySelector('script[data-sngamer-hero-media-v3]')) return;
     const script=document.createElement("script");
-    script.src="hero-media-v2.js?v=20261022-hero";
+    script.src="/hero-media-v3.js?v=20261022-fix2";
     script.defer=true;
-    script.dataset.sngamerHeroMediaV2="true";
+    script.dataset.sngamerHeroMediaV3="true";
     document.body.appendChild(script);
   }
 
