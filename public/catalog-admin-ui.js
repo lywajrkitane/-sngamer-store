@@ -191,6 +191,10 @@
     if (live) {
       const name = document.getElementById('pName')?.value.trim() || 'Nom du produit';
       const category = document.getElementById('pCategory')?.value || 'Catégorie';
+      const subcategory = document.getElementById('pPlatform')?.value || '';
+      const categoryText = subcategory && (category === 'Coins' || category === 'Univers Gaming')
+        ? category + ' · ' + subcategory
+        : category;
       const stock = Number(document.getElementById('pStock')?.value);
       const price = Number(document.getElementById('pPrice')?.value);
       const promo = Number(document.getElementById('pPromoPrice')?.value);
@@ -199,7 +203,7 @@
       if (image) img.src = URL.createObjectURL(image); else img.removeAttribute('src');
       live.querySelector('h4').textContent = name;
       const stockText = Number.isFinite(stock) ? `Stock : ${stock}` : 'Stock non défini';
-      live.querySelector('p').textContent = `${category} • ${stockText}`;
+      live.querySelector('p').textContent = `${categoryText} • ${stockText}`;
       const priceBox = live.querySelector('.sng-product-price');
       if (Number.isFinite(promo) && promo > 0 && promo < price) {
         priceBox.innerHTML = `<span class="sng-product-promo">${esc(money(promo))}</span> <s style="color:#7c8997;font-size:11px">${esc(money(price))}</s>`;
@@ -218,7 +222,7 @@
     if (promo) promo.min = '0';
     if (stock) { stock.min = '0'; stock.step = '1'; }
     IMAGE_IDS.forEach(id => document.getElementById(id)?.addEventListener('change', refreshPreview));
-    ['pName','pCategory','pPrice','pStock','pPromoPrice','pPromoActive','pCampaign'].forEach(id => {
+    ['pName','pCategory','pPlatform','pPrice','pStock','pPromoPrice','pPromoActive','pCampaign'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('input', refreshPreview);
