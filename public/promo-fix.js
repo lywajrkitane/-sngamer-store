@@ -18,14 +18,18 @@
     if(description){
       description.classList.remove("heroSlogan");
       description.classList.add("heroAnnouncement");
-      description.innerHTML = `
-        <span class="announcementIcon" aria-hidden="true">👋</span>
-        <span class="announcementCopy">
-          <strong>BIENVENUE CHEZ SNGAMER</strong>
-          <span>Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.</span>
-        </span>
-        <span class="announcementDots" aria-hidden="true"><i class="active"></i><i></i><i></i><i></i></span>
-      `;
+      // Build the announcement markup once. Repeated promo synchronization must not reset its slide.
+      if(description.dataset.sngWelcomeMarkupReady !== "1"){
+        description.innerHTML = `
+          <span class="announcementIcon" aria-hidden="true">👋</span>
+          <span class="announcementCopy">
+            <strong>BIENVENUE CHEZ SNGAMER</strong>
+            <span>Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.</span>
+          </span>
+          <span class="announcementDots" aria-hidden="true"><i class="active"></i><i></i><i></i></span>
+        `;
+        description.dataset.sngWelcomeMarkupReady = "1";
+      }
       description.setAttribute("aria-label","Bienvenue chez SNGAMER. Merci de nous rendre visite aujourd’hui.");
     }
 
@@ -262,15 +266,15 @@
       style.id = "sngHeroPersistentLayoutV1";
       style.textContent = `
         .hero.professional-hero .heroIn > div:first-child > h1{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
-        .hero.professional-hero .heroIn > div:first-child > label{display:block!important;margin:0 0 3px!important;color:#55a8ff!important;letter-spacing:3px!important}
-        .hero.professional-hero .sngPromoAnnouncement{width:auto!important;min-height:40px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;margin:4px 0 7px!important;position:relative!important;z-index:30!important}
+        .hero.professional-hero .heroIn > div:first-child > label{display:block!important;margin:0 0 7px!important;color:#55a8ff!important;letter-spacing:3px!important}
+        .hero.professional-hero .sngPromoAnnouncement{width:auto!important;min-height:40px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;margin:0 0 11px!important;position:relative!important;z-index:30!important}
         .hero.professional-hero .sngPromoAnnouncementButton{width:38px!important;height:38px!important;min-width:38px!important;flex:0 0 38px!important;padding:0!important;border:1px solid rgba(93,167,255,.55)!important;border-radius:12px!important;color:#fff!important;background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%)!important;box-shadow:0 0 18px rgba(42,111,255,.2),inset 0 1px 0 rgba(255,255,255,.2)!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;position:relative!important}
         .hero.professional-hero .sngPromoAnnouncementButton svg{width:20px!important;height:20px!important;display:block!important}
         .hero.professional-hero .sngPromoAnnouncementButton::after{content:"";position:absolute;inset:-4px;border-radius:15px;border:1px solid rgba(82,179,255,.38);animation:sngPromoAnnouncementPulse 2.2s ease-out infinite;pointer-events:none}
         .hero.professional-hero .sngPromoAnnouncementButton.is-playing::after{animation:sngPromoAnnouncementPlaying 1s ease-in-out infinite}
-        .hero.professional-hero .heroIn > div:first-child p.heroAnnouncement{margin:8px 0 14px!important}
+        .hero.professional-hero .heroIn > div:first-child p.heroAnnouncement{margin:0 0 14px!important}
         .hero.professional-hero .heroIn > .sngPromoHeroCta{display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:185px!important;max-width:185px!important;height:42px!important;min-height:42px!important;max-height:42px!important;margin:12px 0 0 0!important;padding:8px 12px!important;border:1px solid rgba(110,169,255,.3)!important;border-radius:12px!important;background:linear-gradient(108deg,#287eff 0%,#6448ef 53%,#ce2b91 100%)!important;color:#fff!important;font-size:13px!important;font-weight:850!important;line-height:1.1!important;text-align:center!important;white-space:nowrap!important;box-shadow:0 7px 18px rgba(36,116,255,.12),0 4px 14px rgba(198,40,145,.07)!important;grid-column:1!important;justify-self:start!important;align-self:start!important}
-        @media(max-width:560px){.hero.professional-hero .sngPromoAnnouncement{min-height:38px!important;margin:3px 0 6px!important}.hero.professional-hero .sngPromoAnnouncementButton{width:36px!important;height:36px!important;min-width:36px!important;flex-basis:36px!important}.hero.professional-hero .heroIn > div:first-child p.heroAnnouncement{margin:7px 0 12px!important}.hero.professional-hero .heroIn > .sngPromoHeroCta{width:185px!important;max-width:185px!important;height:42px!important;min-height:42px!important;max-height:42px!important;margin:10px 0 0 0!important}}
+        @media(max-width:560px){.hero.professional-hero .sngPromoAnnouncement{min-height:38px!important;margin:0 0 10px!important}.hero.professional-hero .sngPromoAnnouncementButton{width:36px!important;height:36px!important;min-width:36px!important;flex-basis:36px!important}.hero.professional-hero .heroIn > div:first-child p.heroAnnouncement{margin:0 0 12px!important}.hero.professional-hero .heroIn > .sngPromoHeroCta{width:185px!important;max-width:185px!important;height:42px!important;min-height:42px!important;max-height:42px!important;margin:10px 0 0 0!important}}
         @media(prefers-reduced-motion:reduce){.hero.professional-hero .sngPromoAnnouncementButton::after{animation:none!important}}
       `;
       document.head.appendChild(style);
@@ -313,6 +317,73 @@
     }
   }
 
+  function installWelcomeAnnouncementCarousel(){
+    const description = document.querySelector(".hero .heroAnnouncement");
+    if(!description || description.dataset.sngWelcomeRotatorReady === "1") return;
+
+    const icon = description.querySelector(".announcementIcon");
+    const copy = description.querySelector(".announcementCopy");
+    const heading = copy && copy.querySelector("strong");
+    const body = copy && copy.querySelector("span");
+    const dots = Array.from(description.querySelectorAll(".announcementDots i"));
+    if(!icon || !heading || !body || dots.length !== 3) return;
+
+    const slides = [
+      {icon:"👋", title:"BIENVENUE CHEZ SNGAMER", text:"Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui."},
+      {icon:"⚡", title:"COMMANDE RAPIDE", text:"Choisis ton produit et commande simplement en quelques secondes."},
+      {icon:"🚚", title:"LIVRAISON", text:"Livraison partout au Sénégal et dans toute la sous-région."}
+    ];
+    let index = Math.max(0, dots.findIndex(dot => dot.classList.contains("active")));
+    let timer = null;
+    let transitionTimer = null;
+
+    if(!document.getElementById("sngWelcomeCarouselStylesV2")){
+      const style = document.createElement("style");
+      style.id = "sngWelcomeCarouselStylesV2";
+      style.textContent = `
+        .professional-hero .heroAnnouncement .announcementCopy{transition:opacity .22s ease,transform .22s ease}
+        .professional-hero .heroAnnouncement .announcementCopy.is-changing{opacity:0;transform:translateY(4px)}
+        .professional-hero .heroAnnouncement .announcementDots i{transition:width .25s ease,background .25s ease}
+        @media(prefers-reduced-motion:reduce){.professional-hero .heroAnnouncement .announcementCopy{transition:none!important}.professional-hero .heroAnnouncement .announcementDots i{transition:none!important}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    function render(nextIndex, animate){
+      index = (nextIndex + slides.length) % slides.length;
+      const slide = slides[index];
+      if(transitionTimer) clearTimeout(transitionTimer);
+      const update = () => {
+        icon.textContent = slide.icon;
+        heading.textContent = slide.title;
+        body.textContent = slide.text;
+        dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === index));
+        description.setAttribute("aria-label", slide.title + ". " + slide.text);
+        copy.classList.remove("is-changing");
+      };
+      if(animate && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+        copy.classList.add("is-changing");
+        transitionTimer = setTimeout(update, 180);
+      }else{
+        update();
+      }
+    }
+    const stop = () => { if(timer){clearInterval(timer);timer=null;} };
+    const start = () => {
+      stop();
+      if(!document.hidden) timer = setInterval(() => render(index + 1, true), 6000);
+    };
+    description.addEventListener("mouseenter", stop);
+    description.addEventListener("mouseleave", start);
+    description.addEventListener("focusin", stop);
+    description.addEventListener("focusout", start);
+    document.addEventListener("visibilitychange", () => document.hidden ? stop() : start());
+
+    description.dataset.sngWelcomeRotatorReady = "1";
+    render(index, false);
+    start();
+  }
+
   function syncPromoHero(){
     const area=document.getElementById("promoArea");
     const carousel=document.getElementById("promoCarousel");
@@ -323,6 +394,7 @@
 
     applyProfessionalHero();
     installPersistentHeroLayout();
+    installWelcomeAnnouncementCarousel();
     injectProfessionalHeroStyles();
     injectProductDetailTransition();
     installOrderSuccessHook();
