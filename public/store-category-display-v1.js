@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  const order = ["Tous", "Pièces eFootball", "Souris", "Accessoires", "Gaming Phone"];
+  const order = ["Tous", "Pièces eFootball", "Univers Gaming", "Souris", "Accessoires"];
 
   function normalizeCategory(value) {
     return String(value == null ? "" : value)
@@ -22,7 +22,7 @@
   function strictCategory(product) {
     const raw = normalizeCategory(product && product.category);
     if (raw === "coins" || raw === "pieces efootball" || raw === "piece efootball") return "Pièces eFootball";
-    if (raw === "gaming phone" || raw === "gaming phones") return "Gaming Phone";
+    if (raw === "univers gaming" || raw === "gaming phone" || raw === "gaming phones") return "Univers Gaming";
     if (raw === "accessoires" || raw === "accessoire") return "Accessoires";
     if (raw === "souris" || raw === "mouse") return "Souris";
     return String((product && product.category) || "Accessoires").trim() || "Accessoires";
@@ -33,7 +33,7 @@
     if (section === "home") return true;
     const category = strictCategory(product);
     if (section === "accessories") return category === "Accessoires";
-    if (section === "phones") return category === "Gaming Phone";
+    if (section === "phones") return category === "Univers Gaming";
     if (section === "coins") return category === "Pièces eFootball";
     return true;
   }
@@ -186,140 +186,119 @@
   install();
 })();
 
-/* SNGAMER STORE — Pièces eFootball platform subcategories recovery */
+/* SNGAMER STORE — shared subcategory navigation for Pièces eFootball and Univers Gaming */
 (function () {
-  "use strict";
+  'use strict';
+  if (window.__sngHierarchicalCategoriesV2) return;
 
-  let platform = null;
+  const definitions = {
+    coins: {
+      title: 'Pièces eFootball',
+      options: [
+        { value: 'Android', label: 'Pièces eFootball Android', hint: 'Android / Google Play' },
+        { value: 'iPhone', label: 'Pièces eFootball iPhone', hint: 'iPhone / iOS' }
+      ]
+    },
+    phones: {
+      title: 'Univers Gaming',
+      options: [
+        { value: 'PC Gaming', label: 'PC Gaming', hint: 'Ordinateurs et équipements PC' },
+        { value: 'Gaming Phone', label: 'Gaming Phone', hint: 'Smartphones dédiés au jeu' },
+        { value: 'Console', label: 'Console', hint: 'Consoles et accessoires console' }
+      ]
+    }
+  };
+  const selected = { coins: null, phones: null };
   let originalRender = null;
   let originalNavigate = null;
   let originalMatches = null;
 
   function normalize(value) {
-    return String(value == null ? "" : value)
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+    return String(value == null ? '' : value).trim().toLowerCase()
+      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');
   }
-
-  function isCoinSection() {
-    return String(window.activeStoreSection || document.body?.dataset.storeSection || "home") === "coins";
+  function currentSection() {
+    return String(window.activeStoreSection || document.body?.dataset.storeSection || 'home');
   }
-
-  function platformMatch(product) {
-    if (!platform) return true;
-    return normalize(product && product.platform) === normalize(platform);
+  function productMatchesSubcategory(product, section, value) {
+    const wanted = normalize(value);
+    const actual = normalize(product && product.platform);
+    if (actual === wanted) return true;
+    // Compatibility while older Gaming Phone products are being normalized by the server.
+    return section === 'phones' && wanted === 'gaming phone' &&
+      normalize(product && product.category) === 'gaming phone';
   }
-
   function ensureStyles() {
-    if (document.getElementById("sngCoinSubcategoryStylesV1")) return;
-    const style = document.createElement("style");
-    style.id = "sngCoinSubcategoryStylesV1";
-    style.textContent = `
-      body[data-store-section="coins"] #navSubcategories {
-        display:flex !important;
-        visibility:visible !important;
-        opacity:1 !important;
-        position:relative !important;
-        width:100% !important;
-        margin:0 0 22px !important;
-        padding:0 !important;
-        gap:10px !important;
-        align-items:stretch !important;
-        flex-wrap:wrap !important;
-      }
-      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat {
-        flex:1 1 0 !important;
-        min-width:150px !important;
-        min-height:52px !important;
-        padding:12px 16px !important;
-        border:1px solid rgba(76,151,230,.28) !important;
-        border-radius:16px !important;
-        background:linear-gradient(145deg,rgba(14,28,48,.92),rgba(12,18,34,.96)) !important;
-        color:#b9c9dc !important;
-        font:800 14px/1.1 Arial,sans-serif !important;
-        letter-spacing:.3px !important;
-        cursor:pointer !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 20px rgba(0,0,0,.12) !important;
-        transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease !important;
-      }
-      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat:hover {
-        transform:translateY(-1px) !important;
-        border-color:rgba(89,190,255,.65) !important;
-        color:#fff !important;
-      }
-      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat.is-active {
-        color:#fff !important;
-        border-color:rgba(89,190,255,.95) !important;
-        background:linear-gradient(135deg,rgba(30,126,255,.42),rgba(105,58,237,.45),rgba(208,35,158,.28)) !important;
-        box-shadow:0 0 18px rgba(28,150,255,.20),inset 0 0 18px rgba(109,205,255,.07) !important;
-      }
-      body[data-store-section="coins"] #navSubcategories .sngCoinSubcat small {
-        display:block !important;
-        margin-top:5px !important;
-        color:inherit !important;
-        opacity:.72 !important;
-        font-size:11px !important;
-        font-weight:700 !important;
-      }
-      @media(max-width:700px){
-        body[data-store-section="coins"] #navSubcategories{gap:8px !important;margin-bottom:18px !important;}
-        body[data-store-section="coins"] #navSubcategories .sngCoinSubcat{min-width:calc(50% - 4px) !important;min-height:50px !important;padding:11px 10px !important;font-size:13px !important;}
-      }
-    `;
+    if (document.getElementById('sngHierarchicalCategoryStylesV2')) return;
+    const style = document.createElement('style');
+    style.id = 'sngHierarchicalCategoryStylesV2';
+    style.textContent = [
+      'body[data-store-section="coins"] #navSubcategories, body[data-store-section="phones"] #navSubcategories { display:flex!important; visibility:visible!important; opacity:1!important; position:relative!important; width:100%!important; margin:0 0 20px!important; padding:0!important; gap:10px!important; align-items:stretch!important; flex-wrap:wrap!important; }',
+      '.sngStoreSubcategory { flex:1 1 0!important; min-width:145px!important; min-height:54px!important; padding:12px 15px!important; border:1px solid rgba(76,151,230,.28)!important; border-radius:16px!important; background:linear-gradient(145deg,rgba(14,28,48,.92),rgba(12,18,34,.96))!important; color:#b9c9dc!important; font:800 14px/1.15 Arial,sans-serif!important; letter-spacing:.2px!important; text-align:left!important; cursor:pointer!important; box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 20px rgba(0,0,0,.12)!important; transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease!important; }',
+      '.sngStoreSubcategory:hover { transform:translateY(-1px)!important; border-color:rgba(89,190,255,.65)!important; color:#fff!important; }',
+      '.sngStoreSubcategory.is-active { color:#fff!important; border-color:rgba(89,190,255,.95)!important; background:linear-gradient(135deg,rgba(30,126,255,.42),rgba(105,58,237,.45),rgba(208,35,158,.28))!important; box-shadow:0 0 18px rgba(28,150,255,.20),inset 0 0 18px rgba(109,205,255,.07)!important; }',
+      '.sngStoreSubcategory small { display:block!important; margin-top:5px!important; color:inherit!important; opacity:.72!important; font-size:11px!important; font-weight:700!important; }',
+      '@media(max-width:700px){ body[data-store-section="coins"] #navSubcategories, body[data-store-section="phones"] #navSubcategories { gap:8px!important; margin-bottom:18px!important; } .sngStoreSubcategory { flex:1 1 calc(50% - 4px)!important; min-width:calc(50% - 4px)!important; min-height:50px!important; padding:11px 10px!important; font-size:13px!important; } }',
+      '@media(max-width:380px){ .sngStoreSubcategory { font-size:12px!important; } .sngStoreSubcategory small { font-size:10px!important; } }'
+    ].join('\\n');
     document.head.appendChild(style);
   }
 
   function updateSubcategories() {
-    const area = document.getElementById("navSubcategories");
+    const area = document.getElementById('navSubcategories');
     if (!area) return;
     ensureStyles();
-
-    if (!isCoinSection()) {
+    const section = currentSection();
+    const definition = definitions[section];
+    if (!definition) {
       area.hidden = true;
-      area.style.removeProperty("display");
+      area.style.removeProperty('display');
       area.replaceChildren();
       return;
     }
-
     area.hidden = false;
-    area.style.setProperty("display", "flex", "important");
-    area.innerHTML = `
-      <button type="button" class="sngCoinSubcat ${platform === "Android" ? "is-active" : ""}" aria-pressed="${platform === "Android"}" onclick="window.sngSelectCoinPlatform('Android')">
-        Pièces eFootball Android
-        <small>Android</small>
-      </button>
-      <button type="button" class="sngCoinSubcat ${platform === "iPhone" ? "is-active" : ""}" aria-pressed="${platform === "iPhone"}" onclick="window.sngSelectCoinPlatform('iPhone')">
-        Pièces eFootball iPhone
-        <small>iPhone / iOS</small>
-      </button>`;
+    area.setAttribute('aria-label', definition.title + ' : sous-catégories');
+    area.style.setProperty('display', 'flex', 'important');
+    area.replaceChildren();
+    definition.options.forEach(function (option) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'sngStoreSubcategory' + (selected[section] === option.value ? ' is-active' : '');
+      button.setAttribute('aria-pressed', selected[section] === option.value ? 'true' : 'false');
+      const label = document.createElement('span');
+      label.textContent = option.label;
+      const hint = document.createElement('small');
+      hint.textContent = option.hint;
+      button.append(label, hint);
+      button.addEventListener('click', function () { selectSubcategory(section, option.value); });
+      area.appendChild(button);
+    });
   }
 
-  function renderWithPlatform() {
-    if (!originalRender) return;
-    if (!isCoinSection() || !platform) {
+  function renderWithSubcategory() {
+    if (typeof originalRender !== 'function') return;
+    const section = currentSection();
+    const value = definitions[section] ? selected[section] : null;
+    if (!value) {
       originalRender.apply(this, arguments);
       updateSubcategories();
       return;
     }
-
     const previousMatches = window.matchesStoreSection;
     const baseMatches = originalMatches || previousMatches;
     window.matchesStoreSection = function (product) {
-      return baseMatches(product) && platformMatch(product);
+      return (!baseMatches || baseMatches(product)) && productMatchesSubcategory(product, section, value);
     };
-    try {
-      originalRender.apply(this, arguments);
-    } finally {
-      window.matchesStoreSection = previousMatches;
-    }
+    try { originalRender.apply(this, arguments); }
+    finally { window.matchesStoreSection = previousMatches; }
     updateSubcategories();
   }
 
-  function selectPlatform(value) {
-    platform = value === "Android" || value === "iPhone" ? value : null;
-    renderWithPlatform();
+  function selectSubcategory(section, value) {
+    if (!definitions[section]) return;
+    // Tapping the already-selected subcategory resets to the full category.
+    selected[section] = selected[section] === value ? null : value;
+    renderWithSubcategory();
   }
 
   function install() {
@@ -327,37 +306,25 @@
     originalRender = window.render;
     originalNavigate = window.navigateStore;
     originalMatches = window.matchesStoreSection;
-
-    if (typeof originalRender !== "function" || typeof originalNavigate !== "function" || typeof originalMatches !== "function") {
+    if (typeof originalRender !== 'function' || typeof originalNavigate !== 'function' || typeof originalMatches !== 'function') {
       window.setTimeout(install, 50);
       return;
     }
-
-    if (!window.__sngCoinSubcategoriesV1) {
-      window.render = renderWithPlatform;
-      window.sngSelectCoinPlatform = selectPlatform;
-
-      window.navigateStore = function (section) {
-        if (section !== "coins") platform = null;
-        const result = originalNavigate.apply(this, arguments);
-        if (section === "coins") {
-          updateSubcategories();
-          renderWithPlatform();
-        } else {
-          updateSubcategories();
-        }
-        return result;
-      };
-
-      window.__sngCoinSubcategoriesV1 = true;
-    }
-
+    window.render = renderWithSubcategory;
+    window.navigateStore = function (section) {
+      const previousSection = currentSection();
+      if (section !== previousSection && definitions[section]) selected[section] = null;
+      const result = originalNavigate.apply(this, arguments);
+      updateSubcategories();
+      renderWithSubcategory();
+      return result;
+    };
+    window.sngSelectStoreSubcategory = selectSubcategory;
+    // Backward-compatible helper name used by the first eFootball implementation.
+    window.sngSelectCoinPlatform = function (value) { return selectSubcategory('coins', value); };
+    window.__sngHierarchicalCategoriesV2 = true;
     updateSubcategories();
   }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", install, { once:true });
-  } else {
-    install();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once:true });
+  else install();
 })();
