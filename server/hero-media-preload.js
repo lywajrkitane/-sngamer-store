@@ -35,11 +35,13 @@ function patchAdminFile(fileName) {
   let html = fs.readFileSync(file, "utf8");
   const marker = "/hero-media-admin.js";
   if (html.includes(marker)) return;
-  html = html.replace(
-    /<\/body>/i,
-    '<script src="/hero-media-admin.js?v=20261022-hero-admin1" defer></script></body>'
-  );
-  fs.writeFileSync(file, html, "utf8");
+  const scriptTag = '<script src="/hero-media-admin.js?v=20261022-hero-admin2" defer></script>';
+  if (/<\/body>/i.test(html)) {
+    html = html.replace(/<\/body>/i, scriptTag + "</body>");
+    fs.writeFileSync(file, html, "utf8");
+  } else {
+    console.error("HERO_MEDIA_PRELOAD_ERROR: </body> not found in " + fileName);
+  }
 }
 
 try {
