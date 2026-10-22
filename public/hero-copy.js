@@ -7,7 +7,7 @@
   }
   function start(){
     loadOnce('script[data-sngamer-customer-account]','/customer-account.js?v=20261019-1025','sngamerCustomerAccount');
-    loadOnce('script[data-sngamer-hero-media-v6]','/hero-media-v3.js?v=20261022-fix4','sngamerHeroMediaV6');
+    loadOnce('script[data-sngamer-hero-media-v7]','/hero-media-v4.js?v=20261022-exactbanners','sngamerHeroMediaV7');
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
