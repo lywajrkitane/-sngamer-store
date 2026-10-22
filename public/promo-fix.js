@@ -35,7 +35,7 @@
       fallback.innerHTML = `
         <div class="heroTrustBadge">✨ SÉLECTION DU MOMENT</div>
         <h2>TON SETUP. TON GAME.<br>TON STYLE.</h2>
-        <p class="heroTrustProducts">Gaming Phones <span>•</span> Accessoires gaming <span>•</span> Pièces eFootball</p>
+        <p class="heroTrustProducts">Univers Gaming <span>•</span> Accessoires gaming <span>•</span> Pièces eFootball</p>
         <div class="heroDelivery"><span class="heroDeliveryIcon">🚚</span><span>Livraison au Sénégal et dans toute la sous-région</span></div>
       `;
     }
