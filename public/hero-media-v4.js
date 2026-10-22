@@ -25,7 +25,7 @@
       .sngHeroImageFallback{position:absolute;inset:0;z-index:1;display:flex;align-items:center;padding:24px;color:#f4f7ff;background:radial-gradient(ellipse at 28% 50%,rgba(33,125,255,.24),transparent 50%),linear-gradient(120deg,#07101f,#0b2340 62%,#08101c);font-family:Inter,Arial,sans-serif}
       .sngHeroImageFallbackCopy{min-width:0;max-width:72%;display:flex;flex-direction:column;gap:6px;line-height:1.2}
       .sngHeroImageFallbackCopy strong{color:#67b7ff;font-size:12px;letter-spacing:2px}.sngHeroImageFallbackCopy span{font-size:22px;font-weight:850}
-      .sngHeroAudioHotspot{position:absolute;left:7%;top:32.6%;width:16%;aspect-ratio:1;border:0;background:transparent;border-radius:22%;cursor:pointer;z-index:6;padding:0;box-shadow:none!important;outline:none}
+      .sngHeroAudioHotspot{position:absolute;left:7%;top:32.6%;width:12.5%;aspect-ratio:1;border:0;background:transparent;border-radius:22%;cursor:pointer;z-index:6;padding:0;box-shadow:none!important;outline:none}
       .sngHeroAudioHotspot:focus-visible{outline:3px solid #7bd2ff;outline-offset:5px}
       .sngHeroAudioHint{position:absolute;left:7%;top:79%;z-index:7;padding:7px 11px;border:1px solid rgba(91,169,255,.45);border-radius:999px;background:rgba(5,13,27,.92);color:#eaf5ff;font:800 10px/1.1 Inter,Arial,sans-serif;letter-spacing:.3px;white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.3);pointer-events:none;transition:opacity .3s ease,visibility .3s ease}
       .sngHeroAudioHint::before{content:"▶";margin-right:5px;color:#72c8ff}
