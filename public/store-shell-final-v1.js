@@ -20,7 +20,16 @@
     if (footer) { footer.hidden = true; footer.style.display = 'none'; }
     if (hero) hero.hidden = !isHome;
     if (cats) { cats.hidden = !isHome; if (!isHome) cats.style.display = 'none'; else cats.style.removeProperty('display'); }
-    if (subcats) { subcats.hidden = true; subcats.style.display = 'none'; }
+    if (subcats) {
+      const supportsSubcategories = current === 'coins' || current === 'phones';
+      if (supportsSubcategories && subcats.childElementCount > 0) {
+        subcats.hidden = false;
+        subcats.style.setProperty('display', 'flex', 'important');
+      } else {
+        subcats.hidden = true;
+        subcats.style.display = 'none';
+      }
+    }
     if (products) products.style.display = isProfile ? 'none' : '';
     if (profile) { profile.hidden = !isProfile; profile.style.display = isProfile ? 'block' : 'none'; }
     document.body.classList.toggle('sngFinalHomeView', isHome);
