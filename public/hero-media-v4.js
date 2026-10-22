@@ -118,7 +118,7 @@
       const track=document.createElement("div");track.className="sngHeroMediaTrack";
       slides.forEach((slide,i)=>{
         const wrap=document.createElement("div");wrap.className="sngHeroMediaSlide";
-        const img=document.createElement("img");img.alt=slide.alt;img.loading=i===0?"eager":"lazy";img.decoding="async";
+        const img=document.createElement("img");img.alt=slide.alt;img.loading=i===0?"eager":"lazy";img.decoding="async";img.crossOrigin="anonymous";
         let triedFallback=false;
         const loadFallback=()=>{
           if(!triedFallback&&img.src!==new URL(slide.fallbackSrc,location.href).href){
