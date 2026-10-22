@@ -5,7 +5,7 @@ const path = require('path');
 
 const file = path.join(__dirname, '..', 'public', 'admin-dashboard.html');
 const marker = 'SNGAMER_CATALOG_ADMIN_UI_V1';
-const script = '<script src="/catalog-admin-ui.js?v=20261021-catalog1"></script>';
+const script = '<script src="/catalog-admin-ui.js?v=20261022-univers1"></script>';
 
 try {
   if (fs.existsSync(file)) {
