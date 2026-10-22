@@ -79,6 +79,20 @@ price INTEGER NOT NULL CHECK (price >= 0),
   ALTER TABLE products
   ADD COLUMN IF NOT EXISTS platform TEXT DEFAULT NULL
 `);
+
+  // Normalize the former standalone Gaming Phone category into Univers Gaming.
+  // The existing platform column safely stores its subcategory and remains
+  // compatible with Android/iPhone values used by Pièces eFootball.
+  await db(`
+    UPDATE products
+    SET category = 'Univers Gaming',
+        platform = CASE
+          WHEN BTRIM(COALESCE(platform, '')) IN ('PC Gaming', 'Gaming Phone', 'Console')
+            THEN BTRIM(platform)
+          ELSE 'Gaming Phone'
+        END
+    WHERE LOWER(BTRIM(category)) IN ('gaming phone', 'gaming phones')
+  `);
   
   await db(`
     ALTER TABLE products
@@ -664,10 +678,22 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   campaign_id
 } = req.body;
 
+  const requestedCategory = String(category || "Accessoires").trim();
+  const isLegacyPhoneCategory = /^gaming phones?$/i.test(requestedCategory);
+  const normalizedCategory =
+    /^(univers gaming|gaming phones?)$/i.test(requestedCategory)
+      ? "Univers Gaming"
+      : requestedCategory;
+  const requestedPlatform = String(platform || "").trim();
+
   const p = {
   name: String(name || "").trim(),
-  category: String(category || "Accessoires").trim(),
-  platform: category === "Coins" ? String(platform || "").trim() : null,
+  category: normalizedCategory,
+  platform: normalizedCategory === "Coins"
+    ? (requestedPlatform || null)
+    : normalizedCategory === "Univers Gaming"
+      ? (requestedPlatform || (isLegacyPhoneCategory ? "Gaming Phone" : null))
+      : null,
   price: Number(price),
   stock: Number(stock),
   emoji: emoji || "🎮",
@@ -694,6 +720,19 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
       error: "Produit invalide"
     });
   }
+
+  if (p.category === "Coins" && !["Android", "iPhone"].includes(p.platform)) {
+    return res.status(400).json({
+      error: "Choisis la plateforme Android ou iPhone pour les Pièces eFootball."
+    });
+  }
+
+  if (p.category === "Univers Gaming" && !["PC Gaming", "Gaming Phone", "Console"].includes(p.platform)) {
+    return res.status(400).json({
+      error: "Choisis une sous-catégorie : PC Gaming, Gaming Phone ou Console."
+    });
+  }
+
   if (
   p.promo_price !== null &&
   (
@@ -1021,6 +1060,34 @@ app.patch(
   campaign_id
 } = req.body;
 
+      const requestedCategory = category === undefined ? undefined : String(category || "").trim();
+      const isLegacyPhoneCategory = requestedCategory !== undefined && /^gaming phones?$/i.test(requestedCategory);
+      const normalizedCategory = requestedCategory === undefined
+        ? undefined
+        : (/^(univers gaming|gaming phones?)$/i.test(requestedCategory) ? "Univers Gaming" : requestedCategory);
+      const requestedPlatform = platform === undefined ? undefined : String(platform || "").trim();
+      const shouldUpdatePlatform = category !== undefined || platform !== undefined;
+
+      let platformValue = null;
+      if (category === undefined) {
+        platformValue = platform === undefined ? null : (requestedPlatform || null);
+      } else if (normalizedCategory === "Coins") {
+        platformValue = requestedPlatform || null;
+      } else if (normalizedCategory === "Univers Gaming") {
+        platformValue = requestedPlatform || (isLegacyPhoneCategory ? "Gaming Phone" : null);
+      }
+
+      if (normalizedCategory === "Coins" && !["Android", "iPhone"].includes(platformValue)) {
+        return res.status(400).json({
+          error: "Choisis la plateforme Android ou iPhone pour les Pièces eFootball."
+        });
+      }
+
+      if (normalizedCategory === "Univers Gaming" && !["PC Gaming", "Gaming Phone", "Console"].includes(platformValue)) {
+        return res.status(400).json({
+          error: "Choisis une sous-catégorie : PC Gaming, Gaming Phone ou Console."
+        });
+      }
 
       /*
        * =========================================
@@ -1135,7 +1202,7 @@ app.patch(
         SET
           name = COALESCE($1, name),
           category = COALESCE($2, category),
-          platform = COALESCE($3, platform),
+          platform = CASE WHEN $15 = true THEN $3 ELSE platform END,
           price = COALESCE($4, price),
           stock = COALESCE($5, stock),
           emoji = COALESCE($6, emoji),
@@ -1164,10 +1231,8 @@ app.patch(
         `,
         [
           name ?? null,
-          category ?? null,
-          platform !== undefined
-            ? (category === "Coins" ? String(platform || "").trim() || null : null)
-            : null,
+          normalizedCategory ?? null,
+          platformValue,
           price !== undefined ? Number(price) : null,
           stock !== undefined ? Number(stock) : null,
           emoji ?? null,
@@ -1178,7 +1243,8 @@ app.patch(
           promo_active !== undefined ? Boolean(promo_active) : null,
           campaignIdProvided,
           campaignIdValue,
-          productId
+          productId,
+          shouldUpdatePlatform
         ]
       );
 
