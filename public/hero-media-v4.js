@@ -11,15 +11,15 @@
     const style=document.createElement("style");
     style.id="sngPromoHeroRestoreStyles";
     style.textContent=`
-      .sngPromoAnnouncement{width:100%;min-height:48px;display:flex;align-items:center;justify-content:center;margin:0 0 8px;position:relative;z-index:30}
+      .sngPromoAnnouncement{width:100%;min-height:48px;display:flex;align-items:center;justify-content:center;margin:0 0 6px;position:relative;z-index:30}
       .sngPromoAnnouncementButton{width:40px;height:40px;flex:0 0 40px;padding:0;border:1px solid rgba(93,167,255,.55);border-radius:13px;color:#fff;background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%);box-shadow:0 0 20px rgba(42,111,255,.22),inset 0 1px 0 rgba(255,255,255,.2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;position:relative}
       .sngPromoAnnouncementButton svg{width:20px;height:20px;display:block}
       .sngPromoAnnouncementButton::after{content:"";position:absolute;inset:-4px;border-radius:15px;border:1px solid rgba(82,179,255,.38);animation:sngPromoAnnouncementPulse 2.2s ease-out infinite;pointer-events:none}
       .sngPromoAnnouncementButton.is-playing::after{animation:sngPromoAnnouncementPlaying 1s ease-in-out infinite}
-      .sngPromoHeroCta{display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:min(76vw,270px)!important;max-width:270px!important;height:52px!important;min-height:52px!important;max-height:52px!important;margin:12px auto 0!important;padding:11px 16px!important;border:1px solid rgba(110,169,255,.3)!important;border-radius:14px!important;background:linear-gradient(108deg,#287eff 0%,#6448ef 53%,#ce2b91 100%)!important;color:#fff!important;font-size:15px!important;font-weight:850!important;line-height:1.1!important;text-align:center!important;white-space:nowrap!important;box-shadow:0 7px 18px rgba(36,116,255,.12),0 4px 14px rgba(198,40,145,.07)!important}
+      .sngPromoHeroCta{display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:220px!important;max-width:220px!important;height:46px!important;min-height:46px!important;max-height:46px!important;margin:10px 0 0 12px!important;padding:9px 14px!important;border:1px solid rgba(110,169,255,.3)!important;border-radius:13px!important;background:linear-gradient(108deg,#287eff 0%,#6448ef 53%,#ce2b91 100%)!important;color:#fff!important;font-size:14px!important;font-weight:850!important;line-height:1.1!important;text-align:center!important;white-space:nowrap!important;box-shadow:0 7px 18px rgba(36,116,255,.12),0 4px 14px rgba(198,40,145,.07)!important}
       @keyframes sngPromoAnnouncementPulse{0%{transform:scale(.96);opacity:.75}70%{transform:scale(1.12);opacity:0}100%{transform:scale(1.12);opacity:0}}
       @keyframes sngPromoAnnouncementPlaying{0%,100%{transform:scale(.96);opacity:.8}50%{transform:scale(1.1);opacity:.15}}
-      @media(max-width:700px){.sngPromoAnnouncement{min-height:44px;margin-bottom:6px}.sngPromoAnnouncementButton{width:37px;height:37px;flex-basis:37px;border-radius:12px}.sngPromoHeroCta{width:min(72vw,250px)!important;height:48px!important;min-height:48px!important;max-height:48px!important;font-size:14px!important;margin-top:10px!important}}
+      @media(max-width:700px){.sngPromoAnnouncement{min-height:44px;margin-bottom:4px}.sngPromoAnnouncementButton{width:37px;height:37px;flex-basis:37px;border-radius:12px}.sngPromoHeroCta{width:220px!important;max-width:220px!important;height:46px!important;min-height:46px!important;max-height:46px!important;font-size:14px!important;margin:8px 0 0 12px!important}}
       @media(prefers-reduced-motion:reduce){.sngPromoAnnouncementButton::after{animation:none!important}}
     `;
     document.head.appendChild(style);
@@ -35,13 +35,15 @@
 
     addStyles();
 
-    hero.classList.remove("sngHeroMediaV7","sngHeroMediaV8","sngHeroMediaV9","sngHeroMediaV10","has-default-hero");
+    hero.classList.remove("sngHeroMediaV7","sngHeroMediaV8","sngHeroMediaV9","sngHeroMediaV10","has-default-hero","professional-hero");
 
     const mediaMount=heroIn.querySelector(".sngHeroMediaMount");
     if(mediaMount) mediaMount.remove();
 
     if(copy){
-      copy.style.display="none";
+      /* The old hero copy contains the unwanted “ÉQUIPE-TOI. JOUE. GAGNE.” title.
+         Hide it with !important because an older global CSS rule forces it visible. */
+      copy.style.setProperty("display","none","important");
       const primary=copy.querySelector(".primary");
       if(primary){
         primary.classList.remove("sngHeroMediaCta");
