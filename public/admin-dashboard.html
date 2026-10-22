@@ -505,14 +505,13 @@
   <select id="pCategory" required onchange="toggleCoinPlatform()">
   <option value="">Choisir une catégorie</option>
   <option value="Accessoires">Accessoires</option>
-  <option value="Gaming Phone">Gaming Phone</option>
+  <option value="Univers Gaming">Univers Gaming</option>
   <option value="Coins">Coins</option>
 </select>
 
+<label id="pPlatformLabel" for="pPlatform" style="display:none;">Sous-catégorie / plateforme</label>
 <select id="pPlatform" style="display:none;">
-  <option value="">Choisir la plateforme</option>
-  <option value="Android">Pièces eFootball Android</option>
-<option value="iPhone">Pièces eFootball iPhone</option>
+  <option value="">Choisir une sous-catégorie</option>
 </select>
 
   <input id="pPrice" type="number" placeholder="Prix FCFA">
@@ -1203,7 +1202,7 @@ loadPromoMedia();
             ${p.emoji} ${p.name}
           </td>
 
-          <td>${p.category}</td>
+          <td>${p.category === "Univers Gaming" && p.platform ? p.category + "<br><small style='color:#8fa0b2'>" + p.platform + "</small>" : p.category}</td>
 
           <td>${money(p.price)}</td>
 
@@ -1226,16 +1225,39 @@ loadPromoMedia();
 
       `).join("");
   }
+ function configureProductSubcategory(category, select, label, field) {
+  if (!select) return;
+  const previous = String(select.value || "");
+  const isCoins = category === "Coins";
+  const isUnivers = category === "Univers Gaming";
+  const choices = isCoins
+    ? [["Android", "Android — Pièces eFootball"], ["iPhone", "iPhone / iOS — Pièces eFootball"]]
+    : isUnivers
+      ? [["PC Gaming", "PC Gaming"], ["Gaming Phone", "Gaming Phone"], ["Console", "Console"]]
+      : [];
+
+  select.replaceChildren(new Option(isCoins ? "Choisir la plateforme" : "Choisir une sous-catégorie", ""));
+  choices.forEach(([value, text]) => select.add(new Option(text, value)));
+
+  const visible = isCoins || isUnivers;
+  select.required = visible;
+  select.style.display = visible ? "block" : "none";
+  if (label) {
+    label.style.display = visible ? "block" : "none";
+    label.textContent = isCoins ? "🎮 Plateforme des Pièces eFootball" : "🎮 Sous-catégorie Univers Gaming";
+  }
+  if (field) field.style.display = visible ? "block" : "none";
+  select.value = choices.some(([value]) => value === previous) ? previous : "";
+ }
+
  function toggleCoinPlatform() {
   const category = document.getElementById("pCategory").value;
-  const platform = document.getElementById("pPlatform");
-
-  platform.style.display = category === "Coins" ? "block" : "none";
-  platform.required = category === "Coins";
-
-  if (category !== "Coins") {
-    platform.value = "";
-  }
+  configureProductSubcategory(
+    category,
+    document.getElementById("pPlatform"),
+    document.getElementById("pPlatformLabel"),
+    null
+  );
  }
 
   async function addProduct() {
@@ -1284,7 +1306,11 @@ const campaignId = campaignValue ? Number(campaignValue) : null;
 }
 
 if (category === "Coins" && !platform) {
-  alert("Choisis Coins Android ou Coins iPhone.");
+  alert("Choisis Android ou iPhone pour les Pièces eFootball.");
+  return;
+}
+if (category === "Univers Gaming" && !platform) {
+  alert("Choisis PC Gaming, Gaming Phone ou Console pour Univers Gaming.");
   return;
     }
 
@@ -2319,24 +2345,14 @@ mediaFields.forEach(([inputId, previewId, url, type]) => {
   }
   }
 function toggleEditCoinPlatform() {
-  const category =
-    document.getElementById("editProductCategory").value;
-
-  const field =
-    document.getElementById("editPlatformField");
-
-  const platform =
-    document.getElementById("editProductPlatform");
-
-  field.style.display =
-    category === "Coins" ? "block" : "none";
-
-  platform.required = category === "Coins";
-
-  if (category !== "Coins") {
-    platform.value = "";
-  }
-      }
+  const category = document.getElementById("editProductCategory").value;
+  configureProductSubcategory(
+    category,
+    document.getElementById("editProductPlatform"),
+    document.getElementById("editPlatformLabel"),
+    document.getElementById("editPlatformField")
+  );
+}
 function closeEditProduct() {
   document.getElementById("editProductModal").classList.remove("show");
 }
@@ -2367,7 +2383,11 @@ const platform =
   document.getElementById("editProductPlatform").value;
 
 if (category === "Coins" && !platform) {
-  alert("Choisis Coins Android ou Coins iPhone.");
+  alert("Choisis Android ou iPhone pour les Pièces eFootball.");
+  return;
+}
+if (category === "Univers Gaming" && !platform) {
+  alert("Choisis PC Gaming, Gaming Phone ou Console pour Univers Gaming.");
   return;
 }
 
@@ -3382,17 +3402,15 @@ async function loadAll() {
   >
     <option value="">Choisir une catégorie</option>
     <option value="Accessoires">Accessoires</option>
-    <option value="Gaming Phone">Gaming Phone</option>
+    <option value="Univers Gaming">Univers Gaming</option>
     <option value="Coins">Coins</option>
   </select>
 </div>
 
 <div class="edit-product-field" id="editPlatformField" style="display:none;">
-  <label for="editProductPlatform">📱 Plateforme Coins</label>
+  <label for="editProductPlatform" id="editPlatformLabel">Sous-catégorie / plateforme</label>
   <select id="editProductPlatform">
-    <option value="">Choisir la plateforme</option>
-    <option value="Android">Pièces eFootball Android</option>
-<option value="iPhone">Pièces eFootball iPhone</option>
+    <option value="">Choisir une sous-catégorie</option>
   </select>
 </div>
 
