@@ -2149,10 +2149,10 @@ function closeOrderDetails() {
     document.getElementById("editProductCategory").value =
   product.category || "";
 
+toggleEditCoinPlatform();
+
 document.getElementById("editProductPlatform").value =
   product.platform || "";
-
-toggleEditCoinPlatform();
 
     document.getElementById("editProductPrice").value =
       product.price ?? "";
