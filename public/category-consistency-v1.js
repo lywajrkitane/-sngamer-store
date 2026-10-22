@@ -11,8 +11,8 @@
       return "Accessoires";
     }
 
-    if (key === "gaming phone" || key === "gaming phones") {
-      return "Gaming Phone";
+    if (key === "gaming phone" || key === "gaming phones" || key === "univers gaming") {
+      return "Univers Gaming";
     }
 
     if (key === "coins" || key === "coin" || key === "pieces efootball" || key === "piece efootball") {
