@@ -84,7 +84,7 @@ function openProduct(id){
         ${images.length>1?`<div class="productThumbnails">${images.map((url,i)=>`<button class="productThumb" onclick="selectProductImage(${i})"><img src="${escapeHtml(url)}" alt="${escapeHtml(p.name)}"></button>`).join("")}</div>`:""}
       </div>
       <div class="productInfo">
-        <div class="cat">${escapeHtml(p.category||"Gaming")}</div>
+        <div class="cat">${escapeHtml(typeof window.storeCategory === "function" ? window.storeCategory(p) : (p.category||"Gaming"))}</div>
         <h2>${escapeHtml(p.name)}</h2>
         ${Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?`<div class="price price--promo"><span class="priceOld">${money(p.price)}</span><strong class="priceCurrent">${money(p.promo_price)}</strong><span class="discountBadge">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span></div>`:`<div class="price">${money(p.price)}</div>`}
         ${inStock?`<div class="stock">${p.stock} disponible(s)</div>`:`<div class="stock outOfStock">Rupture de stock</div>`}
