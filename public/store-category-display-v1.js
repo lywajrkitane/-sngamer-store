@@ -240,7 +240,7 @@
       '.sngStoreSubcategory small { display:block!important; margin-top:5px!important; color:inherit!important; opacity:.72!important; font-size:11px!important; font-weight:700!important; }',
       '@media(max-width:700px){ body[data-store-section="coins"] #navSubcategories, body[data-store-section="phones"] #navSubcategories { gap:8px!important; margin-bottom:18px!important; } .sngStoreSubcategory { flex:1 1 calc(50% - 4px)!important; min-width:calc(50% - 4px)!important; min-height:50px!important; padding:11px 10px!important; font-size:13px!important; } }',
       '@media(max-width:380px){ .sngStoreSubcategory { font-size:12px!important; } .sngStoreSubcategory small { font-size:10px!important; } }'
-    ].join('\\n');
+    ].join(' ');
     document.head.appendChild(style);
   }
 
