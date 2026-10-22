@@ -2513,7 +2513,7 @@ if (category === "Univers Gaming" && !platform) {
               body: JSON.stringify({
   name,
   category,
-  platform: category === "Coins" ? platform : null,
+  platform: (category === "Coins" || category === "Univers Gaming") ? platform : null,
   price,
   stock,
   description,
