@@ -215,7 +215,7 @@
 
   function normalize(value) {
     return String(value == null ? '' : value).trim().toLowerCase()
-      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
   function currentSection() {
     return String(window.activeStoreSection || document.body?.dataset.storeSection || 'home');
