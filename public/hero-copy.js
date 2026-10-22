@@ -20,6 +20,15 @@
     document.body.appendChild(script);
   }
 
+  function loadHeroMedia(){
+    if(document.querySelector('script[data-sngamer-hero-media-v2]')) return;
+    const script=document.createElement("script");
+    script.src="hero-media-v2.js?v=20261022-hero";
+    script.defer=true;
+    script.dataset.sngamerHeroMediaV2="true";
+    document.body.appendChild(script);
+  }
+
   function injectAnnouncementStyles(){
     if(document.getElementById("sngamerHeroAnnouncementStyles")) return;
     const style=document.createElement("style");
@@ -34,7 +43,6 @@
       .sngHeroAnnouncementDots i{width:7px;height:7px;border-radius:50%;background:#40516a;transition:all .25s ease}
       .sngHeroAnnouncementDots i.active{width:27px;border-radius:99px;background:linear-gradient(90deg,#2f9cff,#d62ab1)}
 
-      /* Audio : bouton média compact, sans texte ni grand cadre. */
       .sngHeroAudioButton{appearance:none;-webkit-appearance:none;border:1px solid rgba(91,169,255,.42);background:linear-gradient(135deg,#1687ff,#7c3aed 58%,#e91e63);color:#fff;width:50px;height:50px;padding:0;border-radius:16px;display:grid;place-items:center;font-family:Inter,Arial,sans-serif;cursor:pointer;box-shadow:0 10px 26px rgba(37,99,235,.25),0 0 22px rgba(72,157,255,.12),inset 0 1px 0 rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;margin:0 0 18px}
       .sngHeroAudioButton:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 13px 30px rgba(37,99,235,.30),0 0 26px rgba(72,157,255,.16),inset 0 1px 0 rgba(255,255,255,.18)}
       .sngHeroAudioButton:active{transform:scale(.94)}
@@ -127,6 +135,6 @@
     let attempts=0;
     const timer=setInterval(function(){createAnnouncement();attempts++;if(attempts>=30)clearInterval(timer)},250);
   }
-  function start(){loadProductStability();loadCustomerAccount();startAnnouncement()}
+  function start(){loadProductStability();loadCustomerAccount();loadHeroMedia();startAnnouncement()}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
