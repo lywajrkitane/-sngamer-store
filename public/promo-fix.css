@@ -47,7 +47,6 @@
 #checkout .checkoutScrollArea #checkoutSummary{margin-top:0}
 #checkout .checkoutScrollArea > *{max-width:100%}
 
-
 /* ==========================================================
    SNGAMER STORE — CORRECTION SOURCE DU CHECKOUT MOBILE
    La fenêtre occupe le viewport et possède son propre scroll.
@@ -154,4 +153,34 @@
   #checkout .checkoutActionBar {
     padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
   }
+}
+
+/* ==========================================================
+   SNGAMER STORE — RESTAURATION DE LA PROMOTION HERO
+   IMPORTANT : la campagne existante reprend la priorité.
+   Le nouveau HERO média n'est utilisé que lorsqu'il n'y a
+   aucune promotion active. Rien d'autre dans le système promo
+   n'est modifié.
+   ========================================================== */
+.hero.sngHeroMediaV10.has-active-promo .sngHeroMediaMount{
+  display:none!important;
+}
+.hero.sngHeroMediaV10.has-active-promo .promoArea{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:280px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+.hero.sngHeroMediaV10.has-active-promo .promoArea .promoCarousel{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+@media(max-width:560px){
+  .hero.sngHeroMediaV10.has-active-promo .promoArea{min-height:250px!important}
 }
