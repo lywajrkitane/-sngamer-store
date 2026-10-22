@@ -10,7 +10,7 @@
     profile: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="15" r="7" fill="none" stroke="currentColor" stroke-width="2.7"/><path d="M10 41c1.5-8 6.2-12 14-12s12.5 4 14 12" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round"/></svg>`
   };
 
-  const LABELS = {home:"Accueil", accessories:"Accessoires", phones:"Gaming Phone", coins:"Pièces eFootball", profile:"Profil"};
+  const LABELS = {home:"Accueil", accessories:"Accessoires", phones:"Univers Gaming", coins:"Pièces eFootball", profile:"Profil"};
 
   function updateBackToTopVisibility() {
     const button = document.getElementById("sngamerBackToTop");
