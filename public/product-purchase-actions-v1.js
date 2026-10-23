@@ -19,6 +19,44 @@
       #productDetail .sngFavBtn.isFavorite .sngFavIcon svg path{fill:currentColor!important}
       #productDetail .sngShareBtn{min-width:112px!important;padding:0 14px!important}
 
+      /* Add to cart: neutral secondary action, distinct from the green Buy Now CTA. */
+      #productDetail .sngAddToCartBtn{
+        width:100%!important;
+        min-height:52px!important;
+        margin:10px 0 0!important;
+        padding:0 18px!important;
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        gap:9px!important;
+        border:1px solid rgba(125,145,175,.34)!important;
+        border-radius:14px!important;
+        background:rgba(20,31,48,.88)!important;
+        background-image:none!important;
+        color:#e6edf7!important;
+        font:inherit!important;
+        font-size:16px!important;
+        font-weight:800!important;
+        letter-spacing:.1px!important;
+        cursor:pointer!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 18px rgba(0,0,0,.12)!important;
+        transition:transform .15s ease,border-color .15s ease,background .15s ease,box-shadow .15s ease!important;
+      }
+      #productDetail .sngAddToCartBtn .sngCartIcon{
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        font-size:20px!important;
+        line-height:1!important;
+        flex:0 0 auto!important;
+      }
+      #productDetail .sngAddToCartBtn:hover{
+        border-color:rgba(105,160,220,.55)!important;
+        background:rgba(29,43,64,.96)!important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 22px rgba(0,0,0,.16)!important;
+      }
+      #productDetail .sngAddToCartBtn:active{transform:scale(.985)!important}
+
       /* Buy now: immediately above Add to cart, with its own stacked sticky position. */
       #productDetail .sngBuyNowBtn{
         order:79!important;
@@ -49,6 +87,7 @@
         #productDetail .sngSocialBtn{min-height:44px!important;height:44px!important}
         #productDetail .sngFavBtn{width:48px!important;min-width:48px!important}
         #productDetail .sngShareBtn{min-width:112px!important}
+        #productDetail .sngAddToCartBtn{min-height:54px!important;font-size:16px!important}
         #productDetail .sngBuyNowBtn{bottom:70px!important;min-height:54px!important;font-size:16px!important}
       }
     `;
@@ -69,17 +108,19 @@
     btn.setAttribute('title',btn.classList.contains('isFavorite')?'Retirer des favoris':'Ajouter aux favoris');
   }
 
-  function productIdFromDetail(detail){
-    const social=detail.querySelector('.sngProductSocial[data-product-id]');
-    const id=Number(social?.dataset.productId||0);
-    if(id)return id;
-    const hash=String(location.hash||'').match(/^#product=(\d+)$/);
-    return hash?Number(hash[1]):0;
-  }
-
   function findAddToCartButton(detail){
     const buttons=Array.from(detail.querySelectorAll('button'));
     return buttons.find(b=>String(b.textContent||'').trim().toLowerCase().includes('ajouter au panier'))||null;
+  }
+
+  function normalizeAddToCartButton(detail){
+    const btn=findAddToCartButton(detail);
+    if(!btn)return;
+    btn.classList.add('sngAddToCartBtn');
+    if(btn.dataset.sngCartNormalized==='1')return;
+    btn.innerHTML='<span class="sngCartIcon" aria-hidden="true">🛒</span><span>Ajouter au panier</span>';
+    btn.setAttribute('aria-label','Ajouter au panier');
+    btn.dataset.sngCartNormalized='1';
   }
 
   function injectBuyNow(detail){
@@ -114,11 +155,20 @@
     addButton.insertAdjacentElement('beforebegin',buy);
   }
 
+  function productIdFromDetail(detail){
+    const social=detail.querySelector('.sngProductSocial[data-product-id]');
+    const id=Number(social?.dataset.productId||0);
+    if(id)return id;
+    const hash=String(location.hash||'').match(/^#product=(\d+)$/);
+    return hash?Number(hash[1]):0;
+  }
+
   function patch(){
     installStyles();
     const detail=document.querySelector('#productDetail');
     if(!detail)return;
     normalizeFavoriteButton(detail);
+    normalizeAddToCartButton(detail);
     injectBuyNow(detail);
   }
 
