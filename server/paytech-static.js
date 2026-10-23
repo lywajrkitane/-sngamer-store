@@ -63,7 +63,59 @@ express.static = function paytechAwareStatic(root, options) {
        * the current /api/products response. We keep the page hidden until the
        * current data is available, then reveal it in one frame.
        */
-      const bootGate = `<style id="sngamer-refresh-boot-style">html.sngamer-refresh-boot body{visibility:hidden!important;opacity:0!important}</style><script id="sngamer-refresh-boot-script">(function(){try{document.documentElement.classList.add('sngamer-refresh-boot');var start=Date.now(),done=false;function reveal(){if(done)return;done=true;document.documentElement.classList.remove('sngamer-refresh-boot');}function check(){if(Array.isArray(window.storeProducts)&&window.storeProducts.length>0){requestAnimationFrame(function(){requestAnimationFrame(reveal);});return;}if(Date.now()-start>8000){reveal();return;}setTimeout(check,50);}check();window.addEventListener('pageshow',function(){setTimeout(check,0);},{once:true});}catch(_){document.documentElement.classList.remove('sngamer-refresh-boot');}})();</script>`;
+      const bootGate = `<style id="sngamer-refresh-boot-style">
+html.sngamer-refresh-boot body{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+html.sngamer-refresh-boot::before{content:"SNGAMER STORE\\A Préparation de la boutique…";white-space:pre-line;position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 22px 62px;box-sizing:border-box;background:radial-gradient(ellipse at 50% 38%,rgba(20,95,170,.28),transparent 48%),linear-gradient(145deg,#070b13,#0b1423 58%,#120c20);color:#f3f7ff;font:900 20px/1.8 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.4px}
+html.sngamer-refresh-boot::after{content:"";position:fixed;z-index:2147483647;top:calc(50% + 36px);left:calc(50% - 14px);width:28px;height:28px;box-sizing:border-box;border:3px solid rgba(104,174,255,.38);border-top-color:#d52db4;border-radius:50%;animation:sngBootSpin .8s linear infinite}
+@keyframes sngBootSpin{to{transform:rotate(360deg)}}
+html.sngamer-refresh-boot.sngamer-refresh-error::before,html.sngamer-refresh-boot.sngamer-refresh-error::after{display:none!important;content:none!important}
+</style><script id="sngamer-refresh-boot-script">(function(){
+  try{
+    var root=document.documentElement;
+    root.classList.add('sngamer-refresh-boot');
+    var started=Date.now(),stableSince=0,finished=false,windowLoaded=document.readyState==='complete';
+    var required=['__sngamerStoreReady','__sngamerCampaignBannerReady','__sngamerPromoHeroReady','__sngamerAnnouncementReady'];
+    function ready(){
+      return windowLoaded && required.every(function(key){return window[key]===true;});
+    }
+    function reveal(){
+      if(finished)return;
+      finished=true;
+      requestAnimationFrame(function(){requestAnimationFrame(function(){root.classList.remove('sngamer-refresh-boot','sngamer-refresh-error');});});
+    }
+    function showFailure(){
+      if(finished)return;
+      finished=true;
+      root.classList.add('sngamer-refresh-error');
+      var panel=document.createElement('div');
+      panel.id='sngamer-refresh-boot-failure';
+      panel.setAttribute('role','alert');
+      panel.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:radial-gradient(ellipse at 50% 35%,rgba(20,95,170,.28),transparent 48%),linear-gradient(145deg,#070b13,#0b1423 58%,#120c20);color:#f3f7ff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;text-align:center';
+      panel.innerHTML='<div style="max-width:380px"><div style="font-size:22px;font-weight:900;letter-spacing:.5px">SNGAMER STORE</div><p style="color:#b7c5d9;line-height:1.6;margin:14px 0 20px">La boutique n’a pas pu terminer son chargement. Réessaie pour afficher la version à jour.</p><button type="button" style="border:0;border-radius:12px;padding:13px 22px;background:linear-gradient(120deg,#167dff,#743bff,#d52db4);color:white;font-weight:900;font-size:15px" id="sngamer-refresh-retry">Réessayer</button></div>';
+      panel.querySelector('#sngamer-refresh-retry').addEventListener('click',function(){location.reload();});
+      root.appendChild(panel);
+    }
+    function check(){
+      if(finished)return;
+      if(ready()){
+        if(!stableSince)stableSince=Date.now();
+        // Allow the campaign API render, announcement carousel and injected hero styles to settle together.
+        if(Date.now()-stableSince>=900){reveal();return;}
+      }else{
+        stableSince=0;
+      }
+      if(Date.now()-started>=20000){showFailure();return;}
+      setTimeout(check,50);
+    }
+    window.addEventListener('load',function(){windowLoaded=true;},{once:true});
+    if(windowLoaded) setTimeout(check,0); else window.addEventListener('DOMContentLoaded',function(){setTimeout(check,0);},{once:true});
+    check();
+  }catch(_){
+    // If the guard itself fails, fail open only after the real load event.
+    window.addEventListener('load',function(){document.documentElement.classList.remove('sngamer-refresh-boot','sngamer-refresh-error');},{once:true});
+  }
+})();</script>`;
+
       if (!html.includes("sngamer-refresh-boot-style")) {
         html = html.replace(/<head>/i, `<head>${bootGate}`);
       }
