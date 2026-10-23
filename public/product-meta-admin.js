@@ -23,6 +23,31 @@
     }[ch]));
   }
 
+  // Remove accidental technical build/version markers from the visible admin UI.
+  // These markers are implementation details and must never be presented to admins.
+  function removeTechnicalMarkers(root = document.body) {
+    if (!root) return;
+    const marker = 'SNGAMER_PRODUCT_META_V3_DIGITAL';
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) nodes.push(node);
+    nodes.forEach(textNode => {
+      if (String(textNode.nodeValue || '').includes(marker)) {
+        textNode.nodeValue = String(textNode.nodeValue).replace(marker, '').replace(/\/\*\s*\*\//g, '').trim();
+        if (!textNode.nodeValue) textNode.parentNode?.removeChild(textNode);
+      }
+    });
+  }
+
+  function watchTechnicalMarkers() {
+    removeTechnicalMarkers();
+    if (window.__sngProductMetaMarkerObserver || !document.body) return;
+    const observer = new MutationObserver(() => removeTechnicalMarkers());
+    observer.observe(document.body, {childList: true, subtree: true});
+    window.__sngProductMetaMarkerObserver = observer;
+  }
+
   function injectStyles() {
     if (document.getElementById('sng-product-meta-admin-styles')) return;
     const style = document.createElement('style');
@@ -142,6 +167,7 @@
   }
 
   function init() {
+    watchTechnicalMarkers();
     injectStyles();
     buildFields();
     installFetchBridge();
