@@ -3,49 +3,71 @@
 const fs = require('fs');
 const path = require('path');
 
-const file = path.join(__dirname, 'server.js');
-const marker = 'SNGAMER_PRODUCT_META_CREATE_V1';
+const serverFile = path.join(__dirname, 'server.js');
+const publicDir = path.join(__dirname, '..', 'public');
+const adminMetaFile = path.join(publicDir, 'product-meta-admin.js');
+const appFile = path.join(publicDir, 'app.js');
+const adminDashboardFile = path.join(publicDir, 'admin-dashboard.html');
+const marker = 'SNGAMER_PRODUCT_META_V2_DIGITAL';
 
-try {
-  if (fs.existsSync(file)) {
+function patchFile(file, patcher, label) {
+  try {
+    if (!fs.existsSync(file)) return;
     let text = fs.readFileSync(file, 'utf8');
-
-    if (!text.includes(marker)) {
-      let changed = false;
-
-      const bodyPattern = /  campaign_id,\n?\} = req\.body;/;
-      if (bodyPattern.test(text)) {
-        text = text.replace(bodyPattern, `  campaign_id,\n  product_condition,\n  warranty,\n  warranty_configured\n} = req.body;`);
-        changed = true;
-      }
-
-      const pEndPattern = /  campaign_id:\n    campaign_id !== null && campaign_id !== undefined && campaign_id !== ""\n      \? Number\(campaign_id\)\n      : null\n  \};/;
-      if (pEndPattern.test(text)) {
-        text = text.replace(pEndPattern, `  campaign_id:\n    campaign_id !== null && campaign_id !== undefined && campaign_id !== ""\n      ? Number(campaign_id)\n      : null,\n  product_condition: ["Neuf", "Occasion", "Reconditionné"].includes(String(product_condition || "Neuf"))\n    ? String(product_condition || "Neuf")\n    : "Neuf",\n  warranty: String(warranty || "").trim() || "Aucune garantie",\n  warranty_configured: Boolean(warranty_configured) && Boolean(String(warranty || "").trim())\n  };`);
-        changed = true;
-      }
-
-      const insertColumnsPattern = /      promo_active,\n      campaign_id\n    \)\n  VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9, \$10\)/;
-      if (insertColumnsPattern.test(text)) {
-        text = text.replace(insertColumnsPattern, `      promo_active,\n      campaign_id,\n      product_condition,\n      warranty,\n      warranty_configured\n    )\n  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`);
-        changed = true;
-      }
-
-      const valuesPattern = /    p\.promo_active,\n    p\.campaign_id\n  \]\n    \);/;
-      if (valuesPattern.test(text)) {
-        text = text.replace(valuesPattern, `    p.promo_active,\n    p.campaign_id,\n    p.product_condition,\n    p.warranty,\n    p.warranty_configured\n  ]\n    );`);
-        changed = true;
-      }
-
-      if (changed) {
-        text = `/* ${marker} */\n` + text;
-        fs.writeFileSync(file, text, 'utf8');
-        console.log('SNGAMER_PRODUCT_META_CREATE_V1: create route patched');
-      } else {
-        console.warn('SNGAMER_PRODUCT_META_CREATE_V1: expected create-route anchors not found');
-      }
+    if (text.includes(marker)) return;
+    const next = patcher(text);
+    if (next !== text) {
+      fs.writeFileSync(file, `/* ${marker} */\n${next}`, 'utf8');
+      console.log(`${marker}: ${label} patched`);
+    } else {
+      console.warn(`${marker}: ${label} anchors not found`);
     }
+  } catch (error) {
+    console.error(`${marker}: ${label} patch error`, error);
   }
-} catch (error) {
-  console.error('PRODUCT_META_CREATE_PRELOAD_ERROR:', error);
 }
+
+patchFile(serverFile, text => {
+  let next = text;
+  next = next.replace(
+    /!\["Neuf", "Occasion", "Reconditionné"\]\.includes\(conditionValue\)/g,
+    '!["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(conditionValue)'
+  );
+  return next;
+}, 'server validation');
+
+patchFile(adminMetaFile, text => {
+  return text.replace(
+    "const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];",
+    "const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné', 'Produit numérique'];"
+  ).replace(
+    "product_condition: CONDITION_OPTIONS.includes(condition) ? condition : 'Neuf',",
+    "product_condition: CONDITION_OPTIONS.includes(condition) ? condition : 'Neuf',"
+  );
+}, 'product create form');
+
+patchFile(adminDashboardFile, text => {
+  let next = text;
+  next = next.replace(
+    '<option value="Reconditionné">Reconditionné</option>',
+    '<option value="Reconditionné">Reconditionné</option>\n        <option value="Produit numérique">Produit numérique</option>'
+  );
+  next = next.replace(
+    '["Neuf", "Occasion", "Reconditionné"].includes(product.product_condition)',
+    '["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(product.product_condition)'
+  );
+  return next;
+}, 'product edit form');
+
+patchFile(appFile, text => {
+  let next = text;
+  next = next.replace(
+    'const productCondition=["Neuf","Occasion","Reconditionné"].includes(String(p.product_condition||"Neuf"))\n    ? String(p.product_condition||"Neuf") : "Neuf";',
+    'const productConditionOptions=["Neuf","Occasion","Reconditionné","Produit numérique"];\n  const productCondition=productConditionOptions.includes(String(p.product_condition||"Neuf"))\n    ? String(p.product_condition||"Neuf") : "Neuf";'
+  );
+  next = next.replace(
+    '<span class="sngAssuranceEyebrow">ÉTAT DU PRODUIT</span>\n          <strong>${escapeHtml(productCondition)}</strong>',
+    '${productCondition === "Produit numérique"\n          ? `<span class="sngAssuranceIcon" aria-hidden="true">💻</span><div class="sngAssuranceCopy"><span class="sngAssuranceEyebrow">TYPE DE PRODUIT</span><strong>Produit numérique</strong></div>`\n          : `<span class="sngAssuranceIcon" aria-hidden="true">📦</span><div class="sngAssuranceCopy"><span class="sngAssuranceEyebrow">ÉTAT DU PRODUIT</span><strong>${escapeHtml(productCondition)}</strong></div>`}'
+  );
+  return next;
+}, 'storefront product metadata');
