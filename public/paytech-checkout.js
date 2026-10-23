@@ -66,7 +66,12 @@
     ).trim();
     const notes = (document.getElementById("deliveryNotes")?.value || "").trim();
     const payment = readPayment();
-    const basket = typeof cartItems !== "undefined" && Array.isArray(cartItems) ? cartItems : [];
+
+    // "Acheter maintenant" supplies a temporary checkout basket containing only
+    // the selected product. Normal checkout continues to use the full cart.
+    const basket = Array.isArray(window.sngamerCheckoutItems)
+      ? window.sngamerCheckoutItems
+      : (typeof cartItems !== "undefined" && Array.isArray(cartItems) ? cartItems : []);
 
     if (!name) {
       showCheckoutMessage("Indique ton nom complet.");
