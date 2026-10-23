@@ -264,6 +264,8 @@
       render(resolveCampaigns(Array.isArray(products) ? products : [], promos));
     } catch (error) {
       console.error("ACTIVE_CAMPAIGN_CAROUSEL_ERROR", error);
+    } finally {
+      window.__sngamerCampaignBannerReady = true;
     }
   }
 
