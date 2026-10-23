@@ -418,6 +418,7 @@
     dots.style.display=hasActivePromo && activeSlides.length>1 ? "flex" : "none";
     area.classList.toggle("has-active-promo",hasActivePromo);
     area.classList.remove("has-default-hero");
+    window.__sngamerPromoHeroReady = true;
   }
 
   function start(){
