@@ -1,0 +1,25 @@
+/* SNGAMER STORE — PREMIUM VISUAL SYSTEM V2 */
+:root{--sng-blue:#1677ff;--sng-cyan:#19b9e8;--sng-navy:#0c1a2d;--sng-ink:#101827;--sng-line:#dfe7f1}
+body{background:linear-gradient(180deg,#f7f9fc 0%,#eef3f8 100%)!important;color:var(--sng-ink)!important}
+.siteHeader{background:rgba(8,18,31,.94)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;backdrop-filter:blur(16px)!important}
+.hero{background:radial-gradient(circle at 82% 22%,rgba(22,119,255,.20),transparent 34%),linear-gradient(135deg,#081526 0%,#10233c 58%,#12304d 100%)!important}
+#cats .catbtn{border-color:#d8e2ee!important;background:#fff!important;color:#314258!important;box-shadow:0 5px 18px rgba(24,55,90,.06)!important}
+#cats .catbtn.on{background:linear-gradient(135deg,var(--sng-blue),#25a6ee)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 10px 25px rgba(22,119,255,.20)!important}
+#products .productCardClickable{background:#fff!important;border:1px solid var(--sng-line)!important;box-shadow:0 12px 35px rgba(16,35,60,.07)!important;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease!important}
+#products .productCardClickable:hover{transform:translateY(-4px)!important;border-color:rgba(22,119,255,.28)!important;box-shadow:0 20px 45px rgba(16,35,60,.12)!important}
+#products .pic{background:linear-gradient(145deg,#f6f9fc,#e9f0f7)!important}
+#products .cat{color:#4f7caf!important}#products h3{color:#172338!important}#products .priceCurrent{color:#0e62d6!important}#products .stock{color:#4f667e!important}
+#products .addToCartIcon{background:linear-gradient(135deg,var(--sng-blue),#18a8e6)!important;color:#fff!important;box-shadow:0 8px 20px rgba(22,119,255,.20)!important}
+#productModal{background:rgba(5,13,24,.72)!important;backdrop-filter:blur(10px)!important}
+#productModal .productBox{background:#fff!important;color:var(--sng-ink)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:0 30px 100px rgba(0,0,0,.30)!important}
+#productModal .productMainImage{background:linear-gradient(145deg,#f7f9fc,#e8eef5)!important}
+#productModal .productThumb{background:#fff!important;border:1px solid #dce5ef!important}
+#productModal .productThumb:hover,#productModal .productThumb:focus{border-color:var(--sng-blue)!important}
+#productModal .productInfo h2{color:#101827!important}#productModal .productInfo .cat{color:#3977bd!important}
+#productModal .productDescriptionSection,#productModal .productVideo,#productModal .sngSpecCard,#productModal .sngTrustGrid{background:#f7f9fc;border:1px solid #e0e7ef;border-radius:16px}
+#productModal .productDescriptionTitle,#productModal .productVideo h3{color:#16243a}#productModal .productDescription{color:#5b6b7f;line-height:1.7}
+#productModal .price,#productModal .priceCurrent{color:#0e62d6!important}#productModal .stock{color:#13834b!important;font-weight:800}#productModal .stock.outOfStock{color:#c33d4a!important}
+#productModal .primary.full{background:linear-gradient(135deg,#1478ff,#19a9e7)!important;border:0!important;box-shadow:0 12px 26px rgba(22,119,255,.22)!important}
+#productModal .sngBuyNow{background:#0c1a2d!important;color:#fff!important}
+.store-footer-content{background:#0c1a2d!important;color:#fff!important}.store-footer-content p,.store-footer-content h2,.store-footer-content h3{color:inherit!important}
+@media(max-width:700px){body{background:#f4f7fb!important}#productModal{padding:8px!important}#productModal .productBox{border-radius:22px!important;padding:14px!important}}
