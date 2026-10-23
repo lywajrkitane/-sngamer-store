@@ -87,41 +87,13 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
-      /* Keep the campaign card self-contained when product names are long. */
-      #sngamerCampaignCarousel .campaignCard {
-        overflow: hidden !important;
-        min-width: 0 !important;
-      }
-      #sngamerCampaignCarousel .campaignCopy {
-        min-width: 0 !important;
-        width: 0 !important;
-        flex: 1 1 0% !important;
-        overflow: hidden !important;
-      }
+      #sngamerCampaignCarousel .campaignCard { overflow: hidden !important; min-width: 0 !important; }
+      #sngamerCampaignCarousel .campaignCopy { min-width: 0 !important; width: 0 !important; flex: 1 1 0% !important; overflow: hidden !important; }
       #sngamerCampaignCarousel .campaignTitle,
-      #sngamerCampaignCarousel .campaignProduct {
-        display: block !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        overflow: hidden !important;
-        white-space: nowrap !important;
-        text-overflow: ellipsis !important;
-      }
-      #sngamerCampaignCarousel .campaignPrice {
-        flex: 0 0 auto !important;
-        min-width: max-content !important;
-        max-width: none !important;
-        white-space: nowrap !important;
-      }
-      #sngamerCampaignCarousel .campaignMedia {
-        flex: 0 0 58px !important;
-      }
-      @media (max-width:560px) {
-        #sngamerCampaignCarousel .campaignMedia {
-          flex-basis: 48px !important;
-        }
-      }
+      #sngamerCampaignCarousel .campaignProduct { display: block !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; overflow: hidden !important; white-space: nowrap !important; text-overflow: ellipsis !important; }
+      #sngamerCampaignCarousel .campaignPrice { flex: 0 0 auto !important; min-width: max-content !important; max-width: none !important; white-space: nowrap !important; }
+      #sngamerCampaignCarousel .campaignMedia { flex: 0 0 58px !important; }
+      @media (max-width:560px) { #sngamerCampaignCarousel .campaignMedia { flex-basis: 48px !important; } }
     `;
     document.head.appendChild(style);
   }
@@ -129,26 +101,20 @@
   async function loadCampaignName() {
     try {
       installCampaignOverflowFix();
-
       const [productsResponse, promosResponse] = await Promise.all([
         fetch("/api/products?campaign_banner=1", { cache: "no-store" }),
         fetch("/api/promo-media", { cache: "no-store" })
       ]);
-
       const products = productsResponse.ok ? await productsResponse.json() : [];
       const promos = promosResponse.ok ? await promosResponse.json() : [];
       const campaign = campaignFromRows(products, promos);
-
       if (!campaign) return;
-
       if (!applyCampaign(campaign)) {
         let attempts = 0;
         const timer = setInterval(() => {
           attempts += 1;
           installCampaignOverflowFix();
-          if (applyCampaign(campaign) || attempts >= 30) {
-            clearInterval(timer);
-          }
+          if (applyCampaign(campaign) || attempts >= 30) clearInterval(timer);
         }, 200);
       }
     } catch (error) {
@@ -162,11 +128,8 @@
     window.addEventListener("load", loadCampaignName, { once: true });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start, { once: true });
-  } else {
-    start();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
+  else start();
 
   const categoryPatch = document.createElement("script");
   categoryPatch.src = "/category-consistency-v1.js?v=20261022-univers1";
@@ -179,7 +142,7 @@
   document.head.appendChild(cartToastPatch);
 
   const productPolishPatch = document.createElement("script");
-  productPolishPatch.src = "/product-detail-polish-v2.js?v=20261023-polish2";
+  productPolishPatch.src = "/product-detail-polish-v2.js?v=20261023-productdetail3";
   productPolishPatch.defer = true;
   document.head.appendChild(productPolishPatch);
 })();
