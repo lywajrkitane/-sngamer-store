@@ -12,12 +12,15 @@ async function load(){
     cats();
     render();
     update();
+    window.__sngamerStoreReady = true;
   } catch (error) {
     console.error("SNGAMER_STORE_LOAD_ERROR", error);
     const grid = document.getElementById("products");
     if (grid && !grid.querySelector(".productCardClickable")) {
       grid.innerHTML = '<div role="status" style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca">Impossible de charger les produits. Vérifie ta connexion puis réessaie.</div>';
     }
+    // The app can reveal its own current error state rather than the stale pre-render shell.
+    window.__sngamerStoreReady = true;
   }
 }
 
