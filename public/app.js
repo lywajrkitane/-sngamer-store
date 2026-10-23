@@ -105,10 +105,13 @@ function toggleProductDescription(button){
   const full=section.querySelector(".sngDescriptionFull");
   if(!preview||!full)return;
   const expanded=button.getAttribute("aria-expanded")==="true";
-  preview.hidden=expanded;
-  full.hidden=!expanded;
-  button.setAttribute("aria-expanded",String(!expanded));
-  button.textContent=expanded?"Voir plus ↓":"Voir moins ↑";
+  const nextExpanded=!expanded;
+  preview.hidden=nextExpanded;
+  full.hidden=!nextExpanded;
+  preview.style.display=nextExpanded?"none":"block";
+  full.style.display=nextExpanded?"block":"none";
+  button.setAttribute("aria-expanded",String(nextExpanded));
+  button.textContent=nextExpanded?"Voir moins ↑":"Voir plus ↓";
 }
 
 function openProduct(id){
