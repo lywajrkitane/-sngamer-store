@@ -69,6 +69,7 @@
     card.addEventListener("mouseenter",()=>clearInterval(timer));
     card.addEventListener("mouseleave",()=>{});
     render(0,false);
+    window.__sngamerAnnouncementReady = true;
     return true;
   }
 
