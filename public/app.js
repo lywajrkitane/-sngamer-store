@@ -75,24 +75,70 @@ async function order(){let customer={name:document.querySelector("#name").value,
 document.querySelector("#q").oninput=render;load();
 function escapeHtml(text=""){return String(text).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
 function openProduct(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
-  const images=[p.image1_url,p.image2_url,p.image3_url].filter(Boolean),inStock=Number(p.stock)>0;window.productImages=images;
+  const p=products.find(x=>Number(x.id)===Number(id));
+  if(!p)return;
+
+  const images=[p.image1_url,p.image2_url,p.image3_url].filter(Boolean);
+  const inStock=Number(p.stock)>0;
+  const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
+  const productCondition=["Neuf","Occasion","Reconditionné"].includes(String(p.product_condition||"Neuf"))
+    ? String(p.product_condition||"Neuf") : "Neuf";
+  const warrantyText=String(p.warranty||"").trim();
+  const noWarranty=!warrantyText || /^(aucune|aucune garantie|sans garantie|non)$/i.test(warrantyText);
+  window.productImages=images;
+
+  const priceHtml=promoActive
+    ? `<div class="price price--promo"><span class="priceOld">${money(p.price)}</span><strong class="priceCurrent">${money(p.promo_price)}</strong><span class="discountBadge">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span></div>`
+    : `<div class="price"><strong class="priceCurrent">${money(p.price)}</strong></div>`;
+
+  const assuranceHtml=`
+    <section class="sngProductAssuranceGrid" aria-label="Informations de livraison et du produit">
+      <div class="sngAssuranceItem sngDeliveryModule">
+        <span class="sngAssuranceIcon" aria-hidden="true">🚚</span>
+        <div class="sngAssuranceCopy">
+          <span class="sngAssuranceEyebrow">LIVRAISON</span>
+          <strong>Livraison au Sénégal</strong>
+          <p>Dakar, banlieue et régions</p>
+          <small>Choisis ta zone et ton adresse au moment de la commande.</small>
+        </div>
+      </div>
+      <div class="sngAssuranceItem">
+        <span class="sngAssuranceIcon" aria-hidden="true">📦</span>
+        <div class="sngAssuranceCopy">
+          <span class="sngAssuranceEyebrow">ÉTAT DU PRODUIT</span>
+          <strong>${escapeHtml(productCondition)}</strong>
+        </div>
+      </div>
+      ${noWarranty ? "" : `<div class="sngAssuranceItem">
+        <span class="sngAssuranceIcon" aria-hidden="true">🛡️</span>
+        <div class="sngAssuranceCopy">
+          <span class="sngAssuranceEyebrow">GARANTIE</span>
+          <strong>${escapeHtml(warrantyText)}</strong>
+        </div>
+      </div>`}
+    </section>`;
+
   document.querySelector("#productDetail").innerHTML=`
-    <div class="productDetail">
+    <div class="productDetail sngProductDetailV1">
       <div class="productGallery">
         <div class="productMainImage">${images.length?`<img id="productMainImage" src="${escapeHtml(images[0])}" alt="${escapeHtml(p.name)}">`:`<div class="productEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div>
-        ${images.length>1?`<div class="productThumbnails">${images.map((url,i)=>`<button class="productThumb" onclick="selectProductImage(${i})"><img src="${escapeHtml(url)}" alt="${escapeHtml(p.name)}"></button>`).join("")}</div>`:""}
+        ${images.length>1?`<div class="productThumbnails">${images.map((url,i)=>`<button type="button" class="productThumb ${i===0?"isActive":""}" onclick="selectProductImage(${i})" aria-label="Afficher l’image ${i+1}"><img src="${escapeHtml(url)}" alt="${escapeHtml(p.name)} — image ${i+1}"></button>`).join("")}</div>`:""}
       </div>
-      <div class="productInfo">
-        <div class="cat">${escapeHtml(typeof window.storeCategory === "function" ? window.storeCategory(p) : (p.category||"Gaming"))}</div>
+      <div class="productInfo sngProductInfoV1">
+        <div class="cat">${escapeHtml(typeof window.storeCategory==="function"?window.storeCategory(p):(p.category||"Gaming"))}</div>
         <h2>${escapeHtml(p.name)}</h2>
-        ${Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?`<div class="price price--promo"><span class="priceOld">${money(p.price)}</span><strong class="priceCurrent">${money(p.promo_price)}</strong><span class="discountBadge">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span></div>`:`<div class="price">${money(p.price)}</div>`}
-        ${inStock?`<div class="stock">${p.stock} disponible(s)</div>`:`<div class="stock outOfStock">Rupture de stock</div>`}
-        <section class="productDescriptionSection"><h3 class="productDescriptionTitle">Description</h3><p class="productDescription">${escapeHtml(p.description||"Aucune description disponible.").replace(/\n/g,"<br>")}</p></section>
+        ${priceHtml}
+        ${inStock?`<div class="stock">${Number(p.stock)} disponible(s)</div>`:`<div class="stock outOfStock">Rupture de stock</div>`}
+        ${assuranceHtml}
+        <section class="productDescriptionSection sngProductDescriptionV1">
+          <h3 class="productDescriptionTitle">Description</h3>
+          <p class="productDescription">${escapeHtml(p.description||"Aucune description disponible.").replace(/\n/g,"<br>")}</p>
+        </section>
         ${p.video_url?`<div class="productVideo"><h3>Vidéo du produit</h3><video controls preload="metadata" src="${escapeHtml(p.video_url)}"></video></div>`:""}
-        ${inStock?`<button class="primary full" onclick="add(${p.id});closeProduct()">Ajouter au panier</button>`:`<button class="primary full disabled" disabled>Rupture de stock</button>`}
+        ${inStock?`<button class="primary full sngProductAddButton" type="button" onclick="if(add(${Number(p.id)}))closeProduct()">Ajouter au panier</button>`:`<button class="primary full disabled sngProductAddButton" type="button" disabled>Rupture de stock</button>`}
       </div>
     </div>`;
+
   document.querySelector("#productModal").classList.add("show");
   try{history.replaceState(null,"",location.pathname+"#product="+p.id)}catch(_){location.hash="product="+p.id}
 }

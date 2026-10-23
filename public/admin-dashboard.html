@@ -2162,6 +2162,27 @@ document.getElementById("editProductPlatform").value =
 
     document.getElementById("editProductDescription").value =
       product.description || "";
+
+    document.getElementById("editProductCondition").value =
+      ["Neuf", "Occasion", "Reconditionné"].includes(product.product_condition)
+        ? product.product_condition : "Neuf";
+
+    const warrantySelect = document.getElementById("editProductWarranty");
+    const warrantyCustomInput = document.getElementById("editProductWarrantyCustom");
+    const warrantySaved = String(product.warranty || "Aucune garantie").trim();
+    const standardWarranties = ["Aucune garantie", "7 jours", "15 jours", "30 jours", "3 mois", "6 mois", "12 mois"];
+    if (standardWarranties.includes(warrantySaved)) {
+      warrantySelect.value = warrantySaved;
+      warrantyCustomInput.value = "";
+    } else if (warrantySaved) {
+      warrantySelect.value = "Personnalisée";
+      warrantyCustomInput.value = warrantySaved;
+    } else {
+      warrantySelect.value = "Aucune garantie";
+      warrantyCustomInput.value = "";
+    }
+    toggleEditWarrantyCustom();
+
     /* =========================================
    APERÇUS DES MÉDIAS EXISTANTS
 ========================================= */
@@ -2353,6 +2374,15 @@ function toggleEditCoinPlatform() {
     document.getElementById("editPlatformField")
   );
 }
+function toggleEditWarrantyCustom() {
+  const select = document.getElementById("editProductWarranty");
+  const wrap = document.getElementById("editProductWarrantyCustomWrap");
+  const input = document.getElementById("editProductWarrantyCustom");
+  const custom = select?.value === "Personnalisée";
+  if (wrap) wrap.style.display = custom ? "block" : "none";
+  if (input) input.required = Boolean(custom);
+}
+
 function closeEditProduct() {
   document.getElementById("editProductModal").classList.remove("show");
 }
@@ -2403,6 +2433,20 @@ if (category === "Univers Gaming" && !platform) {
 
       const description =
         document.getElementById("editProductDescription").value;
+
+      const product_condition =
+        document.getElementById("editProductCondition").value;
+      const warrantySelectValue =
+        document.getElementById("editProductWarranty").value;
+      const warrantyCustomValue =
+        document.getElementById("editProductWarrantyCustom").value.trim();
+      if (warrantySelectValue === "Personnalisée" && !warrantyCustomValue) {
+        alert("Indique la durée ou les conditions de la garantie personnalisée.");
+        return;
+      }
+      const warranty = warrantySelectValue === "Personnalisée"
+        ? warrantyCustomValue
+        : warrantySelectValue;
 
 
       /* ===============================
@@ -2517,6 +2561,8 @@ if (category === "Univers Gaming" && !platform) {
   price,
   stock,
   description,
+  product_condition,
+  warranty,
   promo_price: promoPriceValue,
   promo_active: promoActive,
   campaign_id: campaignValue
@@ -3491,6 +3537,42 @@ async function loadAll() {
       placeholder="Description du produit"
     ></textarea>
   </div>
+
+  <div class="edit-product-section-title" style="margin:18px 0 10px">
+    <h3 style="margin:0 0 5px">Informations complémentaires</h3>
+    <p style="margin:0;color:#91a4ba;font-size:13px">Ces informations seront affichées sur la fiche du produit.</p>
+  </div>
+
+  <div class="edit-product-grid">
+    <div class="edit-product-field">
+      <label for="editProductCondition">📦 État du produit</label>
+      <select id="editProductCondition">
+        <option value="Neuf">Neuf</option>
+        <option value="Occasion">Occasion</option>
+        <option value="Reconditionné">Reconditionné</option>
+      </select>
+    </div>
+
+    <div class="edit-product-field">
+      <label for="editProductWarranty">🛡️ Garantie</label>
+      <select id="editProductWarranty" onchange="toggleEditWarrantyCustom()">
+        <option value="Aucune garantie">Aucune garantie</option>
+        <option value="7 jours">7 jours</option>
+        <option value="15 jours">15 jours</option>
+        <option value="30 jours">30 jours</option>
+        <option value="3 mois">3 mois</option>
+        <option value="6 mois">6 mois</option>
+        <option value="12 mois">12 mois</option>
+        <option value="Personnalisée">Durée personnalisée</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="edit-product-field" id="editProductWarrantyCustomWrap" style="display:none">
+    <label for="editProductWarrantyCustom">Durée de garantie personnalisée</label>
+    <input type="text" id="editProductWarrantyCustom" maxlength="120" placeholder="Ex. 18 mois ou garantie constructeur">
+  </div>
+
       <!-- =========================================
      MÉDIAS DU PRODUIT — MODIFICATION
 ========================================= -->
