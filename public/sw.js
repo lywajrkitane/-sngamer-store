@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261023-bootfix1';
+const SNGAMER_SW_VERSION = '20261023-refresh2';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -16,6 +16,20 @@ self.addEventListener('activate', event => {
       });
     } catch (_) {}
   })());
+});
+
+/*
+ * Never serve a cached storefront document during navigation/reload.
+ * This is intentionally network-only for HTML navigations so a browser's
+ * previously rendered page cannot be reused as the first paint of a refresh.
+ */
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET' || request.mode !== 'navigate') return;
+  event.respondWith(
+    fetch(new Request(request, { cache: 'no-store' }))
+      .catch(() => fetch(request))
+  );
 });
 
 self.addEventListener('push', event => {
