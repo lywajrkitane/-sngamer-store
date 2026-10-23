@@ -103,7 +103,8 @@ price INTEGER NOT NULL CHECK (price >= 0),
     ADD COLUMN IF NOT EXISTS image3_url TEXT,
     ADD COLUMN IF NOT EXISTS video_url TEXT,
     ADD COLUMN IF NOT EXISTS product_condition TEXT NOT NULL DEFAULT 'Neuf',
-    ADD COLUMN IF NOT EXISTS warranty TEXT NOT NULL DEFAULT 'Aucune garantie'
+    ADD COLUMN IF NOT EXISTS warranty TEXT NOT NULL DEFAULT 'Aucune garantie',
+    ADD COLUMN IF NOT EXISTS warranty_configured BOOLEAN NOT NULL DEFAULT false
   `);
   await db(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -307,6 +308,7 @@ app.get("/api/products", async (req, res) => {
   p.platform,
   p.product_condition,
   p.warranty,
+  p.warranty_configured,
   p.price,
   p.stock,
   p.emoji,
@@ -1077,6 +1079,7 @@ app.patch(
       const conditionValue = conditionProvided ? String(product_condition || "").trim() : null;
       const warrantyProvided = warranty !== undefined;
       const warrantyValue = warrantyProvided ? String(warranty ?? "").trim().slice(0, 120) : null;
+      const warrantyConfiguredValue = warrantyProvided ? Boolean(String(warranty ?? "").trim()) : null;
 
       if (conditionProvided && !["Neuf", "Occasion", "Reconditionné"].includes(conditionValue)) {
         return res.status(400).json({ error: "État du produit invalide." });
@@ -1226,6 +1229,7 @@ app.patch(
           description = COALESCE($7, description),
           product_condition = CASE WHEN $16 = true THEN $17 ELSE product_condition END,
           warranty = CASE WHEN $18 = true THEN $19 ELSE warranty END,
+          warranty_configured = CASE WHEN $20 = true THEN $21 ELSE warranty_configured END,
 
           promo_price =
             CASE
@@ -1267,7 +1271,9 @@ app.patch(
           conditionProvided,
           conditionValue,
           warrantyProvided,
-          warrantyValue
+          warrantyValue,
+          warrantyProvided,
+          warrantyConfiguredValue
         ]
       );
 
