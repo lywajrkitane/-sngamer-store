@@ -74,6 +74,43 @@ function closeCheckout(){document.querySelector("#checkout").classList.remove("s
 async function order(){let customer={name:document.querySelector("#name").value,phone:document.querySelector("#phone").value,address:document.querySelector("#addr").value};if(!customer.name||!customer.phone||!customer.address)return alert("Remplis les informations.");let payment=document.querySelector("#pay").value;let r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,payment,items:cartItems})});let d=await r.json();if(!r.ok)return alert(d.error||"Erreur");alert("Commande enregistrée : "+d.orderId);cartItems=[];save();closeCheckout();closeCart();load();}
 document.querySelector("#q").oninput=render;load();
 function escapeHtml(text=""){return String(text).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+function productDescriptionPreview(text){
+  const raw=String(text||"").replace(/\r\n?/g,"\n").trim();
+  if(!raw)return "";
+  let pieces=[];
+  try{
+    if(typeof Intl!=="undefined"&&typeof Intl.Segmenter==="function"){
+      pieces=Array.from(new Intl.Segmenter("fr",{granularity:"sentence"}).segment(raw),x=>x.segment.trim()).filter(Boolean);
+    }
+  }catch(_){}
+  if(pieces.length<=1){
+    const paragraphs=raw.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    if(paragraphs.length>1) pieces=paragraphs;
+  }
+  if(pieces.length<=1){
+    pieces=(raw.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[raw]).map(x=>x.trim()).filter(Boolean);
+  }
+  let preview=pieces.slice(0,2).join(" ").trim()||raw;
+  if(preview===raw&&raw.length>220){
+    const cut=raw.slice(0,200);
+    const boundary=cut.lastIndexOf(" ");
+    preview=(boundary>130?cut.slice(0,boundary):cut).trim().replace(/[.,;:!?\s]+$/,"")+"…";
+  }
+  return preview;
+}
+function toggleProductDescription(button){
+  const section=button?.closest(".productDescriptionSection");
+  if(!section)return;
+  const preview=section.querySelector(".sngDescriptionPreview");
+  const full=section.querySelector(".sngDescriptionFull");
+  if(!preview||!full)return;
+  const expanded=button.getAttribute("aria-expanded")==="true";
+  preview.hidden=expanded;
+  full.hidden=!expanded;
+  button.setAttribute("aria-expanded",String(!expanded));
+  button.textContent=expanded?"Voir plus ↓":"Voir moins ↑";
+}
+
 function openProduct(id){
   const p=products.find(x=>Number(x.id)===Number(id));
   if(!p)return;
@@ -84,12 +121,23 @@ function openProduct(id){
   const productCondition=["Neuf","Occasion","Reconditionné"].includes(String(p.product_condition||"Neuf"))
     ? String(p.product_condition||"Neuf") : "Neuf";
   const warrantyText=String(p.warranty||"").trim();
-  const noWarranty=!warrantyText || /^(aucune|aucune garantie|sans garantie|non)$/i.test(warrantyText);
+  const warrantyConfigured=p.warranty_configured===true||p.warranty_configured==="true";
+  const warrantyDisplay=warrantyConfigured?(warrantyText||"Aucune garantie"):"À définir";
   window.productImages=images;
 
   const priceHtml=promoActive
     ? `<div class="price price--promo"><span class="priceOld">${money(p.price)}</span><strong class="priceCurrent">${money(p.promo_price)}</strong><span class="discountBadge">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span></div>`
     : `<div class="price"><strong class="priceCurrent">${money(p.price)}</strong></div>`;
+
+  const descriptionText=String(p.description||"Aucune description disponible.").replace(/\r\n?/g,"\n").trim();
+  const previewText=productDescriptionPreview(descriptionText);
+  const compactFull=descriptionText.replace(/\s+/g," ").trim();
+  const compactPreview=previewText.replace(/\s+/g," ").trim();
+  const needsDescriptionToggle=compactFull!==compactPreview;
+  const fullDescriptionHtml=escapeHtml(descriptionText).replace(/\n/g,"<br>");
+  const descriptionHtml=needsDescriptionToggle
+    ? `<p class="productDescription sngDescriptionPreview">${escapeHtml(previewText).replace(/\n/g,"<br>")}</p><p class="productDescription sngDescriptionFull" hidden>${fullDescriptionHtml}</p><button type="button" class="sngDescriptionToggle" aria-expanded="false" onclick="toggleProductDescription(this)">Voir plus ↓</button>`
+    : `<p class="productDescription">${fullDescriptionHtml}</p>`;
 
   const assuranceHtml=`
     <section class="sngProductAssuranceGrid" aria-label="Informations de livraison et du produit">
@@ -97,9 +145,7 @@ function openProduct(id){
         <span class="sngAssuranceIcon" aria-hidden="true">🚚</span>
         <div class="sngAssuranceCopy">
           <span class="sngAssuranceEyebrow">LIVRAISON</span>
-          <strong>Livraison au Sénégal</strong>
-          <p>Dakar, banlieue et régions</p>
-          <small>Choisis ta zone et ton adresse au moment de la commande.</small>
+          <strong>Partout au Sénégal</strong>
         </div>
       </div>
       <div class="sngAssuranceItem">
@@ -109,13 +155,13 @@ function openProduct(id){
           <strong>${escapeHtml(productCondition)}</strong>
         </div>
       </div>
-      ${noWarranty ? "" : `<div class="sngAssuranceItem">
+      <div class="sngAssuranceItem">
         <span class="sngAssuranceIcon" aria-hidden="true">🛡️</span>
         <div class="sngAssuranceCopy">
           <span class="sngAssuranceEyebrow">GARANTIE</span>
-          <strong>${escapeHtml(warrantyText)}</strong>
+          <strong>${escapeHtml(warrantyDisplay)}</strong>
         </div>
-      </div>`}
+      </div>
     </section>`;
 
   document.querySelector("#productDetail").innerHTML=`
@@ -129,11 +175,11 @@ function openProduct(id){
         <h2>${escapeHtml(p.name)}</h2>
         ${priceHtml}
         ${inStock?`<div class="stock">${Number(p.stock)} disponible(s)</div>`:`<div class="stock outOfStock">Rupture de stock</div>`}
-        ${assuranceHtml}
         <section class="productDescriptionSection sngProductDescriptionV1">
           <h3 class="productDescriptionTitle">Description</h3>
-          <p class="productDescription">${escapeHtml(p.description||"Aucune description disponible.").replace(/\n/g,"<br>")}</p>
+          ${descriptionHtml}
         </section>
+        ${assuranceHtml}
         ${p.video_url?`<div class="productVideo"><h3>Vidéo du produit</h3><video controls preload="metadata" src="${escapeHtml(p.video_url)}"></video></div>`:""}
         ${inStock?`<button class="primary full sngProductAddButton" type="button" onclick="if(add(${Number(p.id)}))closeProduct()">Ajouter au panier</button>`:`<button class="primary full disabled sngProductAddButton" type="button" disabled>Rupture de stock</button>`}
       </div>
