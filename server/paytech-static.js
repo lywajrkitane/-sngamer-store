@@ -41,19 +41,13 @@ express.static = function paytechAwareStatic(root, options) {
     const pathname = String(req.path || req.url || "").split("?")[0];
     const isHome = req.method === "GET" && (pathname === "/" || pathname === "/index.html");
 
-    /*
-     * The storefront is updated frequently. Do not let the browser keep an
-     * older HTML/CSS/JS bundle after a deployment. The existing ?v= asset
-     * versions remain useful, but these headers make refreshes revalidate the
-     * current files instead of briefly rendering an older cached version.
-     */
-    const isVersionSensitiveAsset =
-      /\.(?:html?|css|js|json)$/i.test(pathname);
-
-    if (isVersionSensitiveAsset && !isHome) {
+    /* Never allow the storefront's executable/text assets to be reused from a stale browser cache. */
+    const isVersionSensitiveAsset = /\.(?:html?|css|js|json)$/i.test(pathname);
+    if (isVersionSensitiveAsset) {
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
       res.set("Pragma", "no-cache");
       res.set("Expires", "0");
+      res.set("Surrogate-Control", "no-store");
     }
 
     if (!isHome) return originalMiddleware(req, res, next);
@@ -61,6 +55,19 @@ express.static = function paytechAwareStatic(root, options) {
     if (!fs.existsSync(indexPath)) return originalMiddleware(req, res, next);
     try {
       let html = fs.readFileSync(indexPath, "utf8");
+
+      /*
+       * Hide the old DOM while the current product data is fetched. This is
+       * the important part for the visual "old version for a moment" flash:
+       * the browser may paint the HTML shell before app.js finishes loading
+       * the current /api/products response. We keep the page hidden until the
+       * current data is available, then reveal it in one frame.
+       */
+      const bootGate = `<style id="sngamer-refresh-boot-style">html.sngamer-refresh-boot body{visibility:hidden!important;opacity:0!important}</style><script id="sngamer-refresh-boot-script">(function(){try{document.documentElement.classList.add('sngamer-refresh-boot');var start=Date.now(),done=false;function reveal(){if(done)return;done=true;document.documentElement.classList.remove('sngamer-refresh-boot');}function check(){if(Array.isArray(window.storeProducts)&&window.storeProducts.length>0){requestAnimationFrame(function(){requestAnimationFrame(reveal);});return;}if(Date.now()-start>8000){reveal();return;}setTimeout(check,50);}check();window.addEventListener('pageshow',function(){setTimeout(check,0);},{once:true});}catch(_){document.documentElement.classList.remove('sngamer-refresh-boot');}})();</script>`;
+      if (!html.includes("sngamer-refresh-boot-style")) {
+        html = html.replace(/<head>/i, `<head>${bootGate}`);
+      }
+
       const scriptTag = '<script src="/paytech-checkout.js?v=20261021-stockcancel1"></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${scriptTag}</body>`);
 
@@ -72,6 +79,7 @@ express.static = function paytechAwareStatic(root, options) {
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
       res.set("Pragma", "no-cache");
       res.set("Expires", "0");
+      res.set("Surrogate-Control", "no-store");
       res.type("html").send(html);
     } catch (error) {
       console.error("PAYTECH_STATIC_INJECTION_ERROR:", error);
