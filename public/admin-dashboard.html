@@ -2169,16 +2169,20 @@ document.getElementById("editProductPlatform").value =
 
     const warrantySelect = document.getElementById("editProductWarranty");
     const warrantyCustomInput = document.getElementById("editProductWarrantyCustom");
-    const warrantySaved = String(product.warranty || "Aucune garantie").trim();
+    const warrantySaved = String(product.warranty || "").trim();
+    const warrantyConfigured = product.warranty_configured === true || product.warranty_configured === "true";
     const standardWarranties = ["Aucune garantie", "7 jours", "15 jours", "30 jours", "3 mois", "6 mois", "12 mois"];
-    if (standardWarranties.includes(warrantySaved)) {
+    if (!warrantyConfigured) {
+      warrantySelect.value = "";
+      warrantyCustomInput.value = "";
+    } else if (standardWarranties.includes(warrantySaved)) {
       warrantySelect.value = warrantySaved;
       warrantyCustomInput.value = "";
     } else if (warrantySaved) {
       warrantySelect.value = "Personnalisée";
       warrantyCustomInput.value = warrantySaved;
     } else {
-      warrantySelect.value = "Aucune garantie";
+      warrantySelect.value = "";
       warrantyCustomInput.value = "";
     }
     toggleEditWarrantyCustom();
@@ -3556,6 +3560,7 @@ async function loadAll() {
     <div class="edit-product-field">
       <label for="editProductWarranty">🛡️ Garantie</label>
       <select id="editProductWarranty" onchange="toggleEditWarrantyCustom()">
+        <option value="">À définir (non renseignée)</option>
         <option value="Aucune garantie">Aucune garantie</option>
         <option value="7 jours">7 jours</option>
         <option value="15 jours">15 jours</option>
