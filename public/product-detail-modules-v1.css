@@ -80,6 +80,26 @@
   box-sizing:border-box;
 }
 #productModal #productDetail .sngDeliveryModule{grid-column:auto !important;}
+/* If the product has no warranty, keep the three-card rhythm with an explicit third card. */
+#productModal #productDetail .sngProductAssuranceGrid:has(.sngAssuranceItem:nth-child(2):last-child)::after{
+  content:"GARANTIE\\A Aucune garantie";
+  white-space:pre-line;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  min-width:0;
+  min-height:108px;
+  padding:12px;
+  border:1px solid rgba(116,153,197,.18);
+  border-radius:15px;
+  background:linear-gradient(145deg,rgba(20,32,49,.92),rgba(11,19,31,.96));
+  color:#eaf1fb;
+  box-sizing:border-box;
+  font-size:9px;
+  line-height:1.35;
+  font-weight:850;
+  letter-spacing:.08em;
+}
 #productModal #productDetail .sngAssuranceIcon{
   display:grid;
   place-items:center;
@@ -193,7 +213,8 @@
     gap:6px;
     margin-top:4px;
   }
-  #productModal #productDetail .sngAssuranceItem{
+  #productModal #productDetail .sngAssuranceItem,
+  #productModal #productDetail .sngProductAssuranceGrid:has(.sngAssuranceItem:nth-child(2):last-child)::after{
     min-height:102px;
     padding:9px 7px;
     border-radius:12px;
