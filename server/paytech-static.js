@@ -40,6 +40,22 @@ express.static = function paytechAwareStatic(root, options) {
   return function serveStatic(req, res, next) {
     const pathname = String(req.path || req.url || "").split("?")[0];
     const isHome = req.method === "GET" && (pathname === "/" || pathname === "/index.html");
+
+    /*
+     * The storefront is updated frequently. Do not let the browser keep an
+     * older HTML/CSS/JS bundle after a deployment. The existing ?v= asset
+     * versions remain useful, but these headers make refreshes revalidate the
+     * current files instead of briefly rendering an older cached version.
+     */
+    const isVersionSensitiveAsset =
+      /\.(?:html?|css|js|json)$/i.test(pathname);
+
+    if (isVersionSensitiveAsset && !isHome) {
+      res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
+    }
+
     if (!isHome) return originalMiddleware(req, res, next);
     const indexPath = path.join(publicRoot, "index.html");
     if (!fs.existsSync(indexPath)) return originalMiddleware(req, res, next);
