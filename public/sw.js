@@ -1,4 +1,22 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
+const SNGAMER_SW_VERSION = '20261023-bootfix1';
+
+self.addEventListener('install', event => {
+  event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    await self.clients.claim();
+    try {
+      const notifications = await self.registration.getNotifications();
+      notifications.forEach(notification => {
+        const tag = String(notification.tag || '');
+        if (tag.startsWith('sngamer-order-status-')) notification.close();
+      });
+    } catch (_) {}
+  })());
+});
 
 self.addEventListener('push', event => {
   let data = {};
@@ -28,9 +46,7 @@ self.addEventListener('push', event => {
     ]
   };
 
-  // Avoid passing an undefined image to browsers that validate NotificationOptions strictly.
   if (!options.image) delete options.image;
-
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
