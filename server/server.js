@@ -101,7 +101,9 @@ price INTEGER NOT NULL CHECK (price >= 0),
     ADD COLUMN IF NOT EXISTS image1_url TEXT,
     ADD COLUMN IF NOT EXISTS image2_url TEXT,
     ADD COLUMN IF NOT EXISTS image3_url TEXT,
-    ADD COLUMN IF NOT EXISTS video_url TEXT
+    ADD COLUMN IF NOT EXISTS video_url TEXT,
+    ADD COLUMN IF NOT EXISTS product_condition TEXT NOT NULL DEFAULT 'Neuf',
+    ADD COLUMN IF NOT EXISTS warranty TEXT NOT NULL DEFAULT 'Aucune garantie'
   `);
   await db(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -303,6 +305,8 @@ app.get("/api/products", async (req, res) => {
   p.name,
   p.category,
   p.platform,
+  p.product_condition,
+  p.warranty,
   p.price,
   p.stock,
   p.emoji,
@@ -1057,7 +1061,9 @@ app.patch(
   description,
   promo_price,
   promo_active,
-  campaign_id
+  campaign_id,
+  product_condition,
+  warranty
 } = req.body;
 
       const requestedCategory = category === undefined ? undefined : String(category || "").trim();
@@ -1067,6 +1073,17 @@ app.patch(
         : (/^(univers gaming|gaming phones?)$/i.test(requestedCategory) ? "Univers Gaming" : requestedCategory);
       const requestedPlatform = platform === undefined ? undefined : String(platform || "").trim();
       const shouldUpdatePlatform = category !== undefined || platform !== undefined;
+      const conditionProvided = product_condition !== undefined;
+      const conditionValue = conditionProvided ? String(product_condition || "").trim() : null;
+      const warrantyProvided = warranty !== undefined;
+      const warrantyValue = warrantyProvided ? String(warranty ?? "").trim().slice(0, 120) : null;
+
+      if (conditionProvided && !["Neuf", "Occasion", "Reconditionné"].includes(conditionValue)) {
+        return res.status(400).json({ error: "État du produit invalide." });
+      }
+      if (warrantyProvided && String(warranty ?? "").trim().length > 120) {
+        return res.status(400).json({ error: "La garantie ne peut pas dépasser 120 caractères." });
+      }
 
       let platformValue = null;
       if (category === undefined) {
@@ -1207,6 +1224,8 @@ app.patch(
           stock = COALESCE($5, stock),
           emoji = COALESCE($6, emoji),
           description = COALESCE($7, description),
+          product_condition = CASE WHEN $16 = true THEN $17 ELSE product_condition END,
+          warranty = CASE WHEN $18 = true THEN $19 ELSE warranty END,
 
           promo_price =
             CASE
@@ -1244,7 +1263,11 @@ app.patch(
           campaignIdProvided,
           campaignIdValue,
           productId,
-          shouldUpdatePlatform
+          shouldUpdatePlatform,
+          conditionProvided,
+          conditionValue,
+          warrantyProvided,
+          warrantyValue
         ]
       );
 
