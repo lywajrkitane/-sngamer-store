@@ -9,60 +9,22 @@
     style.id='sngProductPurchaseActionsStyles';
     style.textContent=`
       /* Product social actions: real heart + perfectly aligned share button. */
-      #productDetail .sngSocialActions{
-        display:flex!important;
-        align-items:center!important;
-        justify-content:flex-start!important;
-        gap:10px!important;
-        width:auto!important;
-        max-width:100%!important;
-      }
-      #productDetail .sngSocialBtn{
-        box-sizing:border-box!important;
-        min-height:42px!important;
-        height:42px!important;
-        margin:0!important;
-        border-radius:12px!important;
-      }
-      #productDetail .sngFavBtn{
-        width:46px!important;
-        min-width:46px!important;
-        padding:0!important;
-        gap:0!important;
-        border-color:rgba(125,145,175,.30)!important;
-        background:rgba(255,255,255,.045)!important;
-      }
+      #productDetail .sngSocialActions{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;width:auto!important;max-width:100%!important}
+      #productDetail .sngSocialBtn{box-sizing:border-box!important;min-height:42px!important;height:42px!important;margin:0!important;border-radius:12px!important}
+      #productDetail .sngFavBtn{width:46px!important;min-width:46px!important;padding:0!important;gap:0!important;border-color:rgba(125,145,175,.30)!important;background:rgba(255,255,255,.045)!important}
       #productDetail .sngFavBtn > span:not(.sngFavIcon){display:none!important}
-      #productDetail .sngFavIcon{
-        display:inline-flex!important;
-        align-items:center!important;
-        justify-content:center!important;
-        width:24px!important;
-        height:24px!important;
-        font-size:0!important;
-        line-height:1!important;
-      }
-      #productDetail .sngFavIcon svg{
-        width:24px!important;
-        height:24px!important;
-        display:block!important;
-        overflow:visible!important;
-      }
-      #productDetail .sngFavIcon svg path{
-        fill:none!important;
-        stroke:currentColor!important;
-        stroke-width:1.9!important;
-        stroke-linecap:round!important;
-        stroke-linejoin:round!important;
-      }
-      #productDetail .sngFavBtn.isFavorite .sngFavIcon svg path{
-        fill:currentColor!important;
-      }
-      #productDetail .sngShareBtn{
-        min-width:112px!important;
-        padding:0 14px!important;
-      }
+      #productDetail .sngFavIcon{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:24px!important;height:24px!important;font-size:0!important;line-height:1!important}
+      #productDetail .sngFavIcon svg{width:24px!important;height:24px!important;display:block!important;overflow:visible!important}
+      #productDetail .sngFavIcon svg path{fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+      #productDetail .sngFavBtn.isFavorite .sngFavIcon svg path{fill:currentColor!important}
+      #productDetail .sngShareBtn{min-width:112px!important;padding:0 14px!important}
+
+      /* Buy now: immediately above Add to cart, with its own stacked sticky position. */
       #productDetail .sngBuyNowBtn{
+        order:79!important;
+        position:sticky!important;
+        bottom:70px!important;
+        z-index:5!important;
         width:100%!important;
         min-height:52px!important;
         margin:10px 0 0!important;
@@ -87,7 +49,7 @@
         #productDetail .sngSocialBtn{min-height:44px!important;height:44px!important}
         #productDetail .sngFavBtn{width:48px!important;min-width:48px!important}
         #productDetail .sngShareBtn{min-width:112px!important}
-        #productDetail .sngBuyNowBtn{min-height:54px!important;font-size:16px!important}
+        #productDetail .sngBuyNowBtn{bottom:70px!important;min-height:54px!important;font-size:16px!important}
       }
     `;
     document.head.appendChild(style);
