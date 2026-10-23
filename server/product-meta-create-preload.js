@@ -8,7 +8,7 @@ const publicDir = path.join(__dirname, '..', 'public');
 const adminMetaFile = path.join(publicDir, 'product-meta-admin.js');
 const appFile = path.join(publicDir, 'app.js');
 const adminDashboardFile = path.join(publicDir, 'admin-dashboard.html');
-const marker = 'SNGAMER_PRODUCT_META_V2_DIGITAL';
+const marker = 'SNGAMER_PRODUCT_META_V3_DIGITAL';
 
 function patchFile(file, patcher, label) {
   try {
@@ -27,24 +27,15 @@ function patchFile(file, patcher, label) {
   }
 }
 
-patchFile(serverFile, text => {
-  let next = text;
-  next = next.replace(
-    /!\["Neuf", "Occasion", "Reconditionné"\]\.includes\(conditionValue\)/g,
-    '!["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(conditionValue)'
-  );
-  return next;
-}, 'server validation');
+patchFile(serverFile, text => text.replace(
+  /!\["Neuf", "Occasion", "Reconditionné"\]\.includes\(conditionValue\)/g,
+  '!["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(conditionValue)'
+), 'server validation');
 
-patchFile(adminMetaFile, text => {
-  return text.replace(
-    "const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];",
-    "const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné', 'Produit numérique'];"
-  ).replace(
-    "product_condition: CONDITION_OPTIONS.includes(condition) ? condition : 'Neuf',",
-    "product_condition: CONDITION_OPTIONS.includes(condition) ? condition : 'Neuf',"
-  );
-}, 'product create form');
+patchFile(adminMetaFile, text => text.replace(
+  "const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];",
+  "const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné', 'Produit numérique'];"
+), 'product create form');
 
 patchFile(adminDashboardFile, text => {
   let next = text;
@@ -66,8 +57,8 @@ patchFile(appFile, text => {
     'const productConditionOptions=["Neuf","Occasion","Reconditionné","Produit numérique"];\n  const productCondition=productConditionOptions.includes(String(p.product_condition||"Neuf"))\n    ? String(p.product_condition||"Neuf") : "Neuf";'
   );
   next = next.replace(
-    '<span class="sngAssuranceEyebrow">ÉTAT DU PRODUIT</span>\n          <strong>${escapeHtml(productCondition)}</strong>',
-    '${productCondition === "Produit numérique"\n          ? `<span class="sngAssuranceIcon" aria-hidden="true">💻</span><div class="sngAssuranceCopy"><span class="sngAssuranceEyebrow">TYPE DE PRODUIT</span><strong>Produit numérique</strong></div>`\n          : `<span class="sngAssuranceIcon" aria-hidden="true">📦</span><div class="sngAssuranceCopy"><span class="sngAssuranceEyebrow">ÉTAT DU PRODUIT</span><strong>${escapeHtml(productCondition)}</strong></div>`}'
+    '<span class="sngAssuranceIcon" aria-hidden="true">📦</span>\n        <div class="sngAssuranceCopy">\n          <span class="sngAssuranceEyebrow">ÉTAT DU PRODUIT</span>\n          <strong>${escapeHtml(productCondition)}</strong>',
+    '<span class="sngAssuranceIcon" aria-hidden="true">${productCondition === "Produit numérique" ? "💻" : "📦"}</span>\n        <div class="sngAssuranceCopy">\n          <span class="sngAssuranceEyebrow">${productCondition === "Produit numérique" ? "TYPE DE PRODUIT" : "ÉTAT DU PRODUIT"}</span>\n          <strong>${escapeHtml(productCondition)}</strong>'
   );
   return next;
 }, 'storefront product metadata');
