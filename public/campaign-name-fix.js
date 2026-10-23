@@ -177,4 +177,9 @@
   cartToastPatch.src = "/cart-toast-v1.js?v=20261020-1";
   cartToastPatch.defer = true;
   document.head.appendChild(cartToastPatch);
+
+  const productPolishPatch = document.createElement("script");
+  productPolishPatch.src = "/product-detail-polish-v2.js?v=20261023-polish2";
+  productPolishPatch.defer = true;
+  document.head.appendChild(productPolishPatch);
 })();
