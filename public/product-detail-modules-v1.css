@@ -1,5 +1,6 @@
-/* SNGAMER STORE — product detail modules v1
-   Focused, additive styles. Existing cart, checkout and media behavior is preserved.
+/* SNGAMER STORE — product detail modules v2
+   Layout correction: description first, then the three information cards on one row.
+   Existing cart, checkout, delivery logic and product data remain untouched.
 */
 #productModal #productDetail,
 #productModal #productDetail .productDetail,
@@ -10,11 +11,11 @@
   max-width:none;
   box-sizing:border-box;
 }
-#productModal #productDetail .productDetail{
-  align-items:start;
-}
+#productModal #productDetail .productDetail{align-items:start;}
 #productModal #productDetail .productInfo{
   min-height:0;
+  display:flex !important;
+  flex-direction:column !important;
 }
 #productModal #productDetail .productInfo h2{
   display:block;
@@ -37,6 +38,11 @@
   min-width:0;
   box-sizing:border-box;
 }
+/* Explicit visual order: description -> three info cards -> video -> CTA. */
+#productModal #productDetail .productDescriptionSection{order:20;}
+#productModal #productDetail .sngProductAssuranceGrid{order:30;}
+#productModal #productDetail .productVideo{order:40;}
+#productModal #productDetail .sngProductAddButton{order:50;}
 #productModal #productDetail .productDescriptionSection{
   padding:16px !important;
   margin:18px 0 14px !important;
@@ -48,71 +54,77 @@
   line-height:1.7;
   margin:0 !important;
 }
+/* Three separate cards, always aligned on the same row. */
 #productModal #productDetail .sngProductAssuranceGrid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:10px;
   width:100%;
-  margin:18px 0 8px;
+  margin:4px 0 8px;
   box-sizing:border-box;
+  align-items:stretch;
 }
 #productModal #productDetail .sngAssuranceItem{
   display:flex;
+  flex-direction:column;
   align-items:flex-start;
-  gap:11px;
+  justify-content:flex-start;
+  gap:9px;
   min-width:0;
-  padding:14px;
+  min-height:108px;
+  padding:12px;
   border:1px solid rgba(116,153,197,.18);
   border-radius:15px;
   background:linear-gradient(145deg,rgba(20,32,49,.92),rgba(11,19,31,.96));
   color:#eaf1fb;
   box-sizing:border-box;
 }
-#productModal #productDetail .sngDeliveryModule{
-  grid-column:1 / -1;
-}
+#productModal #productDetail .sngDeliveryModule{grid-column:auto !important;}
 #productModal #productDetail .sngAssuranceIcon{
   display:grid;
   place-items:center;
-  width:38px;
-  height:38px;
-  flex:0 0 38px;
-  border-radius:12px;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border-radius:10px;
   background:rgba(54,132,231,.13);
   border:1px solid rgba(93,164,245,.17);
-  font-size:19px;
+  font-size:17px;
 }
 #productModal #productDetail .sngAssuranceCopy{
   min-width:0;
+  width:100%;
   display:flex;
   flex-direction:column;
   align-items:flex-start;
-  gap:4px;
+  gap:3px;
 }
 #productModal #productDetail .sngAssuranceEyebrow{
   color:#83b9f5;
-  font-size:10px;
+  font-size:9px;
   line-height:1.2;
   font-weight:900;
-  letter-spacing:.12em;
+  letter-spacing:.09em;
+  white-space:normal;
 }
 #productModal #productDetail .sngAssuranceCopy strong{
   color:#fff;
-  font-size:14px;
-  line-height:1.35;
+  font-size:13px;
+  line-height:1.3;
   font-weight:850;
   overflow-wrap:anywhere;
 }
 #productModal #productDetail .sngAssuranceCopy p{
   margin:0;
   color:#c0ccdc;
-  font-size:13px;
-  line-height:1.45;
+  font-size:11px;
+  line-height:1.35;
+  overflow-wrap:anywhere;
 }
 #productModal #productDetail .sngAssuranceCopy small{
   color:#8e9db2;
-  font-size:12px;
-  line-height:1.45;
+  font-size:10px;
+  line-height:1.35;
 }
 #productModal #productDetail .sngProductAddButton{
   position:static !important;
@@ -150,9 +162,7 @@
   box-shadow:0 0 0 2px rgba(59,149,255,.18);
 }
 @media(max-width:700px){
-  #productModal{
-    padding:8px !important;
-  }
+  #productModal{padding:8px !important;}
   #productModal .productBox{
     width:100% !important;
     max-width:680px !important;
@@ -177,25 +187,38 @@
     letter-spacing:-.55px;
     margin:7px 0 12px !important;
   }
+  /* Keep all three cards on the same horizontal row on phones too. */
   #productModal #productDetail .sngProductAssuranceGrid{
-    grid-template-columns:minmax(0,1fr);
-    gap:8px;
-    margin-top:15px;
-  }
-  #productModal #productDetail .sngDeliveryModule{
-    grid-column:auto;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:6px;
+    margin-top:4px;
   }
   #productModal #productDetail .sngAssuranceItem{
-    padding:12px;
-    border-radius:13px;
+    min-height:102px;
+    padding:9px 7px;
+    border-radius:12px;
+    gap:7px;
   }
   #productModal #productDetail .sngAssuranceIcon{
-    width:34px;
-    height:34px;
-    flex-basis:34px;
-    border-radius:10px;
-    font-size:17px;
+    width:30px;
+    height:30px;
+    flex-basis:30px;
+    border-radius:9px;
+    font-size:15px;
   }
+  #productModal #productDetail .sngAssuranceEyebrow{
+    font-size:7.5px;
+    letter-spacing:.06em;
+  }
+  #productModal #productDetail .sngAssuranceCopy strong{
+    font-size:11px;
+    line-height:1.25;
+  }
+  #productModal #productDetail .sngAssuranceCopy p{
+    font-size:9px;
+    line-height:1.25;
+  }
+  #productModal #productDetail .sngAssuranceCopy small{font-size:8.5px;}
   #productModal #productDetail .productDescriptionSection{
     padding:14px !important;
     margin-top:15px !important;
