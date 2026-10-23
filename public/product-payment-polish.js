@@ -24,6 +24,9 @@
   document.head.appendChild(style);
 
   function polishProductDescription(){
+    // The current product-detail renderer owns its description markup and expand/collapse button.
+    // Do not re-wrap it or introduce a duplicate "Description" heading.
+    if(document.querySelector("#productDetail .sngProductDescriptionV1"))return;
     const paragraph=document.querySelector("#productDetail .productDescription");
     if(!paragraph||paragraph.closest(".productDescriptionBlock"))return;
     const block=document.createElement("section");block.className="productDescriptionBlock";
