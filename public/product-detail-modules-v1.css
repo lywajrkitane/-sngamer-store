@@ -20,7 +20,7 @@
 #productModal #productDetail .sngAssuranceItem{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;min-width:0;height:92px;min-height:92px;padding:9px;border:1px solid rgba(116,153,197,.18);border-radius:13px;background:linear-gradient(145deg,rgba(20,32,49,.92),rgba(11,19,31,.96));color:#eaf1fb;box-sizing:border-box;overflow:hidden}
 #productModal #productDetail .sngDeliveryModule{grid-column:auto!important}
 /* When warranty is not configured in the dashboard, do not invent "Aucune garantie". */
-#productModal #productDetail .sngProductAssuranceGrid:has(.sngAssuranceItem:nth-child(2):last-child)::after{content:"GARANTIE\\A À définir";white-space:pre-line;display:flex;align-items:flex-start;justify-content:flex-start;min-width:0;height:92px;min-height:92px;padding:9px;border:1px solid rgba(116,153,197,.18);border-radius:13px;background:linear-gradient(145deg,rgba(20,32,49,.92),rgba(11,19,31,.96));color:#eaf1fb;box-sizing:border-box;font-size:9px;line-height:1.35;font-weight:850;letter-spacing:.08em}
+
 #productModal #productDetail .sngAssuranceIcon{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:rgba(54,132,231,.13);border:1px solid rgba(93,164,245,.17);font-size:14px}
 #productModal #productDetail .sngAssuranceCopy{min-width:0;width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
 #productModal #productDetail .sngAssuranceEyebrow{color:#83b9f5;font-size:8px;line-height:1.15;font-weight:900;letter-spacing:.07em;white-space:normal}
@@ -49,3 +49,32 @@
   #productModal #productDetail .productInfo button:not(.x){position:static!important;bottom:auto!important;margin-top:16px!important}
 }
 @media(prefers-reduced-motion:reduce){#productModal #productDetail .productThumb{transition:none!important}}
+
+
+/* FINAL PRODUCT DETAIL CORRECTIONS */
+#productModal #productDetail .productInfo .sngProductDescriptionV1{order:50!important}
+#productModal #productDetail .productInfo .sngProductAssuranceGrid{order:60!important}
+#productModal #productDetail .productInfo .productVideo{order:70!important}
+#productModal #productDetail .productInfo .sngProductAddButton{order:80!important}
+#productModal #productDetail .sngProductAssuranceGrid::after{content:none!important;display:none!important}
+#productModal #productDetail .sngAssuranceItem{height:92px!important;min-height:92px!important;max-height:92px!important;overflow:hidden!important}
+#productModal #productDetail .sngDescriptionPreview,
+#productModal #productDetail .sngDescriptionFull{max-height:none!important;overflow:visible!important}
+#productModal #productDetail .sngDescriptionFull[hidden]{display:none!important}
+#productModal #productDetail .sngDescriptionToggle{
+  display:inline-flex!important;align-items:center;justify-content:center;
+  width:auto!important;min-width:112px;min-height:38px;padding:8px 14px!important;
+  margin:12px 0 2px!important;border:1px solid rgba(78,163,255,.45)!important;
+  border-radius:10px!important;background:linear-gradient(135deg,#1368de,#167fe8)!important;
+  color:#fff!important;font-size:13px!important;font-weight:850!important;line-height:1.2;
+  box-shadow:0 5px 15px rgba(22,119,255,.22);cursor:pointer;
+}
+#productModal #productDetail .sngDescriptionToggle:focus-visible{outline:3px solid #8cc8ff;outline-offset:3px}
+#productModal #productDetail .sngDescriptionToggle[aria-expanded="true"]{background:#172a42!important;border-color:#648ab9!important;color:#dcecff!important}
+@media(max-width:700px){
+  #productModal #productDetail .sngProductAssuranceGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #productModal #productDetail .sngAssuranceItem{height:84px!important;min-height:84px!important;max-height:84px!important;padding:7px 6px!important}
+  #productModal #productDetail .sngAssuranceEyebrow{font-size:7px!important;letter-spacing:.04em!important}
+  #productModal #productDetail .sngAssuranceCopy strong{font-size:10px!important;line-height:1.2!important}
+  #productModal #productDetail .sngDescriptionToggle{min-height:36px;font-size:12px!important}
+}
