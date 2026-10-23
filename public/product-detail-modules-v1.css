@@ -19,13 +19,10 @@
 #productModal #productDetail .sngProductAssuranceGrid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px;width:100%;margin:4px 0 8px;box-sizing:border-box;align-items:stretch}
 #productModal #productDetail .sngAssuranceItem{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;min-width:0;height:92px;min-height:92px;padding:9px;border:1px solid rgba(116,153,197,.18);border-radius:13px;background:linear-gradient(145deg,rgba(20,32,49,.92),rgba(11,19,31,.96));color:#eaf1fb;box-sizing:border-box;overflow:hidden}
 #productModal #productDetail .sngDeliveryModule{grid-column:auto!important}
-/* When warranty is not configured in the dashboard, do not invent "Aucune garantie". */
-
 #productModal #productDetail .sngAssuranceIcon{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:rgba(54,132,231,.13);border:1px solid rgba(93,164,245,.17);font-size:14px}
 #productModal #productDetail .sngAssuranceCopy{min-width:0;width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
 #productModal #productDetail .sngAssuranceEyebrow{color:#83b9f5;font-size:8px;line-height:1.15;font-weight:900;letter-spacing:.07em;white-space:normal}
 #productModal #productDetail .sngAssuranceCopy strong{color:#fff;font-size:11px;line-height:1.25;font-weight:850;overflow-wrap:anywhere}
-/* The compact card keeps only the useful summary; detailed delivery text stays in checkout. */
 #productModal #productDetail .sngAssuranceCopy p,#productModal #productDetail .sngAssuranceCopy small{display:none!important}
 #productModal #productDetail .sngProductAddButton{position:static!important;inset:auto!important;display:block;width:100%!important;max-width:none!important;min-height:54px;margin:18px 0 2px!important;z-index:auto!important;box-shadow:0 10px 24px rgba(28,96,213,.22);scroll-margin-bottom:18px}
 #productModal #productDetail .productInfo button:not(.x){position:static!important;inset:auto!important;width:100%;margin-top:18px}
@@ -50,7 +47,6 @@
 }
 @media(prefers-reduced-motion:reduce){#productModal #productDetail .productThumb{transition:none!important}}
 
-
 /* FINAL PRODUCT DETAIL CORRECTIONS */
 #productModal #productDetail .productInfo .sngProductDescriptionV1{order:50!important}
 #productModal #productDetail .productInfo .sngProductAssuranceGrid{order:60!important}
@@ -58,9 +54,22 @@
 #productModal #productDetail .productInfo .sngProductAddButton{order:80!important}
 #productModal #productDetail .sngProductAssuranceGrid::after{content:none!important;display:none!important}
 #productModal #productDetail .sngAssuranceItem{height:92px!important;min-height:92px!important;max-height:92px!important;overflow:hidden!important}
-#productModal #productDetail .sngDescriptionPreview,
-#productModal #productDetail .sngDescriptionFull{max-height:none!important;overflow:visible!important}
+
+/* Description: clean rectangular reading block + deterministic expand/collapse. */
+#productModal #productDetail .sngProductDescriptionV1 .productDescription{
+  text-align:justify!important;
+  text-justify:inter-word;
+  hyphens:auto;
+  -webkit-hyphens:auto;
+  word-break:normal;
+  overflow-wrap:anywhere;
+  max-height:none!important;
+  overflow:visible!important;
+}
+#productModal #productDetail .sngDescriptionPreview[hidden],
 #productModal #productDetail .sngDescriptionFull[hidden]{display:none!important}
+#productModal #productDetail .sngDescriptionPreview:not([hidden]),
+#productModal #productDetail .sngDescriptionFull:not([hidden]){display:block!important}
 #productModal #productDetail .sngDescriptionToggle{
   display:inline-flex!important;align-items:center;justify-content:center;
   width:auto!important;min-width:112px;min-height:38px;padding:8px 14px!important;
@@ -69,8 +78,8 @@
   color:#fff!important;font-size:13px!important;font-weight:850!important;line-height:1.2;
   box-shadow:0 5px 15px rgba(22,119,255,.22);cursor:pointer;
 }
-#productModal #productDetail .sngDescriptionToggle:focus-visible{outline:3px solid #8cc8ff;outline-offset:3px}
 #productModal #productDetail .sngDescriptionToggle[aria-expanded="true"]{background:#172a42!important;border-color:#648ab9!important;color:#dcecff!important}
+#productModal #productDetail .sngDescriptionToggle:focus-visible{outline:3px solid #8cc8ff;outline-offset:3px}
 @media(max-width:700px){
   #productModal #productDetail .sngProductAssuranceGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
   #productModal #productDetail .sngAssuranceItem{height:84px!important;min-height:84px!important;max-height:84px!important;padding:7px 6px!important}
