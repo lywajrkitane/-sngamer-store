@@ -3,6 +3,7 @@
   if (window.__sngProductColorsStorefrontV2) return;
   window.__sngProductColorsStorefrontV2 = true;
   const selected = Object.create(null);
+
   function productList() {
     if (Array.isArray(window.storeProducts)) return window.storeProducts;
     if (Array.isArray(window.products)) return window.products;
@@ -38,7 +39,7 @@
   function injectCss() {
     if (document.getElementById("sngProductColorCss")) return;
     const s = document.createElement("style"); s.id = "sngProductColorCss";
-    s.textContent = "#productDetail .sngProductColorSelector{margin:13px 0 16px;display:block;clear:both}#productDetail .sngProductColorHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}#productDetail .sngProductColorHead strong{color:#f2f6ff;font-size:14px}#productDetail .sngProductColorHead span{color:#91a4ba;font-size:11px}#productDetail .sngProductColorOptions{display:flex;flex-wrap:wrap;gap:8px}#productDetail .sngProductColorOption{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:7px 10px;border:1px solid rgba(123,148,181,.25);border-radius:11px;background:rgba(255,255,255,.035);color:#dce6f5;font:inherit;font-size:12px;font-weight:750;cursor:pointer}#productDetail .sngProductColorOption.is-selected{border-color:#57aaff;background:rgba(32,126,228,.16);box-shadow:0 0 0 1px rgba(87,170,255,.24);color:#fff}#productDetail .sngProductColorSwatch{display:inline-block;width:17px;height:17px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:var(--color-swatch,#808080)}#productDetail .sngProductColorError{margin:8px 0 0;color:#ffb4bf;font-size:12px;font-weight:700}#productDetail .sngProductColorSelector.has-error .sngProductColorOption{border-color:rgba(255,111,132,.48)}.cartItem .sngCartColor{display:block;margin:3px 0;color:#8dbce8;font-size:11px}.cartItem .sngCartColor.missing{color:#ffb4bf}#checkoutSummary .sngCheckoutColor{display:block;margin-top:3px;color:#8dbce8;font-size:12px}";
+    s.textContent = "#productDetail .sngProductColorSelector{margin:13px 0 16px;display:block;clear:both}#productDetail .sngProductColorHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}#productDetail .sngProductColorHead strong{color:#f2f6ff;font-size:14px;font-weight:800}#productDetail .sngProductColorHead span{color:#91a4ba;font-size:11px}#productDetail .sngProductColorOptions{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:3px 2px 7px;scrollbar-width:none;-webkit-overflow-scrolling:touch}#productDetail .sngProductColorOptions::-webkit-scrollbar{display:none}#productDetail .sngProductColorOption{position:relative;display:inline-flex;flex:0 0 auto;width:32px;height:32px;min-width:32px;min-height:32px;padding:0;margin:0;border:2px solid rgba(255,255,255,.28);border-radius:50%;background:var(--color-swatch,#808080);box-shadow:0 2px 8px rgba(0,0,0,.28),inset 0 0 0 1px rgba(0,0,0,.12);cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}#productDetail .sngProductColorOption:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.7)}#productDetail .sngProductColorOption:focus-visible{outline:2px solid #63b5ff;outline-offset:3px}#productDetail .sngProductColorOption.is-selected{border-color:#fff;box-shadow:0 0 0 2px rgba(68,157,255,.9),0 0 14px rgba(68,157,255,.42),inset 0 0 0 1px rgba(255,255,255,.55);transform:scale(1.08)}#productDetail .sngProductColorSwatch{display:block;width:100%;height:100%;border-radius:50%;background:var(--color-swatch,#808080)}#productDetail .sngProductColorOption[aria-label*="Blanc"] .sngProductColorSwatch{border:1px solid rgba(20,28,40,.28)}#productDetail .sngProductColorError{margin:8px 0 0;color:#ffb4bf;font-size:12px;font-weight:700}#productDetail .sngProductColorSelector.has-error .sngProductColorOption{border-color:rgba(255,111,132,.72)}.cartItem .sngCartColor{display:block;margin:3px 0;color:#8dbce8;font-size:11px}.cartItem .sngCartColor.missing{color:#ffb4bf}#checkoutSummary .sngCheckoutColor{display:block;margin-top:3px;color:#8dbce8;font-size:12px}";
     document.head.appendChild(s);
   }
   function showError(message) {
@@ -59,24 +60,56 @@
     if (old && old.dataset.productId === String(p.id)) return;
     if (old) old.remove();
     injectCss();
-    const box = document.createElement("section"); box.className = "sngProductColorSelector"; box.dataset.productId = String(p.id);
-    const head = document.createElement("div"); head.className = "sngProductColorHead"; head.innerHTML = "<strong>🎨 Couleur</strong><span>Choisis une couleur</span>"; box.appendChild(head);
-    const row = document.createElement("div"); row.className = "sngProductColorOptions"; const current = selected[String(p.id)];
+
+    const box = document.createElement("section");
+    box.className = "sngProductColorSelector";
+    box.dataset.productId = String(p.id);
+
+    const head = document.createElement("div");
+    head.className = "sngProductColorHead";
+    head.innerHTML = "<strong>🎨 Couleur</strong><span>Choisis une couleur</span>";
+    box.appendChild(head);
+
+    const row = document.createElement("div");
+    row.className = "sngProductColorOptions";
+    const current = selected[String(p.id)];
+
     options.forEach(function (c) {
-      const b = document.createElement("button"); b.type = "button"; b.className = "sngProductColorOption";
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sngProductColorOption";
       const active = !!current && current.name.toLowerCase() === c.name.toLowerCase();
-      b.setAttribute("aria-pressed", String(active)); if (active) b.classList.add("is-selected"); b.style.setProperty("--color-swatch", c.hex);
-      const swatch = document.createElement("span"); swatch.className = "sngProductColorSwatch"; swatch.setAttribute("aria-hidden", "true");
-      const label = document.createElement("span"); label.textContent = c.name; b.appendChild(swatch); b.appendChild(label);
+      b.setAttribute("aria-label", "Couleur " + c.name);
+      b.setAttribute("title", c.name);
+      b.setAttribute("aria-pressed", String(active));
+      if (active) b.classList.add("is-selected");
+      b.style.setProperty("--color-swatch", c.hex);
+
+      const swatch = document.createElement("span");
+      swatch.className = "sngProductColorSwatch";
+      swatch.setAttribute("aria-hidden", "true");
+      b.appendChild(swatch);
+
       b.addEventListener("click", function () {
         selected[String(p.id)] = { name: c.name, hex: c.hex };
-        box.classList.remove("has-error"); const err = box.querySelector(".sngProductColorError"); if (err) err.hidden = true;
-        row.querySelectorAll("button").forEach(function (btn) { const isActive = btn === b; btn.classList.toggle("is-selected", isActive); btn.setAttribute("aria-pressed", String(isActive)); });
+        box.classList.remove("has-error");
+        const err = box.querySelector(".sngProductColorError");
+        if (err) err.hidden = true;
+        row.querySelectorAll("button").forEach(function (btn) {
+          const isActive = btn === b;
+          btn.classList.toggle("is-selected", isActive);
+          btn.setAttribute("aria-pressed", String(isActive));
+        });
       });
       row.appendChild(b);
     });
+
     box.appendChild(row);
-    const error = document.createElement("p"); error.className = "sngProductColorError"; error.textContent = "Choisis une couleur pour continuer."; error.hidden = true; box.appendChild(error);
+    const error = document.createElement("p");
+    error.className = "sngProductColorError";
+    error.textContent = "Choisis une couleur pour continuer.";
+    error.hidden = true;
+    box.appendChild(error);
     title.insertAdjacentElement("afterend", box);
   }
   function renderSelectorFromDetail() { const p = productFromDetail(); if (p) renderSelector(p.id); }
