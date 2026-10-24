@@ -136,9 +136,100 @@
     document.head.appendChild(style);
   }
 
+  function installCampaignFrameGlow() {
+    const STYLE_ID = "sngamer-campaign-frame-glow-v1";
+    if (document.getElementById(STYLE_ID)) return;
+
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = `
+      /* Premium campaign frame: a restrained travelling light, not a flashing RGB border. */
+      #sngamerCampaignCarousel .campaignCard {
+        position: relative !important;
+        isolation: isolate !important;
+        border-color: rgba(78,156,255,.30) !important;
+      }
+
+      #sngamerCampaignCarousel .campaignCard::before,
+      #sngamerCampaignCarousel .campaignCard::after {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        pointer-events: none;
+      }
+
+      #sngamerCampaignCarousel .campaignCard::before {
+        z-index: 0;
+        padding: 1px;
+        background: conic-gradient(
+          from 0deg,
+          transparent 0deg,
+          transparent 292deg,
+          rgba(70,161,255,.05) 310deg,
+          rgba(70,161,255,.28) 330deg,
+          rgba(221,67,210,.95) 344deg,
+          rgba(91,170,255,1) 352deg,
+          rgba(255,255,255,.92) 357deg,
+          rgba(70,161,255,.25) 360deg
+        );
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        animation: sngCampaignFrameSweep 5.8s linear infinite;
+        opacity: .92;
+      }
+
+      #sngamerCampaignCarousel .campaignCard::after {
+        z-index: -1;
+        padding: 2px;
+        background: conic-gradient(
+          from 0deg,
+          transparent 0deg,
+          transparent 300deg,
+          rgba(55,151,255,.08) 326deg,
+          rgba(208,55,205,.24) 344deg,
+          rgba(75,160,255,.38) 354deg,
+          transparent 360deg
+        );
+        filter: blur(7px);
+        opacity: .50;
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        animation: sngCampaignFrameSweep 5.8s linear infinite;
+      }
+
+      #sngamerCampaignCarousel .campaignCard > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      #sngamerCampaignCarousel .campaignCard.is-pressed::before { opacity: 1; }
+
+      @keyframes sngCampaignFrameSweep {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      @media (max-width:560px) {
+        #sngamerCampaignCarousel .campaignCard::after { filter: blur(5px); opacity: .42; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #sngamerCampaignCarousel .campaignCard::before,
+        #sngamerCampaignCarousel .campaignCard::after { animation: none !important; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   async function loadCampaignName() {
     try {
       installCampaignOverflowFix();
+      installCampaignFrameGlow();
       const [productsResponse, promosResponse] = await Promise.all([
         fetch("/api/products?campaign_banner=1", { cache: "no-store" }),
         fetch("/api/promo-media", { cache: "no-store" })
@@ -152,6 +243,7 @@
         const timer = setInterval(() => {
           attempts += 1;
           installCampaignOverflowFix();
+          installCampaignFrameGlow();
           if (applyCampaign(campaign) || attempts >= 30) clearInterval(timer);
         }, 200);
       }
@@ -162,6 +254,7 @@
 
   function start() {
     installCampaignOverflowFix();
+    installCampaignFrameGlow();
     loadCampaignName();
     window.addEventListener("load", loadCampaignName, { once: true });
   }
