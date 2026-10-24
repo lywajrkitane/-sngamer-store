@@ -34,8 +34,9 @@
       #${HOST_ID} .campaignCard{width:100%;min-height:120px;box-sizing:border-box;display:flex;align-items:center;gap:15px;padding:15px 16px;border:1px solid rgba(96,165,250,.28);border-radius:20px;background:radial-gradient(circle at 0% 50%,rgba(37,99,235,.20),transparent 38%),linear-gradient(135deg,#0b1425,#111326 58%,#18112b);box-shadow:0 12px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035);transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
       #${HOST_ID} .campaignCard.is-pressed{border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.42),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-1px)}
       #${HOST_ID} .campaignCard:focus-visible{outline:none;border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.38)}
-      #${HOST_ID} .campaignMedia{width:78px;height:78px;flex:0 0 78px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#9333ea);border:1px solid rgba(255,255,255,.12)}
-      #${HOST_ID} .campaignMedia img{width:100%;height:100%;object-fit:contain;object-position:center;box-sizing:border-box;padding:4px;display:block}
+      #${HOST_ID} .campaignMedia{width:78px;height:78px;flex:0 0 78px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#9333ea);border:1px solid rgba(255,255,255,.12);box-sizing:border-box;transition:width .18s ease,height .18s ease,flex-basis .18s ease}
+      #${HOST_ID} .campaignMedia.has-image{background:#0b1425;border-color:rgba(116,163,222,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 5px 16px rgba(0,0,0,.16)}
+      #${HOST_ID} .campaignMedia img{width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;object-position:center;box-sizing:border-box;padding:0;display:block;border-radius:inherit}
       #${HOST_ID} .campaignEmoji{font-size:31px}
       #${HOST_ID} .campaignCopy{min-width:0;flex:1}
       #${HOST_ID} .campaignEyebrow{margin:0 0 5px;color:#78aefc;font-size:11px;line-height:1.25;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}
@@ -155,7 +156,7 @@
 
     return `
       <div class="campaignCard" data-product-id="${Number(product.id) || 0}" role="button" tabindex="0" aria-label="${esc(name)} — ${esc(product.name || "Produit")}">
-        <div class="campaignMedia">
+        <div class="campaignMedia${image ? " has-image" : ""}">
           ${image ? `<img src="${esc(image)}" alt="${esc(product.name || "Produit en promotion")}" loading="eager">` : `<span class="campaignEmoji">${esc(leftSticker || product.emoji || "🔥")}</span>`}
         </div>
         <div class="campaignCopy">
@@ -189,6 +190,27 @@
       slide.className = `campaignSlide${index === 0 ? " active" : ""}`;
       slide.innerHTML = cardMarkup(item);
       const card = slide.querySelector(".campaignCard");
+      const media = slide.querySelector(".campaignMedia");
+      const productImage = slide.querySelector(".campaignMedia img");
+      if (media && productImage) {
+        const fitImageFrame = () => {
+          const naturalWidth = Number(productImage.naturalWidth || 0);
+          const naturalHeight = Number(productImage.naturalHeight || 0);
+          if (!naturalWidth || !naturalHeight) return;
+          const mobile = window.matchMedia("(max-width: 560px)").matches;
+          const maxWidth = mobile ? 88 : 108;
+          const maxHeight = mobile ? 66 : 80;
+          const scale = Math.min(maxWidth / naturalWidth, maxHeight / naturalHeight);
+          const width = Math.max(1, Math.round(naturalWidth * scale));
+          const height = Math.max(1, Math.round(naturalHeight * scale));
+          media.style.width = width + "px";
+          media.style.height = height + "px";
+          media.style.flexBasis = width + "px";
+          media.dataset.nativeRatio = (naturalWidth / naturalHeight).toFixed(4);
+        };
+        productImage.addEventListener("load", fitImageFrame, { once: true });
+        if (productImage.complete) fitImageFrame();
+      }
 
       const open = () => {
         const id = Number(card?.dataset.productId || 0);
