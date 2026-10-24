@@ -7,7 +7,7 @@
   function loadBuyNowFix() {
     if (document.querySelector('script[data-sngamer-buy-now-fix="1"]')) return;
     const script = document.createElement("script");
-    script.src = "/buy-now-single-product-fix.js?v=20261024-pricehierarchy1";
+    script.src = "/buy-now-single-product-fix.js?v=20261024-stock-state-rootfix2";
     script.dataset.sngamerBuyNowFix = "1";
     document.body.appendChild(script);
   }
@@ -332,7 +332,7 @@
         white-space:nowrap!important;
         overflow:hidden!important;
         text-overflow:ellipsis!important;
-        animation:sngStockPulse 2.2s ease-in-out infinite!important;
+        animation:none!important; opacity:1!important;
       }
       #products .card.productCardClickable .info > .stock.sngStockStatus i{
         display:block!important;
@@ -343,6 +343,16 @@
         background:currentColor!important;
         box-shadow:0 0 0 3px rgba(99,220,134,.08),0 0 10px currentColor!important;
         flex:0 0 7px!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock{
+        animation:none!important;
+        opacity:1!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock > i,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock > span{
+        animation:none!important;
+        opacity:1!important;
+        transform:none!important;
       }
       #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited{
         color:#f2a93b!important;
