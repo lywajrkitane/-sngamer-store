@@ -19,15 +19,69 @@
     }
 
     style.textContent = `
+      /* ON ORDER uses exactly the same premium status frame as the stock badges. */
       #products .card .stock.onOrderStock,
       #products .card.productCardClickable .stock.onOrderStock,
       #productDetail .onOrderStock,
       #drawer .onOrderStock,
       #checkout .onOrderStock,
       #checkoutSummary .onOrderStock {
-        color: ${PINK} !important;
-        font-weight: 700 !important;
-        text-shadow: 0 0 10px rgba(255,79,163,.20) !important;
+        display:inline-flex !important;
+        align-items:center !important;
+        justify-content:flex-start !important;
+        gap:6px !important;
+        width:max-content !important;
+        max-width:100% !important;
+        min-height:28px !important;
+        height:28px !important;
+        margin:4px 0 10px !important;
+        padding:5px 10px !important;
+        box-sizing:border-box !important;
+        border-radius:9px !important;
+        border:1px solid rgba(255,79,163,.34) !important;
+        background:rgba(255,79,163,.09) !important;
+        color:${PINK} !important;
+        font-size:11px !important;
+        line-height:1 !important;
+        font-weight:800 !important;
+        letter-spacing:.1px !important;
+        white-space:nowrap !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+        text-shadow:0 0 10px rgba(255,79,163,.20) !important;
+        animation:none !important;
+        opacity:1 !important;
+        transform:none !important;
+      }
+
+      #products .card.productCardClickable .stock.onOrderStock .sngOnOrderDot,
+      #productDetail .onOrderStock .sngOnOrderDot,
+      #drawer .onOrderStock .sngOnOrderDot,
+      #checkout .onOrderStock .sngOnOrderDot,
+      #checkoutSummary .onOrderStock .sngOnOrderDot {
+        display:block !important;
+        width:7px !important;
+        height:7px !important;
+        min-width:7px !important;
+        border-radius:50% !important;
+        background:${PINK} !important;
+        box-shadow:0 0 0 3px rgba(255,79,163,.08),0 0 10px ${PINK} !important;
+        flex:0 0 7px !important;
+        opacity:1 !important;
+        transform:none !important;
+        animation:none !important;
+      }
+
+      #products .card.productCardClickable .stock.onOrderStock .sngOnOrderLabel,
+      #productDetail .onOrderStock .sngOnOrderLabel,
+      #drawer .onOrderStock .sngOnOrderLabel,
+      #checkout .onOrderStock .sngOnOrderLabel,
+      #checkoutSummary .onOrderStock .sngOnOrderLabel {
+        display:inline-block !important;
+        color:inherit !important;
+        opacity:1 !important;
+        transform:none !important;
+        animation:none !important;
       }
     `;
   }
@@ -35,22 +89,29 @@
   function forcePremium(el) {
     if (!el) return;
 
-    const needsText = el.textContent !== LABEL;
-    const needsClass = !el.classList.contains("onOrderStock") || el.classList.contains("outOfStock");
-    const needsColor = el.style.getPropertyValue("color") !== PINK || el.style.getPropertyPriority("color") !== "important";
-    const needsWeight = el.style.getPropertyValue("font-weight") !== "700" || el.style.getPropertyPriority("font-weight") !== "important";
-
-    if (needsText) el.textContent = LABEL;
-    if (needsClass) {
-      el.classList.remove("outOfStock");
-      el.classList.add("onOrderStock");
+    const alreadyStructured = !!el.querySelector(".sngOnOrderDot") && !!el.querySelector(".sngOnOrderLabel");
+    if (!alreadyStructured) {
+      el.textContent = "";
+      const dot = document.createElement("i");
+      dot.className = "sngOnOrderDot";
+      dot.setAttribute("aria-hidden", "true");
+      const label = document.createElement("span");
+      label.className = "sngOnOrderLabel";
+      label.textContent = LABEL;
+      el.append(dot, label);
+    } else {
+      const label = el.querySelector(".sngOnOrderLabel");
+      if (label.textContent !== LABEL) label.textContent = LABEL;
     }
-    if (needsColor) el.style.setProperty("color", PINK, "important");
-    if (needsWeight) el.style.setProperty("font-weight", "700", "important");
 
-    if (el.style.getPropertyValue("text-shadow") !== "0 0 10px rgba(255,79,163,.20)" || el.style.getPropertyPriority("text-shadow") !== "important") {
-      el.style.setProperty("text-shadow", "0 0 10px rgba(255,79,163,.20)", "important");
-    }
+    el.classList.remove("outOfStock");
+    el.classList.add("onOrderStock");
+    el.style.setProperty("color", PINK, "important");
+    el.style.setProperty("font-weight", "700", "important");
+    el.style.setProperty("text-shadow", "0 0 10px rgba(255,79,163,.20)", "important");
+    el.style.setProperty("animation", "none", "important");
+    el.style.setProperty("opacity", "1", "important");
+    el.style.setProperty("transform", "none", "important");
   }
 
   function normalizeProducts() {
@@ -218,7 +279,6 @@
           init?.method || (typeof input !== "string" ? input?.method : "GET") || "GET"
         ).toUpperCase();
 
-        // New product: save the selected availability mode after creation.
         if (method === "POST" && url.includes("/api/admin/products") && !url.includes("/media")) {
           try {
             const data = await response.clone().json();
@@ -235,7 +295,6 @@
           } catch (_) {}
         }
 
-        // Existing product: save the selected availability mode after editing.
         const editMatch = url.match(/\/api\/admin\/products\/([^/?#]+)$/);
         if ((method === "PUT" || method === "PATCH") && editMatch && !url.includes("/stock-mode")) {
           try {
