@@ -8,7 +8,7 @@
 
     const label = hero.querySelector(".heroIn > div:first-child > label");
     const title = hero.querySelector(".heroIn > div:first-child h1");
-    const description = hero.querySelector(".heroIn > div:first-child p");
+    const description = hero.querySelector(".heroIn > div:first-child > p.heroAnnouncement") || hero.querySelector(".heroIn > div:first-child > p.heroSlogan");
     const button = hero.querySelector(".heroIn .primary");
     const fallback = document.getElementById("defaultHeroContent");
 
@@ -281,8 +281,8 @@
     }
 
     const label = copy.querySelector(":scope > label") || copy.querySelector("label");
-    const description = copy.querySelector("p.heroAnnouncement") || copy.querySelector("p");
-    if(!label || !description) return;
+    const description = copy.querySelector(":scope > p.heroAnnouncement") || copy.querySelector(":scope > p.heroSlogan");
+    if(!label) return;
 
     let row = heroIn.querySelector(".sngPromoAnnouncement");
     if(!row){
@@ -291,7 +291,13 @@
       row.innerHTML = '<button type="button" class="sngPromoAnnouncementButton" aria-label="Écouter l’annonce SNGAMER STORE" title="Écouter l’annonce SNGAMER STORE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.8 8.5H4.5A1.5 1.5 0 0 0 3 10v4a1.5 1.5 0 0 0 1.5 1.5h2.3L11 19V5Z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></button>';
     }
     // The sound button always stays between the small brand label and the welcome card.
-    if(row.parentElement !== copy || row.nextElementSibling !== description) copy.insertBefore(row, description);
+    if(description && description.parentElement === copy){
+      if(row.parentElement !== copy || row.nextElementSibling !== description) copy.insertBefore(row, description);
+    }else if(row.parentElement !== copy){
+      copy.insertBefore(row, label.nextSibling);
+    }else if(row.previousElementSibling !== label){
+      copy.insertBefore(row, label.nextSibling);
+    }
 
     const audioButton = row.querySelector(".sngPromoAnnouncementButton");
     if(audioButton && audioButton.dataset.audioReady !== "1"){
@@ -318,7 +324,7 @@
   }
 
   function installWelcomeAnnouncementCarousel(){
-    const description = document.querySelector(".hero .heroAnnouncement");
+    const description = document.querySelector(".hero .heroIn > div:first-child > p.heroAnnouncement");
     if(!description || description.dataset.sngWelcomeRotatorReady === "1") return;
 
     const icon = description.querySelector(".announcementIcon");
