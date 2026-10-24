@@ -145,7 +145,7 @@ function injectCustomerSpaceScript(app) {
       let html = fs.readFileSync(indexPath, "utf8");
       const paytechTag = '<script src="/paytech-checkout.js?v=20261021-stockcancel1"></script>';
       const customerTag = '<script src="/customer-space-enhancements.js?v=20261018-1450" defer></script>';
-      const pushTag = '<script src="/customer-push.js?v=20261024-stock-state-rootfix2" defer></script>';
+      const pushTag = '<script src="/customer-push.js?v=20261024-stock-root-cause2" defer></script>';
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
       const legacyBridgeTag = '<script src="/customer-premium-legacy-bridge-v1.js?v=20261018-1900"></script>';

@@ -327,3 +327,14 @@
     right:0!important;
   }
 }
+
+
+/* SNGAMER STOCK STATUS — no animated ornament on stock badges */
+#products .card.productCardClickable .info > .stock.sngStockStatus::before,
+#products .card.productCardClickable .info > .stock.sngStockStatus::after{
+  content:none!important;
+  display:none!important;
+  animation:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}

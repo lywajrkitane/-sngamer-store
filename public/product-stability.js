@@ -7,7 +7,7 @@
   function loadBuyNowFix() {
     if (document.querySelector('script[data-sngamer-buy-now-fix="1"]')) return;
     const script = document.createElement("script");
-    script.src = "/buy-now-single-product-fix.js?v=20261024-stock-state-rootfix2";
+    script.src = "/buy-now-single-product-fix.js?v=20261024-stock-root-cause2";
     script.dataset.sngamerBuyNowFix = "1";
     document.body.appendChild(script);
   }
@@ -354,6 +354,22 @@
         opacity:1!important;
         transform:none!important;
       }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock > i,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock > span{
+        animation:none!important;
+        transition:none!important;
+        opacity:1!important;
+        transform:none!important;
+        filter:none!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus::before,
+      #products .card.productCardClickable .info > .stock.sngStockStatus::after{
+        content:none!important;
+        display:none!important;
+        animation:none!important;
+        opacity:0!important;
+      }
       #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited{
         color:#f2a93b!important;
         border-color:rgba(242,169,59,.34)!important;
@@ -417,32 +433,29 @@
   function refreshStockDisplay(root) {
     const scope=root||document;
     scope.querySelectorAll?.('#products .card.productCardClickable .info > .stock').forEach(stockEl=>{
-      if(stockEl.dataset.sngamerStockStatusApplied==="1") return;
-      const card=stockEl.closest(".productCardClickable");
+      const card=stockEl.closest('.productCardClickable');
       if(!card) return;
-      const raw=stockEl.textContent||"";
+      const raw=stockEl.textContent||'';
+      if(stockEl.classList.contains('onOrderStock') || /sur commande/i.test(raw)) return;
+      const countText=stockEl.getAttribute('data-stock-count');
+      const hasSourceCount=countText!==null && countText.trim()!=='' && Number.isFinite(Number(countText));
       const match=raw.match(/(\d+)/);
-      const stock=match?Number(match[1]):0;
-      stockEl.classList.add("sngStockStatus");
-      stockEl.classList.remove("is-stock","is-limited","is-last","is-out","outOfStock");
-      if(stock>5){
-        stockEl.classList.add("is-stock");
-        stockEl.innerHTML='<i aria-hidden="true"></i><span>En stock</span>';
-        stockEl.setAttribute("aria-label","En stock");
-      }else if(stock>1){
-        stockEl.classList.add("is-limited");
-        stockEl.innerHTML='<i aria-hidden="true"></i><span>'+stock+' en stock</span>';
-        stockEl.setAttribute("aria-label",stock+' en stock');
-      }else if(stock===1){
-        stockEl.classList.add("is-last");
-        stockEl.innerHTML='<i aria-hidden="true"></i><span>Dernier article !</span>';
-        stockEl.setAttribute("aria-label","Dernier article");
-      }else{
-        stockEl.classList.add("is-out");
-        stockEl.innerHTML='<i aria-hidden="true"></i><span>Rupture de stock</span>';
-        stockEl.setAttribute("aria-label","Rupture de stock");
-      }
-      stockEl.dataset.sngamerStockStatusApplied="1";
+      const parsed=hasSourceCount ? Number(countText) : (match ? Number(match[1]) : 0);
+      const stock=Math.max(0,Math.floor(Number.isFinite(parsed) ? parsed : 0));
+      let state,label;
+      if(stock>5){ state='is-stock'; label='En stock'; }
+      else if(stock>1){ state='is-limited'; label=stock+' en stock'; }
+      else if(stock===1){ state='is-last'; label='Dernier article !'; }
+      else { state='is-out'; label='Rupture de stock'; }
+      const currentLabel=stockEl.querySelector(':scope > span')?.textContent?.trim()||'';
+      if(stockEl.dataset.sngamerStockState===state && currentLabel===label) return;
+      stockEl.classList.add('sngStockStatus');
+      stockEl.classList.remove('is-stock','is-limited','is-last','is-out','outOfStock');
+      stockEl.classList.add(state);
+      stockEl.innerHTML='<i aria-hidden="true"></i><span>'+label+'</span>';
+      stockEl.setAttribute('aria-label',label);
+      stockEl.dataset.sngamerStockState=state;
+      stockEl.dataset.sngamerStockStatusApplied='1';
     });
   }
 

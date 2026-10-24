@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261024-stock-state-rootfix2';
+const SNGAMER_SW_VERSION = '20261024-stock-root-cause2';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
