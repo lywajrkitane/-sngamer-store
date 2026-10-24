@@ -113,7 +113,7 @@
       } else {
         if (profile) { profile.hidden = true; profile.style.display = "none"; profile.replaceChildren(); delete profile.dataset.sngProfileLoading; }
         if (subcats) { subcats.hidden = true; subcats.style.display = "none"; }
-        if (title) title.textContent = section === "home" ? "Nos produits" : section === "accessories" ? "Accessoires" : section === "phones" ? "Univers Gaming" : "Pièces eFootball";
+        if (title) title.textContent = section === "home" ? "Collection" : section === "accessories" ? "Accessoires" : section === "phones" ? "Univers Gaming" : "Pièces eFootball";
 
         if (typeof window.filterBy === "function") {
           const targetFilter = section === "home" ? "Tous" : section === "accessories" ? "Accessoires" : section === "phones" ? "Gaming Phone" : "Coins";
