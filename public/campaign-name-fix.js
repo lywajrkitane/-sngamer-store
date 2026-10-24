@@ -136,70 +136,47 @@
     document.head.appendChild(style);
   }
 
-  function installCampaignFrameGlow() {
-    const STYLE_ID = "sngamer-campaign-frame-glow-v1";
+  function installCampaignFrameSymbols() {
+    const STYLE_ID = "sngamer-campaign-frame-symbols-v1";
     if (document.getElementById(STYLE_ID)) return;
 
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
-      /* Premium campaign frame: a restrained travelling light, not a flashing RGB border. */
+      /* Premium campaign frame: reuse the subtle controller-symbol animation from product cards. */
       #sngamerCampaignCarousel .campaignCard {
         position: relative !important;
         isolation: isolate !important;
-        border-color: rgba(78,156,255,.30) !important;
+        overflow: hidden !important;
       }
 
-      #sngamerCampaignCarousel .campaignCard::before,
-      #sngamerCampaignCarousel .campaignCard::after {
-        content: "";
-        position: absolute;
-        inset: -1px;
-        border-radius: inherit;
-        pointer-events: none;
-      }
-
+      /* Remove the previous travelling-light treatment completely. */
       #sngamerCampaignCarousel .campaignCard::before {
-        z-index: 0;
-        padding: 1px;
-        background: conic-gradient(
-          from 0deg,
-          transparent 0deg,
-          transparent 292deg,
-          rgba(70,161,255,.05) 310deg,
-          rgba(70,161,255,.28) 330deg,
-          rgba(221,67,210,.95) 344deg,
-          rgba(91,170,255,1) 352deg,
-          rgba(255,255,255,.92) 357deg,
-          rgba(70,161,255,.25) 360deg
-        );
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        mask-composite: exclude;
-        animation: sngCampaignFrameSweep 5.8s linear infinite;
-        opacity: .92;
+        content: none !important;
+        display: none !important;
+        animation: none !important;
+        filter: none !important;
+        box-shadow: none !important;
       }
 
       #sngamerCampaignCarousel .campaignCard::after {
-        z-index: -1;
-        padding: 2px;
-        background: conic-gradient(
-          from 0deg,
-          transparent 0deg,
-          transparent 300deg,
-          rgba(55,151,255,.08) 326deg,
-          rgba(208,55,205,.24) 344deg,
-          rgba(75,160,255,.38) 354deg,
-          transparent 360deg
-        );
-        filter: blur(7px);
-        opacity: .50;
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        mask-composite: exclude;
-        animation: sngCampaignFrameSweep 5.8s linear infinite;
+        content: "△  ○  ×  □";
+        position: absolute !important;
+        z-index: 4 !important;
+        left: 10px !important;
+        top: 7px !important;
+        color: rgba(104,178,255,.52) !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 9px !important;
+        font-weight: 700 !important;
+        letter-spacing: 3px !important;
+        line-height: 1 !important;
+        text-shadow: 0 0 7px rgba(49,148,255,.30) !important;
+        opacity: .38 !important;
+        pointer-events: none !important;
+        white-space: nowrap !important;
+        animation: sngCampaignControllerSymbols 7s ease-in-out infinite !important;
+        transform: translate3d(0,0,0) !important;
       }
 
       #sngamerCampaignCarousel .campaignCard > * {
@@ -207,20 +184,19 @@
         z-index: 1;
       }
 
-      #sngamerCampaignCarousel .campaignCard.is-pressed::before { opacity: 1; }
-
-      @keyframes sngCampaignFrameSweep {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-
-      @media (max-width:560px) {
-        #sngamerCampaignCarousel .campaignCard::after { filter: blur(5px); opacity: .42; }
+      @keyframes sngCampaignControllerSymbols {
+        0%, 100% { transform: translate3d(0,0,0); opacity: .12; }
+        18% { transform: translate3d(20px,0,0); opacity: .40; }
+        40% { transform: translate3d(58px,0,0); opacity: .24; }
+        60% { transform: translate3d(92px,0,0); opacity: .42; }
+        78% { transform: translate3d(126px,0,0); opacity: .16; }
       }
 
       @media (prefers-reduced-motion: reduce) {
-        #sngamerCampaignCarousel .campaignCard::before,
-        #sngamerCampaignCarousel .campaignCard::after { animation: none !important; }
+        #sngamerCampaignCarousel .campaignCard::after {
+          animation: none !important;
+          opacity: .20 !important;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -229,7 +205,7 @@
   async function loadCampaignName() {
     try {
       installCampaignOverflowFix();
-      installCampaignFrameGlow();
+      installCampaignFrameSymbols();
       const [productsResponse, promosResponse] = await Promise.all([
         fetch("/api/products?campaign_banner=1", { cache: "no-store" }),
         fetch("/api/promo-media", { cache: "no-store" })
@@ -243,7 +219,7 @@
         const timer = setInterval(() => {
           attempts += 1;
           installCampaignOverflowFix();
-          installCampaignFrameGlow();
+          installCampaignFrameSymbols();
           if (applyCampaign(campaign) || attempts >= 30) clearInterval(timer);
         }, 200);
       }
@@ -254,7 +230,7 @@
 
   function start() {
     installCampaignOverflowFix();
-    installCampaignFrameGlow();
+    installCampaignFrameSymbols();
     loadCampaignName();
     window.addEventListener("load", loadCampaignName, { once: true });
   }
