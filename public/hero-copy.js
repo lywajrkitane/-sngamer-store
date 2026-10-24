@@ -13,7 +13,7 @@
   }
   function start(){
     loadOnce('script[data-sngamer-customer-account]','/customer-account.js?v=20261019-1025','sngamerCustomerAccount');
-    loadOnce('script[data-sngamer-announcement-carousel-fix]','/announcement-carousel-fix.js?v=20261023-stableboot3','sngamerAnnouncementCarouselFix');
+    loadOnce('script[data-sngamer-home-hero]','/home-hero.js?v=20261024-dynamic-home-hero1','sngamerHomeHero');
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
   else start();
