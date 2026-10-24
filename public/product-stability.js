@@ -39,14 +39,14 @@
         overflow:visible!important;
       }
 
-      /* Regular price + discount badge: fixed two-column row.
-         The badge can never sit on top of the price text. */
+      /* Regular price + discount badge: content-sized columns.
+         The old price must have enough room to show the complete FCFA text. */
       #products .card.productCardClickable .price.price--promo .priceOldRow{
-        display:grid!important;
-        grid-template-columns:minmax(0,1fr) auto!important;
+        display:flex!important;
+        flex-direction:row!important;
         align-items:center!important;
-        justify-content:initial!important;
-        column-gap:12px!important;
+        justify-content:flex-start!important;
+        gap:10px!important;
         width:100%!important;
         height:18px!important;
         min-height:18px!important;
@@ -54,13 +54,15 @@
         padding:0!important;
         line-height:1!important;
         overflow:visible!important;
+        white-space:nowrap!important;
       }
 
       #products .card.productCardClickable .price.price--promo .priceOld{
-        display:block!important;
-        min-width:0!important;
+        display:inline-block!important;
+        flex:0 0 auto!important;
+        min-width:max-content!important;
         max-width:none!important;
-        width:100%!important;
+        width:max-content!important;
         margin:0!important;
         padding:0!important;
         color:#7f8da0!important;
@@ -71,7 +73,7 @@
         text-decoration:line-through!important;
         text-decoration-thickness:1.2px!important;
         opacity:.9!important;
-        overflow:hidden!important;
+        overflow:visible!important;
         text-overflow:clip!important;
       }
 
@@ -80,6 +82,7 @@
         position:static!important;
         inset:auto!important;
         display:inline-flex!important;
+        flex:0 0 auto!important;
         align-items:center!important;
         justify-content:center!important;
         width:max-content!important;
@@ -155,15 +158,27 @@
           gap:5px!important;
         }
         #products .card.productCardClickable .price.price--promo .priceOldRow{
-          grid-template-columns:minmax(0,1fr) auto!important;
-          column-gap:12px!important;
+          display:flex!important;
+          flex-direction:row!important;
+          align-items:center!important;
+          justify-content:flex-start!important;
+          gap:8px!important;
+          width:100%!important;
           height:17px!important;
           min-height:17px!important;
+          overflow:visible!important;
+          white-space:nowrap!important;
         }
         #products .card.productCardClickable .price.price--promo .priceOld{
+          flex:0 0 auto!important;
+          width:max-content!important;
+          min-width:max-content!important;
+          max-width:none!important;
           font-size:8px!important;
+          overflow:visible!important;
         }
         #products .card.productCardClickable .price.price--promo .priceOldRow .discountBadge{
+          flex:0 0 auto!important;
           min-width:40px!important;
           max-width:42px!important;
           height:17px!important;
