@@ -1838,10 +1838,12 @@ if (document.readyState === "loading") {
 
         const customer = o.customer || {};
 
+        const safeOrderText = value => String(value ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
         const items = Array.isArray(o.items)
-          ? o.items.map(item =>
-              `${item.name} × ${item.quantity}`
-            ).join("<br>")
+          ? o.items.map(item => {
+              const colorName = typeof item.color === "string" ? item.color : item.color?.name;
+              return `${safeOrderText(item.name)} × ${safeOrderText(item.quantity)}${colorName ? `<br><small style="color:#8ebce8">🎨 Couleur : ${safeOrderText(colorName)}</small>` : ""}`;
+            }).join("<br>")
           : "";
 
         return `
@@ -1966,7 +1968,7 @@ if (document.readyState === "loading") {
     const items = Array.isArray(order.items) && order.items.length
       ? order.items.map(item => `
           <div class="order-detail-item">
-            <span>${safe(item.name)} × ${safe(item.quantity)}</span>
+            <span>${safe(item.name)} × ${safe(item.quantity)}${(typeof item.color === "string" ? item.color : item.color?.name) ? `<small style="display:block;margin-top:4px;color:#8ebce8">🎨 Couleur : ${safe(typeof item.color === "string" ? item.color : item.color?.name)}</small>` : ""}</span>
             <b>${money(Number(item.price || 0) * Number(item.quantity || 0))}</b>
           </div>
         `).join("")
@@ -2165,6 +2167,9 @@ document.getElementById("editProductPlatform").value =
 
     if (typeof window.sngProductCharacteristicsSetEditor === "function") {
       window.sngProductCharacteristicsSetEditor("edit", product.characteristics || []);
+    }
+    if (typeof window.sngProductColorsSetEditor === "function") {
+      window.sngProductColorsSetEditor("edit", product.colors || []);
     }
 
     document.getElementById("editProductCondition").value =
@@ -4012,5 +4017,6 @@ async function loadAll() {
 </script>
 <script src="/admin-product-edit-polish.js?v=20261022-univers1"></script>
 <script src="/product-characteristics-admin.js?v=20261024-characteristics1"></script>
+<script src="/product-colors-admin.js?v=20261024-colors1"></script>
 </body>
 </html>
