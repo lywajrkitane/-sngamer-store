@@ -35,7 +35,7 @@
       #${HOST_ID} .campaignCard.is-pressed{border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.42),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-1px)}
       #${HOST_ID} .campaignCard:focus-visible{outline:none;border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.38)}
       #${HOST_ID} .campaignMedia{width:78px;height:78px;flex:0 0 78px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#9333ea);border:1px solid rgba(255,255,255,.12)}
-      #${HOST_ID} .campaignMedia img{width:100%;height:100%;object-fit:cover;display:block}
+      #${HOST_ID} .campaignMedia img{width:100%;height:100%;object-fit:contain;object-position:center;box-sizing:border-box;padding:4px;display:block}
       #${HOST_ID} .campaignEmoji{font-size:31px}
       #${HOST_ID} .campaignCopy{min-width:0;flex:1}
       #${HOST_ID} .campaignEyebrow{margin:0 0 5px;color:#78aefc;font-size:11px;line-height:1.25;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}
