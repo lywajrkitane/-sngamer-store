@@ -165,7 +165,11 @@
             const first = items[0]?.name || "Votre achat";
             const publicName = items.length > 1 ? first + " + " + (items.length - 1) : first;
             const total = order.total_amount ?? order.total ?? 0;
-            return `<article class="sgaOrder" data-order-id="${Number(order.id) || 0}"><div class="sgaOrderTop"><strong>Commande · ${esc(publicName)}</strong><span>${esc(order.status || "Nouvelle")}</span></div><div class="sgaOrderMeta">${total ? money(total) : "Montant non disponible"}</div></article>`;
+            const colorDetails = items.filter(item => item && (typeof item.color === "string" ? item.color : item.color?.name)).map(item => {
+              const colorName = typeof item.color === "string" ? item.color : item.color?.name;
+              return `${item.name || "Produit"} : ${colorName}`;
+            }).join(" · ");
+            return `<article class="sgaOrder" data-order-id="${Number(order.id) || 0}"><div class="sgaOrderTop"><strong>Commande · ${esc(publicName)}</strong><span>${esc(order.status || "Nouvelle")}</span></div><div class="sgaOrderMeta">${total ? money(total) : "Montant non disponible"}${colorDetails ? `<div class="sngOrderColorSummary" style="margin-top:5px;color:#92b7dd;font-size:12px">🎨 ${esc(colorDetails)}</div>` : ""}</div></article>`;
           }).join("") : '<p class="sngProfileEmpty">Aucune commande pour le moment.</p>'}</div>
         </div>`;
       if (typeof window.sngRefreshFavorites === "function") window.sngRefreshFavorites();
