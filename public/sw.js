@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261024-stock-root-cause2';
+const SNGAMER_SW_VERSION = '20261024-stock-root-cause3';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -15,6 +15,38 @@ self.addEventListener('activate', event => {
         if (tag.startsWith('sngamer-order-status-')) notification.close();
       });
     } catch (_) {}
+  })());
+});
+
+/* SNGAMER — final visual guard for "Sur commande".
+   Some legacy stock-status rules have higher CSS specificity than the
+   on-order badge. Keep the existing layout and only force the pink frame
+   for products explicitly marked on_order. */
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+  if (!url.pathname.endsWith('/stock-mode.js')) return;
+
+  event.respondWith((async () => {
+    const response = await fetch(request);
+    if (!response.ok) return response;
+
+    try {
+      const source = await response.text();
+      const patch = `\n;(function(){\n  const PINK='#ff4fa3';\n  function patchOnOrder(){\n    const styleId='sngOnOrderFinalVisualGuard';\n    let style=document.getElementById(styleId);\n    if(!style){\n      style=document.createElement('style');\n      style.id=styleId;\n      document.head.appendChild(style);\n    }\n    style.textContent=\`\n      #products .card.productCardClickable .info > .stock.onOrderStock.sngStockStatus,\n      #products .card.productCardClickable .info > .stock.sngStockStatus.onOrderStock.is-stock,\n      #products .card.productCardClickable .info > .stock.onOrderStock {\n        color:\${PINK} !important;\n        border-color:rgba(255,79,163,.34) !important;\n        background:rgba(255,79,163,.09) !important;\n        box-shadow:none !important;\n      }\n      #products .card.productCardClickable .info > .stock.onOrderStock::before,\n      #products .card.productCardClickable .info > .stock.onOrderStock::after {\n        border-color:transparent !important;\n        background:transparent !important;\n        box-shadow:none !important;\n      }\n      #products .card.productCardClickable .info > .stock.onOrderStock > i,\n      #products .card.productCardClickable .info > .stock.onOrderStock .sngOnOrderDot {\n        background:\${PINK} !important;\n        box-shadow:0 0 0 3px rgba(255,79,163,.08),0 0 10px \${PINK} !important;\n      }\n    \`;\n  }\n  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',patchOnOrder,{once:true});\n  else patchOnOrder();\n  new MutationObserver(patchOnOrder).observe(document.documentElement,{childList:true,subtree:true});\n})();\n`;
+      const headers = new Headers(response.headers);
+      headers.set('Cache-Control', 'no-store');
+      headers.set('X-SNGAMER-Stock-Visual-Fix', 'on-order-pink');
+      return new Response(source + patch, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+      });
+    } catch (_) {
+      return response;
+    }
   })());
 });
 
