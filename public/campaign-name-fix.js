@@ -81,19 +81,57 @@
   }
 
   function installCampaignOverflowFix() {
-    const STYLE_ID = "sngamer-campaign-overflow-fix-v1";
+    const STYLE_ID = "sngamer-campaign-overflow-fix-v2-square";
     if (document.getElementById(STYLE_ID)) return;
 
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
+      /* Premium promotion media: strict 1:1 frame, with the whole product visible. */
       #sngamerCampaignCarousel .campaignCard { overflow: hidden !important; min-width: 0 !important; }
       #sngamerCampaignCarousel .campaignCopy { min-width: 0 !important; width: 0 !important; flex: 1 1 0% !important; overflow: hidden !important; }
       #sngamerCampaignCarousel .campaignTitle,
       #sngamerCampaignCarousel .campaignProduct { display: block !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; overflow: hidden !important; white-space: nowrap !important; text-overflow: ellipsis !important; }
       #sngamerCampaignCarousel .campaignPrice { flex: 0 0 auto !important; min-width: max-content !important; max-width: none !important; white-space: nowrap !important; }
-      #sngamerCampaignCarousel .campaignMedia { flex: 0 0 58px !important; }
-      @media (max-width:560px) { #sngamerCampaignCarousel .campaignMedia { flex-basis: 48px !important; } }
+
+      /* The product image area is always square (1:1), never stretched. */
+      #sngamerCampaignCarousel .campaignMedia {
+        width: 88px !important;
+        height: 88px !important;
+        aspect-ratio: 1 / 1 !important;
+        flex: 0 0 88px !important;
+        padding: 5px !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        display: grid !important;
+        place-items: center !important;
+        background: linear-gradient(145deg, #101b2c, #080d16) !important;
+        border: 1px solid rgba(87,174,255,.30) !important;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.035), 0 8px 20px rgba(0,0,0,.20) !important;
+      }
+
+      #sngamerCampaignCarousel .campaignMedia img {
+        width: 100% !important;
+        height: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+        object-fit: contain !important;
+        object-position: center !important;
+        display: block !important;
+        border-radius: 11px !important;
+      }
+
+      @media (max-width:560px) {
+        #sngamerCampaignCarousel .campaignMedia {
+          width: 78px !important;
+          height: 78px !important;
+          flex-basis: 78px !important;
+          padding: 4px !important;
+          border-radius: 14px !important;
+        }
+        #sngamerCampaignCarousel .campaignMedia img {
+          border-radius: 10px !important;
+        }
+      }
     `;
     document.head.appendChild(style);
   }
