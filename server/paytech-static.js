@@ -126,55 +126,13 @@ express.static = function paytechAwareStatic(root, options) {
     try {
       let html = fs.readFileSync(indexPath, "utf8");
 
-      /*
-       * Hide the old DOM while the current product data is fetched. This is
-       * the important part for the visual "old version for a moment" flash:
-       * the browser may paint the HTML shell before app.js finishes loading
-       * the current /api/products response. We keep the page hidden until the
-       * current data is available, then reveal it in one frame.
-       */
-      /* Hide only the homepage fragments that are rewritten by client scripts.
-         Never hide the whole storefront or hold it behind readiness flags indefinitely. */
-      const visualGate = `<style id="sngamer-refresh-visual-style">
-html.sngamer-refresh-visual-boot .sngPromoAnnouncementButton,
-html.sngamer-refresh-visual-boot .heroAnnouncement,
-html.sngamer-refresh-visual-boot #promoArea .promoCarousel,
-html.sngamer-refresh-visual-boot #promoArea .promoDots,
-html.sngamer-refresh-visual-boot #promoArea .defaultHeroContent,
-html.sngamer-refresh-visual-boot #products,
-html.sngamer-refresh-visual-boot #cats { visibility:hidden!important; }
-html.sngamer-refresh-visual-boot .sngPromoAnnouncement { min-height:52px!important; }
-</style><script id="sngamer-refresh-visual-script">(function(){
-  try{
-    var root=document.documentElement;
-    root.classList.add('sngamer-refresh-visual-boot');
-    var started=Date.now(),released=false;
-    function reveal(){
-      if(released)return;
-      released=true;
-      requestAnimationFrame(function(){root.classList.remove('sngamer-refresh-visual-boot');});
-    }
-    function ready(){
-      return window.__sngamerStoreReady===true
-        && window.__sngamerCampaignBannerReady===true
-        && window.__sngamerPromoHeroReady===true
-        && window.__sngamerAnnouncementReady===true;
-    }
-    function check(){
-      if(released)return;
-      if(ready() || Date.now()-started>=2200){reveal();return;}
-      setTimeout(check,40);
-    }
-    check();
-    window.addEventListener('load',function(){setTimeout(check,80);},{once:true});
-    setTimeout(reveal,2600);
-  }catch(_){
-    document.documentElement.classList.remove('sngamer-refresh-visual-boot');
-  }
-})();</script>`;
-      if (!html.includes("sngamer-refresh-visual-style")) {
-        html = html.replace(/<head>/i, `<head>${visualGate}`);
-      }
+      /* ROOT FIX: the old hero was hard-coded in index.html. That meant the browser
+         could paint a previous hero before home-hero.js replaced it. Remove only that
+         legacy hero paragraph on the server, while deliberately preserving the audio
+         announcement button immediately before it. The dynamic hero then owns the
+         complete presentation from the first meaningful paint. */
+      html = html.replace(/<p\s+class="heroAnnouncement"[^>]*>[\s\S]*?<\/p>/i,
+        '<p class="heroAnnouncement sngHomeHeroMount" aria-hidden="true"></p>');
 
       const scriptTag = '<script src="/paytech-checkout.js?v=20261021-stockcancel1"></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${scriptTag}</body>`);
