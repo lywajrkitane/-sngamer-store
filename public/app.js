@@ -1,4 +1,35 @@
 let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous",selectedCoinPlatform=null;
+let homeMixedProducts=[];
+function shuffleProductGroup(items){
+  const shuffled=items.slice();
+  for(let i=shuffled.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];
+  }
+  return shuffled;
+}
+function mixHomeProductsByCategory(items){
+  const groups=new Map();
+  for(const product of items){
+    const category=String(storeCategory(product)||product.category||"Autres");
+    if(!groups.has(category)) groups.set(category,[]);
+    groups.get(category).push(product);
+  }
+  for(const [category,group] of groups) groups.set(category,shuffleProductGroup(group));
+
+  const mixed=[];
+  let previousCategory=null;
+  while(true){
+    const available=[...groups.keys()].filter(category=>groups.get(category).length>0);
+    if(!available.length) break;
+    let choices=available.filter(category=>category!==previousCategory);
+    if(!choices.length) choices=available;
+    const category=choices[Math.floor(Math.random()*choices.length)];
+    mixed.push(groups.get(category).shift());
+    previousCategory=category;
+  }
+  return mixed;
+}
 window.activeStoreSection=window.activeStoreSection||"home";
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
 async function load(){
@@ -8,6 +39,7 @@ async function load(){
     const data = await response.json();
     if (!Array.isArray(data)) throw new Error("products_response_not_array");
     products = data;
+    homeMixedProducts = mixHomeProductsByCategory(products);
     window.storeProducts = products;
     cats();
     render();
@@ -55,7 +87,8 @@ function render(){
   if(!productGrid)return;
   if(window.activeStoreSection==="profile"){productGrid.replaceChildren();return;}
   const q=(document.querySelector("#q")?.value||"").toLowerCase();
-  const list=products.filter(p=>matchesStoreSection(p)&&(window.activeStoreSection!=="home"||filter==="Tous"||storeCategory(p)===filter)&&(p.name||"").toLowerCase().includes(q));
+  const sourceList=(window.activeStoreSection==="home"&&filter==="Tous")?homeMixedProducts:products;
+  const list=sourceList.filter(p=>matchesStoreSection(p)&&(window.activeStoreSection!=="home"||filter==="Tous"||storeCategory(p)===filter)&&(p.name||"").toLowerCase().includes(q));
   productGrid.innerHTML=list.map(p=>{
     const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
     const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
