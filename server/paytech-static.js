@@ -84,7 +84,7 @@ express.static = function paytechAwareStatic(root, options) {
   }
 
   function rewriteAssetReferences(source) {
-    return String(source).replace(/(["'\`])([^"'\\\`\\s<>]+)\\1/g, (whole, quote, value) => {
+    return String(source).replace(/(["'])([^"'\s<>]+)\1/g, (whole, quote, value) => {
       if (!mutableAssetPattern.test(value.split(/[?#]/, 1)[0])) return whole;
       const updated = cacheBustAssetUrl(value);
       return quote + updated + quote;
