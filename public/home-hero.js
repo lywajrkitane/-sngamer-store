@@ -1,19 +1,19 @@
 (function () {
   "use strict";
-  if (window.__sngamerHomeHeroV3) return;
-  window.__sngamerHomeHeroV3 = true;
+  if (window.__sngamerHomeHeroV4) return;
+  window.__sngamerHomeHeroV4 = true;
 
   const DEFAULTS = [
-    { slot: 1, title: "BONJOUR ET BIENVENUE SUR SNGAMER STORE", body: "Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui." },
+    { slot: 1, title: "MERCI DE NOUS RENDRE VISITE !", body: "Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming." },
     { slot: 2, title: "COMMANDE EN LIGNE", body: "Choisis tes produits, ajoute-les au panier et passe ta commande facilement." },
     { slot: 3, title: "LIVRAISON AU SÉNÉGAL", body: "Nous préparons ta commande avec soin et facilitons sa livraison." }
   ];
   const INTERVAL = 6500;
 
   function addStyles() {
-    if (document.getElementById("sngHomeHeroStylesV3")) return;
+    if (document.getElementById("sngHomeHeroStylesV4")) return;
     const style = document.createElement("style");
-    style.id = "sngHomeHeroStylesV3";
+    style.id = "sngHomeHeroStylesV4";
     style.textContent = [
       ".sngHomeHeroWrap{width:100%;margin:14px 0 22px;display:block;position:relative;z-index:2;box-sizing:border-box}",
       ".sngHomeHeroCard{position:relative;width:100%;height:clamp(300px,44vw,330px);overflow:hidden;border-radius:24px;border:1px solid rgba(94,164,255,.42);background:radial-gradient(circle at 18% 12%,rgba(34,128,255,.32),transparent 38%),radial-gradient(circle at 88% 84%,rgba(214,42,168,.24),transparent 38%),linear-gradient(145deg,#0d1c31,#070b15 74%);box-shadow:0 20px 44px rgba(0,0,0,.34),0 0 28px rgba(34,128,255,.12),inset 0 1px 0 rgba(255,255,255,.08);outline:none;touch-action:pan-y}",
@@ -41,11 +41,8 @@
   }
 
   async function fetchData(url) {
-    try {
-      const response = await fetch(url, { cache: "no-store" });
-      if (!response.ok) return null;
-      return await response.json();
-    } catch (_) { return null; }
+    try { const response = await fetch(url, { cache: "no-store" }); if (!response.ok) return null; return await response.json(); }
+    catch (_) { return null; }
   }
 
   async function loadSlides() {
@@ -61,15 +58,8 @@
   }
 
   function makeSlide(slide,index){
-    const panel=document.createElement("article");
-    panel.className="sngHomeHeroSlide"+(index===0?" is-active":"");
-    panel.setAttribute("aria-hidden",index===0?"false":"true");
-    panel.setAttribute("aria-label","Slide "+(index+1));
-    if(slide.url && /^(https?:)\/\//.test(slide.url)){
-      const image=document.createElement("img");
-      image.className="sngHomeHeroImage"; image.src=slide.url; image.alt=""; image.decoding="async"; image.draggable=false;
-      panel.appendChild(image);
-    }
+    const panel=document.createElement("article"); panel.className="sngHomeHeroSlide"+(index===0?" is-active":""); panel.setAttribute("aria-hidden",index===0?"false":"true"); panel.setAttribute("aria-label","Slide "+(index+1));
+    if(slide.url && /^(https?:)\/\//.test(slide.url)){ const image=document.createElement("img"); image.className="sngHomeHeroImage"; image.src=slide.url; image.alt=""; image.decoding="async"; image.draggable=false; panel.appendChild(image); }
     const shade=document.createElement("div"); shade.className="sngHomeHeroShade"; shade.setAttribute("aria-hidden","true");
     const copy=document.createElement("div"); copy.className="sngHomeHeroCopy";
     const eyebrow=document.createElement("span"); eyebrow.className="sngHomeHeroEyebrow"; eyebrow.textContent=slide.slot===1?"BIENVENUE CHEZ SNGAMER":slide.slot===2?"COMMANDE EN LIGNE":"LIVRAISON AU SÉNÉGAL";
@@ -80,47 +70,26 @@
 
   function mount(placeholder){
     if(!placeholder || placeholder.dataset.sngHomeHeroReplaced==="1") return;
-    placeholder.dataset.sngHomeHeroReplaced="1"; addStyles();
-    const hostColumn=placeholder.parentElement;
+    placeholder.dataset.sngHomeHeroReplaced="1"; addStyles(); const hostColumn=placeholder.parentElement;
     const wrap=document.createElement("div"); wrap.className="sngHomeHeroWrap"; wrap.setAttribute("role","region"); wrap.setAttribute("aria-label","Héros de présentation SNGAMER STORE");
     const card=document.createElement("div"); card.className="sngHomeHeroCard"; card.tabIndex=0; card.setAttribute("role","group"); card.setAttribute("aria-roledescription","carrousel"); card.setAttribute("aria-label","Présentation de la boutique");
     const dots=document.createElement("div"); dots.className="sngHomeHeroDots"; dots.setAttribute("aria-label","Choisir une diapositive");
     card.appendChild(dots); wrap.appendChild(card); placeholder.replaceWith(wrap);
     if(hostColumn){hostColumn.querySelectorAll(":scope > p.heroAnnouncement, :scope > p.heroSlogan").forEach(function(oldCard){if(oldCard!==placeholder)oldCard.remove();});}
-
     loadSlides().then(function(slides){
-      card.replaceChildren();
-      const panels=slides.map(makeSlide);
-      const dotButtons=slides.map(function(slide,index){
-        const button=document.createElement("button"); button.type="button"; button.className=index===0?"is-active":""; button.setAttribute("aria-label","Afficher le slide "+(index+1)+" : "+slide.title); button.title=slide.title;
-        button.addEventListener("click",function(){show(index,true);}); return button;
-      });
-      panels.forEach(function(panel){card.appendChild(panel);});
-      dots.replaceChildren(); dots.style.position="absolute"; card.appendChild(dots); dotButtons.forEach(function(button){dots.appendChild(button);});
+      card.replaceChildren(); const panels=slides.map(makeSlide);
+      const dotButtons=slides.map(function(slide,index){ const button=document.createElement("button"); button.type="button"; button.className=index===0?"is-active":""; button.setAttribute("aria-label","Afficher le slide "+(index+1)+" : "+slide.title); button.title=slide.title; button.addEventListener("click",function(){show(index,true);}); return button; });
+      panels.forEach(function(panel){card.appendChild(panel);}); dots.replaceChildren(); dots.style.position="absolute"; card.appendChild(dots); dotButtons.forEach(function(button){dots.appendChild(button);});
       let activeIndex=0,timer=null;
-      function show(nextIndex,resetTimer){
-        activeIndex=(nextIndex+panels.length)%panels.length;
-        panels.forEach(function(panel,index){panel.classList.toggle("is-active",index===activeIndex);panel.setAttribute("aria-hidden",index===activeIndex?"false":"true");});
-        dotButtons.forEach(function(button,index){button.classList.toggle("is-active",index===activeIndex);if(index===activeIndex)button.setAttribute("aria-current","true");else button.removeAttribute("aria-current");});
-        if(resetTimer)startTimer();
-      }
+      function show(nextIndex,resetTimer){ activeIndex=(nextIndex+panels.length)%panels.length; panels.forEach(function(panel,index){panel.classList.toggle("is-active",index===activeIndex);panel.setAttribute("aria-hidden",index===activeIndex?"false":"true");}); dotButtons.forEach(function(button,index){button.classList.toggle("is-active",index===activeIndex);if(index===activeIndex)button.setAttribute("aria-current","true");else button.removeAttribute("aria-current");}); if(resetTimer)startTimer(); }
       function pauseTimer(){if(timer)window.clearInterval(timer);timer=null;}
       function startTimer(){pauseTimer();timer=window.setInterval(function(){show(activeIndex+1,false);},INTERVAL);}
       card.addEventListener("mouseenter",pauseTimer); card.addEventListener("mouseleave",startTimer); card.addEventListener("focusin",pauseTimer); card.addEventListener("focusout",startTimer);
-      let touchStartX=0,touchStartY=0;
-      card.addEventListener("touchstart",function(e){const t=e.touches&&e.touches[0];if(t){touchStartX=t.clientX;touchStartY=t.clientY;}},{passive:true});
-      card.addEventListener("touchend",function(e){const t=e.changedTouches&&e.changedTouches[0];if(!t)return;const dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))show(activeIndex+(dx<0?1:-1),true);},{passive:true});
-      card.addEventListener("keydown",function(e){if(e.key==="ArrowRight"){e.preventDefault();show(activeIndex+1,true);}if(e.key==="ArrowLeft"){e.preventDefault();show(activeIndex-1,true);}});
-      startTimer();
+      let touchStartX=0,touchStartY=0; card.addEventListener("touchstart",function(e){const t=e.touches&&e.touches[0];if(t){touchStartX=t.clientX;touchStartY=t.clientY;}},{passive:true}); card.addEventListener("touchend",function(e){const t=e.changedTouches&&e.changedTouches[0];if(!t)return;const dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))show(activeIndex+(dx<0?1:-1),true);},{passive:true});
+      card.addEventListener("keydown",function(e){if(e.key==="ArrowRight"){e.preventDefault();show(activeIndex+1,true);}if(e.key==="ArrowLeft"){e.preventDefault();show(activeIndex-1,true);}}); startTimer();
     });
   }
 
-  function boot(){
-    let attempts=0;
-    const timer=window.setInterval(function(){
-      const placeholder=document.querySelector(".hero .heroIn > div:first-child > p.heroAnnouncement:not(.sngHomeHeroBody)")||document.querySelector(".hero .heroIn > div:first-child > p.heroSlogan");
-      if(placeholder){window.clearInterval(timer);mount(placeholder);}else if(++attempts>80){window.clearInterval(timer);}
-    },200);
-  }
+  function boot(){ let attempts=0; const timer=window.setInterval(function(){ const placeholder=document.querySelector(".hero .heroIn > div:first-child > p.heroAnnouncement:not(.sngHomeHeroBody)")||document.querySelector(".hero .heroIn > div:first-child > p.heroSlogan"); if(placeholder){window.clearInterval(timer);mount(placeholder);}else if(++attempts>80){window.clearInterval(timer);}},200); }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
