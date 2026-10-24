@@ -3,7 +3,7 @@
   const fetchNative = window.fetch.bind(window);
   const CARD_ID = 'sngPushCard';
   let installing = false;
-  const SW_VERSION = '20261023-refresh2';
+  const SW_VERSION = '20261024-stock-state-rootfix2';
 
   function base64UrlToUint8Array(base64String){
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
