@@ -1,7 +1,7 @@
 (function () {
   "use strict";
   if (window.__sngamerHomeHeroV3) return;
-  window.__sngamerHomeHeroV2 = true;
+  window.__sngamerHomeHeroV3 = true;
 
   const DEFAULTS = [
     { slot: 1, title: "BONJOUR ET BIENVENUE SUR SNGAMER STORE", body: "Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui." },
@@ -13,7 +13,7 @@
   function addStyles() {
     if (document.getElementById("sngHomeHeroStylesV3")) return;
     const style = document.createElement("style");
-    style.id = "sngHomeHeroStylesV2";
+    style.id = "sngHomeHeroStylesV3";
     style.textContent = [
       ".sngHomeHeroWrap{width:100%;margin:14px 0 22px;display:block;position:relative;z-index:2;box-sizing:border-box}",
       ".sngHomeHeroCard{position:relative;width:100%;height:clamp(300px,44vw,330px);overflow:hidden;border-radius:24px;border:1px solid rgba(94,164,255,.42);background:radial-gradient(circle at 18% 12%,rgba(34,128,255,.32),transparent 38%),radial-gradient(circle at 88% 84%,rgba(214,42,168,.24),transparent 38%),linear-gradient(145deg,#0d1c31,#070b15 74%);box-shadow:0 20px 44px rgba(0,0,0,.34),0 0 28px rgba(34,128,255,.12),inset 0 1px 0 rgba(255,255,255,.08);outline:none;touch-action:pan-y}",
