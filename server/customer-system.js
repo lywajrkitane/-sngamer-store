@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
 const express = require("express");
+const { resolveSelectedProductColor } = require("./product-colors");
 
 const customerPool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -316,15 +317,16 @@ function buildRouter() {
         const productId = Number(item.id);
         const quantity = Number(item.qty ?? item.quantity);
         if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity <= 0) throw new Error("Produit ou quantité invalide");
-        const productResult = await client.query(`SELECT id,name,price,promo_price,promo_active,stock,emoji FROM products WHERE id=$1 FOR UPDATE`, [productId]);
+        const productResult = await client.query(`SELECT id,name,price,promo_price,promo_active,stock,emoji,colors FROM products WHERE id=$1 FOR UPDATE`, [productId]);
         if (!productResult.rows.length) throw new Error("Produit introuvable");
         const product = productResult.rows[0];
         if (Number(product.stock) < quantity) throw new Error(`Stock insuffisant pour ${product.name}`);
         const promo = Boolean(product.promo_active) && Number(product.promo_price) > 0 && Number(product.promo_price) < Number(product.price);
         const unitPrice = promo ? Number(product.promo_price) : Number(product.price);
         const subtotal = unitPrice * quantity;
+        const selectedColor = resolveSelectedProductColor(item, product.colors, product.name);
         total += subtotal;
-        finalItems.push({ id: product.id, name: product.name, price: unitPrice, quantity, subtotal, emoji: product.emoji });
+        finalItems.push({ id: product.id, name: product.name, price: unitPrice, quantity, subtotal, emoji: product.emoji, ...(selectedColor ? { color: selectedColor } : {}) });
       }
       // The customer-order route is an independent order path from the PayTech
       // route. Reserve its stock atomically before exposing the order as created.
