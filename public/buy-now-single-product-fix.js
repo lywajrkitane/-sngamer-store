@@ -84,6 +84,14 @@
         #products .card.productCardClickable .info > .stock.sngStockStatus > i,
         #products .card.productCardClickable .info > .stock.sngStockStatus > span{animation:none!important}
       }
+
+      /* SNGAMER STORE — stock 1..5 uses one premium dark-yellow treatment. */
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-last{
+        color:#C99700!important;
+        border-color:rgba(201,151,0,.42)!important;
+        background:rgba(201,151,0,.10)!important;
+      }
     `;
     document.head.appendChild(style);
   }
