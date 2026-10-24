@@ -3,6 +3,7 @@ const path = require("path");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
+const { normalizeProductColors, resolveSelectedProductColor } = require("./product-colors");
 const { v2: cloudinary } = require("cloudinary");
 const multer = require("multer");
 cloudinary.config({
@@ -124,7 +125,8 @@ price INTEGER NOT NULL CHECK (price >= 0),
     ADD COLUMN IF NOT EXISTS product_condition TEXT NOT NULL DEFAULT 'Neuf',
     ADD COLUMN IF NOT EXISTS warranty TEXT NOT NULL DEFAULT 'Aucune garantie',
     ADD COLUMN IF NOT EXISTS warranty_configured BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN IF NOT EXISTS characteristics JSONB NOT NULL DEFAULT '[]'::jsonb
+    ADD COLUMN IF NOT EXISTS characteristics JSONB NOT NULL DEFAULT '[]'::jsonb,
+    ADD COLUMN IF NOT EXISTS colors JSONB NOT NULL DEFAULT '[]'::jsonb
   `);
   await db(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -334,6 +336,7 @@ app.get("/api/products", async (req, res) => {
   p.emoji,
   p.description,
   p.characteristics,
+  p.colors,
   p.image1_url,
   p.image2_url,
   p.image3_url,
@@ -401,7 +404,7 @@ app.post("/api/orders", async (req, res) => {
 
       const productResult = await client.query(
         `
-        SELECT id, name, price, promo_price, promo_active, stock, emoji
+        SELECT id, name, price, promo_price, promo_active, stock, emoji, colors
 FROM products
 WHERE id = $1
 FOR UPDATE
@@ -435,13 +438,16 @@ const subtotal = unitPrice * quantity;
 
       total += subtotal;
 
+      const selectedColor = resolveSelectedProductColor(item, product.colors, product.name);
+
       finalItems.push({
         id: product.id,
         name: product.name,
         price: unitPrice,
         quantity,
         subtotal,
-        emoji: product.emoji
+        emoji: product.emoji,
+        ...(selectedColor ? { color: selectedColor } : {})
       });
 
             // Le stock est uniquement vérifié ici.
@@ -706,7 +712,8 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   product_condition,
   warranty,
   warranty_configured,
-  characteristics
+  characteristics,
+  colors
 } = req.body;
 
   const conditionValue = String(product_condition || "Neuf").trim();
@@ -718,6 +725,10 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   const characteristicsValue = normalizeProductCharacteristics(characteristics);
   if (!Array.isArray(characteristicsValue)) {
     return res.status(400).json({ error: "Vérifie les caractéristiques : chaque ligne doit contenir un nom et une valeur (30 lignes maximum)." });
+  }
+  const colorsValue = normalizeProductColors(colors);
+  if (!Array.isArray(colorsValue)) {
+    return res.status(400).json({ error: "Vérifie les couleurs : 20 couleurs maximum, avec un nom et une couleur valide." });
   }
 
   const requestedCategory = String(category || "Accessoires").trim();
@@ -752,7 +763,8 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   product_condition: conditionValue,
   warranty: warrantyValue,
   warranty_configured: warrantyConfiguredValue,
-  characteristics: characteristicsValue
+  characteristics: characteristicsValue,
+  colors: colorsValue
   };
 
   if (
@@ -819,9 +831,10 @@ if (
       product_condition,
       warranty,
       warranty_configured,
-      characteristics
+      characteristics,
+      colors
     )
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
   RETURNING *
   `,
   [
@@ -838,7 +851,8 @@ if (
     p.product_condition,
     p.warranty,
     p.warranty_configured,
-    JSON.stringify(p.characteristics)
+    JSON.stringify(p.characteristics),
+    JSON.stringify(p.colors)
   ]
     );
 
@@ -1115,7 +1129,8 @@ app.patch(
   product_condition,
   warranty,
   warranty_configured,
-  characteristics
+  characteristics,
+  colors
 } = req.body;
 
       const requestedCategory = category === undefined ? undefined : String(category || "").trim();
@@ -1135,12 +1150,17 @@ app.patch(
         : warrantyProvided ? Boolean(String(warranty ?? "").trim()) : null;
       const characteristicsProvided = characteristics !== undefined;
       const characteristicsValue = characteristicsProvided ? normalizeProductCharacteristics(characteristics) : null;
+      const colorsProvided = colors !== undefined;
+      const colorsValue = colorsProvided ? normalizeProductColors(colors) : null;
 
       if (conditionProvided && !["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(conditionValue)) {
         return res.status(400).json({ error: "État du produit invalide." });
       }
       if (characteristicsProvided && !Array.isArray(characteristicsValue)) {
         return res.status(400).json({ error: "Vérifie les caractéristiques : chaque ligne doit contenir un nom et une valeur (30 lignes maximum)." });
+      }
+      if (colorsProvided && !Array.isArray(colorsValue)) {
+        return res.status(400).json({ error: "Vérifie les couleurs : 20 couleurs maximum, avec un nom et une couleur valide." });
       }
       if (warrantyProvided && String(warranty ?? "").trim().length > 120) {
         return res.status(400).json({ error: "La garantie ne peut pas dépasser 120 caractères." });
@@ -1289,6 +1309,7 @@ app.patch(
           warranty = CASE WHEN $18 = true THEN $19 ELSE warranty END,
           warranty_configured = CASE WHEN $20 = true THEN $21 ELSE warranty_configured END,
           characteristics = CASE WHEN $22 = true THEN $23::jsonb ELSE characteristics END,
+          colors = CASE WHEN $24 = true THEN $25::jsonb ELSE colors END,
 
           promo_price =
             CASE
@@ -1334,7 +1355,9 @@ app.patch(
           warrantyConfiguredProvided,
           warrantyConfiguredValue,
           characteristicsProvided,
-          characteristicsProvided ? JSON.stringify(characteristicsValue) : null
+          characteristicsProvided ? JSON.stringify(characteristicsValue) : null,
+          colorsProvided,
+          colorsProvided ? JSON.stringify(colorsValue) : null
         ]
       );
 
