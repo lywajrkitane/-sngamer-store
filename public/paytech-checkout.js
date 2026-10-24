@@ -134,7 +134,8 @@
           idempotency_key: paymentAttemptKey(),
           items: basket.map((item) => ({
             id: Number(item.id),
-            qty: Number(item.qty ?? item.quantity)
+            qty: Number(item.qty ?? item.quantity),
+            color: item.color || null
           }))
         })
       });
