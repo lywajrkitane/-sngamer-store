@@ -302,8 +302,143 @@
     document.head.appendChild(style);
   }
 
+  function installStockDisplayFix() {
+    if (document.getElementById("sngamer-stock-display-fix")) return;
+    const style = document.createElement("style");
+    style.id = "sngamer-stock-display-fix";
+    style.textContent = `
+      /* SNGAMER STORE — customer-facing stock privacy/status badge.
+         The badge stays in the EXISTING .stock position. Only its visual content changes. */
+      #products .card.productCardClickable .info > .stock.sngStockStatus{
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:flex-start!important;
+        gap:6px!important;
+        width:max-content!important;
+        max-width:100%!important;
+        min-height:28px!important;
+        height:28px!important;
+        margin:4px 0 10px!important;
+        padding:5px 10px!important;
+        border-radius:9px!important;
+        border:1px solid rgba(86,211,122,.28)!important;
+        background:rgba(33,130,64,.10)!important;
+        color:#63dc86!important;
+        font-size:11px!important;
+        line-height:1!important;
+        font-weight:800!important;
+        letter-spacing:.1px!important;
+        box-sizing:border-box!important;
+        white-space:nowrap!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        animation:sngStockPulse 2.2s ease-in-out infinite!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus i{
+        display:block!important;
+        width:7px!important;
+        height:7px!important;
+        min-width:7px!important;
+        border-radius:50%!important;
+        background:currentColor!important;
+        box-shadow:0 0 0 3px rgba(99,220,134,.08),0 0 10px currentColor!important;
+        flex:0 0 7px!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited{
+        color:#f2a93b!important;
+        border-color:rgba(242,169,59,.34)!important;
+        background:rgba(242,169,59,.09)!important;
+        animation:sngStockPulseLimited 2.0s ease-in-out infinite!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-last{
+        color:#ef8b3d!important;
+        border-color:rgba(239,139,61,.40)!important;
+        background:rgba(239,139,61,.10)!important;
+        font-weight:900!important;
+        animation:sngStockPulseLast 1.8s ease-in-out infinite!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-out{
+        color:#ff6b8a!important;
+        border-color:rgba(255,107,138,.34)!important;
+        background:rgba(255,107,138,.09)!important;
+        font-weight:900!important;
+        animation:sngStockPulseOut 1.8s ease-in-out infinite!important;
+      }
+      @keyframes sngStockPulse{
+        0%,100%{box-shadow:0 0 0 0 rgba(99,220,134,0),0 0 0 rgba(99,220,134,0)}
+        50%{box-shadow:0 0 0 2px rgba(99,220,134,.05),0 0 16px rgba(99,220,134,.12)}
+      }
+      @keyframes sngStockPulseLimited{
+        0%,100%{box-shadow:0 0 0 0 rgba(242,169,59,0),0 0 0 rgba(242,169,59,0)}
+        50%{box-shadow:0 0 0 2px rgba(242,169,59,.06),0 0 16px rgba(242,169,59,.14)}
+      }
+      @keyframes sngStockPulseLast{
+        0%,100%{box-shadow:0 0 0 0 rgba(239,139,61,0),0 0 0 rgba(239,139,61,0)}
+        50%{box-shadow:0 0 0 2px rgba(239,139,61,.07),0 0 18px rgba(239,139,61,.16)}
+      }
+      @keyframes sngStockPulseOut{
+        0%,100%{box-shadow:0 0 0 0 rgba(255,107,138,0),0 0 0 rgba(255,107,138,0)}
+        50%{box-shadow:0 0 0 2px rgba(255,107,138,.06),0 0 16px rgba(255,107,138,.14)}
+      }
+      @media(max-width:700px){
+        #products .card.productCardClickable .info > .stock.sngStockStatus{
+          min-height:27px!important;
+          height:27px!important;
+          margin:4px 0 10px!important;
+          padding:5px 9px!important;
+          border-radius:8px!important;
+          font-size:10px!important;
+          gap:5px!important;
+        }
+        #products .card.productCardClickable .info > .stock.sngStockStatus i{
+          width:6px!important;
+          height:6px!important;
+          min-width:6px!important;
+          flex-basis:6px!important;
+        }
+      }
+      @media(prefers-reduced-motion:reduce){
+        #products .card.productCardClickable .info > .stock.sngStockStatus{animation:none!important}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function refreshStockDisplay(root) {
+    const scope=root||document;
+    scope.querySelectorAll?.('#products .card.productCardClickable .info > .stock').forEach(stockEl=>{
+      if(stockEl.dataset.sngamerStockStatusApplied==="1") return;
+      const card=stockEl.closest(".productCardClickable");
+      if(!card) return;
+      const raw=stockEl.textContent||"";
+      const match=raw.match(/(\d+)/);
+      const stock=match?Number(match[1]):0;
+      stockEl.classList.add("sngStockStatus");
+      stockEl.classList.remove("is-stock","is-limited","is-last","is-out","outOfStock");
+      if(stock>5){
+        stockEl.classList.add("is-stock");
+        stockEl.innerHTML='<i aria-hidden="true"></i><span>En stock</span>';
+        stockEl.setAttribute("aria-label","En stock");
+      }else if(stock>1){
+        stockEl.classList.add("is-limited");
+        stockEl.innerHTML='<i aria-hidden="true"></i><span>'+stock+' en stock</span>';
+        stockEl.setAttribute("aria-label",stock+' en stock');
+      }else if(stock===1){
+        stockEl.classList.add("is-last");
+        stockEl.innerHTML='<i aria-hidden="true"></i><span>Dernier article !</span>';
+        stockEl.setAttribute("aria-label","Dernier article");
+      }else{
+        stockEl.classList.add("is-out");
+        stockEl.innerHTML='<i aria-hidden="true"></i><span>Rupture de stock</span>';
+        stockEl.setAttribute("aria-label","Rupture de stock");
+      }
+      stockEl.dataset.sngamerStockStatusApplied="1";
+    });
+  }
+
   function init() {
     installHomePromoPriceFix();
+    installStockDisplayFix();
     loadBuyNowFix();
     const grid=document.getElementById("products");
     if(grid && !grid.dataset.sngamerPromoLayoutObserver){
@@ -313,10 +448,12 @@
           row.style.gridColumn="1 / -1";
           row.style.width="100%";
         });
+        refreshStockDisplay(grid);
       });
       observer.observe(grid,{childList:true,subtree:true});
       grid.dataset.sngamerPromoLayoutObserver="1";
     }
+    refreshStockDisplay(document);
   }
 
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init,{once:true});
