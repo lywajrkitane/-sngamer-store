@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SERVER_FILE = path.join(__dirname, "server.js");
-const PUBLIC_DIR = path.join(__dirname, "..");
+const PUBLIC_DIR = path.join(__dirname, "..", "public");
 
 function patchServer() {
   let text = fs.readFileSync(SERVER_FILE, "utf8");
