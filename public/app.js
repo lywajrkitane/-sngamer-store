@@ -61,13 +61,13 @@ function render(){
     const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
     const inStock=Number(p.stock)>0;
     const normalPriceText = new Intl.NumberFormat("fr-FR").format(p.price);
-        const currentPriceValue = promoActive ? Number(p.promo_price) : Number(p.price);
-        const currentPriceText = new Intl.NumberFormat("fr-FR").format(currentPriceValue);
-        const currentPriceDigits = currentPriceText.replace(/\D/g, "").length;
-        const currentPriceClass = currentPriceDigits >= 7 ? "priceCurrent priceCurrent--long" : "priceCurrent";
-        const priceHtml = promoActive
-          ? `<div class="price price--promo"><div class="priceOldRow"><span class="priceOld">${normalPriceText} FCFA</span><span class="discountBadge">-${discount}%</span></div><div class="pricePromoMain"><strong class="${currentPriceClass}">${currentPriceText}<small>FCFA</small></strong></div></div>`
-          : `<div class="price price--regular"><div class="priceOldRow priceOldRow--placeholder" aria-hidden="true"></div><div class="pricePromoMain"><strong class="${currentPriceClass}">${currentPriceText}<small>FCFA</small></strong></div></div>`
+    const currentPriceValue = promoActive ? Number(p.promo_price) : Number(p.price);
+    const currentPriceText = new Intl.NumberFormat("fr-FR").format(currentPriceValue);
+    const currentPriceDigits = currentPriceText.replace(/\D/g, "").length;
+    const currentPriceClass = currentPriceDigits >= 7 ? "priceCurrent priceCurrent--long" : currentPriceDigits >= 6 ? "priceCurrent priceCurrent--medium" : "priceCurrent";
+    const priceHtml = promoActive
+      ? `<div class="price price--promo"><div class="priceOldRow"><span class="priceOld">${normalPriceText} FCFA</span><span class="discountBadge">-${discount}%</span></div><div class="pricePromoMain"><strong class="${currentPriceClass}">${currentPriceText}<small>FCFA</small></strong></div></div>`
+      : `<div class="price price--regular"><div class="priceOldRow priceOldRow--placeholder" aria-hidden="true"></div><div class="pricePromoMain"><strong class="${currentPriceClass}">${currentPriceText}<small>FCFA</small></strong></div></div>`;
     const category=storeCategory(p),categoryLabel=category==="Coins"&&p.platform?`${category} ${p.platform}`:category;
     return `<article class="card productCardClickable" onclick="openProduct(${Number(p.id)})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProduct(${Number(p.id)});}"><div class="pic">${(p.main_image_url||p.image1_url)?`<img class="productCardImage" src="${escapeHtml(p.image1_url)}" alt="${escapeHtml(p.name||"")}" loading="lazy">`:`<div class="productCardEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div><div class="info"><div class="cat">${escapeHtml(categoryLabel||"")}</div><h3>${escapeHtml(p.name||"")}</h3><div class="stock ${!inStock?"outOfStock":""}">${inStock?`${p.stock} disponible(s)`:"Rupture de stock"}</div><div class="productCardPurchaseRow">${priceHtml}<div class="productCardBottom ${inStock?"":"is-placeholder"}">${inStock?`<button type="button" class="addToCartIcon" aria-label="Ajouter au panier" onclick="event.stopPropagation();add(${Number(p.id)});">＋</button>`:""}</div></div></div></article>`;
   }).join("");
