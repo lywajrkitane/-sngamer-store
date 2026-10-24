@@ -28,41 +28,43 @@
     style.id = STYLE_ID;
     style.textContent = `
       #${HOST_ID}{width:100%;margin:0;box-sizing:border-box;position:relative;z-index:5}
-      #${HOST_ID} .campaignViewport{position:relative;width:100%;min-height:92px;overflow:hidden}
+      #${HOST_ID} .campaignViewport{position:relative;width:100%;min-height:132px;overflow:hidden}
       #${HOST_ID} .campaignSlide{display:none;width:100%;box-sizing:border-box;cursor:pointer}
       #${HOST_ID} .campaignSlide.active{display:block;animation:sngCampaignIn .42s ease both}
-      #${HOST_ID} .campaignCard{width:100%;min-height:86px;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid rgba(96,165,250,.28);border-radius:17px;background:radial-gradient(circle at 0% 50%,rgba(37,99,235,.20),transparent 38%),linear-gradient(135deg,#0b1425,#111326 58%,#18112b);box-shadow:0 12px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035);transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+      #${HOST_ID} .campaignCard{width:100%;min-height:120px;box-sizing:border-box;display:flex;align-items:center;gap:15px;padding:15px 16px;border:1px solid rgba(96,165,250,.28);border-radius:20px;background:radial-gradient(circle at 0% 50%,rgba(37,99,235,.20),transparent 38%),linear-gradient(135deg,#0b1425,#111326 58%,#18112b);box-shadow:0 12px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035);transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
       #${HOST_ID} .campaignCard.is-pressed{border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.42),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-1px)}
       #${HOST_ID} .campaignCard:focus-visible{outline:none;border-color:rgba(87,174,255,.98);box-shadow:0 0 0 1px rgba(87,174,255,.75),0 0 18px rgba(76,150,255,.38)}
-      #${HOST_ID} .campaignMedia{width:58px;height:58px;flex:0 0 58px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#9333ea);border:1px solid rgba(255,255,255,.12)}
+      #${HOST_ID} .campaignMedia{width:78px;height:78px;flex:0 0 78px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#9333ea);border:1px solid rgba(255,255,255,.12)}
       #${HOST_ID} .campaignMedia img{width:100%;height:100%;object-fit:cover;display:block}
-      #${HOST_ID} .campaignEmoji{font-size:27px}
+      #${HOST_ID} .campaignEmoji{font-size:31px}
       #${HOST_ID} .campaignCopy{min-width:0;flex:1}
-      #${HOST_ID} .campaignEyebrow{margin:0 0 3px;color:#78aefc;font-size:10px;line-height:1.2;font-weight:900;letter-spacing:1.4px;text-transform:uppercase}
-      #${HOST_ID} .campaignTitle{margin:0;color:#fff;font-size:clamp(14px,3.7vw,18px);line-height:1.2;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      #${HOST_ID} .campaignProduct{margin-top:3px;color:#aebbd0;font-size:11px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      #${HOST_ID} .campaignPrice{flex:0 0 auto;text-align:right}
-      #${HOST_ID} .campaignOld{display:block;color:#8190a2;font-size:9px;text-decoration:line-through;margin-bottom:2px;white-space:nowrap}
-      #${HOST_ID} .campaignCurrent{display:block;color:#fff;font-size:15px;font-weight:900;white-space:nowrap}
-      #${HOST_ID} .campaignBadge{display:inline-flex;margin-top:3px;padding:3px 7px;border-radius:999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:9px;font-weight:900;box-shadow:0 3px 10px rgba(239,68,68,.22)}
-      #${HOST_ID} .campaignDots{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:8px;min-height:7px}
-      #${HOST_ID} .campaignDot{display:block;width:7px !important;height:7px !important;min-width:7px !important;min-height:7px !important;max-width:7px !important;max-height:7px !important;padding:0 !important;margin:0;border:0;border-radius:999px;background:#43526a;cursor:pointer;transition:all .25s ease;box-sizing:border-box}
-      #${HOST_ID} .campaignDot.active{width:25px !important;min-width:25px !important;max-width:25px !important;height:7px !important;min-height:7px !important;max-height:7px !important;background:linear-gradient(90deg,#4da3ff,#d92aa8)}
+      #${HOST_ID} .campaignEyebrow{margin:0 0 5px;color:#78aefc;font-size:11px;line-height:1.25;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}
+      #${HOST_ID} .campaignTitle{margin:0;color:#fff;font-size:clamp(15px,2.3vw,19px);line-height:1.24;font-weight:900;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+      #${HOST_ID} .campaignProduct{margin-top:5px;color:#aebbd0;font-size:12px;line-height:1.35;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+      #${HOST_ID} .campaignPrice{flex:0 0 auto;text-align:right;max-width:36%}
+      #${HOST_ID} .campaignOld{display:block;color:#8190a2;font-size:10px;text-decoration:line-through;margin-bottom:4px;white-space:nowrap}
+      #${HOST_ID} .campaignCurrent{display:block;color:#fff;font-size:clamp(15px,2.2vw,18px);font-weight:900;white-space:nowrap}
+      #${HOST_ID} .campaignBadge{display:inline-flex;margin-top:5px;padding:4px 8px;border-radius:999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:10px;font-weight:900;box-shadow:0 3px 10px rgba(239,68,68,.22)}
+      #${HOST_ID} .campaignDots{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:10px;min-height:8px}
+      #${HOST_ID} .campaignDot{display:block;width:8px !important;height:8px !important;min-width:8px !important;min-height:8px !important;max-width:8px !important;max-height:8px !important;padding:0 !important;margin:0;border:0;border-radius:999px;background:#43526a;cursor:pointer;transition:all .25s ease;box-sizing:border-box}
+      #${HOST_ID} .campaignDot.active{width:28px !important;min-width:28px !important;max-width:28px !important;height:8px !important;min-height:8px !important;max-height:8px !important;background:linear-gradient(90deg,#4da3ff,#d92aa8)}
       @keyframes sngCampaignIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
       @media(max-width:560px){
-        #${HOST_ID} .campaignViewport{min-height:79px}
-        #${HOST_ID} .campaignCard{min-height:72px;gap:9px;padding:8px 9px;border-radius:15px}
-        #${HOST_ID} .campaignMedia{width:48px;height:48px;flex-basis:48px;border-radius:11px}
-        #${HOST_ID} .campaignEmoji{font-size:22px}
-        #${HOST_ID} .campaignEyebrow{font-size:8px;letter-spacing:1px}
-        #${HOST_ID} .campaignTitle{font-size:13px}
-        #${HOST_ID} .campaignProduct{font-size:10px}
-        #${HOST_ID} .campaignOld{font-size:8px}
-        #${HOST_ID} .campaignCurrent{font-size:12px}
-        #${HOST_ID} .campaignBadge{font-size:8px;padding:3px 6px}
-        #${HOST_ID} .campaignDots{margin-top:7px;gap:5px;min-height:6px}
-        #${HOST_ID} .campaignDot{width:6px !important;height:6px !important;min-width:6px !important;min-height:6px !important;max-width:6px !important;max-height:6px !important}
-        #${HOST_ID} .campaignDot.active{width:20px !important;min-width:20px !important;max-width:20px !important;height:6px !important;min-height:6px !important;max-height:6px !important}
+        #${HOST_ID} .campaignViewport{min-height:126px}
+        #${HOST_ID} .campaignCard{min-height:116px;gap:11px;padding:12px;border-radius:17px}
+        #${HOST_ID} .campaignMedia{width:68px;height:68px;flex-basis:68px;border-radius:13px}
+        #${HOST_ID} .campaignEmoji{font-size:25px}
+        #${HOST_ID} .campaignCopy{flex:1 1 auto}
+        #${HOST_ID} .campaignEyebrow{font-size:9px;letter-spacing:1px;margin-bottom:4px}
+        #${HOST_ID} .campaignTitle{font-size:14px;line-height:1.22;-webkit-line-clamp:2}
+        #${HOST_ID} .campaignProduct{font-size:11px;line-height:1.3;margin-top:4px;-webkit-line-clamp:2}
+        #${HOST_ID} .campaignPrice{max-width:38%;flex-basis:auto}
+        #${HOST_ID} .campaignOld{font-size:8px;margin-bottom:3px}
+        #${HOST_ID} .campaignCurrent{font-size:12px;white-space:nowrap}
+        #${HOST_ID} .campaignBadge{font-size:9px;padding:4px 7px;margin-top:4px}
+        #${HOST_ID} .campaignDots{margin-top:9px;gap:5px;min-height:7px}
+        #${HOST_ID} .campaignDot{width:7px !important;height:7px !important;min-width:7px !important;min-height:7px !important;max-width:7px !important;max-height:7px !important}
+        #${HOST_ID} .campaignDot.active{width:23px !important;min-width:23px !important;max-width:23px !important;height:7px !important;min-height:7px !important;max-height:7px !important}
       }
     `;
     document.head.appendChild(style);
