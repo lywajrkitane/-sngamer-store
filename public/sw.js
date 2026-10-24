@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261023-refresh2';
+const SNGAMER_SW_VERSION = '20261024-stock-dot-only1';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -15,6 +15,53 @@ self.addEventListener('activate', event => {
         if (tag.startsWith('sngamer-order-status-')) notification.close();
       });
     } catch (_) {}
+  })());
+});
+
+/* SNGAMER stock badge refinement.
+   Keep the badge/text completely static; animate ONLY the small status dot. */
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin || !url.pathname.endsWith('/product-stability.js')) return;
+
+  event.respondWith((async () => {
+    const response = await fetch(event.request);
+    const source = await response.text();
+    const patch = `
+/* SNGAMER FINAL STOCK DOT-ONLY PATCH */
+(() => {
+  const style = document.createElement('style');
+  style.id = 'sngamer-stock-dot-only-final';
+  style.textContent = \`
+    #products .card.productCardClickable .info > .stock.sngStockStatus {
+      animation: none !important;
+    }
+    #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited,
+    #products .card.productCardClickable .info > .stock.sngStockStatus.is-last,
+    #products .card.productCardClickable .info > .stock.sngStockStatus.is-out {
+      animation: none !important;
+    }
+    #products .card.productCardClickable .info > .stock.sngStockStatus i {
+      animation: sngStockDotBlink 1.8s ease-in-out infinite !important;
+      transform-origin: center center !important;
+    }
+    @keyframes sngStockDotBlink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .12; transform: scale(.82); }
+    }
+  \`;
+  document.head.appendChild(style);
+})();
+`;
+    const body = source + '\n' + patch;
+    const headers = new Headers(response.headers);
+    headers.set('content-type', 'application/javascript; charset=utf-8');
+    headers.delete('content-length');
+    return new Response(body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
   })());
 });
 
