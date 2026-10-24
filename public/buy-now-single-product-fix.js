@@ -34,13 +34,23 @@
         animation:none!important;
       }
       #products .card.productCardClickable .info > .stock.sngStockStatus > i{
-        animation:sngStockContentBlink 1.8s ease-in-out infinite!important;
+        animation:none!important;
+        opacity:1!important;
+        transform:none!important;
         transform-origin:center!important;
       }
       #products .card.productCardClickable .info > .stock.sngStockStatus > span{
         display:inline-block!important;
-        animation:sngStockContentBlink 1.8s ease-in-out infinite!important;
+        animation:none!important;
+        opacity:1!important;
+        transform:none!important;
         transform-origin:left center!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock > i,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-stock > span{
+        animation:none!important;
+        opacity:1!important;
+        transform:none!important;
       }
       #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited > i,
       #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited > span{
