@@ -15,14 +15,16 @@
     const style = document.createElement("style");
     style.id = "sngBuyNowPremiumStyles";
     style.textContent = `
-      #productDetail .price.price--promo{display:flex!important;align-items:baseline!important;flex-wrap:wrap!important;gap:10px!important;margin:20px 0 8px!important;min-height:48px!important}
-      #productDetail .price.price--promo .priceCurrent{order:1!important;color:#f7f9ff!important;font-size:clamp(30px,7vw,42px)!important;line-height:1!important;font-weight:900!important;letter-spacing:-1.1px!important;text-shadow:0 0 18px rgba(84,145,255,.14)!important}
-      #productDetail .price.price--promo .priceOld{order:2!important;color:#7f8da0!important;font-size:14px!important;line-height:1!important;font-weight:650!important;text-decoration:line-through!important;text-decoration-thickness:1.5px!important;opacity:.85!important}
-      #productDetail .price.price--promo .discountBadge{order:3!important;align-self:center!important;padding:7px 10px!important;border-radius:9px!important;border:1px solid rgba(255,78,112,.24)!important;background:rgba(255,61,96,.10)!important;color:#ff6685!important;font-size:12px!important;line-height:1!important;font-weight:900!important}
-      #productDetail .price.price--promo .priceCurrent small{margin-left:5px!important;font-size:.42em!important;font-weight:800!important;letter-spacing:0!important}
-      #productDetail .price:not(.price--promo){margin:20px 0 8px!important}
-      #productDetail .price:not(.price--promo) .priceCurrent{color:#f7f9ff!important;font-size:clamp(30px,7vw,42px)!important;line-height:1!important;font-weight:900!important;letter-spacing:-1.1px!important}
-      #productDetail .price:not(.price--promo) .priceCurrent small{margin-left:5px!important;font-size:.42em!important;font-weight:800!important}
+      #productDetail .price.price--promo{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:5px!important;margin:20px 0 8px!important;padding:0!important;min-height:0!important}
+      #productDetail .price.price--promo .priceOldRow{display:flex!important;align-items:center!important;order:0!important;min-height:14px!important;line-height:1.15!important}
+      #productDetail .price.price--promo .priceOld{order:0!important;color:#8995a7!important;font-size:14px!important;line-height:1.15!important;font-weight:650!important;text-decoration:line-through!important;text-decoration-thickness:1.5px!important;opacity:.9!important}
+      #productDetail .price.price--promo .pricePromoMain{display:flex!important;align-items:baseline!important;justify-content:flex-start!important;gap:12px!important;flex-wrap:wrap!important;width:100%!important}
+      #productDetail .price.price--promo .priceCurrent{order:0!important;color:#F4D58D!important;font-size:clamp(30px,7vw,42px)!important;line-height:1!important;font-weight:900!important;letter-spacing:-1.1px!important;text-shadow:0 0 18px rgba(244,213,141,.12)!important}
+      #productDetail .price.price--promo .discountBadge{order:1!important;align-self:center!important;padding:7px 10px!important;border-radius:9px!important;border:1px solid rgba(255,78,112,.24)!important;background:rgba(255,61,96,.10)!important;color:#ff6685!important;font-size:12px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important}
+      #productDetail .price.price--promo .priceCurrent small{margin-left:5px!important;color:#d8c58e!important;font-size:.42em!important;font-weight:800!important;letter-spacing:0!important}
+      #productDetail .price:not(.price--promo){display:block!important;margin:20px 0 8px!important}
+      #productDetail .price:not(.price--promo) .priceCurrent{color:#F4D58D!important;font-size:clamp(30px,7vw,42px)!important;line-height:1!important;font-weight:900!important;letter-spacing:-1.1px!important}
+      #productDetail .price:not(.price--promo) .priceCurrent small{margin-left:5px!important;color:#d8c58e!important;font-size:.42em!important;font-weight:800!important;letter-spacing:0!important}
       #checkoutSummary .sngCheckoutColor{display:inline-flex!important;align-items:center!important;gap:6px!important;margin:4px 0 0!important;color:#91bde8!important;font-size:12px!important;font-weight:700!important}
       #checkoutSummary .sngCheckoutColorDot{width:10px!important;height:10px!important;min-width:10px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.45)!important;box-shadow:0 1px 4px rgba(0,0,0,.35)!important}
     `;
