@@ -60,7 +60,7 @@ function render(){
     const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
     const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
     const inStock=Number(p.stock)>0;
-    const priceHtml=promoActive?`<div class="price price--promo"><div class="pricePromoTop"><span class="priceOld">${new Intl.NumberFormat("fr-FR").format(p.price)} FCFA</span><span class="discountBadge">-${discount}%</span></div><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.promo_price)}<small>FCFA</small></strong></div>`:`<div class="price price--regular"><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.price)}<small>FCFA</small></strong></div>`;
+    const priceHtml=promoActive?`<div class="price price--promo"><div class="priceOldRow"><span class="priceOld">${new Intl.NumberFormat("fr-FR").format(p.price)} FCFA</span></div><div class="pricePromoMain"><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.promo_price)}<small>FCFA</small></strong><span class="discountBadge">-${discount}%</span></div></div>`:`<div class="price price--regular"><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.price)}<small>FCFA</small></strong></div>`;
     const category=storeCategory(p),categoryLabel=category==="Coins"&&p.platform?`${category} ${p.platform}`:category;
     return `<article class="card productCardClickable" onclick="openProduct(${Number(p.id)})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProduct(${Number(p.id)});}"><div class="pic">${(p.main_image_url||p.image1_url)?`<img class="productCardImage" src="${escapeHtml(p.image1_url)}" alt="${escapeHtml(p.name||"")}" loading="lazy">`:`<div class="productCardEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div><div class="info"><div class="cat">${escapeHtml(categoryLabel||"")}</div><h3>${escapeHtml(p.name||"")}</h3>${priceHtml}<div class="stock ${!inStock?"outOfStock":""}">${inStock?`${p.stock} disponible(s)`:"Rupture de stock"}</div>${inStock?`<div class="productCardBottom"><button type="button" class="addToCartIcon" aria-label="Ajouter au panier" onclick="event.stopPropagation();add(${Number(p.id)});">＋</button></div>`:""}</div></article>`;
   }).join("");
@@ -141,8 +141,8 @@ function openProduct(id){
   window.productImages=images;
 
   const priceHtml=promoActive
-    ? `<div class="price price--promo"><span class="priceOld">${money(p.price)}</span><strong class="priceCurrent">${money(p.promo_price)}</strong><span class="discountBadge">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span></div>`
-    : `<div class="price"><strong class="priceCurrent">${money(p.price)}</strong></div>`;
+    ? `<div class="price price--promo"><div class="priceOldRow"><span class="priceOld">${money(p.price)}</span></div><div class="pricePromoMain"><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.promo_price)}<small>FCFA</small></strong><span class="discountBadge">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span></div></div>`
+    : `<div class="price price--regular"><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.price)}<small>FCFA</small></strong></div>`;
 
   const descriptionText=String(p.description||"Aucune description disponible.").replace(/\r\n?/g,"\n").trim();
   const previewText=productDescriptionPreview(descriptionText);
