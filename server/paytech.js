@@ -184,13 +184,16 @@ async function installPaytech(app) {
       await client.query("BEGIN");
       let total = 0;
       const finalItems = [];
+      const quantitiesByProduct = new Map();
       for (const item of items) {
         const productId = Number(item.id), quantity = Number(item.quantity ?? item.qty);
         if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity <= 0) throw new Error("Produit ou quantité invalide");
+        const cumulativeQuantity = (quantitiesByProduct.get(productId) || 0) + quantity;
+        quantitiesByProduct.set(productId, cumulativeQuantity);
         const r = await client.query(`SELECT id,name,price,promo_price,promo_active,stock,emoji,colors FROM products WHERE id=$1 FOR UPDATE`, [productId]);
         if (!r.rows.length) throw new Error("Produit introuvable");
         const product = r.rows[0];
-        if (Number(product.stock) < quantity) throw new Error(`Stock insuffisant pour ${product.name}`);
+        if (Number(product.stock) < cumulativeQuantity) throw new Error(`Stock insuffisant pour ${product.name} (toutes couleurs confondues)`);
         const promo = Boolean(product.promo_active) && Number(product.promo_price) > 0 && Number(product.promo_price) < Number(product.price);
         const unitPrice = promo ? Number(product.promo_price) : Number(product.price);
         const subtotal = unitPrice * quantity;
