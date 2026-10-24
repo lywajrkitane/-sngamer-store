@@ -2163,8 +2163,12 @@ document.getElementById("editProductPlatform").value =
     document.getElementById("editProductDescription").value =
       product.description || "";
 
+    if (typeof window.sngProductCharacteristicsSetEditor === "function") {
+      window.sngProductCharacteristicsSetEditor("edit", product.characteristics || []);
+    }
+
     document.getElementById("editProductCondition").value =
-      ["Neuf", "Occasion", "Reconditionné"].includes(product.product_condition)
+      ["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(product.product_condition)
         ? product.product_condition : "Neuf";
 
     const warrantySelect = document.getElementById("editProductWarranty");
@@ -3554,6 +3558,7 @@ async function loadAll() {
         <option value="Neuf">Neuf</option>
         <option value="Occasion">Occasion</option>
         <option value="Reconditionné">Reconditionné</option>
+        <option value="Produit numérique">Produit numérique</option>
       </select>
     </div>
 
@@ -4006,5 +4011,6 @@ async function loadAll() {
 })();
 </script>
 <script src="/admin-product-edit-polish.js?v=20261022-univers1"></script>
+<script src="/product-characteristics-admin.js?v=20261024-characteristics1"></script>
 </body>
 </html>

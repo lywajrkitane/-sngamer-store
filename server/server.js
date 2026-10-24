@@ -56,6 +56,25 @@ async function db(query, params = []) {
   return pool.query(query, params);
 }
 
+function normalizeProductCharacteristics(input) {
+  let rows = input;
+  if (rows === undefined || rows === null) return [];
+  if (typeof rows === "string") {
+    try { rows = JSON.parse(rows); } catch (_) { return null; }
+  }
+  if (!Array.isArray(rows) || rows.length > 30) return null;
+  const cleaned = [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) return null;
+    const name = String(row.name ?? "").trim();
+    const value = String(row.value ?? "").trim();
+    if (!name && !value) continue;
+    if (!name || !value || name.length > 80 || value.length > 300) return null;
+    cleaned.push({ name, value });
+  }
+  return cleaned;
+}
+
 async function initDb() {
   await db(`
     CREATE TABLE IF NOT EXISTS products (
@@ -104,7 +123,8 @@ price INTEGER NOT NULL CHECK (price >= 0),
     ADD COLUMN IF NOT EXISTS video_url TEXT,
     ADD COLUMN IF NOT EXISTS product_condition TEXT NOT NULL DEFAULT 'Neuf',
     ADD COLUMN IF NOT EXISTS warranty TEXT NOT NULL DEFAULT 'Aucune garantie',
-    ADD COLUMN IF NOT EXISTS warranty_configured BOOLEAN NOT NULL DEFAULT false
+    ADD COLUMN IF NOT EXISTS warranty_configured BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS characteristics JSONB NOT NULL DEFAULT '[]'::jsonb
   `);
   await db(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -313,6 +333,7 @@ app.get("/api/products", async (req, res) => {
   p.stock,
   p.emoji,
   p.description,
+  p.characteristics,
   p.image1_url,
   p.image2_url,
   p.image3_url,
@@ -681,8 +702,23 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   description,
   promo_price,
   promo_active,
-  campaign_id
+  campaign_id,
+  product_condition,
+  warranty,
+  warranty_configured,
+  characteristics
 } = req.body;
+
+  const conditionValue = String(product_condition || "Neuf").trim();
+  if (!["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(conditionValue)) {
+    return res.status(400).json({ error: "État du produit invalide." });
+  }
+  const warrantyValue = String(warranty ?? "").trim().slice(0, 120) || "Aucune garantie";
+  const warrantyConfiguredValue = Boolean(warranty_configured) && Boolean(String(warranty ?? "").trim());
+  const characteristicsValue = normalizeProductCharacteristics(characteristics);
+  if (!Array.isArray(characteristicsValue)) {
+    return res.status(400).json({ error: "Vérifie les caractéristiques : chaque ligne doit contenir un nom et une valeur (30 lignes maximum)." });
+  }
 
   const requestedCategory = String(category || "Accessoires").trim();
   const isLegacyPhoneCategory = /^gaming phones?$/i.test(requestedCategory);
@@ -712,7 +748,11 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   campaign_id:
     campaign_id !== null && campaign_id !== undefined && campaign_id !== ""
       ? Number(campaign_id)
-      : null
+      : null,
+  product_condition: conditionValue,
+  warranty: warrantyValue,
+  warranty_configured: warrantyConfiguredValue,
+  characteristics: characteristicsValue
   };
 
   if (
@@ -775,9 +815,13 @@ if (
       description,
       promo_price,
       promo_active,
-      campaign_id
+      campaign_id,
+      product_condition,
+      warranty,
+      warranty_configured,
+      characteristics
     )
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
   RETURNING *
   `,
   [
@@ -790,7 +834,11 @@ if (
     p.description,
     p.promo_price,
     p.promo_active,
-    p.campaign_id
+    p.campaign_id,
+    p.product_condition,
+    p.warranty,
+    p.warranty_configured,
+    JSON.stringify(p.characteristics)
   ]
     );
 
@@ -1065,7 +1113,9 @@ app.patch(
   promo_active,
   campaign_id,
   product_condition,
-  warranty
+  warranty,
+  warranty_configured,
+  characteristics
 } = req.body;
 
       const requestedCategory = category === undefined ? undefined : String(category || "").trim();
@@ -1079,10 +1129,18 @@ app.patch(
       const conditionValue = conditionProvided ? String(product_condition || "").trim() : null;
       const warrantyProvided = warranty !== undefined;
       const warrantyValue = warrantyProvided ? String(warranty ?? "").trim().slice(0, 120) : null;
-      const warrantyConfiguredValue = warrantyProvided ? Boolean(String(warranty ?? "").trim()) : null;
+      const warrantyConfiguredProvided = warranty_configured !== undefined || warrantyProvided;
+      const warrantyConfiguredValue = warranty_configured !== undefined
+        ? Boolean(warranty_configured)
+        : warrantyProvided ? Boolean(String(warranty ?? "").trim()) : null;
+      const characteristicsProvided = characteristics !== undefined;
+      const characteristicsValue = characteristicsProvided ? normalizeProductCharacteristics(characteristics) : null;
 
-      if (conditionProvided && !["Neuf", "Occasion", "Reconditionné"].includes(conditionValue)) {
+      if (conditionProvided && !["Neuf", "Occasion", "Reconditionné", "Produit numérique"].includes(conditionValue)) {
         return res.status(400).json({ error: "État du produit invalide." });
+      }
+      if (characteristicsProvided && !Array.isArray(characteristicsValue)) {
+        return res.status(400).json({ error: "Vérifie les caractéristiques : chaque ligne doit contenir un nom et une valeur (30 lignes maximum)." });
       }
       if (warrantyProvided && String(warranty ?? "").trim().length > 120) {
         return res.status(400).json({ error: "La garantie ne peut pas dépasser 120 caractères." });
@@ -1230,6 +1288,7 @@ app.patch(
           product_condition = CASE WHEN $16 = true THEN $17 ELSE product_condition END,
           warranty = CASE WHEN $18 = true THEN $19 ELSE warranty END,
           warranty_configured = CASE WHEN $20 = true THEN $21 ELSE warranty_configured END,
+          characteristics = CASE WHEN $22 = true THEN $23::jsonb ELSE characteristics END,
 
           promo_price =
             CASE
@@ -1272,8 +1331,10 @@ app.patch(
           conditionValue,
           warrantyProvided,
           warrantyValue,
-          warrantyProvided,
-          warrantyConfiguredValue
+          warrantyConfiguredProvided,
+          warrantyConfiguredValue,
+          characteristicsProvided,
+          characteristicsProvided ? JSON.stringify(characteristicsValue) : null
         ]
       );
 

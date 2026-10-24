@@ -2,7 +2,7 @@
   'use strict';
 
   const VERSION = '20261023-product-meta1';
-  const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné'];
+  const CONDITION_OPTIONS = ['Neuf', 'Occasion', 'Reconditionné', 'Produit numérique'];
   const WARRANTY_OPTIONS = [
     'Aucune garantie',
     '7 jours',

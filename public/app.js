@@ -101,6 +101,15 @@ function productDescriptionPreview(text){
   }
   return preview;
 }
+function normalizeProductCharacteristics(input){
+  let rows=input;
+  if(typeof rows==="string"){try{rows=JSON.parse(rows)}catch(_){return []}}
+  if(!Array.isArray(rows))return [];
+  return rows.map(row=>({
+    name:String(row?.name??"").trim().slice(0,80),
+    value:String(row?.value??"").trim().slice(0,300)
+  })).filter(row=>row.name&&row.value).slice(0,30);
+}
 function toggleProductDescription(button){
   const section=button?.closest(".productDescriptionSection");
   if(!section)return;
@@ -124,7 +133,7 @@ function openProduct(id){
   const images=[p.image1_url,p.image2_url,p.image3_url].filter(Boolean);
   const inStock=Number(p.stock)>0;
   const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
-  const productCondition=["Neuf","Occasion","Reconditionné"].includes(String(p.product_condition||"Neuf"))
+  const productCondition=["Neuf","Occasion","Reconditionné","Produit numérique"].includes(String(p.product_condition||"Neuf"))
     ? String(p.product_condition||"Neuf") : "Neuf";
   const warrantyText=String(p.warranty||"").trim();
   const warrantyConfigured=p.warranty_configured===true||p.warranty_configured==="true";
@@ -140,6 +149,15 @@ function openProduct(id){
   const compactFull=descriptionText.replace(/\s+/g," ").trim();
   const compactPreview=previewText.replace(/\s+/g," ").trim();
   const needsDescriptionToggle=compactFull!==compactPreview;
+  const productCharacteristics=normalizeProductCharacteristics(p.characteristics);
+  const characteristicsHtml=productCharacteristics.length
+    ? `<section class="sngProductCharacteristics" aria-labelledby="sngProductCharacteristicsTitle">
+        <h3 id="sngProductCharacteristicsTitle">Caractéristiques</h3>
+        <dl class="sngProductCharacteristicsList">
+          ${productCharacteristics.map(item=>`<div class="sngProductCharacteristicRow"><dt>${escapeHtml(item.name)}</dt><dd>${escapeHtml(item.value).replace(/\\n/g,"<br>")}</dd></div>`).join("")}
+        </dl>
+      </section>`
+    : "";
   const fullDescriptionHtml=escapeHtml(descriptionText).replace(/\n/g,"<br>");
   const descriptionHtml=needsDescriptionToggle
     ? `<p class="productDescription sngDescriptionPreview">${escapeHtml(previewText).replace(/\n/g,"<br>")}</p><p class="productDescription sngDescriptionFull" hidden>${fullDescriptionHtml}</p><button type="button" class="sngDescriptionToggle" aria-expanded="false" onclick="toggleProductDescription(this)">Voir plus ↓</button>`
@@ -155,9 +173,9 @@ function openProduct(id){
         </div>
       </div>
       <div class="sngAssuranceItem">
-        <span class="sngAssuranceIcon" aria-hidden="true">📦</span>
+        <span class="sngAssuranceIcon" aria-hidden="true">${productCondition === "Produit numérique" ? "💻" : "📦"}</span>
         <div class="sngAssuranceCopy">
-          <span class="sngAssuranceEyebrow">ÉTAT DU PRODUIT</span>
+          <span class="sngAssuranceEyebrow">${productCondition === "Produit numérique" ? "TYPE DE PRODUIT" : "ÉTAT DU PRODUIT"}</span>
           <strong>${escapeHtml(productCondition)}</strong>
         </div>
       </div>
@@ -185,6 +203,7 @@ function openProduct(id){
           <h3 class="productDescriptionTitle">Description</h3>
           ${descriptionHtml}
         </section>
+        ${characteristicsHtml}
         ${assuranceHtml}
         ${p.video_url?`<div class="productVideo"><h3>Vidéo du produit</h3><video controls preload="metadata" src="${escapeHtml(p.video_url)}"></video></div>`:""}
         ${inStock?`<button class="primary full sngProductAddButton" type="button" onclick="if(add(${Number(p.id)}))closeProduct()">Ajouter au panier</button>`:`<button class="primary full disabled sngProductAddButton" type="button" disabled>Rupture de stock</button>`}

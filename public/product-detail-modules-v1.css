@@ -86,3 +86,18 @@
   #productModal #productDetail .sngAssuranceCopy strong{font-size:10px!important;line-height:1.2!important}
   #productModal #productDetail .sngDescriptionToggle{min-height:36px;font-size:12px!important}
 }
+
+
+/* Optional product characteristics: after description, before delivery/condition/warranty. */
+#productModal #productDetail .sngProductCharacteristics{order:55!important;margin:20px 0 18px!important;padding:0!important;min-width:0}
+#productModal #productDetail .sngProductCharacteristics h3{margin:0 0 12px!important;color:#f5f8ff!important;font-size:clamp(19px,2.6vw,24px)!important;line-height:1.25!important;font-weight:850!important}
+#productModal #productDetail .sngProductCharacteristicsList{margin:0!important;padding:0!important;overflow:hidden;border:1px solid rgba(126,158,198,.22);border-radius:14px;background:linear-gradient(145deg,rgba(18,31,49,.82),rgba(8,15,27,.88))}
+#productModal #productDetail .sngProductCharacteristicRow{display:grid;grid-template-columns:minmax(0,42%) minmax(0,58%);gap:12px;margin:0!important;padding:12px 14px!important;border-bottom:1px solid rgba(126,158,198,.15);align-items:start}
+#productModal #productDetail .sngProductCharacteristicRow:last-child{border-bottom:0}
+#productModal #productDetail .sngProductCharacteristicRow dt{min-width:0;margin:0!important;color:#8fbdf2!important;font-size:14px!important;line-height:1.45!important;font-weight:750!important;overflow-wrap:anywhere}
+#productModal #productDetail .sngProductCharacteristicRow dd{min-width:0;margin:0!important;color:#dce5f2!important;font-size:14px!important;line-height:1.5!important;font-weight:600!important;overflow-wrap:anywhere;text-align:left}
+@media(max-width:520px){
+  #productModal #productDetail .sngProductCharacteristics{margin:16px 0 15px!important}
+  #productModal #productDetail .sngProductCharacteristicRow{grid-template-columns:minmax(0,40%) minmax(0,60%);gap:8px;padding:10px 11px!important}
+  #productModal #productDetail .sngProductCharacteristicRow dt,#productModal #productDetail .sngProductCharacteristicRow dd{font-size:12px!important}
+}
