@@ -39,6 +39,28 @@ function uploadToCloudinary(buffer, resourceType, folder) {
   });
 }
 const app = express();
+
+/* SNGAMER CACHE COHERENCY: dynamic data and mutable UI code must always be revalidated. */
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const pathname = String(req.path || "/").split("?")[0];
+  const extension = path.extname(pathname).toLowerCase();
+  const mutableExtensions = new Set([".html", ".htm", ".js", ".mjs", ".css", ".json", ".webmanifest"]);
+  if (
+    pathname === "/" ||
+    pathname === "/api" ||
+    pathname.startsWith("/api/") ||
+    !extension ||
+    mutableExtensions.has(extension)
+  ) {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.set("Surrogate-Control", "no-store");
+  }
+  next();
+});
+
 const PORT = process.env.PORT || 10000;
 
 if (!process.env.DATABASE_URL) {
