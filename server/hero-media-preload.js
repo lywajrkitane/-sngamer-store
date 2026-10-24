@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SERVER_FILE = path.join(__dirname, "server.js");
-const PUBLIC_DIR = path.join(__dirname, "..", "public");
+const PUBLIC_DIR = path.join(__dirname, "..");
 
 function patchServer() {
   let text = fs.readFileSync(SERVER_FILE, "utf8");
@@ -16,7 +16,6 @@ function patchServer() {
     text = text.replace(anchor, block + anchor);
     changed = true;
   }
-
 
   const contentDbMarker = "/* SNGAMER HERO CONTENT DB V1 */";
   if (!text.includes(contentDbMarker)) {
@@ -32,16 +31,27 @@ function patchServer() {
     changed = true;
   }
 
-
-  const routeMarker = "/* SNGAMER HERO MEDIA ROUTES V1 */";
-  if (!text.includes(routeMarker)) {
-    const anchor = 'app.use(express.static(path.join(__dirname, "..", "public")));';
-    const block = `/* SNGAMER HERO MEDIA ROUTES V1 */\n\napp.get("/api/hero-media", async (req, res) => {\n  try {\n    const result = await db(\n      "SELECT slot, media_type, url, updated_at FROM hero_media ORDER BY slot ASC"\n    );\n    res.json({ success: true, hero: result.rows });\n  } catch (error) {\n    console.error("HERO_MEDIA_GET_ERROR:", error);\n    res.status(500).json({ success: false, error: "Impossible de récupérer les images du héros." });\n  }\n});\n\napp.post("/api/admin/hero-media", requireAdmin, (req, res) => {\n  upload.single("media")(req, res, async (uploadError) => {\n    try {\n      if (uploadError) throw uploadError;\n      const slot = Number(req.body?.slot);\n      if (![1, 2, 3].includes(slot)) {\n        return res.status(400).json({ success: false, error: "Emplacement du héros invalide." });\n      }\n      if (!req.file) {\n        return res.status(400).json({ success: false, error: "Sélectionne une image." });\n      }\n      if (!String(req.file.mimetype || "").startsWith("image/")) {\n        return res.status(400).json({ success: false, error: "Le fichier doit être une image." });\n      }\n\n      const result = await uploadToCloudinary(req.file.buffer, "image", "sngamer/hero");\n      const url = result.secure_url || result.url;\n      if (!url) throw new Error("Cloudinary n'a pas retourné d'URL.");\n\n      await db(\`INSERT INTO hero_media (slot, media_type, url, updated_at)\n         VALUES ($1, 'image', $2, NOW())\n         ON CONFLICT (slot) DO UPDATE SET\n           media_type = EXCLUDED.media_type,\n           url = EXCLUDED.url,\n           updated_at = NOW()\`,\n        [slot, url]\n      );\n\n      res.json({ success: true, slot, url });\n    } catch (error) {\n      console.error("HERO_MEDIA_UPLOAD_ERROR:", error);\n      res.status(400).json({ success: false, error: error.message || "Impossible d'enregistrer l'image." });\n    }\n  });\n});\n\napp.delete("/api/admin/hero-media/:slot", requireAdmin, async (req, res) => {\n  try {\n    const slot = Number(req.params.slot);\n    if (![1, 2, 3].includes(slot)) {\n      return res.status(400).json({ success: false, error: "Emplacement du héros invalide." });\n    }\n    await db("DELETE FROM hero_media WHERE slot = $1", [slot]);\n    res.json({ success: true, slot });\n  } catch (error) {\n    console.error("HERO_MEDIA_DELETE_ERROR:", error);\n    res.status(500).json({ success: false, error: "Impossible de retirer l'image." });\n  }\n});\n\n`;
-    if (!text.includes(anchor)) throw new Error("Hero media route anchor not found");
+  const contentMigrationMarker = "/* SNGAMER HERO CONTENT COPY V2 */";
+  if (!text.includes(contentMigrationMarker)) {
+    const anchor = '  console.log("Database initialized successfully");';
+    const block = [
+      "  /* SNGAMER HERO CONTENT COPY V2 */",
+      "  await db(\"UPDATE hero_slide_content SET title = 'MERCI DE NOUS RENDRE VISITE !', body = 'Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.', updated_at = NOW() WHERE slot = 1 AND title = 'BONJOUR ET BIENVENUE SUR SNGAMER STORE' AND body = 'Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.'\");",
+      ""
+    ].join("\n") + "\n";
+    if (!text.includes(anchor)) throw new Error("Hero content migration anchor not found");
     text = text.replace(anchor, block + anchor);
     changed = true;
   }
 
+  const routeMarker = "/* SNGAMER HERO MEDIA ROUTES V1 */";
+  if (!text.includes(routeMarker)) {
+    const anchor = 'app.use(express.static(path.join(__dirname, "..", "public")));';
+    const block = `/* SNGAMER HERO MEDIA ROUTES V1 */\n\napp.get("/api/hero-media", async (req, res) => {\n  try {\n    const result = await db(\n      "SELECT slot, media_type, url, updated_at FROM hero_media ORDER BY slot ASC"\n    );\n    res.json({ success: true, hero: result.rows });\n  } catch (error) {\n    console.error("HERO_MEDIA_GET_ERROR:", error);\n    res.status(500).json({ success: false, error: "Impossible de récupérer les images du héros." });\n  }\n});\n\napp.post("/api/admin/hero-media", requireAdmin, (req, res) => {\n  upload.single("media")(req, res, async (uploadError) => {\n    try {\n      if (uploadError) throw uploadError;\n      const slot = Number(req.body?.slot);\n      if (![1, 2, 3].includes(slot)) return res.status(400).json({ success: false, error: "Emplacement du héros invalide." });\n      if (!req.file) return res.status(400).json({ success: false, error: "Sélectionne une image." });\n      if (!String(req.file.mimetype || "").startsWith("image/")) return res.status(400).json({ success: false, error: "Le fichier doit être une image." });\n      const result = await uploadToCloudinary(req.file.buffer, "image", "sngamer/hero");\n      const url = result.secure_url || result.url;\n      if (!url) throw new Error("Cloudinary n'a pas retourné d'URL.");\n      await db(\`INSERT INTO hero_media (slot, media_type, url, updated_at) VALUES ($1, 'image', $2, NOW()) ON CONFLICT (slot) DO UPDATE SET media_type = EXCLUDED.media_type, url = EXCLUDED.url, updated_at = NOW()\`, [slot, url]);\n      res.json({ success: true, slot, url });\n    } catch (error) {\n      console.error("HERO_MEDIA_UPLOAD_ERROR:", error);\n      res.status(400).json({ success: false, error: error.message || "Impossible d'enregistrer l'image." });\n    }\n  });\n});\n\napp.delete("/api/admin/hero-media/:slot", requireAdmin, async (req, res) => {\n  try {\n    const slot = Number(req.params.slot);\n    if (![1, 2, 3].includes(slot)) return res.status(400).json({ success: false, error: "Emplacement du héros invalide." });\n    await db("DELETE FROM hero_media WHERE slot = $1", [slot]);\n    res.json({ success: true, slot });\n  } catch (error) {\n    console.error("HERO_MEDIA_DELETE_ERROR:", error);\n    res.status(500).json({ success: false, error: "Impossible de retirer l'image." });\n  }\n});\n\n`;
+    if (!text.includes(anchor)) throw new Error("Hero media route anchor not found");
+    text = text.replace(anchor, block + anchor);
+    changed = true;
+  }
 
   const contentRouteMarker = "/* SNGAMER HERO CONTENT ROUTES V1 */";
   if (!text.includes(contentRouteMarker)) {
@@ -64,12 +74,8 @@ function patchServer() {
       "    const slot = Number(req.body && req.body.slot);",
       "    const title = String((req.body && req.body.title) || '').trim();",
       "    const body = String((req.body && req.body.body) || '').trim();",
-      "    if (![1, 2, 3].includes(slot)) {",
-      "      return res.status(400).json({ success: false, error: 'Emplacement du héros invalide.' });",
-      "    }",
-      "    if (!title || title.length > 90 || !body || body.length > 260) {",
-      "      return res.status(400).json({ success: false, error: 'Vérifie le titre (1 à 90 caractères) et le texte (1 à 260 caractères).' });",
-      "    }",
+      "    if (![1, 2, 3].includes(slot)) return res.status(400).json({ success: false, error: 'Emplacement du héros invalide.' });",
+      "    if (!title || title.length > 90 || !body || body.length > 260) return res.status(400).json({ success: false, error: 'Vérifie le titre (1 à 90 caractères) et le texte (1 à 260 caractères).' });",
       "    const result = await db('INSERT INTO hero_slide_content (slot, title, body, updated_at) VALUES ($1, $2, $3, NOW()) ON CONFLICT (slot) DO UPDATE SET title = EXCLUDED.title, body = EXCLUDED.body, updated_at = NOW() RETURNING slot, title, body, updated_at', [slot, title, body]);",
       "    res.json({ success: true, slide: result.rows[0] });",
       "  } catch (error) {",
@@ -83,7 +89,6 @@ function patchServer() {
     text = text.replace(anchor, block + anchor);
     changed = true;
   }
-
 
   if (changed) fs.writeFileSync(SERVER_FILE, text, "utf8");
 }
@@ -99,12 +104,9 @@ function patchAdminFile(fileName) {
     if (updated !== html) fs.writeFileSync(file, updated, "utf8");
     return;
   }
-  if (/<\/body>/i.test(html)) {
-    html = html.replace(/<\/body>/i, scriptTag + "</body>");
-    fs.writeFileSync(file, html, "utf8");
-  } else {
-    console.error("HERO_MEDIA_PRELOAD_ERROR: </body> not found in " + fileName);
-  }
+  if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, scriptTag + "</body>");
+  else return console.error("HERO_MEDIA_PRELOAD_ERROR: </body> not found in " + fileName);
+  fs.writeFileSync(file, html, "utf8");
 }
 
 try {
