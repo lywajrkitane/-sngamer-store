@@ -87,7 +87,7 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
-      /* Premium promotion media: strict 1:1 frame, with the whole product visible. */
+      /* Premium promotion media: strict square 1:1 frame, filled edge-to-edge by the product image. */
       #sngamerCampaignCarousel .campaignCard { overflow: hidden !important; min-width: 0 !important; }
       #sngamerCampaignCarousel .campaignCopy { min-width: 0 !important; width: 0 !important; flex: 1 1 0% !important; overflow: hidden !important; }
       #sngamerCampaignCarousel .campaignTitle,
@@ -100,7 +100,7 @@
         height: 88px !important;
         aspect-ratio: 1 / 1 !important;
         flex: 0 0 88px !important;
-        padding: 5px !important;
+        padding: 0 !important;
         border-radius: 16px !important;
         overflow: hidden !important;
         display: grid !important;
@@ -114,10 +114,10 @@
         width: 100% !important;
         height: 100% !important;
         aspect-ratio: 1 / 1 !important;
-        object-fit: contain !important;
+        object-fit: cover !important;
         object-position: center !important;
         display: block !important;
-        border-radius: 11px !important;
+        border-radius: inherit !important;
       }
 
       @media (max-width:560px) {
@@ -125,11 +125,11 @@
           width: 78px !important;
           height: 78px !important;
           flex-basis: 78px !important;
-          padding: 4px !important;
+          padding: 0 !important;
           border-radius: 14px !important;
         }
         #sngamerCampaignCarousel .campaignMedia img {
-          border-radius: 10px !important;
+          border-radius: inherit !important;
         }
       }
     `;
