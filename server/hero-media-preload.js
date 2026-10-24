@@ -26,7 +26,7 @@ function patchServer() {
       "  await db(\"CREATE TABLE IF NOT EXISTS hero_slide_content (slot INTEGER PRIMARY KEY CHECK (slot IN (1, 2, 3)), title TEXT NOT NULL, body TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())\");",
       "  await db(\"INSERT INTO hero_slide_content (slot, title, body) VALUES (1, 'BONJOUR ET BIENVENUE SUR SNGAMER STORE', 'Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.'), (2, 'COMMANDE EN LIGNE', 'Choisis tes produits, ajoute-les au panier et passe ta commande facilement.'), (3, 'LIVRAISON AU SÉNÉGAL', 'Nous préparons ta commande avec soin et facilitons sa livraison.') ON CONFLICT (slot) DO NOTHING\");",
       ""
-    ].join("\\n") + "\\n";
+    ].join("\n") + "\n";
     if (!text.includes(anchor)) throw new Error("Hero content DB anchor not found");
     text = text.replace(anchor, block + anchor);
     changed = true;
@@ -78,7 +78,7 @@ function patchServer() {
       "  }",
       "});",
       ""
-    ].join("\\n") + "\\n";
+    ].join("\n") + "\n";
     if (!text.includes(anchor)) throw new Error("Hero content route anchor not found");
     text = text.replace(anchor, block + anchor);
     changed = true;
