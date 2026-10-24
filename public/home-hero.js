@@ -168,9 +168,6 @@
         timer = window.setInterval(function () { show(activeIndex + 1, false); }, INTERVAL);
       }
 
-      dotButtons.forEach(function (button, index) {
-        button.addEventListener("click", function () { show(index, true); });
-      });
       card.addEventListener("mouseenter", pauseTimer);
       card.addEventListener("mouseleave", startTimer);
       card.addEventListener("focusin", pauseTimer);
