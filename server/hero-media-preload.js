@@ -98,19 +98,19 @@ function patchAdminFile(fileName) {
   if (!fs.existsSync(file)) return;
   let html = fs.readFileSync(file, "utf8");
   const marker = "/hero-media-admin.js";
-  const scriptTag = '<script src="/hero-media-admin.js?v=20261024-hero-admintext2" defer></script>';
-  const fixTag = '<script src="/hero-dashboard-fix.js?v=20261024-hero-dashboard1" defer></script>';
+  const scriptTag = '<script src="/hero-media-admin.js?v=20261024-hero-admintext3" defer></script>';
+  const fixTag = '<script src="/hero-dashboard-fix.js?v=20261024-hero-dashboard2" defer></script>';
+  const editorTag = '<script src="/hero-dashboard-editor.js?v=20261024-hero-editor1" defer></script>';
   if (html.includes(marker)) {
     let updated = html.replace(/<script[^>]*\/hero-media-admin\.js[^>]*><\/script>/i, scriptTag);
-    if (!updated.includes("/hero-dashboard-fix.js")) {
-      updated = updated.replace(scriptTag, scriptTag + fixTag);
-    } else {
-      updated = updated.replace(/<script[^>]*\/hero-dashboard-fix\.js[^>]*><\/script>/i, fixTag);
-    }
+    if (!updated.includes("/hero-dashboard-fix.js")) updated = updated.replace(scriptTag, scriptTag + fixTag);
+    else updated = updated.replace(/<script[^>]*\/hero-dashboard-fix\.js[^>]*><\/script>/i, fixTag);
+    if (!updated.includes("/hero-dashboard-editor.js")) updated = updated.replace(fixTag, fixTag + editorTag);
+    else updated = updated.replace(/<script[^>]*\/hero-dashboard-editor\.js[^>]*><\/script>/i, editorTag);
     if (updated !== html) fs.writeFileSync(file, updated, "utf8");
     return;
   }
-  if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, scriptTag + fixTag + "</body>");
+  if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, scriptTag + fixTag + editorTag + "</body>");
   else return console.error("HERO_MEDIA_PRELOAD_ERROR: </body> not found in " + fileName);
   fs.writeFileSync(file, html, "utf8");
 }
