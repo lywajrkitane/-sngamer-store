@@ -19,7 +19,7 @@
     document.querySelectorAll(".professional-hero .sngPromoAnnouncement").forEach(function(el){el.remove();});
     const description=document.querySelector(".professional-hero .heroAnnouncement");
     if(description && !description.closest(".sngHomeHeroWrap")){
-      description.innerHTML="";
+      if(description.innerHTML) description.innerHTML="";
       description.removeAttribute("aria-label");
     }
   }
