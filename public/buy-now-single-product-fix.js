@@ -27,6 +27,53 @@
       #productDetail .price:not(.price--promo) .priceCurrent small{margin-left:5px!important;color:#d8c58e!important;font-size:.42em!important;font-weight:800!important;letter-spacing:0!important}
       #checkoutSummary .sngCheckoutColor{display:inline-flex!important;align-items:center!important;gap:6px!important;margin:4px 0 0!important;color:#91bde8!important;font-size:12px!important;font-weight:700!important}
       #checkoutSummary .sngCheckoutColorDot{width:10px!important;height:10px!important;min-width:10px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.45)!important;box-shadow:0 1px 4px rgba(0,0,0,.35)!important}
+
+      /* SNGAMER STORE — stock badge content animation.
+         Keep the badge itself stable; only the dot + text softly fade in/out. */
+      #products .card.productCardClickable .info > .stock.sngStockStatus{
+        animation:none!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus > i{
+        animation:sngStockContentBlink 1.8s ease-in-out infinite!important;
+        transform-origin:center!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus > span{
+        display:inline-block!important;
+        animation:sngStockContentBlink 1.8s ease-in-out infinite!important;
+        transform-origin:left center!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited > i,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-limited > span{
+        animation:sngStockContentBlinkLimited 1.7s ease-in-out infinite!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-last > i,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-last > span{
+        animation:sngStockContentBlinkLast 1.55s ease-in-out infinite!important;
+      }
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-out > i,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.is-out > span{
+        animation:sngStockContentBlinkOut 1.65s ease-in-out infinite!important;
+      }
+      @keyframes sngStockContentBlink{
+        0%,100%{opacity:.42;transform:scale(.96)}
+        50%{opacity:1;transform:scale(1)}
+      }
+      @keyframes sngStockContentBlinkLimited{
+        0%,100%{opacity:.42;transform:scale(.96)}
+        50%{opacity:1;transform:scale(1)}
+      }
+      @keyframes sngStockContentBlinkLast{
+        0%,100%{opacity:.38;transform:scale(.95)}
+        50%{opacity:1;transform:scale(1)}
+      }
+      @keyframes sngStockContentBlinkOut{
+        0%,100%{opacity:.45;transform:scale(.97)}
+        50%{opacity:1;transform:scale(1)}
+      }
+      @media(prefers-reduced-motion:reduce){
+        #products .card.productCardClickable .info > .stock.sngStockStatus > i,
+        #products .card.productCardClickable .info > .stock.sngStockStatus > span{animation:none!important}
+      }
     `;
     document.head.appendChild(style);
   }
