@@ -23,8 +23,9 @@
     style.id = "sngamer-home-promo-price-fix";
     style.textContent = `
       /* HOME PRODUCT CARDS — FINAL PROMO PRICE SEPARATION
-         Old price + discount badge share one protected row.
-         Sale price stays on its own bottom line, aligned with regular prices.
+         Row 1: old price + discount badge, with a protected visual gap.
+         Row 2: sale price aligned with regular product prices.
+         The badge never overlaps the old price, its FCFA, or the + button.
       */
       #products .card.productCardClickable .price.price--promo{
         position:relative!important;
@@ -41,12 +42,12 @@
         overflow:visible!important;
       }
 
-      /* Regular price and discount badge: SAME ROW. */
+      /* Regular price and discount badge: SAME ROW, never touching. */
       #products .card.productCardClickable .price.price--promo .priceOldRow{
         display:flex!important;
         align-items:center!important;
         justify-content:flex-start!important;
-        gap:6px!important;
+        gap:10px!important;
         width:100%!important;
         height:18px!important;
         min-height:18px!important;
@@ -60,11 +61,11 @@
         display:block!important;
         flex:0 1 auto!important;
         min-width:0!important;
-        max-width:calc(100% - 48px)!important;
+        max-width:calc(100% - 52px)!important;
         margin:0!important;
         padding:0!important;
         color:#7f8da0!important;
-        font-size:9px!important;
+        font-size:8.5px!important;
         line-height:1!important;
         font-weight:650!important;
         white-space:nowrap!important;
@@ -84,7 +85,7 @@
         justify-content:center!important;
         flex:0 0 auto!important;
         width:auto!important;
-        min-width:0!important;
+        min-width:40px!important;
         max-width:42px!important;
         height:18px!important;
         min-height:18px!important;
@@ -157,9 +158,15 @@
         #products .card.productCardClickable .price.price--promo .priceOldRow{
           height:17px!important;
           min-height:17px!important;
-          gap:5px!important;
+          gap:10px!important;
+        }
+        #products .card.productCardClickable .price.price--promo .priceOld{
+          font-size:8.5px!important;
+          max-width:calc(100% - 52px)!important;
         }
         #products .card.productCardClickable .price.price--promo .priceOldRow .discountBadge{
+          min-width:40px!important;
+          max-width:42px!important;
           height:17px!important;
           min-height:17px!important;
           padding:2px 5px!important;
