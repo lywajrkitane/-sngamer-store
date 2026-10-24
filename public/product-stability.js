@@ -12,7 +12,7 @@
   function loadBuyNowFix() {
     if (document.querySelector('script[data-sngamer-buy-now-fix="1"]')) return;
     const script = document.createElement("script");
-    script.src = "/buy-now-single-product-fix.js?v=20261023-singleproduct1";
+    script.src = "/buy-now-single-product-fix.js?v=20261024-pricehierarchy1";
     script.dataset.sngamerBuyNowFix = "1";
     document.body.appendChild(script);
   }
