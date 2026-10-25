@@ -12,10 +12,10 @@ const fs = require('fs');
 const path = require('path');
 require('./admin-dashboard-data-preload');
 
-const WORKSPACE_VERSION = '20261025-1200-canonical-full-dashboard1';
-const DATA_VERSION = '20261025-1200-data-stable1';
+const WORKSPACE_VERSION = '20261025-1205-authguard-workspaces3';
+const DATA_VERSION = '20261025-1205-single-refresh3';
 const CLIENTS_VERSION = '20261025-1200-clients-stable1';
-const DASHBOARD_DATA_VERSION = '20261025-1200-dashboard-data1';
+const DASHBOARD_DATA_VERSION = '20261025-1205-auth-aware-summary3';
 
 function replaceScript(html, filename, version, attributes = '') {
   const escapedName = filename.replace(/\./g, '\\.');

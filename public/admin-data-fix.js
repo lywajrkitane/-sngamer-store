@@ -21,7 +21,8 @@
   let refreshInFlight = false;
   let lastRefreshAt = 0;
   let observer = null;
-  let lastWorkspace = null;
+  let authWaitObserver = null;
+  let baseInstalled = false;
 
   function adminBox() {
     return document.getElementById('adminBox');
@@ -56,7 +57,7 @@
   }
 
   function loadAnalyticsAdmin() {
-    if (window.__sngAnalyticsAdminLoaded || document.querySelector('script[data-sng-site-analytics-admin]')) return;
+    if (window.__sngAnalyticsAdminLoaded || document.querySelector('script[data-sng-site-analytics-admin],script[src*="/site-analytics-admin.js"]')) return;
     const script = document.createElement('script');
     script.src = '/site-analytics-admin.js?v=20261019-analytics3';
     script.async = false;
@@ -70,7 +71,7 @@
   }
 
   function loadProductPerformanceAdmin() {
-    if (window.__sngProductPerformanceAdminLoaded || document.querySelector('script[data-sng-product-performance-admin]')) return;
+    if (window.__sngProductPerformanceAdminLoaded || document.querySelector('script[data-sng-product-performance-admin],script[src*="/product-analytics-admin.js"]')) return;
     const script = document.createElement('script');
     script.src = '/product-analytics-admin.js?v=20261020-products4';
     script.async = false;
@@ -192,8 +193,7 @@
         if (typeof window.loadOrders === 'function') await runLoader('loadOrders');
         cleanupAllLegacyOrderPanels();
       }
-      lastWorkspace = currentWorkspace();
-      console.debug('SNGAMER ADMIN AUTO REFRESH OK:', reason, lastWorkspace);
+      console.debug('SNGAMER ADMIN AUTO REFRESH OK:', reason, currentWorkspace());
     } catch (error) {
       console.error('SNGAMER ADMIN AUTO REFRESH ERROR:', reason, error);
     } finally {
@@ -216,10 +216,9 @@
       if (!isAdminVisible()) return;
       cleanupAllLegacyOrderPanels();
       loadProductPerformanceAdmin();
-      const workspace = currentWorkspace();
-      if (workspace !== lastWorkspace) refreshNow('workspace-change');
+      // Workspace switching is presentation-only, not a reason to restart loadAll().
     });
-    observer.observe(box, { attributes: true, attributeFilter: ['class', 'data-v26-workspace'] });
+    observer.observe(box, { attributes: true, attributeFilter: ['class'] });
   }
 
   function sanitizePaymentSelectors(root = document) {
@@ -243,6 +242,8 @@
   }
 
   function bootPaymentSelectorGuard() {
+    if (window.__sngAdminPaymentSelectorGuardInstalled) return;
+    window.__sngAdminPaymentSelectorGuardInstalled = true;
     sanitizePaymentSelectors(document);
     if (!document.body) return;
     const guard = new MutationObserver(() => sanitizePaymentSelectors(document));
@@ -368,23 +369,41 @@
     observeProductPanel();
   }
 
+  window.SNGAMER_ADMIN_AUTO_REFRESH_NOW = function (reason) {
+    return refreshNow(reason || 'authenticated-view', { force: true });
+  };
+
   function boot() {
     const box = adminBox();
     if (!box) {
-      window.setTimeout(boot, 250);
+      window.setTimeout(boot, 150);
       return;
     }
-    installFinalResponsiveDashboard();
-    stopOldCoreTimer();
-    cleanupAllLegacyOrderPanels();
-    installObserver();
-    bootPaymentSelectorGuard();
-    loadRefundUiV2();
-    loadAnalyticsAdmin();
-    loadProductPerformanceAdmin();
+    // Wait for authenticated visibility before installing any timer, observer
+    // or admin-data loader. Never repeat setup in a 250 ms loop while logged out.
     if (!isAdminVisible()) {
-      window.setTimeout(boot, 250);
+      if (!authWaitObserver && typeof MutationObserver !== 'undefined') {
+        authWaitObserver = new MutationObserver(() => {
+          if (isAdminVisible()) {
+            authWaitObserver.disconnect();
+            authWaitObserver = null;
+            boot();
+          }
+        });
+        authWaitObserver.observe(box, { attributes: true, attributeFilter: ['class'] });
+      }
       return;
+    }
+    if (!baseInstalled) {
+      baseInstalled = true;
+      installFinalResponsiveDashboard();
+      stopOldCoreTimer();
+      cleanupAllLegacyOrderPanels();
+      installObserver();
+      bootPaymentSelectorGuard();
+      loadRefundUiV2();
+      loadAnalyticsAdmin();
+      loadProductPerformanceAdmin();
     }
     if (!intervalId) {
       scheduleInitialRefreshes();
@@ -393,15 +412,15 @@
   }
 
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      cleanupAllLegacyOrderPanels();
-      loadRefundUiV2();
-      loadAnalyticsAdmin();
-      loadProductPerformanceAdmin();
-      refreshNow('visibility');
-    }
+    if (document.visibilityState !== 'visible' || !isAdminVisible()) return;
+    cleanupAllLegacyOrderPanels();
+    loadRefundUiV2();
+    loadAnalyticsAdmin();
+    loadProductPerformanceAdmin();
+    refreshNow('visibility');
   });
   window.addEventListener('pageshow', () => {
+    if (!isAdminVisible()) return;
     cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();
@@ -409,6 +428,7 @@
     refreshNow('pageshow');
   });
   window.addEventListener('focus', () => {
+    if (!isAdminVisible()) return;
     cleanupAllLegacyOrderPanels();
     loadRefundUiV2();
     loadAnalyticsAdmin();

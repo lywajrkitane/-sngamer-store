@@ -17,6 +17,11 @@
     if (el) el.textContent = value;
   }
 
+  function isAdminVisible() {
+    const box = $('adminBox');
+    return !!box && !box.classList.contains('hidden');
+  }
+
   function ensureStyles() {
     if ($('sg-dashboard-recap-style')) return;
     const style = document.createElement('style');
@@ -56,6 +61,7 @@
         <tbody>
           <tr><td>🆕 Nouvelles</td><td data-recap="new_orders">—</td></tr>
           <tr><td>✅ Confirmées</td><td data-recap="confirmed_orders">—</td></tr>
+          <tr><td>🟣 En préparation</td><td data-recap="prepared_orders">—</td></tr>
           <tr><td>🚚 Expédiées</td><td data-recap="shipped_orders">—</td></tr>
           <tr><td>📦 Livrées</td><td data-recap="delivered_orders">—</td></tr>
           <tr><td>❌ Annulées</td><td data-recap="cancelled_orders">—</td></tr>
@@ -75,6 +81,7 @@
       customers: data.customers,
       new_orders: data.new_orders,
       confirmed_orders: data.confirmed_orders,
+      prepared_orders: data.prepared_orders,
       shipped_orders: data.shipped_orders,
       delivered_orders: data.delivered_orders,
       cancelled_orders: data.cancelled_orders
@@ -88,6 +95,7 @@
     setText('revenue', money(data.revenue));
     setText('newOrderCount', data.new_orders);
     setText('confirmedOrderCount', data.confirmed_orders);
+    setText('preparedOrderCount', data.prepared_orders);
     setText('shippedOrderCount', data.shipped_orders);
     setText('deliveredOrderCount', data.delivered_orders);
     setText('cancelledOrderCount', data.cancelled_orders);
@@ -97,6 +105,7 @@
   }
 
   async function fetchSummary() {
+    if (!isAdminVisible()) return false;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
     try {
@@ -114,17 +123,41 @@
     } finally { clearTimeout(timer); }
   }
 
-  function boot() {
+  let authObserver = null;
+  function startSummaryRefresh() {
+    if (!isAdminVisible()) return;
     ensureOverview();
     fetchSummary();
     if (!window.__sngCanonicalDashboardTimer) {
-      window.__sngCanonicalDashboardTimer = setInterval(fetchSummary, 60000);
+      window.__sngCanonicalDashboardTimer = setInterval(() => {
+        if (isAdminVisible()) fetchSummary();
+      }, 60000);
     }
   }
-
+  function boot() {
+    ensureOverview();
+    const box = $('adminBox');
+    if (!box) return;
+    if (isAdminVisible()) {
+      startSummaryRefresh();
+      return;
+    }
+    if (!authObserver && typeof MutationObserver !== 'undefined') {
+      authObserver = new MutationObserver(() => {
+        if (isAdminVisible()) {
+          authObserver.disconnect();
+          authObserver = null;
+          startSummaryRefresh();
+        }
+      });
+      authObserver.observe(box, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') fetchSummary(); });
-  window.addEventListener('focus', fetchSummary);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && isAdminVisible()) fetchSummary();
+  });
+  window.addEventListener('focus', () => { if (isAdminVisible()) fetchSummary(); });
   window.SNGAMER_CANONICAL_DASHBOARD_REFRESH = fetchSummary;
 })();

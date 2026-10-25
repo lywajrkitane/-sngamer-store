@@ -9,6 +9,7 @@
   ];
   const pending={};
   let crop=null;
+  let authObserver=null;
   function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;')}
   function css(){if(document.getElementById('sngHeroDashEditorStyle'))return;const s=document.createElement('style');s.id='sngHeroDashEditorStyle';s.textContent=`
     #sngHeroDashboardEditor{margin:0 0 24px;padding:20px;border:1px solid rgba(73,145,255,.35);border-radius:22px;background:linear-gradient(145deg,#0b1628,#110d20);box-shadow:0 16px 45px rgba(0,0,0,.25)}
@@ -32,6 +33,25 @@
   async function saveImg(slot){if(!pending[slot])return status(slot,'Choisis une image puis valide son cadrage avant de l’enregistrer.','err');const fd=new FormData();fd.append('slot',slot);fd.append('media',pending[slot]);const r=await fetch('/api/admin/hero-media',{method:'POST',body:fd});const j=await r.json();if(j.success){delete pending[slot];document.getElementById('hdPreview'+slot).innerHTML='<img src="'+esc(j.url)+'" alt="Image Hero '+slot+'">';status(slot,'Image enregistrée avec succès.','ok')}else status(slot,'Erreur : '+(j.error||'enregistrement impossible'),'err')}
   async function removeImg(slot){const r=await fetch('/api/admin/hero-media/'+slot,{method:'DELETE'});const j=await r.json();if(j.success){document.getElementById('hdPreview'+slot).textContent='Aucune image enregistrée';status(slot,'Image retirée.','ok')}else status(slot,'Erreur : '+(j.error||'suppression impossible'),'err')}
   function mount(){if(document.getElementById('sngHeroDashboardEditor'))return true;css();const admin=document.getElementById('adminBox');if(!admin||admin.classList.contains('hidden'))return false;const root=document.createElement('section');root.id='sngHeroDashboardEditor';root.innerHTML='<div class="hdHead"><div><h2>🎯 HERO — Page d’accueil</h2><p class="hdSub">Ici tu gères les 3 slides du Hero de la page d’accueil. Choisis les images, ajuste le cadrage et le zoom, puis modifie les textes quand tu veux.</p></div><div class="hdBadge">3 SLIDES · IMAGES + TEXTES</div></div><div class="hdGrid">'+slides.map(card).join('')+'</div>';const stats=admin.querySelector('.stats');if(stats)stats.insertAdjacentElement('afterend',root);else admin.prepend(root);slides.forEach(x=>{const f=document.getElementById('hdFile'+x.slot);f.addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(file)openCrop(x.slot,file)});document.querySelector('[data-save-img="'+x.slot+'"]').onclick=()=>saveImg(x.slot);document.querySelector('[data-save-copy="'+x.slot+'"]').onclick=()=>saveCopy(x.slot);document.querySelector('[data-remove="'+x.slot+'"]').onclick=()=>removeImg(x.slot)});load();return true}
-  function boot(){let n=0;const t=setInterval(()=>{if(mount()||++n>160)clearInterval(t)},250)}
+  function boot(){
+    let tries=0;
+    function waitForAdmin(){
+      const admin=document.getElementById('adminBox');
+      if(!admin){if(++tries<100)window.setTimeout(waitForAdmin,100);return;}
+      if(!admin.classList.contains('hidden')){
+        if(authObserver){authObserver.disconnect();authObserver=null;}
+        mount();return;
+      }
+      if(!authObserver && typeof MutationObserver!=='undefined'){
+        authObserver=new MutationObserver(()=>{
+          if(!admin.classList.contains('hidden')){
+            authObserver.disconnect();authObserver=null;mount();
+          }
+        });
+        authObserver.observe(admin,{attributes:true,attributeFilter:['class']});
+      }
+    }
+    waitForAdmin();
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

@@ -434,6 +434,8 @@
   }
   @media(max-width:390px){#sg-admin-v26-nav button{font-size:11px;padding:8px 7px;gap:5px}#sg-admin-v26-nav button span{width:18px;flex-basis:18px;font-size:15px}}
 </style>
+
+<style id="sg-admin-auth-visibility-guard">html body #adminBox.hidden{display:none!important}</style>
 </head>
 
 <body>
@@ -1164,43 +1166,18 @@ async function login() {
 
 
   function showAdmin() {
-
-    document
-      .getElementById("loginBox")
-      .classList.add("hidden");
-
-    document
-      .getElementById("adminBox")
-      .classList.remove("hidden");
-
-    document
-      .getElementById("logoutBtn")
-      .classList.remove("hidden");
-
-    void loadAll();
-    // Retry after the session cookie and admin view have settled; no manual refresh needed.
-    [600, 1600, 3500, 6500].forEach(delay => setTimeout(() => {
-      const adminBox = document.getElementById("adminBox");
-      if (adminBox && !adminBox.classList.contains("hidden")) void loadAll();
-    }, delay));
-
-    // Core automatic refresh: do not depend on an extra script finding the
-    // Orders button or on the workspace's delayed initialization.
-    if (!window.__sngAdminOrdersAutoRefreshTimer) {
-      const refreshAdminOrders = () => {
-        const box = document.getElementById("adminBox");
-        if (!box || box.classList.contains("hidden")) return;
-        if (document.visibilityState === "hidden") return;
-        void loadAll();
-      };
-
-      window.__sngAdminOrdersAutoRefreshTimer = window.setInterval(refreshAdminOrders, 10000);
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") refreshAdminOrders();
-      });
-      window.addEventListener("focus", refreshAdminOrders);
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("adminBox").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.remove("hidden");
+    if (typeof window.SNGAMER_ADMIN_WORKSPACE_BOOT === "function") {
+      window.SNGAMER_ADMIN_WORKSPACE_BOOT();
     }
-loadPromoMedia();
+    if (typeof window.SNGAMER_ADMIN_AUTO_REFRESH_NOW === "function") {
+      void window.SNGAMER_ADMIN_AUTO_REFRESH_NOW("login");
+    } else {
+      void loadAll();
+    }
+    loadPromoMedia();
     loadPromoProductSelectors();
   }
 
@@ -1214,16 +1191,33 @@ loadPromoMedia();
   }
 
 
-  async function loadProducts() {
+  async function fetchAdminJson(url, options = {}, timeoutMs = 8000) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, {
+        credentials: "same-origin",
+        cache: "no-store",
+        ...options,
+        signal: controller.signal
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || `Chargement impossible (HTTP ${response.status})`);
+      if (payload === null) throw new Error("Réponse JSON invalide du serveur.");
+      return payload;
+    } catch (error) {
+      if (error && error.name === "AbortError") throw new Error(`Le serveur n'a pas répondu en ${Math.round(timeoutMs / 1000)} secondes.`);
+      throw error;
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  }
 
-    const response =
-      await fetch("/api/products");
+async function loadProducts() {
 
-    const products =
-      await response.json();
-
-    document.getElementById("productCount")
-      .textContent = products.length;
+    const payload = await fetchAdminJson("/api/products");
+    const products = Array.isArray(payload) ? payload : payload?.products;
+    if (!Array.isArray(products)) throw new Error("Réponse invalide lors du chargement des produits.");
 
     document.getElementById("productsTable")
       .innerHTML = products.map(p => `
@@ -1820,52 +1814,11 @@ if (document.readyState === "loading") {
 
   async function loadOrders() {
 
-    const response = await fetch("/api/admin/orders", {
-      credentials: "same-origin",
-      cache: "no-store"
-    });
+    const orders = await fetchAdminJson("/api/admin/orders");
+    if (!Array.isArray(orders)) throw new Error("Réponse invalide lors du chargement des commandes.");
+    // Overview counters are owned by /api/admin/dashboard-summary.
 
-    if (!response.ok) {
-      const problem = await response.json().catch(() => ({}));
-      throw new Error(problem.error || `Chargement des commandes impossible (HTTP ${response.status})`);
-    }
 
-    const orders = await response.json();
-    if (!Array.isArray(orders)) {
-      throw new Error("Réponse invalide lors du chargement des commandes");
-    }
-  const newOrders = orders.filter(o => {
-  const status = String(o.status || "").trim().toLowerCase();
-  return status === "nouvelle" || status === "nouveau" || status.startsWith("nouvelle ");
-}).length;
-  const confirmedOrders = orders.filter(o => o.status === "Confirmée").length;
-  const preparedOrders = orders.filter(o => o.status === "En préparation").length;
-  const shippedOrders = orders.filter(o => o.status === "Expédiée").length;
-  const deliveredOrders = orders.filter(o => o.status === "Livrée").length;
-  const cancelledOrders = orders.filter(o => o.status === "Annulée").length;
-
-  document.getElementById("newOrderCount").textContent = newOrders;
-  document.getElementById("confirmedOrderCount").textContent = confirmedOrders;
-  document.getElementById("preparedOrderCount").textContent = preparedOrders;
-  document.getElementById("shippedOrderCount").textContent = shippedOrders;
-  document.getElementById("deliveredOrderCount").textContent = deliveredOrders;
-  document.getElementById("cancelledOrderCount").textContent = cancelledOrders;
-    document.getElementById("orderCount")
-      .textContent = orders.length;
-
-    const revenue = orders
-      .filter(o => {
-        const orderStatus = String(o.status || "").trim().toLocaleLowerCase("fr-FR");
-        const paymentStatus = String(o.payment_status || "").trim().toLocaleLowerCase("fr-FR");
-        const paid = paymentStatus === "payé" || paymentStatus === "paye" || paymentStatus === "paid"
-          || (!paymentStatus && orderStatus === "payée");
-        const cancelled = orderStatus === "annulée" || orderStatus === "annulee";
-        return paid && !cancelled;
-      })
-      .reduce((sum, o) => sum + Number(o.total || 0), 0);
-
-    document.getElementById("revenue")
-      .textContent = money(revenue);
 
     document.getElementById("ordersTable")
       .innerHTML = orders.map(o => {
@@ -3120,11 +3073,20 @@ async function loadAll() {
 
   const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
   const retryTask = async (label, task) => {
-    const delays = [250, 500, 900, 1500, 2200];
+    const delays = [400];
     let lastError;
     for (let attempt = 0; attempt <= delays.length; attempt++) {
       try {
-        await task();
+        await new Promise((resolve, reject) => {
+          const timer = window.setTimeout(
+            () => reject(new Error(`Le chargement « ${label} » dépasse 9 secondes.`)),
+            9000
+          );
+          Promise.resolve().then(task).then(
+            value => { window.clearTimeout(timer); resolve(value); },
+            error => { window.clearTimeout(timer); reject(error); }
+          );
+        });
         return true;
       } catch (error) {
         lastError = error;

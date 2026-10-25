@@ -19,16 +19,20 @@ if (!express.application.__sngCanonicalDashboardData) {
             SELECT
               (SELECT COUNT(*)::int FROM products) AS products,
               (SELECT COUNT(*)::int FROM orders) AS orders,
-              (SELECT COUNT(*)::int FROM orders WHERE status = 'Nouvelle') AS new_orders,
-              (SELECT COUNT(*)::int FROM orders WHERE status = 'Confirmée') AS confirmed_orders,
-              (SELECT COUNT(*)::int FROM orders WHERE status = 'Expédiée') AS shipped_orders,
-              (SELECT COUNT(*)::int FROM orders WHERE status = 'Livrée') AS delivered_orders,
-              (SELECT COUNT(*)::int FROM orders WHERE status = 'Annulée') AS cancelled_orders,
+              (SELECT COUNT(*)::int FROM orders WHERE LOWER(BTRIM(COALESCE(status,''))) IN ('nouvelle','nouveau') OR LOWER(BTRIM(COALESCE(status,''))) LIKE 'nouvelle %') AS new_orders,
+              (SELECT COUNT(*)::int FROM orders WHERE LOWER(BTRIM(COALESCE(status,''))) = 'confirmée') AS confirmed_orders,
+              (SELECT COUNT(*)::int FROM orders WHERE LOWER(BTRIM(COALESCE(status,''))) = 'en préparation') AS prepared_orders,
+              (SELECT COUNT(*)::int FROM orders WHERE LOWER(BTRIM(COALESCE(status,''))) = 'expédiée') AS shipped_orders,
+              (SELECT COUNT(*)::int FROM orders WHERE LOWER(BTRIM(COALESCE(status,''))) = 'livrée') AS delivered_orders,
+              (SELECT COUNT(*)::int FROM orders WHERE LOWER(BTRIM(COALESCE(status,''))) = 'annulée') AS cancelled_orders,
               (SELECT COUNT(*)::int FROM customers) AS customers,
               (SELECT COALESCE(SUM(total),0)::bigint FROM orders
-                 WHERE LOWER(COALESCE(payment_status,'')) IN ('payé','paye','paid')
-                   AND LOWER(COALESCE(refund_status,'')) NOT IN ('remboursé','rembourse')
-                   AND LOWER(COALESCE(status,'')) NOT IN ('annulée','annulee')) AS revenue
+                 WHERE (
+                   LOWER(BTRIM(COALESCE(payment_status,''))) IN ('payé','paye','paid')
+                   OR (BTRIM(COALESCE(payment_status,'')) = '' AND LOWER(BTRIM(COALESCE(status,''))) IN ('payée','payee'))
+                 )
+                   AND LOWER(BTRIM(COALESCE(refund_status,''))) NOT IN ('remboursé','rembourse')
+                   AND LOWER(BTRIM(COALESCE(status,''))) NOT IN ('annulée','annulee')) AS revenue
           `);
           res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
           res.json(result.rows[0]);
