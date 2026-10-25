@@ -88,14 +88,24 @@
     });
     nav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
     button.classList.add('active');
-    try{sessionStorage.setItem('sg_admin_workspace_v26','customers')}catch(_){}
+    try{
+      sessionStorage.setItem('sg_admin_workspace_v26','customers');
+      sessionStorage.removeItem('sg_admin_workspace_hero');
+    }catch(_){}
     load();
     window.scrollTo({top:0,left:0,behavior:'auto'});
   }
 
   function mountNavButton(){
     const nav=document.getElementById('sg-admin-v26-nav');
-    if(!nav||nav.querySelector('[data-sg-customers]'))return;
+    if(!nav)return;
+    const sharedButton=nav.querySelector('[data-v26-view="customers"]');
+    if(sharedButton){
+      sharedButton.dataset.sgCustomers='1';
+      sharedButton.classList.add('sgCustomersNavBtn');
+      return;
+    }
+    if(nav.querySelector('[data-sg-customers]'))return;
     const button=document.createElement('button');
     button.type='button';button.className='sgCustomersNavBtn';button.dataset.sgCustomers='1';
     button.innerHTML='<span aria-hidden="true">👥</span><b>Clients</b>';
@@ -203,7 +213,7 @@
   }
 
   const observer=new MutationObserver(mount);
-  observer.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
   document.addEventListener('DOMContentLoaded',mount);
   setInterval(()=>{if(document.getElementById('adminBox')&&!document.getElementById('adminBox').classList.contains('hidden')){mountNavButton();load()}},30000);
 })();
