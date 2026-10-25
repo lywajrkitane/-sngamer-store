@@ -621,6 +621,25 @@
     if (scroll) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }
 
+  function watchDynamicSections() {
+    const root = box();
+    if (!root || root.dataset.sgV26SectionObserver === '1' || typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(records => {
+      const newSections = records.some(record =>
+        Array.from(record.addedNodes || []).some(node => node.nodeType === 1 && node.tagName === 'SECTION')
+      );
+      if (!newSections) return;
+      sections().forEach(section => {
+        const type = typeOfSection(section);
+        const show = active === 'overview' ? false : type === active;
+        section.classList.toggle('sg-v26-show', show);
+        section.classList.toggle('sg-v26-hide', !show);
+      });
+    });
+    observer.observe(root, { childList: true });
+    root.dataset.sgV26SectionObserver = '1';
+  }
+
   function bindNavigation() {
     const n = nav();
     if (!n || n.dataset.bound) return;
@@ -669,6 +688,7 @@
     styles();
     removeLegacyNavs();
     nav();
+    watchDynamicSections();
     bindNavigation();
     interceptOldDashboardButtons();
     let saved = 'overview';
