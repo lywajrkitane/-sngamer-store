@@ -34,9 +34,8 @@ function prepareAdminHtml(source) {
   html = replaceScript(html, 'admin-data-fix.js', DATA_VERSION);
   html = replaceScript(html, 'customer-admin.js', CLIENTS_VERSION, ' defer');
 
-  // Remove any legacy competing Hero workspace injection. Hero is now owned by
-  // the canonical workspace controller above.
-  html = html.replace(/<script\\b[^>]*\\bsrc=["\'][^"\']*\\/admin-hero-workspace\.js(?:\\?[^"\']*)?["\'][^>]*>\\s*<\\/script>/gi, '');
+  // The canonical workspace controller owns Hero navigation too. Do not inject
+  // the legacy Hero controller from this preload.
 
   if (!html.includes('premium-dialogs-v1.css')) {
     html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835"></head>');
