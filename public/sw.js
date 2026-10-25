@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261024-stock-root-cause3';
+const SNGAMER_SW_VERSION = '20261025-product-actions-loader1';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -18,15 +18,48 @@ self.addEventListener('activate', event => {
   })());
 });
 
-/* SNGAMER — final visual guard for "Sur commande".
-   Some legacy stock-status rules have higher CSS specificity than the
-   on-order badge. Keep the existing layout and only force the pink frame
-   for products explicitly marked on_order. */
+/* SNGAMER — ensure the product image-action module is actually loaded.
+   The module already exists in public/, but the storefront HTML did not load it.
+   Inject only the missing script into document responses; do not alter the page
+   markup or any working product logic. */
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+
+  if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('/index.html')) {
+    event.respondWith((async () => {
+      const response = await fetch(request);
+      if (!response.ok) return response;
+      try {
+        const type = response.headers.get('content-type') || '';
+        if (!type.includes('text/html')) return response;
+        const source = await response.text();
+        if (source.includes('/product-image-actions-v1.js')) return new Response(source, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers
+        });
+        const injected = source.replace(
+          '</body>',
+          '<script src="/product-image-actions-v1.js?v=20261025-image-actions2" defer></script></body>'
+        );
+        const headers = new Headers(response.headers);
+        headers.set('Cache-Control', 'no-store');
+        headers.set('X-SNGAMER-Product-Actions', 'loaded');
+        return new Response(injected, {
+          status: response.status,
+          statusText: response.statusText,
+          headers
+        });
+      } catch (_) {
+        return response;
+      }
+    })());
+    return;
+  }
+
   if (!url.pathname.endsWith('/stock-mode.js')) return;
 
   event.respondWith((async () => {
