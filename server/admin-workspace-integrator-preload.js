@@ -11,7 +11,6 @@ const FILES = ['admin.html', 'admin-dashboard.html'];
 const HERO = '<script src="/admin-hero-workspace.js?v=20261025-hero"></script>';
 const CLIENTS = '<script src="/customer-admin.js?v=20261025-clients"></script>';
 const ORDERS = '<script src="/admin-orders-responsive.js?v=20261025-orders-premium"></script>';
-const UI_STABILITY = '<script src="/admin-ui-stability-fix.js?v=20261025-ui2"></script>';
 
 function patch(fileName) {
   const file = path.join(PUBLIC, fileName);
@@ -34,11 +33,6 @@ function patch(fileName) {
 
   if (!html.includes('/admin-orders-responsive.js')) {
     html = html.replace(/<\/body>/i, `${ORDERS}</body>`);
-    changed = true;
-  }
-
-  if (!html.includes('/admin-ui-stability-fix.js')) {
-    html = html.replace(/<\/body>/i, `${UI_STABILITY}</body>`);
     changed = true;
   }
 
