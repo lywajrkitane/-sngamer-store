@@ -164,6 +164,6 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add server/server.js server/paytech.js public/paytech-checkout.js public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js server/admin-data-fix-preload.js .github/workflows/inject-admin-v24.yml
+          git add server/server.js server/paytech.js public/paytech-checkout.js public/admin.html public/admin-dashboard.html public/admin-data-fix.js server/customer-system.js server/bootstrap.js .github/workflows/inject-admin-v24.yml
           git commit -m 'security(payment): harden PayTech checkout idempotency'
           git push
