@@ -4,6 +4,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+require('./admin-dashboard-data-preload');
 
 const WORKSPACE_VERSION = '20261025-1140-canonical-workspace3';
 const DATA_VERSION = '20261025-1140-data-stable2';
