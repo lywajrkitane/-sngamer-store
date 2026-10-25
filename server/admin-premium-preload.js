@@ -11,6 +11,7 @@ const WORKSPACE_VERSION = '20261025-0958-workspace-stable1';
 const DATA_VERSION = '20261025-0958-data-stable1';
 const HERO_VERSION = '20261025-0958-hero-stable1';
 const CLIENTS_VERSION = '20261025-0958-clients-stable1';
+const STABILITY_VERSION = '20261025-1038-dashboard-stability1';
 
 function replaceScript(html, filename, version, attributes = '') {
   const escapedName = filename.replace(/\./g, '\\.');
@@ -45,6 +46,7 @@ function prepareAdminHtml(source) {
   html = replaceScript(html, 'admin-hero-workspace.js', HERO_VERSION);
   html = replaceScript(html, 'admin-data-fix.js', DATA_VERSION);
   html = replaceScript(html, 'customer-admin.js', CLIENTS_VERSION, ' defer');
+  html = replaceScript(html, 'admin-dashboard-stability.js', STABILITY_VERSION, ' defer');
 
   if (!html.includes('premium-dialogs-v1.css')) {
     html = html.replace(/<\/head>/i,
