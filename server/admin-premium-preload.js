@@ -1,88 +1,65 @@
 /* SNGAMER STORE — Admin premium HTML preload.
-   This is the first HTML middleware for admin pages. Keep asset versions here:
-   bootstrap.js runs later in the listen-wrapper chain and does not serve these
-   pages because this middleware intentionally handles them first.
+   Canonical admin asset injection. Business logic is untouched.
 */
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
-const WORKSPACE_VERSION = '20261025-0958-workspace-stable1';
+const WORKSPACE_VERSION = '20261025-1048-canonical1';
 const DATA_VERSION = '20261025-0958-data-stable1';
 const HERO_VERSION = '20261025-0958-hero-stable1';
 const CLIENTS_VERSION = '20261025-0958-clients-stable1';
-const STABILITY_VERSION = '20261025-1038-dashboard-stability1';
 
 function replaceScript(html, filename, version, attributes = '') {
   const escapedName = filename.replace(/\./g, '\\.');
   const pattern = new RegExp(
-    "<script\\b[^>]*\\bsrc=[\"'][^\"']*\\/" + escapedName +
-    "(?:\\?[^\"']*)?[\"'][^>]*>\\s*<\\/script>",
+    '<script\\b[^>]*\\bsrc=["\'][^"\']*\\/' + escapedName + '(?:\\?[^"\']*)?["\'][^>]*>\\s*<\\/script>',
     'gi'
   );
   const tag = '<script src="/' + filename + '?v=' + version + '"' + attributes + '></script>';
   const existing = html.match(pattern);
-
   if (existing && existing.length) {
     let first = true;
-    return html.replace(pattern, () => {
-      if (first) {
-        first = false;
-        return tag;
-      }
+    return html.replace(pattern, function () {
+      if (first) { first = false; return tag; }
       return '';
     });
   }
-
   if (/<\/body>/i.test(html)) return html.replace(/<\/body>/i, tag + '</body>');
   return html + '\n' + tag + '\n';
 }
 
 function prepareAdminHtml(source) {
   let html = source;
-
-  // One canonical, cache-busted copy of each workspace/data controller.
   html = replaceScript(html, 'admin-v24-workspace.js', WORKSPACE_VERSION);
   html = replaceScript(html, 'admin-hero-workspace.js', HERO_VERSION);
   html = replaceScript(html, 'admin-data-fix.js', DATA_VERSION);
   html = replaceScript(html, 'customer-admin.js', CLIENTS_VERSION, ' defer');
-  html = replaceScript(html, 'admin-dashboard-stability.js', STABILITY_VERSION, ' defer');
 
   if (!html.includes('premium-dialogs-v1.css')) {
-    html = html.replace(/<\/head>/i,
-      '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835"></head>');
+    html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835"></head>');
   }
   if (!html.includes('premium-dialogs-v1.js')) {
-    html = html.replace(/<\/body>/i,
-      '<script src="/premium-dialogs-v1.js?v=20261018-1835"></script></body>');
+    html = html.replace(/<\/body>/i, '<script src="/premium-dialogs-v1.js?v=20261018-1835"></script></body>');
   }
   if (!html.includes('premium-select-guard-v1.js')) {
-    html = html.replace(/<\/body>/i,
-      '<script src="/premium-select-guard-v1.js?v=20261018-1835"></script></body>');
+    html = html.replace(/<\/body>/i, '<script src="/premium-select-guard-v1.js?v=20261018-1835"></script></body>');
   }
-
   return html;
 }
 
 if (!express.application.__sngAdminPremiumPreload) {
   express.application.__sngAdminPremiumPreload = true;
   const originalListen = express.application.listen;
-
   express.application.listen = function adminPremiumListen(...args) {
     const app = this;
     const stack = app._router && app._router.stack;
-
     if (stack && !app.__sngAdminPremiumInjected) {
       app.__sngAdminPremiumInjected = true;
-
       const injectAdminPremium = function (req, res, next) {
-        if (req.method !== 'GET' || !['/admin.html', '/admin-dashboard.html'].includes(req.path)) {
-          return next();
-        }
-
+        if (req.method !== 'GET' || !['/admin.html', '/admin-dashboard.html'].includes(req.path)) return next();
         const file = path.join(__dirname, '..', 'public', req.path.slice(1));
         if (!fs.existsSync(file)) return next();
-
         try {
           const html = prepareAdminHtml(fs.readFileSync(file, 'utf8'));
           res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -95,12 +72,10 @@ if (!express.application.__sngAdminPremiumPreload) {
           return next();
         }
       };
-
       const router = express.Router();
       router.use(injectAdminPremium);
       stack.unshift(...(router.stack || []));
     }
-
     return originalListen.apply(this, args);
   };
 }
