@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261025-product-actions-loader1';
+const SNGAMER_SW_VERSION = '20261025-product-actions-loader2';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -18,14 +18,9 @@ self.addEventListener('activate', event => {
   })());
 });
 
-/* SNGAMER — ensure the product image-action module is actually loaded.
-   The module already exists in public/, but the storefront HTML did not load it.
-   Inject only the missing script into document responses; do not alter the page
-   markup or any working product logic. */
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
-
   const url = new URL(request.url);
 
   if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('/index.html')) {
@@ -36,26 +31,15 @@ self.addEventListener('fetch', event => {
         const type = response.headers.get('content-type') || '';
         if (!type.includes('text/html')) return response;
         const source = await response.text();
-        if (source.includes('/product-image-actions-v1.js')) return new Response(source, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers
-        });
-        const injected = source.replace(
-          '</body>',
-          '<script src="/product-image-actions-v1.js?v=20261025-image-actions2" defer></script></body>'
-        );
+        let injected = source;
+        if (!injected.includes('/product-image-actions-v2.js')) {
+          injected = injected.replace('</body>', '<script src="/product-image-actions-v2.js?v=20261025-overlay2" defer></script></body>');
+        }
         const headers = new Headers(response.headers);
         headers.set('Cache-Control', 'no-store');
-        headers.set('X-SNGAMER-Product-Actions', 'loaded');
-        return new Response(injected, {
-          status: response.status,
-          statusText: response.statusText,
-          headers
-        });
-      } catch (_) {
-        return response;
-      }
+        headers.set('X-SNGAMER-Product-Actions', 'v2');
+        return new Response(injected, { status: response.status, statusText: response.statusText, headers });
+      } catch (_) { return response; }
     })());
     return;
   }
@@ -65,28 +49,40 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const response = await fetch(request);
     if (!response.ok) return response;
-
     try {
       const source = await response.text();
-      const patch = `\n;(function(){\n  const PINK='#ff4fa3';\n  function patchOnOrder(){\n    const styleId='sngOnOrderFinalVisualGuard';\n    let style=document.getElementById(styleId);\n    if(!style){\n      style=document.createElement('style');\n      style.id=styleId;\n      document.head.appendChild(style);\n    }\n    style.textContent=\`\n      #products .card.productCardClickable .info > .stock.onOrderStock.sngStockStatus,\n      #products .card.productCardClickable .info > .stock.sngStockStatus.onOrderStock.is-stock,\n      #products .card.productCardClickable .info > .stock.onOrderStock {\n        color:\${PINK} !important;\n        border-color:rgba(255,79,163,.34) !important;\n        background:rgba(255,79,163,.09) !important;\n        box-shadow:none !important;\n      }\n      #products .card.productCardClickable .info > .stock.onOrderStock::before,\n      #products .card.productCardClickable .info > .stock.onOrderStock::after {\n        border-color:transparent !important;\n        background:transparent !important;\n        box-shadow:none !important;\n      }\n      #products .card.productCardClickable .info > .stock.onOrderStock > i,\n      #products .card.productCardClickable .info > .stock.onOrderStock .sngOnOrderDot {\n        background:\${PINK} !important;\n        box-shadow:0 0 0 3px rgba(255,79,163,.08),0 0 10px \${PINK} !important;\n      }\n    \`;\n  }\n  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',patchOnOrder,{once:true});\n  else patchOnOrder();\n  new MutationObserver(patchOnOrder).observe(document.documentElement,{childList:true,subtree:true});\n})();\n`;
+      const patch = `
+;(function(){
+  const PINK='#ff4fa3';
+  function patchOnOrder(){
+    const styleId='sngOnOrderFinalVisualGuard';
+    let style=document.getElementById(styleId);
+    if(!style){style=document.createElement('style');style.id=styleId;document.head.appendChild(style);}
+    style.textContent=\`
+      #products .card.productCardClickable .info > .stock.onOrderStock.sngStockStatus,
+      #products .card.productCardClickable .info > .stock.sngStockStatus.onOrderStock.is-stock,
+      #products .card.productCardClickable .info > .stock.onOrderStock {color:\${PINK}!important;border-color:rgba(255,79,163,.34)!important;background:rgba(255,79,163,.09)!important;box-shadow:none!important;}
+      #products .card.productCardClickable .info > .stock.onOrderStock::before,
+      #products .card.productCardClickable .info > .stock.onOrderStock::after {border-color:transparent!important;background:transparent!important;box-shadow:none!important;}
+      #products .card.productCardClickable .info > .stock.onOrderStock > i,
+      #products .card.productCardClickable .info > .stock.onOrderStock .sngOnOrderDot {background:\${PINK}!important;box-shadow:0 0 0 3px rgba(255,79,163,.08),0 0 10px \${PINK}!important;}
+    \`;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patchOnOrder,{once:true});else patchOnOrder();
+  new MutationObserver(patchOnOrder).observe(document.documentElement,{childList:true,subtree:true});
+})();
+`;
       const headers = new Headers(response.headers);
       headers.set('Cache-Control', 'no-store');
       headers.set('X-SNGAMER-Stock-Visual-Fix', 'on-order-pink');
-      return new Response(source + patch, {
-        status: response.status,
-        statusText: response.statusText,
-        headers
-      });
-    } catch (_) {
-      return response;
-    }
+      return new Response(source + patch, { status: response.status, statusText: response.statusText, headers });
+    } catch (_) { return response; }
   })());
 });
 
 self.addEventListener('push', event => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (_) {}
-
   const title = data.title || 'SNGAMER STORE';
   const options = {
     body: data.body || 'Une mise à jour de votre commande est disponible.',
@@ -97,36 +93,23 @@ self.addEventListener('push', event => {
     renotify: true,
     requireInteraction: false,
     silent: false,
-    vibrate: [80, 40, 80],
+    vibrate: [80,40,80],
     timestamp: Date.now(),
     lang: 'fr-FR',
     dir: 'auto',
-    data: {
-      url: data.url || '/?profile=1',
-      orderId: data.orderId || null,
-      status: data.status || null
-    },
-    actions: [
-      { action: 'open-order', title: 'Voir le suivi' }
-    ]
+    data: { url: data.url || '/?profile=1', orderId: data.orderId || null, status: data.status || null },
+    actions: [{ action: 'open-order', title: 'Voir le suivi' }]
   };
-
-  if (!options.image) delete options.image;
-  event.waitUntil(self.registration.showNotification(title, options));
+  if(!options.image)delete options.image;
+  event.waitUntil(self.registration.showNotification(title,options));
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const target = event.notification?.data?.url || '/?profile=1';
-
-  event.waitUntil((async () => {
-    const clientsList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const client of clientsList) {
-      if ('focus' in client) {
-        try { await client.navigate(target); } catch (_) {}
-        return client.focus();
-      }
-    }
+  event.waitUntil((async()=>{
+    const clientsList=await clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const client of clientsList){if('focus' in client){try{await client.navigate(target)}catch(_){}return client.focus();}}
     return clients.openWindow(target);
   })());
 });
