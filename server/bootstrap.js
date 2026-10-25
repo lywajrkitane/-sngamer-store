@@ -205,7 +205,7 @@ express.application.listen = function patchedListen(...args) {
           html = html.replace("</body>", `${workspaceTag}</body>`);
         }
 
-        const dataFixTag = `<script src="/admin-data-fix.js?v=${workspaceVersion}"></script>`;
+        const dataFixTag = `<script src="/admin-data-fix.js?v=20261018-1220"></script>`;
         const dataFixPattern = /<script\b[^>]*src=["'][^"']*\/admin-data-fix\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi;
         html = html.replace(dataFixPattern, dataFixTag);
         if (!dataFixPattern.test(html)) {
