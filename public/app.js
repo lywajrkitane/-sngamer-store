@@ -171,7 +171,22 @@ function openProduct(id){
   if(!p)return;
 
   const images=[p.image1_url,p.image2_url,p.image3_url].filter(Boolean);
-  const inStock=Number(p.stock)>0;
+  const stockMode=String(p.stock_mode||"stock");
+  const stockCount=Math.max(0,Math.floor(Number(p.stock)||0));
+  const isOnOrder=stockMode==="on_order";
+  const isOutOfStock=stockMode==="out"||(!isOnOrder&&stockCount<=0);
+  const inStock=isOnOrder||(!isOutOfStock&&stockCount>0);
+  const availabilityHtml=(()=>{
+    if(isOnOrder){
+      return '<div class="stock sngProductAvailability onOrderStock" role="status" aria-label="Sur commande">Sur commande</div>';
+    }
+    let state,label;
+    if(isOutOfStock){state="is-out";label="Rupture de stock";}
+    else if(stockCount>5){state="is-stock";label="En stock";}
+    else if(stockCount===1){state="is-last";label="Dernier article !";}
+    else{state="is-limited";label="Stock limité";}
+    return '<div class="stock sngProductAvailability sngStockStatus '+state+'" role="status" aria-label="'+label+'"><i aria-hidden="true"></i><span>'+label+'</span></div>';
+  })();
   const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
   const productCondition=["Neuf","Occasion","Reconditionné","Produit numérique"].includes(String(p.product_condition||"Neuf"))
     ? String(p.product_condition||"Neuf") : "Neuf";
@@ -237,8 +252,8 @@ function openProduct(id){
       <div class="productInfo sngProductInfoV1">
         <div class="cat">${escapeHtml(typeof window.storeCategory==="function"?window.storeCategory(p):(p.category||"Gaming"))}</div>
         <h2>${escapeHtml(p.name)}</h2>
+        ${availabilityHtml}
         ${priceHtml}
-        ${inStock?`<div class="stock">${Number(p.stock)} disponible(s)</div>`:`<div class="stock outOfStock">Rupture de stock</div>`}
         <section class="productDescriptionSection sngProductDescriptionV1">
           <h3 class="productDescriptionTitle">Description</h3>
           ${descriptionHtml}
