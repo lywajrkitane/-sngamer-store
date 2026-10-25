@@ -1,0 +1,69 @@
+name: Ensure admin workspace is loaded
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  ensure-workspace:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure canonical workspace scripts are in admin HTML
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          changed = False
+          workspace = '<script src="/admin-v24-workspace.js?v=20261025-1105"></script>'
+          data_fix = '<script src="/admin-data-fix.js?v=20261025-1105"></script>'
+
+          for filename in ('public/admin.html', 'public/admin-dashboard.html'):
+              p = Path(filename)
+              if not p.exists():
+                  continue
+              s = p.read_text(encoding='utf-8')
+
+              ws_re = r'<script\s+src=["\']/admin-v24-workspace\.js(?:\?[^"\']*)?["\']\s*></script>'
+              df_re = r'<script\s+src=["\']/admin-data-fix\.js(?:\?[^"\']*)?["\']\s*></script>'
+
+              if re.search(ws_re, s, re.I):
+                  s2 = re.sub(ws_re, workspace, s, count=1, flags=re.I)
+              else:
+                  s2 = s.replace('</body>', workspace + '\n</body>', 1)
+
+              if re.search(df_re, s2, re.I):
+                  s2 = re.sub(df_re, data_fix, s2, count=1, flags=re.I)
+              else:
+                  s2 = s2.replace('</body>', data_fix + '\n</body>', 1)
+
+              if s2 != s:
+                  p.write_text(s2, encoding='utf-8')
+                  changed = True
+
+          if changed:
+              print('Admin workspace tags ensured.')
+          else:
+              print('Admin workspace tags already present.')
+
+      - name: Validate workspace JavaScript
+        run: node --check public/admin-v24-workspace.js
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/admin.html public/admin-dashboard.html
+          git commit -m 'ensure canonical admin workspace scripts are loaded'
+          git push
