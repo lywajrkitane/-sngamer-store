@@ -52,9 +52,22 @@
     document.head.appendChild(style);
   }
 
+  function dedupeHeroButtons(nav) {
+    const buttons = Array.from(nav.querySelectorAll('button')).filter(button => {
+      const label = norm(button.textContent);
+      return button.id === BUTTON_ID || (label === 'hero' || label === '🎯 hero');
+    });
+    let keeper = nav.querySelector('#' + BUTTON_ID) || buttons[0] || null;
+    if (keeper && keeper.id !== BUTTON_ID) keeper.id = BUTTON_ID;
+    buttons.forEach(button => { if (button !== keeper) button.remove(); });
+    return keeper;
+  }
+
   function addButton() {
     const nav = $('#' + NAV_ID);
-    if (!nav || $('#' + BUTTON_ID)) return false;
+    if (!nav) return false;
+    const existing = dedupeHeroButtons(nav);
+    if (existing) return true;
     const button = document.createElement('button');
     button.type = 'button';
     button.id = BUTTON_ID;
@@ -70,6 +83,7 @@
   function setActiveButton(active) {
     const nav = $('#' + NAV_ID);
     if (!nav) return;
+    dedupeHeroButtons(nav);
     nav.querySelectorAll('button').forEach(btn => {
       const isHero = btn.id === BUTTON_ID;
       const isOther = btn.dataset.v26View === active;
