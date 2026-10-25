@@ -26,22 +26,23 @@ function removeScriptTags(html, filename) {
   return html.replace(pattern, '');
 }
 
+function insertBeforeClosingTag(html, tagName, content) {
+  const marker = `</${tagName}>`;
+  const index = html.toLowerCase().lastIndexOf(marker);
+  if (index < 0) return html + '\\n' + content + '\\n';
+  return html.slice(0, index) + content + '\\n' + html.slice(index);
+}
+
 function prepareAdminHtml(source) {
   let html = source;
 
-  // Replace any stale or duplicate copies, then add one known-good ordered set.
+  // Replace stale or duplicate copies, then add one canonical ordered set.
   for (const [filename] of ADMIN_SCRIPTS) {
     html = removeScriptTags(html, filename);
   }
 
   const scripts = ADMIN_SCRIPTS.map(([, tag]) => tag).join('\\n');
-  if (/<\\/body>/i.test(html)) {
-    html = html.replace(/<\\/body>/i, scripts + '\\n</body>');
-  } else {
-    html += '\\n' + scripts + '\\n';
-  }
-
-  return html;
+  return insertBeforeClosingTag(html, 'body', scripts);
 }
 
 if (!express.application.__sngAdminPremiumPreload) {
@@ -67,10 +68,8 @@ if (!express.application.__sngAdminPremiumPreload) {
         try {
           let html = fs.readFileSync(file, 'utf8');
           if (!html.includes('premium-dialogs-v1.css')) {
-            html = html.replace(
-              /<\\/head>/i,
-              '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835"></head>'
-            );
+            const css = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835">';
+            html = insertBeforeClosingTag(html, 'head', css);
           }
 
           html = prepareAdminHtml(html);
