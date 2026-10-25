@@ -29,7 +29,7 @@ function removeScriptTags(html, filename) {
 function insertBeforeClosingTag(html, tagName, content) {
   const marker = `</${tagName}>`;
   const index = html.toLowerCase().lastIndexOf(marker);
-  if (index < 0) return html + '\\n' + content + '\\n';
+  if (index < 0) return html + String.fromCharCode(10) + content + String.fromCharCode(10);
   return html.slice(0, index) + content + '\\n' + html.slice(index);
 }
 
@@ -41,7 +41,7 @@ function prepareAdminHtml(source) {
     html = removeScriptTags(html, filename);
   }
 
-  const scripts = ADMIN_SCRIPTS.map(([, tag]) => tag).join('\\n');
+  const scripts = ADMIN_SCRIPTS.map(([, tag]) => tag).join(String.fromCharCode(10));
   return insertBeforeClosingTag(html, 'body', scripts);
 }
 
