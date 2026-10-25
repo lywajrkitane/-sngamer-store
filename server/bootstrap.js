@@ -175,18 +175,6 @@ express.application.listen = function patchedListen(...args) {
         if (!html.includes("customer-admin.js")) {
           html = html.replace(/<\/body>/i, '<script src="/customer-admin.js" defer></script></body>');
         }
-        if (!html.includes("admin-v2.css")) {
-          html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/admin-v2.css?v=20261016-2200"></head>');
-        }
-        if (!html.includes("admin-v2.js")) {
-          html = html.replace(/<\/body>/i, '<script src="/admin-v2.js?v=20261016-2200" defer></script></body>');
-        }
-        if (!html.includes("admin-v21.css")) {
-          html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/admin-v21.css?v=20261016-2300"></head>');
-        }
-        if (!html.includes("admin-v21.js")) {
-          html = html.replace(/<\/body>/i, '<script src="/admin-v21.js?v=20261021-orders5" defer></script></body>');
-        }
 
         html = html.replace(/<script[^>]+admin-v24-workspace\.js[^>]*><\/script>/gi, "");
         html = html.replace(/<script[^>]+admin-section-workspace-v24\.js[^>]*><\/script>/gi, "");
@@ -211,7 +199,6 @@ express.application.listen = function patchedListen(...args) {
       }
     };
 
-    // Register exact admin routes before static files and the catch-all.
     const injectionRouter = express.Router();
     injectionRouter.use(adminInjection);
 
@@ -222,9 +209,6 @@ express.application.listen = function patchedListen(...args) {
       stack.push(...(injectionRouter.stack || []));
     }
 
-    // Append customer routes after the static middleware but before the catch-all.
-    // These are exact API paths; find the catch-all using the route path rather than
-    // Express' version-dependent RegExp.toString() representation.
     const catchAllIndex = stack.findIndex(layer => {
       if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
       const routePath = layer.route.path;
