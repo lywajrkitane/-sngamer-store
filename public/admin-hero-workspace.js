@@ -54,7 +54,15 @@
 
   function addButton() {
     const nav = $('#' + NAV_ID);
-    if (!nav || $('#' + BUTTON_ID)) return false;
+    if (!nav) return false;
+    const sharedButton = nav.querySelector('[data-v26-view="hero"]');
+    if (sharedButton) {
+      sharedButton.id = BUTTON_ID;
+      sharedButton.title = 'Gérer le Hero de la page d’accueil';
+      sharedButton.setAttribute('aria-label', 'Gérer le Hero de la page d’accueil');
+      return true;
+    }
+    if ($('#' + BUTTON_ID)) return false;
     const button = document.createElement('button');
     button.type = 'button';
     button.id = BUTTON_ID;
@@ -92,7 +100,10 @@
     const stats = r.querySelector(':scope > .stats');
     if (stats) stats.style.display = 'none';
     setActiveButton('hero');
-    try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
+    try {
+      sessionStorage.setItem(STORAGE_KEY, '1');
+      sessionStorage.setItem('sg_admin_workspace_v26', 'hero');
+    } catch (_) {}
     if (scroll) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     return true;
   }
@@ -116,7 +127,15 @@
     addButton();
     bind();
     let shouldRestore = false;
-    try { shouldRestore = sessionStorage.getItem(STORAGE_KEY) === '1'; } catch (_) {}
+    try {
+      const sharedWorkspace = sessionStorage.getItem('sg_admin_workspace_v26');
+      if (sharedWorkspace && sharedWorkspace !== 'hero') {
+        sessionStorage.removeItem(STORAGE_KEY);
+        shouldRestore = false;
+      } else {
+        shouldRestore = sharedWorkspace === 'hero' || (!sharedWorkspace && sessionStorage.getItem(STORAGE_KEY) === '1');
+      }
+    } catch (_) {}
     if (shouldRestore) showHero(false);
     return !!($('#' + NAV_ID) && findHeroSection());
   }

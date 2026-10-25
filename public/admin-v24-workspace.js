@@ -12,10 +12,12 @@
   const KEY = 'sg_admin_workspace_v26';
   const VIEWS = [
     ['overview', "Vue d'ensemble", '▦'],
+    ['hero', 'Hero', '🎯'],
     ['products', 'Produits', '📦'],
     ['orders', 'Commandes', '🛒'],
     ['promotions', 'Promotions', '🎉'],
-    ['campaigns', 'Campagnes', '📣']
+    ['campaigns', 'Campagnes', '📣'],
+    ['customers', 'Clients', '👥']
   ];
 
   let active = 'overview';
@@ -31,6 +33,8 @@
     const id = norm(section.id);
     const cls = norm(typeof section.className === 'string' ? section.className : '');
 
+    if (id === 'sgcustomersection' || cls.includes('sgcustomersection')) return 'customers';
+    if (/\bhero\b/.test(heading) || /hero/.test(id) || /heroworkspace/.test(cls)) return 'hero';
     if (cls.includes('campaignssection') || /campagnes/.test(heading) || /campagn/.test(id)) return 'campaigns';
     if (cls.includes('promoadminsection') || /promotions?/.test(heading) || /promotion/.test(id)) return 'promotions';
     if (/gestion des produits/.test(heading) || /produits?/.test(heading) || /stock/.test(heading) || /products?/.test(id)) return 'products';
@@ -288,15 +292,8 @@
         line-height:1.05;
         letter-spacing:-.03em;
       }
-      #adminBox .stat::after{
-        content:'';
-        position:absolute;
-        right:16px;bottom:16px;
-        width:42px;height:3px;
-        border-radius:99px;
-        background:linear-gradient(90deg,var(--sg-blue),var(--sg-purple),var(--sg-pink));
-        opacity:.8;
-      }
+      /* No pseudo progress bars on KPI cards: the cards show metrics only. */
+      #adminBox .stat::after{content:none!important;display:none!important}
 
       /* ---------- FORMS ---------- */
       #adminBox input,#adminBox select,#adminBox textarea{
@@ -557,7 +554,7 @@
     const root = box();
     if (!root || root.classList.contains('hidden')) return;
     const generation = ++viewLoadGeneration;
-    const delays = view === 'orders' ? [0, 1200] : view === 'overview' ? [0, 900] : view === 'products' ? [0] : [];
+    const delays = view === 'orders' ? [0, 1200] : view === 'overview' ? [0, 900] : (view === 'products' || view === 'customers') ? [0] : [];
 
     delays.forEach((delay, index) => {
       setTimeout(async () => {
@@ -573,7 +570,9 @@
             ? window.loadAll
             : view === 'products'
               ? window.loadProducts
-              : null;
+              : view === 'customers'
+                ? window.sngAdminCustomersLoad
+                : null;
         if (typeof loader !== 'function') return;
         try {
           await loader();
@@ -588,7 +587,11 @@
     const root = box();
     if (!root) return;
     active = VIEWS.some(v => v[0] === view) ? view : 'overview';
-    try { sessionStorage.setItem(KEY, active); } catch (_) {}
+    try {
+      sessionStorage.setItem(KEY, active);
+      if (active === 'hero') sessionStorage.setItem('sg_admin_workspace_hero', '1');
+      else sessionStorage.removeItem('sg_admin_workspace_hero');
+    } catch (_) {}
 
     styles();
     removeLegacyNavs();
@@ -616,6 +619,25 @@
     refreshViewData(active);
 
     if (scroll) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }
+
+  function watchDynamicSections() {
+    const root = box();
+    if (!root || root.dataset.sgV26SectionObserver === '1' || typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(records => {
+      const newSections = records.some(record =>
+        Array.from(record.addedNodes || []).some(node => node.nodeType === 1 && node.tagName === 'SECTION')
+      );
+      if (!newSections) return;
+      sections().forEach(section => {
+        const type = typeOfSection(section);
+        const show = active === 'overview' ? false : type === active;
+        section.classList.toggle('sg-v26-show', show);
+        section.classList.toggle('sg-v26-hide', !show);
+      });
+    });
+    observer.observe(root, { childList: true });
+    root.dataset.sgV26SectionObserver = '1';
   }
 
   function bindNavigation() {
@@ -666,6 +688,7 @@
     styles();
     removeLegacyNavs();
     nav();
+    watchDynamicSections();
     bindNavigation();
     interceptOldDashboardButtons();
     let saved = 'overview';
