@@ -5,9 +5,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
-const WORKSPACE_VERSION = '20261025-1048-canonical1';
+const WORKSPACE_VERSION = '20261025-1055-workspace2';
 const DATA_VERSION = '20261025-0958-data-stable1';
-const HERO_VERSION = '20261025-0958-hero-stable1';
 const CLIENTS_VERSION = '20261025-0958-clients-stable1';
 
 function replaceScript(html, filename, version, attributes = '') {
@@ -32,9 +31,12 @@ function replaceScript(html, filename, version, attributes = '') {
 function prepareAdminHtml(source) {
   let html = source;
   html = replaceScript(html, 'admin-v24-workspace.js', WORKSPACE_VERSION);
-  html = replaceScript(html, 'admin-hero-workspace.js', HERO_VERSION);
   html = replaceScript(html, 'admin-data-fix.js', DATA_VERSION);
   html = replaceScript(html, 'customer-admin.js', CLIENTS_VERSION, ' defer');
+
+  // Remove any legacy competing Hero workspace injection. Hero is now owned by
+  // the canonical workspace controller above.
+  html = html.replace(/<script\\b[^>]*\\bsrc=["\'][^"\']*\\/admin-hero-workspace\.js(?:\\?[^"\']*)?["\'][^>]*>\\s*<\\/script>/gi, '');
 
   if (!html.includes('premium-dialogs-v1.css')) {
     html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835"></head>');
