@@ -8,6 +8,7 @@ const path = require('path');
 const WORKSPACE_VERSION = '20261025-1140-canonical-workspace3';
 const DATA_VERSION = '20261025-1140-data-stable2';
 const CLIENTS_VERSION = '20261025-1140-clients-stable2';
+const DASHBOARD_DATA_VERSION = '20261025-1140-dashboard-data1';
 
 function replaceScript(html, filename, version, attributes = '') {
   const escapedName = filename.replace(/\./g, '\\.');
@@ -33,11 +34,11 @@ function prepareAdminHtml(source) {
   html = replaceScript(html, 'admin-v24-workspace.js', WORKSPACE_VERSION, ' onload="window.SNGAMER_ADMIN_WORKSPACE_BOOT&&window.SNGAMER_ADMIN_WORKSPACE_BOOT()"');
   html = replaceScript(html, 'admin-data-fix.js', DATA_VERSION);
   html = replaceScript(html, 'customer-admin.js', CLIENTS_VERSION, ' defer');
+  html = replaceScript(html, 'admin-dashboard-data.js', DASHBOARD_DATA_VERSION);
 
   // Strip retired workspace controllers from any pre-existing HTML copy.
   html = html.replace(/<script\b[^>]*\bsrc=["'][^"']*\/admin-hero-workspace\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, '');
   html = html.replace(/<script\b[^>]*\bsrc=["'][^"']*\/admin-section-workspace-v24\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, '');
-
 
   if (!html.includes('premium-dialogs-v1.css')) {
     html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835"></head>');
