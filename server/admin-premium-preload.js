@@ -5,9 +5,9 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
-const WORKSPACE_VERSION = '20261025-1055-workspace2';
-const DATA_VERSION = '20261025-0958-data-stable1';
-const CLIENTS_VERSION = '20261025-0958-clients-stable1';
+const WORKSPACE_VERSION = '20261025-1140-canonical-workspace3';
+const DATA_VERSION = '20261025-1140-data-stable2';
+const CLIENTS_VERSION = '20261025-1140-clients-stable2';
 
 function replaceScript(html, filename, version, attributes = '') {
   const escapedName = filename.replace(/\./g, '\\.');
@@ -30,12 +30,14 @@ function replaceScript(html, filename, version, attributes = '') {
 
 function prepareAdminHtml(source) {
   let html = source;
-  html = replaceScript(html, 'admin-v24-workspace.js', WORKSPACE_VERSION);
+  html = replaceScript(html, 'admin-v24-workspace.js', WORKSPACE_VERSION, ' onload="window.SNGAMER_ADMIN_WORKSPACE_BOOT&&window.SNGAMER_ADMIN_WORKSPACE_BOOT()"');
   html = replaceScript(html, 'admin-data-fix.js', DATA_VERSION);
   html = replaceScript(html, 'customer-admin.js', CLIENTS_VERSION, ' defer');
 
-  // The canonical workspace controller owns Hero navigation too. Do not inject
-  // the legacy Hero controller from this preload.
+  // Strip retired workspace controllers from any pre-existing HTML copy.
+  html = html.replace(/<script\b[^>]*\bsrc=["'][^"']*\/admin-hero-workspace\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, '');
+  html = html.replace(/<script\b[^>]*\bsrc=["'][^"']*\/admin-section-workspace-v24\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, '');
+
 
   if (!html.includes('premium-dialogs-v1.css')) {
     html = html.replace(/<\/head>/i, '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835"></head>');

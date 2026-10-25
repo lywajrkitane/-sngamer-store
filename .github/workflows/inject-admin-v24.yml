@@ -155,41 +155,6 @@ jobs:
           node --check server/paytech.js
           node --check public/paytech-checkout.js
 
-      - name: Refresh admin workspace script version
-        shell: python
-        run: |
-          from pathlib import Path
-          import re
-
-          version = '20261018-1220'
-          workspace_tag = f'<script src="/admin-v24-workspace.js?v={version}"></script>'
-          fix_tag = f'<script src="/admin-data-fix.js?v={version}"></script>'
-
-          changed = []
-          for filename in ('public/admin.html', 'public/admin-dashboard.html'):
-              p = Path(filename)
-              if not p.exists():
-                  continue
-              s = p.read_text(encoding='utf-8')
-              pattern = r'<script\s+src=["\']/admin-v24-workspace\.js\?v=[^"\']+["\']\s*></script>'
-              new_s = re.sub(pattern, workspace_tag, s, count=1) if re.search(pattern, s) else s.replace('</body>', workspace_tag + '\n</body>', 1)
-              fix_pattern = r'<script\s+src=["\']/admin-data-fix\.js\?v=[^"\']+["\']\s*></script>'
-              new_s = re.sub(fix_pattern, fix_tag, new_s, count=1) if re.search(fix_pattern, new_s) else new_s.replace('</body>', fix_tag + '\n</body>', 1)
-              if new_s != s:
-                  p.write_text(new_s, encoding='utf-8')
-                  changed.append(filename)
-
-          for filename in ('server/bootstrap.js', 'server/admin-data-fix-preload.js'):
-              p = Path(filename)
-              if not p.exists():
-                  continue
-              s = p.read_text(encoding='utf-8')
-              new_s = re.sub(r'(/admin-data-fix\.js\?v=)[^"\']+', rf'\g<1>{version}', s)
-              if new_s != s:
-                  p.write_text(new_s, encoding='utf-8')
-                  changed.append(filename)
-          print('Updated:', ', '.join(changed) if changed else 'none')
-
       - name: Commit injection
         shell: bash
         run: |

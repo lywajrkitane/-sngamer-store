@@ -163,51 +163,7 @@ express.application.listen = function patchedListen(...args) {
   if (stack) {
     installGuestOrderRoute(app);
 
-    const adminInjection = function (req, res, next) {
-      const target = req.path === "/admin-dashboard.html" || req.path === "/admin.html";
-      if (!target || req.method !== "GET") return next();
-
-      const file = path.join(__dirname, "..", "public", req.path.replace(/^\//, ""));
-      if (!fs.existsSync(file)) return next();
-
-      try {
-        let html = fs.readFileSync(file, "utf8");
-        if (!html.includes("customer-admin.js")) {
-          html = html.replace(/<\/body>/i, '<script src="/customer-admin.js" defer></script></body>');
-        }
-
-        html = html.replace(/<script[^>]+admin-v24-workspace\.js[^>]*><\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-section-workspace-v24\.js[^>]*><\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-v25-workspace\.js[^>]*><\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-v23-orders\.js[^>]*><\/script>/gi, "");
-        html = html.replace(/<script[^>]+admin-final-fix\.js[^>]*><\/script>/gi, "");
-
-        if (!html.includes("/admin-v24-workspace.js")) {
-          html = html.replace("</body>", '<script src="/admin-v24-workspace.js?v=20261018-1048"></script></body>');
-        }
-        if (!html.includes("/admin-data-fix.js")) {
-          html = html.replace("</body>", '<script src="/admin-data-fix.js?v=20261018-1220"></script></body>');
-        }
-
-        res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-        res.set("Pragma", "no-cache");
-        res.set("Expires", "0");
-        return res.type("html").send(html);
-      } catch (error) {
-        console.error("ADMIN_HTML_INJECTION_ERROR:", error);
-        return next();
-      }
-    };
-
-    const injectionRouter = express.Router();
-    injectionRouter.use(adminInjection);
-
-    const staticIndex = stack.findIndex(layer => layer && layer.handle && layer.handle.name === "serveStatic");
-    if (staticIndex >= 0) {
-      stack.splice(staticIndex, 0, ...(injectionRouter.stack || []));
-    } else {
-      stack.push(...(injectionRouter.stack || []));
-    }
+    // Admin HTML is served by server/admin-premium-preload.js only.
 
     const catchAllIndex = stack.findIndex(layer => {
       if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
