@@ -307,32 +307,6 @@
     }
   </style>
 <link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1835">
-<style id="sg-admin-workspace-nav-style">
-  #sg-admin-v26-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;width:100%;margin:0 0 18px;padding:10px;background:linear-gradient(180deg,rgba(12,21,36,.98),rgba(7,13,23,.98));border:1px solid rgba(115,145,190,.22);border-radius:18px;box-shadow:0 12px 34px rgba(0,0,0,.2);box-sizing:border-box;position:relative;z-index:5}
-  #sg-admin-v26-nav::before{content:"SNGAMER STORE";grid-column:1/-1;display:block;padding:5px 8px 8px;color:#8ea4c5;font-size:10px;font-weight:900;letter-spacing:.2em}
-  #sg-admin-v26-nav button{width:100%;min-width:0;min-height:44px;padding:9px 10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(115,145,190,.12);border-radius:12px;background:#0e192b;color:#bac7dc;font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;cursor:pointer}
-  #sg-admin-v26-nav button span{width:22px;flex:0 0 22px;text-align:center;font-size:17px}
-  #sg-admin-v26-nav button b{overflow:hidden;text-overflow:ellipsis;font-weight:800}
-  #sg-admin-v26-nav button.active{color:#fff;border-color:rgba(92,116,255,.45);background:linear-gradient(135deg,#207eff,#6939ff);box-shadow:0 8px 22px rgba(60,80,255,.2)}
-  #adminBox.sg-v26-mode>section.sg-v26-hide{display:none!important}
-  #adminBox.sg-v26-mode>section.sg-v26-show{display:block!important}
-  #adminBox.sg-v26-mode[data-v26-workspace="overview"]>.stats{display:grid!important}
-  #adminBox.sg-v26-mode[data-v26-workspace]:not([data-v26-workspace="overview"])>.stats{display:none!important}
-  @media(min-width:900px){
-    #adminBox.sg-v26-mode{display:grid!important;grid-template-columns:minmax(190px,220px) minmax(0,1fr)!important;column-gap:22px!important;align-items:start!important}
-    #adminBox.sg-v26-mode>#sg-admin-v26-nav{grid-column:1!important;grid-row:1/span 100!important;position:sticky;top:94px;display:flex;flex-direction:column;align-self:start;margin:0;overflow:visible}
-    #adminBox.sg-v26-mode>.stats,#adminBox.sg-v26-mode>section{grid-column:2;min-width:0}
-  }
-  @media(max-width:899px){
-    #adminBox.sg-v26-mode{display:block!important;overflow:visible!important}
-    #adminBox.sg-v26-mode>#sg-admin-v26-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%;max-width:100%;margin:0 0 14px;padding:8px;position:relative;top:auto}
-    #adminBox.sg-v26-mode>.stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0}
-    #adminBox.sg-v26-mode>section{min-width:0;max-width:100%}
-  }
-  @media(max-width:390px){#sg-admin-v26-nav button{font-size:11px;padding:8px 7px;gap:5px}#sg-admin-v26-nav button span{width:18px;flex-basis:18px;font-size:15px}}
-</style>
-
-<style id="sg-admin-auth-visibility-guard">html body #adminBox.hidden{display:none!important}</style>
 </head>
 
 <body>
@@ -367,16 +341,6 @@
 
   <!-- ADMIN -->
   <main id="adminBox" class="hidden">
-
-    <nav id="sg-admin-v26-nav" aria-label="Espaces administrateur">
-      <button type="button" data-v26-view="overview" class="active" aria-current="page"><span aria-hidden="true">▦</span><b>Vue d'ensemble</b></button>
-      <button type="button" data-v26-view="hero"><span aria-hidden="true">🎯</span><b>Hero</b></button>
-      <button type="button" data-v26-view="products"><span aria-hidden="true">📦</span><b>Produits</b></button>
-      <button type="button" data-v26-view="orders"><span aria-hidden="true">🛒</span><b>Commandes</b></button>
-      <button type="button" data-v26-view="promotions"><span aria-hidden="true">🎉</span><b>Promotions</b></button>
-      <button type="button" data-v26-view="campaigns"><span aria-hidden="true">📣</span><b>Campagnes</b></button>
-      <button type="button" data-v26-view="customers" data-sg-customers="1"><span aria-hidden="true">👥</span><b>Clients</b></button>
-    </nav>
 
     <div class="stats">
 
@@ -991,10 +955,9 @@ async function loadAll() {
 
 </script>
 
-<script src="/admin-v24-workspace.js?v=20261025-1140-canonical"></script>
-<script src="/admin-data-fix.js?v=20261025-1140-canonical"></script>
+<script src="/admin-v24-workspace.js?v=20261018-1220"></script>
+<script src="/admin-data-fix.js?v=20261018-1220"></script>
 <script src="/premium-dialogs-v1.js?v=20261018-1835"></script>
 <script src="/premium-select-guard-v1.js?v=20261018-1835"></script>
-<script src="/customer-admin.js?v=20261025-client-workspace2" defer></script>
 </body>
 </html>
