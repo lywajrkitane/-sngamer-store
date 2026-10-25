@@ -30,7 +30,7 @@ function insertBeforeClosingTag(html, tagName, content) {
   const marker = `</${tagName}>`;
   const index = html.toLowerCase().lastIndexOf(marker);
   if (index < 0) return html + String.fromCharCode(10) + content + String.fromCharCode(10);
-  return html.slice(0, index) + content + '\\n' + html.slice(index);
+  return html.slice(0, index) + content + String.fromCharCode(10) + html.slice(index);
 }
 
 function prepareAdminHtml(source) {
