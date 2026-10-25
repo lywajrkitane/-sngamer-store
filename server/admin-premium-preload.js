@@ -1,8 +1,7 @@
 /* SNGAMER STORE — Admin premium HTML delivery
-   This middleware intentionally serves the admin pages before static files.
-   Keep it in sync with the main workspace controller: otherwise its early
-   response bypasses the later bootstrap HTML injector and can silently serve
-   a dashboard without the ordered navigation or Customers workspace.
+   This middleware serves admin pages before static files. Keep its HTML in
+   sync with the main workspace controller: this early response would
+   otherwise bypass the later bootstrap HTML injector.
 */
 const express = require('express');
 const fs = require('fs');
@@ -21,8 +20,7 @@ const ADMIN_SCRIPTS = [
 function removeScriptTags(html, filename) {
   const escaped = filename.replace(/[.*+?^$()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(
-    '<script\\b[^>]*\\bsrc=["\\'][^"\\']*' + escaped +
-    '(?:\\?[^"\\']*)?["\\'][^>]*>\\s*<\\/script>',
+    `<script\\b[^>]*\\bsrc=["'][^"']*${escaped}(?:\\?[^"']*)?["'][^>]*>\\s*<\\/script>`,
     'gi'
   );
   return html.replace(pattern, '');
@@ -31,18 +29,16 @@ function removeScriptTags(html, filename) {
 function prepareAdminHtml(source) {
   let html = source;
 
-  // The early premium middleware must be the single reliable entry point for
-  // admin script versions. Replace duplicate/stale copies, then add one
-  // canonical ordered set without deleting other product/admin scripts.
+  // Replace any stale or duplicate copies, then add one known-good ordered set.
   for (const [filename] of ADMIN_SCRIPTS) {
     html = removeScriptTags(html, filename);
   }
 
-  const scripts = ADMIN_SCRIPTS.map(([, tag]) => tag).join('\n');
+  const scripts = ADMIN_SCRIPTS.map(([, tag]) => tag).join('\\n');
   if (/<\\/body>/i.test(html)) {
-    html = html.replace(/<\\/body>/i, scripts + '\n</body>');
+    html = html.replace(/<\\/body>/i, scripts + '\\n</body>');
   } else {
-    html += '\n' + scripts + '\n';
+    html += '\\n' + scripts + '\\n';
   }
 
   return html;
