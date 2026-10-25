@@ -195,7 +195,7 @@ express.application.listen = function patchedListen(...args) {
         html = html.replace(/<script[^>]+admin-final-fix\.js[^>]*><\/script>/gi, "");
 
         const workspaceTag = '<script src="/admin-v24-workspace.js?v=20261025-0840-workspace6"></script>';
-        const workspaceScriptPattern = /<script\\b[^>]*src=["'][^"']*\\/admin-v24-workspace\\.js(?:\\?[^"']*)?["'][^>]*>\\s*<\\/script>/gi;
+        const workspaceScriptPattern = /<script\b[^>]*src=["'][^"']*\/admin-v24-workspace\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi;
         const refreshedWorkspaceHtml = html.replace(workspaceScriptPattern, workspaceTag);
         html = refreshedWorkspaceHtml !== html
           ? refreshedWorkspaceHtml
