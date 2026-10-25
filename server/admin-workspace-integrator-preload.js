@@ -1,7 +1,7 @@
 /* SNGAMER STORE — ADMIN WORKSPACE INTEGRATOR
-   Source-level integration for the two existing dedicated workspaces.
-   Keeps the main workspace controller untouched and makes Hero + Clients
-   available on both admin pages before the browser loads them.
+   Source-level integration for the two existing dedicated workspaces
+   plus the responsive orders presentation.
+   Keeps the main workspace controller and order data logic untouched.
 */
 const fs = require('fs');
 const path = require('path');
@@ -10,6 +10,7 @@ const PUBLIC = path.join(__dirname, '..', 'public');
 const FILES = ['admin.html', 'admin-dashboard.html'];
 const HERO = '<script src="/admin-hero-workspace.js?v=20261025-hero"></script>';
 const CLIENTS = '<script src="/customer-admin.js?v=20261025-clients"></script>';
+const ORDERS = '<script src="/admin-orders-responsive.js?v=20261025-orders-premium"></script>';
 
 function patch(fileName) {
   const file = path.join(PUBLIC, fileName);
@@ -27,6 +28,11 @@ function patch(fileName) {
 
   if (!html.includes('/customer-admin.js')) {
     html = html.replace(/<\/body>/i, `${CLIENTS}</body>`);
+    changed = true;
+  }
+
+  if (!html.includes('/admin-orders-responsive.js')) {
+    html = html.replace(/<\/body>/i, `${ORDERS}</body>`);
     changed = true;
   }
 
