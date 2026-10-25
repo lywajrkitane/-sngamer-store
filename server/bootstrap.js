@@ -194,22 +194,11 @@ express.application.listen = function patchedListen(...args) {
         html = html.replace(/<script[^>]+admin-v23-orders\.js[^>]*><\/script>/gi, "");
         html = html.replace(/<script[^>]+admin-final-fix\.js[^>]*><\/script>/gi, "");
 
-        // Always inject the current workspace URL. The version is intentionally
-        // changed when the workspace controller changes so browsers cannot reuse
-        // an older cached JavaScript file after a deploy.
-        const workspaceVersion = "20261025-0948-workspace-final";
-        const workspaceTag = `<script src="/admin-v24-workspace.js?v=${workspaceVersion}"></script>`;
-        const workspacePattern = /<script\b[^>]*src=["'][^"']*\/admin-v24-workspace\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi;
-        html = html.replace(workspacePattern, workspaceTag);
-        if (!workspacePattern.test(html)) {
-          html = html.replace("</body>", `${workspaceTag}</body>`);
+        if (!html.includes("/admin-v24-workspace.js")) {
+          html = html.replace("</body>", '<script src="/admin-v24-workspace.js?v=20261018-1048"></script></body>');
         }
-
-        const dataFixTag = `<script src="/admin-data-fix.js?v=20261025-0958-workspace-stable1"></script>`;
-        const dataFixPattern = /<script\b[^>]*src=["'][^"']*\/admin-data-fix\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi;
-        html = html.replace(dataFixPattern, dataFixTag);
-        if (!dataFixPattern.test(html)) {
-          html = html.replace("</body>", `${dataFixTag}</body>`);
+        if (!html.includes("/admin-data-fix.js")) {
+          html = html.replace("</body>", '<script src="/admin-data-fix.js?v=20261018-1220"></script></body>');
         }
 
         res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
