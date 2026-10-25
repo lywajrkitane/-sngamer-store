@@ -7,7 +7,7 @@
 #productModal #productDetail .productInfo{width:100%;min-width:0;max-width:none;box-sizing:border-box}
 #productModal #productDetail .productDetail{align-items:start}
 #productModal #productDetail .productInfo{min-height:0;display:flex!important;flex-direction:column!important}
-#productModal #productDetail .productInfo h2{display:block;width:100%;max-width:none!important;box-sizing:border-box!important;margin:8px 0 14px!important;padding-inline:14px!important;font-size:clamp(24px,2.5vw,32px)!important;line-height:1.18!important;letter-spacing:-.4px!important;text-align:justify!important;text-justify:inter-word;white-space:normal!important;overflow-wrap:break-word;word-break:normal;hyphens:manual!important}
+#productModal #productDetail .productInfo h2{display:block;width:100%;max-width:none!important;box-sizing:border-box!important;margin:8px 0 14px!important;padding-inline:14px!important;font-size:clamp(23px,2.4vw,30px)!important;line-height:1.2!important;letter-spacing:-.3px!important;text-align:left!important;text-justify:auto!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important;hyphens:none!important}
 #productModal #productDetail .productDescriptionSection,#productModal #productDetail .productDescription{display:block;width:100%!important;max-width:none!important;min-width:0;box-sizing:border-box}
 #productModal #productDetail .productDescriptionSection{order:20;padding:14px!important;margin:16px 0 10px!important}
 #productModal #productDetail .sngProductAssuranceGrid{order:30}
@@ -33,7 +33,7 @@
   #productModal .productBox{width:100%!important;max-width:680px!important;padding:16px 14px 24px!important;max-height:calc(100dvh - 16px)!important;border-radius:20px!important}
   #productModal #productDetail .productDetail{display:flex!important;flex-direction:column!important;gap:14px!important;align-items:stretch!important}
   #productModal #productDetail .productGallery,#productModal #productDetail .productInfo{width:100%!important;max-width:none!important}
-  #productModal #productDetail .productInfo h2{font-size:clamp(22px,3.8vw,27px)!important;line-height:1.18!important;letter-spacing:-.3px!important;margin:7px 0 12px!important;padding-inline:12px!important;text-align:justify!important;text-justify:inter-word;hyphens:manual!important}
+  #productModal #productDetail .productInfo h2{font-size:clamp(21px,3.5vw,25px)!important;line-height:1.2!important;letter-spacing:-.25px!important;margin:7px 0 12px!important;padding-inline:12px!important;text-align:left!important;text-justify:auto!important;overflow-wrap:normal!important;word-break:normal!important;hyphens:none!important}
   #productModal #productDetail .sngProductAssuranceGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px;margin-top:4px}
   #productModal #productDetail .sngAssuranceItem,#productModal #productDetail .sngProductAssuranceGrid:has(.sngAssuranceItem:nth-child(2):last-child)::after{height:82px;min-height:82px;padding:7px 6px;border-radius:11px;gap:5px}
   #productModal #productDetail .sngAssuranceIcon{width:26px;height:26px;flex-basis:26px;border-radius:8px;font-size:13px}
