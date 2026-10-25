@@ -201,7 +201,7 @@ express.application.listen = function patchedListen(...args) {
           ? refreshedWorkspaceHtml
           : html.replace("</body>", `${workspaceTag}</body>`);
         if (!html.includes("/admin-data-fix.js")) {
-          html = html.replace("</body>", '<script src="/admin-data-fix.js?v=20261018-1220"></script></body>');
+          html = html.replace("</body>", '<script src="/admin-data-fix.js?v=20261025-0840-workspace6"></script></body>');
         }
 
         res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
