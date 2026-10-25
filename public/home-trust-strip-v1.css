@@ -1,5 +1,0 @@
-/* SNGAMER STORE — homepage benefit strip
-   Disabled after mobile UX review: the hero already communicates the key store benefits.
-   Kept as a neutral compatibility layer so the existing index.html does not need a risky rewrite.
-*/
-.homeBenefits{display:none!important}
