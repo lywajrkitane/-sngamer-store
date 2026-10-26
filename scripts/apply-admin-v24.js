@@ -3,7 +3,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..', 'public');
 const files = ['admin.html', 'admin-dashboard.html'];
-const scriptTag = '<script src="/admin-v24-workspace.js?v=20261017-0735"></script>';
+const scriptTag = '<script src="/admin-v24-workspace.js?v=20261026-clean-dashboard1"></script>';
 
 for (const file of files) {
   const target = path.join(root, file);
@@ -23,5 +23,5 @@ for (const file of files) {
 
   html = html.replace(bodyClose, `\n${scriptTag}\n</body>\n</html>`);
   fs.writeFileSync(target, html, 'utf8');
-  console.log(`ADMIN V2.6 isolated workspace injected into ${file}`);
+  console.log(`ADMIN clean workspace injected into ${file}`);
 }
