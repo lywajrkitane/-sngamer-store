@@ -603,8 +603,16 @@
       section.classList.toggle('sg-v26-hide', !show);
     });
 
-    n.querySelectorAll('[data-v26-view]').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.v26View === active);
+    // Keep exactly one workspace highlighted across the standard and dedicated tabs.
+    // Hero and Clients have their own view handlers, but their buttons share this navigation.
+    n.querySelectorAll('button').forEach(btn => {
+      let view = btn.dataset.v26View || '';
+      if (btn.id === 'sg-admin-hero-view') view = 'hero';
+      else if (btn.dataset.sgCustomers === '1') view = 'customers';
+      const selected = view === active;
+      btn.classList.toggle('active', selected);
+      if (selected) btn.setAttribute('aria-current', 'page');
+      else btn.removeAttribute('aria-current');
     });
 
     // Statistics are a direct child of #adminBox, not a section. Explicitly
