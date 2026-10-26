@@ -44,27 +44,6 @@
     }
   }
 
-  function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" })[c]; }); }
-  function money(value) { return new Intl.NumberFormat("fr-FR").format(Number(value) || 0) + " FCFA"; }
-
-  function orderTracking(status) {
-    const states = ["Nouvelle", "Confirmée", "En préparation", "Expédiée", "Livrée"];
-    const current = String(status || "Nouvelle").trim();
-    const normalized = current.toLowerCase();
-    const activeIndex = current === "Annulée" ? -1 : Math.max(0, states.findIndex(function (s) { return s.toLowerCase() === normalized; }));
-    const cancelled = current === "Annulée";
-    const labels = ["Nouvelle", "Confirmée", "Préparation", "Expédiée", "Livrée"];
-    return `<div class="sngOrderTracking" data-status="${esc(current)}" aria-label="Suivi de la commande">
-      <div class="sngOrderTrackLine" aria-hidden="true">${states.slice(0, -1).map(function (_, i) { return `<span class="sngOrderTrackConnector ${!cancelled && activeIndex > i ? "is-done" : ""}"></span>`; }).join("")}</div>
-      <div class="sngOrderTrackSteps">${states.map(function (state, i) {
-        const done = !cancelled && i <= activeIndex;
-        const active = !cancelled && i === activeIndex;
-        return `<div class="sngOrderTrackStep ${done ? "is-done" : ""} ${active ? "is-current" : ""}"><span class="sngOrderTrackDot">${done ? "✓" : ""}</span><span>${labels[i]}</span></div>`;
-      }).join("")}</div>
-      ${cancelled ? `<div class="sngOrderTrackCancelled">✕ Commande annulée</div>` : `<div class="sngOrderTrackCurrent">${esc(current)}</div>`}
-    </div>`;
-  }
-
   function setSectionChrome(section) {
     const isHome = section === "home";
     const isProfile = section === "profile";
@@ -119,7 +98,7 @@
         if (cats) { cats.innerHTML = ""; cats.hidden = true; cats.style.display = "none"; }
         if (subcats) { subcats.hidden = true; subcats.style.display = "none"; subcats.innerHTML = ""; }
         if (grid) grid.replaceChildren();
-        if (profile) { profile.hidden = false; profile.style.display = "block"; loadCustomerProfile(profile); }
+        if (profile) { profile.hidden = false; profile.style.display = "block"; }
       } else {
         if (profile) { profile.hidden = true; profile.style.display = "none"; profile.replaceChildren(); delete profile.dataset.sngProfileLoading; }
         if (subcats) { subcats.hidden = true; subcats.style.display = "none"; }
@@ -149,92 +128,6 @@
     window.__sngamerStoreNavigationV2 = true;
   }
 
-  async function loadCustomerProfile(profile) {
-    if (!profile || profile.dataset.sngProfileLoading === "1") return;
-    profile.dataset.sngProfileLoading = "1";
-    try {
-      const r = await fetch("/api/customer/me", { credentials: "same-origin", cache: "no-store" });
-      if (!r.ok) { profile.innerHTML = '<div class="sgaCard"><h2>Connexion requise</h2><p>Connecte-toi à ton espace client pour voir tes commandes.</p></div>'; return; }
-      const d = await r.json();
-      const customer = d.customer || {};
-      const or = await fetch("/api/customer/orders", { credentials: "same-origin", cache: "no-store" });
-      const orders = or.ok ? await or.json() : [];
-      const list = Array.isArray(orders) ? orders : [];
-      profile.innerHTML = `
-        <div class="sgaCard sngProfileHeader">
-          <h2>Bonjour ${esc(customer.name || "Client")} 👋</h2>
-          <p>Bienvenue dans ton espace client.</p>
-          <div class="sngProfileMeta">${esc(customer.phone || "")}${customer.email ? " · " + esc(customer.email) : ""}</div>
-        </div>
-        <div class="sgaCard">
-          <div class="sgaCardHead"><h3>Mes commandes</h3><span>${list.length}</span></div>
-          <div class="sngProfileOrders">${list.length ? list.map(function(order) {
-            const items = Array.isArray(order.items) ? order.items : [];
-            const first = items[0]?.name || "Votre achat";
-            const publicName = items.length > 1 ? first + " + " + (items.length - 1) : first;
-            const total = order.total_amount ?? order.total ?? 0;
-            const status = String(order.status || "Nouvelle");
-            const colorDetails = items.filter(item => item && (typeof item.color === "string" ? item.color : item.color?.name)).map(item => {
-              const colorName = typeof item.color === "string" ? item.color : item.color?.name;
-              return `${item.name || "Produit"} : ${colorName}`;
-            }).join(" · ");
-            return `<article class="sgaOrder" data-order-id="${Number(order.id) || 0}"><div class="sgaOrderTop"><strong>Commande #${Number(order.id) || 0}</strong><span>${esc(status)}</span></div><div class="sgaOrderMeta">${esc(publicName)} · ${total ? money(total) : "Montant non disponible"}${colorDetails ? `<div class="sngOrderColorSummary" style="margin-top:5px;color:#92b7dd;font-size:12px">🎨 ${esc(colorDetails)}</div>` : ""}</div>${orderTracking(status)}</article>`;
-          }).join("") : '<p class="sngProfileEmpty">Aucune commande pour le moment.</p>'}</div>
-        </div>`;
-      if (typeof window.sngRefreshFavorites === "function") window.sngRefreshFavorites();
-    } catch (e) {
-      console.error("SNGAMER_PROFILE_LOAD_ERROR", e);
-      profile.innerHTML = '<div class="sgaCard"><h2>Espace client</h2><p>Impossible de charger ton espace client pour le moment. Réessaie dans quelques secondes.</p></div>';
-    } finally { delete profile.dataset.sngProfileLoading; }
-  }
-
-  /*
-   * ROOT-CAUSE GUARD FOR ORDER TRACKING
-   * Several customer-space enhancement scripts are injected after this file and
-   * can rebuild #profileArea. When they rebuild an order card, the original
-   * tracking markup can disappear. This observer restores the tracking line on
-   * the final DOM instead of depending on script load order.
-   */
-  function installOrderTrackingReconciler() {
-    if (window.__sngamerOrderTrackingReconciler) return;
-    window.__sngamerOrderTrackingReconciler = true;
-
-    function statusFromCard(card) {
-      const direct = card.querySelector(".sgaOrderTop span, .order-status, [data-order-status], [data-status]");
-      if (direct && direct.textContent.trim()) return direct.textContent.trim();
-      const text = card.textContent || "";
-      const known = ["Annulée", "Livrée", "Expédiée", "En préparation", "Confirmée", "Nouvelle"];
-      return known.find(function (value) { return text.includes(value); }) || "Nouvelle";
-    }
-
-    function reconcile() {
-      const profile = document.getElementById("profileArea");
-      if (!profile || profile.hidden) return;
-      const cards = profile.querySelectorAll(".sgaOrder, [data-order-id].order-card, [data-order-id].orderCard, [data-order-id].order-item, [data-order-id].order");
-      cards.forEach(function (card) {
-        if (card.querySelector(".sngOrderTracking")) return;
-        const id = card.getAttribute("data-order-id");
-        if (!id || !/^\d+$/.test(id)) return;
-        const status = statusFromCard(card);
-        const meta = card.querySelector(".sgaOrderMeta");
-        if (meta) meta.insertAdjacentHTML("afterend", orderTracking(status));
-        else card.insertAdjacentHTML("beforeend", orderTracking(status));
-      });
-    }
-
-    const start = function () {
-      const profile = document.getElementById("profileArea");
-      if (!profile) return;
-      reconcile();
-      const observer = new MutationObserver(function () { reconcile(); });
-      observer.observe(profile, { childList: true, subtree: true });
-      [100, 500, 1200, 2500].forEach(function (delay) { setTimeout(reconcile, delay); });
-    };
-
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
-    else start();
-  }
-
   function installIsolationCSS() {
     if (document.getElementById("sngSectionIsolationV2")) return;
     const style = document.createElement("style");
@@ -253,24 +146,12 @@
       body.sngProfileView #shop { min-height:calc(100vh - 150px); }
       body.sngCategoryView #shop > .bar,
       body.sngProfileView #shop > .bar { margin-bottom:18px; }
-      .sngOrderTracking { margin-top:14px; padding:12px 10px 10px; border:1px solid rgba(112,154,220,.20); border-radius:14px; background:rgba(7,17,32,.58); overflow:hidden; }
-      .sngOrderTrackSteps { position:relative; z-index:2; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:3px; }
-      .sngOrderTrackStep { min-width:0; display:flex; flex-direction:column; align-items:center; gap:5px; color:#7488a4; font-size:9px; line-height:1.15; text-align:center; }
-      .sngOrderTrackDot { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; border:1px solid #3a4c68; background:#0b1424; color:#fff; font-size:10px; font-weight:800; box-sizing:border-box; }
-      .sngOrderTrackStep.is-done { color:#8fc5ff; }
-      .sngOrderTrackStep.is-current { color:#fff; font-weight:800; }
-      .sngOrderTrackStep.is-done .sngOrderTrackDot { background:linear-gradient(135deg,#2374ff,#9b2cff); border-color:#5e83ff; box-shadow:0 0 12px rgba(69,91,255,.35); }
-      .sngOrderTrackLine { position:absolute; display:none; }
-      .sngOrderTrackSteps { position:relative; }
-      .sngOrderTrackSteps:before { content:""; position:absolute; left:10%; right:10%; top:9px; height:2px; background:#263650; z-index:-1; }
-      .sngOrderTrackCurrent { margin-top:9px; text-align:center; font-size:11px; font-weight:800; color:#65b6ff; }
-      .sngOrderTrackCancelled { margin-top:9px; text-align:center; font-size:11px; font-weight:800; color:#ff6b8a; }
-      @media (min-width:700px) { .sngOrderTrackStep { font-size:10px; } .sngOrderTracking { padding:14px 16px 11px; } }
+
     `;
     document.head.appendChild(style);
   }
 
-  function boot() { installIsolationCSS(); installStoreNavigation(); installOrderTrackingReconciler(); watchCheckout(); }
+  function boot() { installIsolationCSS(); installStoreNavigation(); watchCheckout(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true }); else boot();
   window.setTimeout(prepareCheckoutLayout, 250);
 })();
