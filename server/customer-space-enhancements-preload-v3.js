@@ -144,16 +144,14 @@ function injectCustomerSpaceScript(app) {
     try {
       let html = fs.readFileSync(indexPath, "utf8");
       const paytechTag = '<script src="/paytech-checkout.js?v=20261021-stockcancel1"></script>';
-      const customerTag = '<script src="/customer-space-enhancements.js?v=20261018-1450" defer></script>';
+      const customerTag = '<script src="/customer-space-enhancements.js?v=20261026-profile-source1" defer></script>';
       const pushTag = '<script src="/customer-push.js?v=20261024-stock-root-cause2" defer></script>';
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
       const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261021-footerfix1" defer></script>';
-      const profilePremiumTag = '<script src="/customer-profile-premium-v1.js?v=20261026-profile-root2" defer></script>';
       const productSocialTag = '<script src="/product-social-v1.js?v=20261021-social1" defer></script>';
       const productImageActionsTag = '<script src="/product-image-actions-v1.js?v=20261026-overlay2" defer></script>';
       const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261022-hier1" defer></script>';
-      const finalOrderTrackingTag = '<script src="/customer-order-tracking-final-v1.js?v=20261026-final2" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
       if (!html.includes("/customer-push.js")) html = html.replace(/<\/body>/i, `${pushTag}</body>`);
@@ -161,11 +159,9 @@ function injectCustomerSpaceScript(app) {
       if (!html.includes("premium-dialogs-v1.js")) html = html.replace(/<\/body>/i, `${premiumJsTag}</body>`);
       if (!html.includes("desktop-profile-entry-v1.js")) html = html.replace(/<\/body>/i, `${desktopProfileTag}</body>`);
       html = html.replace(/<script\b[^>]*src=["'][^"']*customer-profile-premium-v1\.js[^"']*["'][^>]*>\s*<\/script>/gi, "");
-      html = html.replace(/<\/body>/i, `${profilePremiumTag}</body>`);
       if (!html.includes("/product-social-v1.js")) html = html.replace(/<\/body>/i, `${productSocialTag}</body>`);
       if (!html.includes("/product-image-actions-v1.js")) html = html.replace(/<\/body>/i, `${productImageActionsTag}</body>`);
       html = html.replace(/<\/body>/i, `${finalShellTag}</body>`);
-      html = html.replace(/<\/body>/i, `${finalOrderTrackingTag}</body>`);
       html = html.replace(/if\s*\(!confirm\(([^;]*?)\)\)\s*return;/g, 'if (!(await window.sngPremiumConfirm($1))) return;');
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); res.set("Pragma", "no-cache"); res.set("Expires", "0");
       return res.type("html").send(html);
