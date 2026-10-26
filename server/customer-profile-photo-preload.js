@@ -1,8 +1,6 @@
 const express = require("express");
 const multer = require("multer");
 const { Pool } = require("pg");
-const fs = require("fs");
-const path = require("path");
 
 const profilePool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -30,10 +28,14 @@ async function ensureProfilePhotoColumn() {
 
 function installProfileRoutes() {
   const router = express.Router();
+
   router.get("/api/customer/profile-photo", async (req, res) => {
     try {
       if (!req.session?.customerId) return res.status(401).end();
-      const result = await profilePool.query(`SELECT profile_photo, profile_photo_mime FROM customers WHERE id=$1 LIMIT 1`, [req.session.customerId]);
+      const result = await profilePool.query(
+        `SELECT profile_photo, profile_photo_mime FROM customers WHERE id=$1 LIMIT 1`,
+        [req.session.customerId]
+      );
       if (!result.rows.length || !result.rows[0].profile_photo) return res.status(404).end();
       res.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
       res.type(result.rows[0].profile_photo_mime || "image/jpeg");
@@ -50,7 +52,10 @@ function installProfileRoutes() {
       if (error) return res.status(400).json({ error: error.message || "Photo invalide." });
       try {
         if (!req.file?.buffer?.length) return res.status(400).json({ error: "Aucune photo reçue." });
-        await profilePool.query(`UPDATE customers SET profile_photo=$1, profile_photo_mime=$2, updated_at=NOW() WHERE id=$3`, [req.file.buffer, req.file.mimetype, req.session.customerId]);
+        await profilePool.query(
+          `UPDATE customers SET profile_photo=$1, profile_photo_mime=$2, updated_at=NOW() WHERE id=$3`,
+          [req.file.buffer, req.file.mimetype, req.session.customerId]
+        );
         res.json({ success: true });
       } catch (dbError) {
         console.error("CUSTOMER_PROFILE_PHOTO_SAVE_ERROR:", dbError);
@@ -62,39 +67,18 @@ function installProfileRoutes() {
   router.delete("/api/customer/profile-photo", async (req, res) => {
     try {
       if (!req.session?.customerId) return res.status(401).json({ error: "Connexion client requise" });
-      await profilePool.query(`UPDATE customers SET profile_photo=NULL, profile_photo_mime=NULL, updated_at=NOW() WHERE id=$1`, [req.session.customerId]);
+      await profilePool.query(
+        `UPDATE customers SET profile_photo=NULL, profile_photo_mime=NULL, updated_at=NOW() WHERE id=$1`,
+        [req.session.customerId]
+      );
       res.json({ success: true });
     } catch (error) {
       console.error("CUSTOMER_PROFILE_PHOTO_DELETE_ERROR:", error);
       res.status(500).json({ error: "Impossible de supprimer la photo de profil." });
     }
   });
-  return router;
-}
 
-function injectProfileScript(app) {
-  const router = express.Router();
-  router.get(["/", "/index.html"], (req, res, next) => {
-    const indexPath = path.join(__dirname, "..", "public", "index.html");
-    if (!fs.existsSync(indexPath)) return next();
-    try {
-      let html = fs.readFileSync(indexPath, "utf8");
-      const tag = '<script src="/customer-profile-premium-v1.js?v=20261019-0933" defer></script>';
-      html = html.replace(/<script\b[^>]*src=["'][^"']*customer-profile-premium-v1\.js[^"']*["'][^>]*>\s*<\/script>/gi, "");
-      html = html.replace(/<\/body>/i, `${tag}</body>`);
-      res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-      res.set("Pragma", "no-cache");
-      res.set("Expires", "0");
-      return res.type("html").send(html);
-    } catch (error) {
-      console.error("CUSTOMER_PROFILE_HTML_INJECTION_ERROR:", error);
-      return next();
-    }
-  });
-  const stack = app._router && app._router.stack;
-  if (!stack) return;
-  const staticIndex = stack.findIndex(layer => layer && layer.handle && layer.handle.name === "serveStatic");
-  if (staticIndex >= 0) stack.splice(staticIndex, 0, ...(router.stack || []));
+  return router;
 }
 
 const originalListen = express.application.listen;
@@ -113,7 +97,6 @@ express.application.listen = function customerProfileListenPatched(...args) {
         });
         if (catchAllIndex >= 0) stack.splice(catchAllIndex, 0, ...(profileRouter.stack || []));
         else stack.push(...(profileRouter.stack || []));
-        injectProfileScript(app);
       }
       return originalListen.apply(app, args);
     } catch (error) {
