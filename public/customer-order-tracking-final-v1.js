@@ -1,14 +1,13 @@
-/* SNGAMER STORE — Customer order tracking FINAL DOM reconciler
-   This is intentionally loaded after the other customer-space enhancements.
-   It owns only the tracking line and never replaces the customer's profile UI. */
+/* SNGAMER STORE — Customer order tracking FINAL DOM reconciler */
 (function(){
   'use strict';
-  if(window.__sngCustomerOrderTrackingFinalV1)return;
-  window.__sngCustomerOrderTrackingFinalV1=true;
+  if(window.__sngCustomerOrderTrackingFinalV2)return;
+  window.__sngCustomerOrderTrackingFinalV2=true;
 
   const STATES=['Nouvelle','Confirmée','En préparation','Expédiée','Livrée'];
   const LABELS=['Nouvelle','Confirmée','Préparation','Expédiée','Livrée'];
   let ordersPromise=null;
+  let reconcileTimer=null;
 
   function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
 
@@ -17,7 +16,7 @@
     const style=document.createElement('style');
     style.id='sngCustomerOrderTrackingFinalCss';
     style.textContent=`
-      .sngCustomerFinalTracking{margin:12px 0 0;padding:13px 9px 11px;border:1px solid rgba(74,145,255,.22);border-radius:14px;background:linear-gradient(135deg,rgba(8,22,40,.92),rgba(21,10,38,.82));box-sizing:border-box;width:100%;overflow:hidden}
+      .sngCustomerFinalTracking{display:block!important;visibility:visible!important;margin:12px 0 0;padding:13px 9px 11px;border:1px solid rgba(74,145,255,.22);border-radius:14px;background:linear-gradient(135deg,rgba(8,22,40,.92),rgba(21,10,38,.82));box-sizing:border-box;width:100%;overflow:hidden;clear:both}
       .sngCustomerFinalTracking *{box-sizing:border-box}
       .sngCustomerFinalTrackingHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
       .sngCustomerFinalTrackingTitle{font-size:12px;font-weight:900;color:#fff}
@@ -73,8 +72,8 @@
 
   function trackingHtml(status){
     const current=normalizeStatus(status);
-    if(current==='Annulée')return `<div class="sngCustomerFinalTracking" data-sng-final-tracking="1"><div class="sngCustomerFinalTrackingHead"><span class="sngCustomerFinalTrackingTitle">📍 Suivi de la commande</span><span class="sngCustomerFinalTrackingStatus">Annulée</span></div><div class="sngCustomerFinalTrackingNote">Cette commande a été annulée.</div></div>`;
-    const active=STATES.indexOf(current)<0?0:STATES.indexOf(current);
+    if(current==='Annulée')return `<div class="sngCustomerFinalTracking" data-sng-final-tracking="1" data-status="Annulée"><div class="sngCustomerFinalTrackingHead"><span class="sngCustomerFinalTrackingTitle">📍 Suivi de la commande</span><span class="sngCustomerFinalTrackingStatus">Annulée</span></div><div class="sngCustomerFinalTrackingNote">Cette commande a été annulée.</div></div>`;
+    const active=Math.max(0,STATES.indexOf(current));
     const steps=STATES.map((state,i)=>{
       const done=i<=active;
       const currentStep=i===active;
@@ -85,7 +84,7 @@
   }
 
   function findOrderCards(profile){
-    const all=[...profile.querySelectorAll('[data-order-id],article,section,.sgaOrder,.order-card,.orderCard,.order-item')];
+    const all=[...profile.querySelectorAll('.sgaOrder,[data-order-id],article,section,.order-card,.orderCard,.order-item')];
     const seen=new Set();
     return all.filter(card=>{
       if(seen.has(card))return false;
@@ -96,41 +95,47 @@
     });
   }
 
-  async function reconcile(){
-    const profile=document.getElementById('profileArea');
-    if(!profile||profile.hidden||profile.offsetParent===null)return;
-    css();
-    const orders=await getOrders();
-    const map=new Map(orders.map(o=>[Number(o.id),o]));
+  function renderCards(profile,orders){
+    if(!profile)return;
+    const map=new Map((orders||[]).map(o=>[Number(o.id),o]));
     findOrderCards(profile).forEach(card=>{
-      const id=orderId(card); if(!id)return;
+      const id=orderId(card);if(!id)return;
       card.setAttribute('data-order-id',String(id));
       const order=map.get(id);
       const status=statusFromCard(card,order);
-      let tracking=card.querySelector('[data-sng-final-tracking="1"],.sngOrderTracking,.sngTracking');
+      let tracking=card.querySelector('[data-sng-final-tracking="1"],.sngCustomerFinalTracking');
       if(!tracking){
         const anchor=card.querySelector('.sgaOrderMeta,.sngCustomerOrderNotice,.sgaOrderTop');
         if(anchor)anchor.insertAdjacentHTML('afterend',trackingHtml(status));
         else card.insertAdjacentHTML('beforeend',trackingHtml(status));
-      }else if(tracking.dataset.sngFinalTracking!=='1'){
-        tracking.outerHTML=trackingHtml(status);
-      }else if(normalizeStatus(tracking.dataset.status)!==status){
-        tracking.outerHTML=trackingHtml(status);
+        return;
       }
+      if(tracking.dataset.status!==status)tracking.outerHTML=trackingHtml(status);
     });
   }
 
-  function boot(){
+  async function reconcile(){
     css();
     const profile=document.getElementById('profileArea');
-    if(!profile)return;
-    const observer=new MutationObserver(()=>{
-      clearTimeout(window.__sngCustomerFinalTrackingTimer);
-      window.__sngCustomerFinalTrackingTimer=setTimeout(reconcile,80);
-    });
-    observer.observe(profile,{childList:true,subtree:true});
-    [0,150,500,1200,2500,5000].forEach(d=>setTimeout(reconcile,d));
-    setInterval(()=>{ordersPromise=null;reconcile();},5000);
+    if(!profile||profile.hidden||profile.offsetParent===null)return;
+    // Render immediately from the DOM so tracking never depends on a slow API.
+    renderCards(profile,[]);
+    // Then reconcile against the authoritative server status.
+    const orders=await getOrders();
+    if(document.getElementById('profileArea')===profile)renderCards(profile,orders);
+  }
+
+  function schedule(){clearTimeout(reconcileTimer);reconcileTimer=setTimeout(reconcile,40);}
+
+  function boot(){
+    css();
+    const root=document.documentElement;
+    if(!window.__sngCustomerFinalTrackingDocumentObserver){
+      window.__sngCustomerFinalTrackingDocumentObserver=new MutationObserver(schedule);
+      window.__sngCustomerFinalTrackingDocumentObserver.observe(root,{childList:true,subtree:true});
+    }
+    [0,100,300,700,1500,3000].forEach(d=>setTimeout(schedule,d));
+    setInterval(()=>{ordersPromise=null;schedule();},5000);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
