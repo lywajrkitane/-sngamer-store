@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261026-product-actions-loader3';
+const SNGAMER_SW_VERSION = '20261026-customer-order-tracking-cache-fix1';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -25,7 +25,7 @@ self.addEventListener('fetch', event => {
 
   if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('/index.html')) {
     event.respondWith((async () => {
-      const response = await fetch(request);
+      const response = await fetch(request, { cache: 'no-store' });
       if (!response.ok) return response;
       try {
         const type = response.headers.get('content-type') || '';
@@ -33,17 +33,24 @@ self.addEventListener('fetch', event => {
         const source = await response.text();
         const headers = new Headers(response.headers);
         headers.set('Cache-Control', 'no-store');
-        headers.set('X-SNGAMER-Product-Actions', 'v3');
+        headers.set('X-SNGAMER-Product-Actions', 'v4');
         return new Response(source, { status: response.status, statusText: response.statusText, headers });
       } catch (_) { return response; }
     })());
     return;
   }
 
+  // Critical storefront patches must never be served from a stale browser cache.
+  // The customer profile order tracker lives in navigation-checkout-fix.js.
+  if (url.pathname.endsWith('/navigation-checkout-fix.js') || url.pathname.endsWith('/profile-navigation-refresh.js')) {
+    event.respondWith(fetch(request, { cache: 'no-store' }));
+    return;
+  }
+
   if (!url.pathname.endsWith('/stock-mode.js')) return;
 
   event.respondWith((async () => {
-    const response = await fetch(request);
+    const response = await fetch(request, { cache: 'no-store' });
     if (!response.ok) return response;
     try {
       const source = await response.text();
