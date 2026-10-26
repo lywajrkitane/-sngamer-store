@@ -152,7 +152,7 @@ function injectCustomerSpaceScript(app) {
       const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261021-footerfix1" defer></script>';
       const profilePremiumTag = '<script src="/customer-profile-premium-v1.js?v=20261019-0933" defer></script>';
       const productSocialTag = '<script src="/product-social-v1.js?v=20261021-social1" defer></script>';
-      const productImageActionsTag = '<script src="/product-image-actions-v1.js?v=20261025-overlay1" defer></script>';
+      const productImageActionsTag = '<script src="/product-image-actions-v1.js?v=20261026-overlay2" defer></script>';
       const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261022-hier1" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
@@ -178,31 +178,3 @@ function injectCustomerSpaceScript(app) {
 }
 
 const originalListen = express.application.listen;
-express.application.listen = function customerSpaceListenPatched(...args) {
-  const app = this;
-  const start = async () => {
-    try {
-      await ensureCustomerSpaceEnhancements();
-      await initPushDatabase();
-      const stack = app._router && app._router.stack;
-      if (stack) {
-        const enhancementRouter = installCustomerSpaceRoutes();
-        const pushRouter = installPushRoutes();
-        const catchAllIndex = stack.findIndex(layer => {
-          if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
-          const routePath = layer.route.path;
-          return routePath === "*" || (Array.isArray(routePath) && routePath.includes("*"));
-        });
-        if (catchAllIndex >= 0) {
-          stack.splice(catchAllIndex, 0, ...(enhancementRouter.stack || []), ...(pushRouter.stack || []));
-        } else {
-          stack.push(...(enhancementRouter.stack || []), ...(pushRouter.stack || []));
-        }
-        installOrderStatusObserver(app);
-        injectCustomerSpaceScript(app);
-      }
-      return originalListen.apply(app, args);
-    } catch (error) { console.error("CUSTOMER_SPACE_ENHANCEMENTS_BOOT_ERROR:", error); process.exit(1); }
-  };
-  return start();
-};
