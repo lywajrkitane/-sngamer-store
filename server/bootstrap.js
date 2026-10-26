@@ -195,7 +195,7 @@ express.application.listen = function patchedListen(...args) {
         html = html.replace(/<script[^>]+admin-final-fix\.js[^>]*><\/script>/gi, "");
 
         if (!html.includes("/admin-v24-workspace.js")) {
-          html = html.replace("</body>", '<script src="/admin-v24-workspace.js?v=20261018-1048"></script></body>');
+          html = html.replace("</body>", '<script src="/admin-v24-workspace.js?v=20261026-active-single1"></script></body>');
         }
         if (!html.includes("/admin-data-fix.js")) {
           html = html.replace("</body>", '<script src="/admin-data-fix.js?v=20261018-1220"></script></body>');
