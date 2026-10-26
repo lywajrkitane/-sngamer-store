@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261025-product-actions-loader2';
+const SNGAMER_SW_VERSION = '20261026-product-actions-loader3';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -31,14 +31,10 @@ self.addEventListener('fetch', event => {
         const type = response.headers.get('content-type') || '';
         if (!type.includes('text/html')) return response;
         const source = await response.text();
-        let injected = source;
-        if (!injected.includes('/product-image-actions-v2.js')) {
-          injected = injected.replace('</body>', '<script src="/product-image-actions-v2.js?v=20261025-overlay2" defer></script></body>');
-        }
         const headers = new Headers(response.headers);
         headers.set('Cache-Control', 'no-store');
-        headers.set('X-SNGAMER-Product-Actions', 'v2');
-        return new Response(injected, { status: response.status, statusText: response.statusText, headers });
+        headers.set('X-SNGAMER-Product-Actions', 'v3');
+        return new Response(source, { status: response.status, statusText: response.statusText, headers });
       } catch (_) { return response; }
     })());
     return;
