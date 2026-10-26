@@ -1,17 +1,17 @@
 (function(){
   'use strict';
-  if(window.__sngProductImageActionsV2Loaded)return;
-  window.__sngProductImageActionsV2Loaded=true;
+  if(window.__sngProductImageActionsCanonicalTopLoaded)return;
+  window.__sngProductImageActionsCanonicalTopLoaded=true;
 
   function installStyles(){
-    if(document.getElementById('sngProductImageActionsV2Styles'))return;
+    if(document.getElementById('sngProductImageActionsCanonicalTopStyles'))return;
     const style=document.createElement('style');
-    style.id='sngProductImageActionsV2Styles';
+    style.id='sngProductImageActionsCanonicalTopStyles';
     style.textContent=`
       #productDetail .productMainImage{position:relative!important;overflow:visible!important;}
       #productDetail .productMainImage .sngSocialActions{
         position:absolute!important;top:12px!important;left:12px!important;right:12px!important;
-        z-index:50!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;
+        z-index:9999!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;
         display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
         pointer-events:none!important;
       }
@@ -64,9 +64,9 @@
   function observe(){
     run();
     if(!document.documentElement)return;
-    if(!window.__sngProductImageActionsV2Observer){
-      window.__sngProductImageActionsV2Observer=new MutationObserver(run);
-      window.__sngProductImageActionsV2Observer.observe(document.documentElement,{childList:true,subtree:true});
+    if(!window.__sngProductImageActionsCanonicalTopObserver){
+      window.__sngProductImageActionsCanonicalTopObserver=new MutationObserver(run);
+      window.__sngProductImageActionsCanonicalTopObserver.observe(document.documentElement,{childList:true,subtree:true});
     }
     let attempts=0;
     const timer=setInterval(function(){
