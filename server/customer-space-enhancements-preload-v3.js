@@ -148,7 +148,6 @@ function injectCustomerSpaceScript(app) {
       const pushTag = '<script src="/customer-push.js?v=20261024-stock-root-cause2" defer></script>';
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
-      const legacyBridgeTag = '<script src="/customer-premium-legacy-bridge-v1.js?v=20261018-1900"></script>';
       const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261021-footerfix1" defer></script>';
       const profilePremiumTag = '<script src="/customer-profile-premium-v1.js?v=20261019-0933" defer></script>';
       const productSocialTag = '<script src="/product-social-v1.js?v=20261021-social1" defer></script>';
@@ -160,7 +159,6 @@ function injectCustomerSpaceScript(app) {
       if (!html.includes("/customer-push.js")) html = html.replace(/<\/body>/i, `${pushTag}</body>`);
       if (!html.includes("premium-dialogs-v1.css")) html = html.replace(/<\/head>/i, `${premiumCssTag}</head>`);
       if (!html.includes("premium-dialogs-v1.js")) html = html.replace(/<\/body>/i, `${premiumJsTag}</body>`);
-      if (!html.includes("customer-premium-legacy-bridge-v1.js")) html = html.replace(/<\/body>/i, `${legacyBridgeTag}</body>`);
       if (!html.includes("desktop-profile-entry-v1.js")) html = html.replace(/<\/body>/i, `${desktopProfileTag}</body>`);
       html = html.replace(/<script\b[^>]*src=["'][^"']*customer-profile-premium-v1\.js[^"']*["'][^>]*>\s*<\/script>/gi, "");
       html = html.replace(/<\/body>/i, `${profilePremiumTag}</body>`);
@@ -180,3 +178,35 @@ function injectCustomerSpaceScript(app) {
 }
 
 const originalListen = express.application.listen;
+const originalUse = express.application.use;
+express.application.use = function customerSpaceUse(...args) {
+  return originalUse.apply(this, args);
+};
+
+express.application.listen = function customerSpaceListenPatched(...args) {
+  const app = this;
+  const start = async () => {
+    try {
+      await ensureCustomerSpaceEnhancements();
+      const stack = app._router && app._router.stack;
+      if (stack) {
+        const customerRouter = installCustomerSpaceRoutes();
+        const catchAllIndex = stack.findIndex(layer => {
+          if (!layer || !layer.route || !layer.route.methods || !layer.route.methods.get) return false;
+          const routePath = layer.route.path;
+          return routePath === "*" || (Array.isArray(routePath) && routePath.includes("*"));
+        });
+        if (catchAllIndex >= 0) stack.splice(catchAllIndex, 0, ...(customerRouter.stack || []));
+        else stack.push(...(customerRouter.stack || []));
+        injectCustomerSpaceScript(app);
+        try { initPushDatabase(); installPushRoutes(app); } catch (pushError) { console.error("CUSTOMER_PUSH_BOOT_ERROR:", pushError); }
+        try { installOrderStatusObserver(app); } catch (statusError) { console.error("ORDER_STATUS_OBSERVER_BOOT_ERROR:", statusError); }
+      }
+      return originalListen.apply(app, args);
+    } catch (error) {
+      console.error("CUSTOMER_SPACE_ENHANCEMENTS_BOOT_ERROR:", error);
+      process.exit(1);
+    }
+  };
+  return start();
+};
