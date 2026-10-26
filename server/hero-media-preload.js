@@ -96,23 +96,22 @@ function patchServer() {
 function patchAdminFile(fileName) {
   const file = path.join(PUBLIC_DIR, fileName);
   if (!fs.existsSync(file)) return;
-  let html = fs.readFileSync(file, "utf8");
-  const marker = "/hero-media-admin.js";
-  const scriptTag = '<script src="/hero-media-admin.js?v=20261024-hero-admintext3" defer></script>';
-  const fixTag = '<script src="/hero-dashboard-fix.js?v=20261024-hero-dashboard2" defer></script>';
-  const editorTag = '<script src="/hero-dashboard-editor.js?v=20261024-hero-editor1" defer></script>';
-  if (html.includes(marker)) {
-    let updated = html.replace(/<script[^>]*\/hero-media-admin\.js[^>]*><\/script>/i, scriptTag);
-    if (!updated.includes("/hero-dashboard-fix.js")) updated = updated.replace(scriptTag, scriptTag + fixTag);
-    else updated = updated.replace(/<script[^>]*\/hero-dashboard-fix\.js[^>]*><\/script>/i, fixTag);
-    if (!updated.includes("/hero-dashboard-editor.js")) updated = updated.replace(fixTag, fixTag + editorTag);
-    else updated = updated.replace(/<script[^>]*\/hero-dashboard-editor\.js[^>]*><\/script>/i, editorTag);
-    if (updated !== html) fs.writeFileSync(file, updated, "utf8");
-    return;
-  }
-  if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, scriptTag + fixTag + editorTag + "</body>");
-  else return console.error("HERO_MEDIA_PRELOAD_ERROR: </body> not found in " + fileName);
-  fs.writeFileSync(file, html, "utf8");
+
+  const original = fs.readFileSync(file, "utf8");
+  const editorTag = '<script src="/hero-dashboard-editor.js?v=20261026-hero-dedicated1" defer></script>';
+  let html = original;
+
+  // Keep only the dedicated Hero workspace editor. The two older scripts
+  // mounted another Hero panel below Overview and duplicated the same controls.
+  html = html
+    .replace(/<script\b[^>]*src=["'][^"']*\/hero-media-admin\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, "")
+    .replace(/<script\b[^>]*src=["'][^"']*\/hero-dashboard-fix\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, "")
+    .replace(/<script\b[^>]*src=["'][^"']*\/hero-dashboard-editor\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, "");
+
+  if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, editorTag + "\n</body>");
+  else html += "\n" + editorTag + "\n";
+
+  if (html !== original) fs.writeFileSync(file, html, "utf8");
 }
 
 try {
