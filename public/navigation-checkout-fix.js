@@ -188,6 +188,53 @@
     } finally { delete profile.dataset.sngProfileLoading; }
   }
 
+  /*
+   * ROOT-CAUSE GUARD FOR ORDER TRACKING
+   * Several customer-space enhancement scripts are injected after this file and
+   * can rebuild #profileArea. When they rebuild an order card, the original
+   * tracking markup can disappear. This observer restores the tracking line on
+   * the final DOM instead of depending on script load order.
+   */
+  function installOrderTrackingReconciler() {
+    if (window.__sngamerOrderTrackingReconciler) return;
+    window.__sngamerOrderTrackingReconciler = true;
+
+    function statusFromCard(card) {
+      const direct = card.querySelector(".sgaOrderTop span, .order-status, [data-order-status], [data-status]");
+      if (direct && direct.textContent.trim()) return direct.textContent.trim();
+      const text = card.textContent || "";
+      const known = ["Annulée", "Livrée", "Expédiée", "En préparation", "Confirmée", "Nouvelle"];
+      return known.find(function (value) { return text.includes(value); }) || "Nouvelle";
+    }
+
+    function reconcile() {
+      const profile = document.getElementById("profileArea");
+      if (!profile || profile.hidden) return;
+      const cards = profile.querySelectorAll(".sgaOrder, [data-order-id].order-card, [data-order-id].orderCard, [data-order-id].order-item, [data-order-id].order");
+      cards.forEach(function (card) {
+        if (card.querySelector(".sngOrderTracking")) return;
+        const id = card.getAttribute("data-order-id");
+        if (!id || !/^\d+$/.test(id)) return;
+        const status = statusFromCard(card);
+        const meta = card.querySelector(".sgaOrderMeta");
+        if (meta) meta.insertAdjacentHTML("afterend", orderTracking(status));
+        else card.insertAdjacentHTML("beforeend", orderTracking(status));
+      });
+    }
+
+    const start = function () {
+      const profile = document.getElementById("profileArea");
+      if (!profile) return;
+      reconcile();
+      const observer = new MutationObserver(function () { reconcile(); });
+      observer.observe(profile, { childList: true, subtree: true });
+      [100, 500, 1200, 2500].forEach(function (delay) { setTimeout(reconcile, delay); });
+    };
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
+    else start();
+  }
+
   function installIsolationCSS() {
     if (document.getElementById("sngSectionIsolationV2")) return;
     const style = document.createElement("style");
@@ -223,7 +270,7 @@
     document.head.appendChild(style);
   }
 
-  function boot() { installIsolationCSS(); installStoreNavigation(); watchCheckout(); }
+  function boot() { installIsolationCSS(); installStoreNavigation(); installOrderTrackingReconciler(); watchCheckout(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true }); else boot();
   window.setTimeout(prepareCheckoutLayout, 250);
 })();
