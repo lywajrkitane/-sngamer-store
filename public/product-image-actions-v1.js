@@ -1,12 +1,14 @@
 (function(){
   'use strict';
-  if(window.__sngProductImageActionsCanonicalTopLoaded)return;
-  window.__sngProductImageActionsCanonicalTopLoaded=true;
+  // Version 3: deliberately uses a new runtime guard so an older cached
+  // product-image-actions script cannot prevent this canonical positioner from running.
+  if(window.__sngProductImageActionsCanonicalTopV3Loaded)return;
+  window.__sngProductImageActionsCanonicalTopV3Loaded=true;
 
   function installStyles(){
-    if(document.getElementById('sngProductImageActionsCanonicalTopStyles'))return;
+    if(document.getElementById('sngProductImageActionsCanonicalTopV3Styles'))return;
     const style=document.createElement('style');
-    style.id='sngProductImageActionsCanonicalTopStyles';
+    style.id='sngProductImageActionsCanonicalTopV3Styles';
     style.textContent=`
       #productDetail .productMainImage{position:relative!important;overflow:visible!important;}
       #productDetail .productMainImage .sngSocialActions{
@@ -64,9 +66,9 @@
   function observe(){
     run();
     if(!document.documentElement)return;
-    if(!window.__sngProductImageActionsCanonicalTopObserver){
-      window.__sngProductImageActionsCanonicalTopObserver=new MutationObserver(run);
-      window.__sngProductImageActionsCanonicalTopObserver.observe(document.documentElement,{childList:true,subtree:true});
+    if(!window.__sngProductImageActionsCanonicalTopV3Observer){
+      window.__sngProductImageActionsCanonicalTopV3Observer=new MutationObserver(run);
+      window.__sngProductImageActionsCanonicalTopV3Observer.observe(document.documentElement,{childList:true,subtree:true});
     }
     let attempts=0;
     const timer=setInterval(function(){
