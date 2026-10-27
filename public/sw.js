@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261026-customer-order-tracking-cache-fix1';
+const SNGAMER_SW_VERSION = '20261027-social-top-only1';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -23,6 +23,13 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
+  // The storefront has exactly one social-action implementation now.
+  // The old image-actions file is intercepted and replaced by the top-only implementation.
+  if (url.pathname.endsWith('/product-image-actions-v1.js')) {
+    event.respondWith(fetch('/product-social-top-only-v1.js', { cache: 'no-store' }));
+    return;
+  }
+
   if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('/index.html')) {
     event.respondWith((async () => {
       const response = await fetch(request, { cache: 'no-store' });
@@ -33,15 +40,13 @@ self.addEventListener('fetch', event => {
         const source = await response.text();
         const headers = new Headers(response.headers);
         headers.set('Cache-Control', 'no-store');
-        headers.set('X-SNGAMER-Product-Actions', 'v4');
+        headers.set('X-SNGAMER-Product-Actions', 'top-only-v1');
         return new Response(source, { status: response.status, statusText: response.statusText, headers });
       } catch (_) { return response; }
     })());
     return;
   }
 
-  // Critical storefront patches must never be served from a stale browser cache.
-  // The customer profile order tracker lives in navigation-checkout-fix.js.
   if (url.pathname.endsWith('/navigation-checkout-fix.js') || url.pathname.endsWith('/profile-navigation-refresh.js')) {
     event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
