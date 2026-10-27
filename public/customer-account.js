@@ -164,14 +164,35 @@
     styles();
     const a=area();
     hideCatalog();
-    const ok=await me();
-    if(ok===false) return authView('login');
-    if(ok===null&&!state.customer) {
-      a.innerHTML=`<div class="sgaWrap"><section class="sgaCard"><h2 class="sgaTitle">Espace client</h2><p class="sgaSub">Impossible de vérifier ta session pour le moment. Tu n’as pas été déconnecté. Réessaie sans ressaisir tes identifiants.</p><button type="button" class="sgaBtn" onclick="sngRefreshAccount()">Réessayer</button></section></div>`;
+    const cachedCustomer=state.customer;
+    let c=cachedCustomer;
+
+    if(cachedCustomer) {
+      // Reuse the authenticated identity immediately when the customer returns
+      // to Profile; validate the server session in the background.
+      me().then(status=>{
+        if(document.body.dataset.storeSection!=='profile') return;
+        if(status===false) {
+          state.orders=[];
+          state.ordersLoaded=false;
+          authView('login');
+        }
+      }).catch(error=>console.error('SNGAMER_CUSTOMER_SESSION_REFRESH_ERROR',error));
+    } else {
+      const ok=await me();
+      if(ok===false) return authView('login');
+      if(ok===null&&!state.customer) {
+        a.innerHTML=`<div class="sgaWrap"><section class="sgaCard"><h2 class="sgaTitle">Espace client</h2><p class="sgaSub">Impossible de vérifier ta session pour le moment. Tu n’as pas été déconnecté. Réessaie sans ressaisir tes identifiants.</p><button type="button" class="sgaBtn" onclick="sngRefreshAccount()">Réessayer</button></section></div>`;
+        return;
+      }
+      c=state.customer;
+    }
+    if(!c) {
+      a.innerHTML=`<div class="sgaWrap"><section class="sgaCard"><p class="sgaSub">Impossible de charger les informations du compte pour le moment.</p><button type="button" class="sgaBtn" onclick="sngRefreshAccount()">Réessayer</button></section></div>`;
       return;
     }
-    const orders=Array.isArray(state.orders)?state.orders:[];
-    const c=state.customer,n=firstName(c.name),
+    const orders=Array.isArray(state.orders)?state.orders:[],
+      n=firstName(c.name),
       count=state.ordersLoaded?orders.length:'…',
       active=state.ordersLoaded?orders.filter(o=>!['Livrée','Annulée'].includes(o.status)).length:'…',
       deliveredCount=state.ordersLoaded?orders.filter(o=>o.status==='Livrée').length:'…';a.innerHTML=`<div class="sgaWrap"><section class="sgaCard"><div class="sgaHead"><div><div class="sgaSmall">SNGAMER STORE · ESPACE CLIENT</div><h2>Bonjour ${esc(n)} 👋</h2></div><button class="sgaLogout" onclick="sngLogout()">Déconnexion</button></div><div class="sgaIdentity"><button type="button" class="sgaAvatar" onclick="sngPickProfilePhoto()" title="Changer ma photo de profil" aria-label="Modifier la photo de profil"><span class="sgaAvatarInitial">${esc(n.charAt(0).toUpperCase())}</span><img class="sgaAvatarImage" alt="Photo de profil" hidden><span class="sgaAvatarCamera" aria-hidden="true">📷</span></button><input id="sgaProfilePhotoInput" class="sgaPhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><div><strong>${esc(c.name)}</strong></div></div><div class="sgaStatGrid"><div class="sgaStat"><b>${count}</b><span>Commandes</span></div><div class="sgaStat"><b>${active}</b><span>En cours</span></div><div class="sgaStat"><b>${deliveredCount}</b><span>Livrées</span></div></div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Mes commandes</h3><div id="sgaOrdersContent">${state.ordersLoaded?renderAccountOrders(orders):`<div class="sgaEmpty">Chargement de tes commandes…</div>`}</div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Mes informations</h3><div class="sgaRow"><span>Nom</span><b>${esc(c.name)}</b></div><div class="sgaRow"><span>E-mail</span><b>${esc(c.email)}</b></div><div class="sgaRow"><span>Téléphone</span><b>${esc(c.phone||'—')}</b></div><div class="sgaRow"><span>Adresse</span><b>${esc(c.address||'—')}</b></div><div class="sgaActions"><button class="sgaBtn" onclick="sngEditProfile()">Modifier mes informations</button><button class="sgaBtn alt" onclick="navigateStore('home')">Continuer mes achats</button></div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Suivi & assistance</h3><p class="sgaSub">Les statuts de commande et les demandes de remboursement sont synchronisés avec SNGAMER STORE.</p><div class="sgaActions"><button class="sgaBtn" onclick="sngRefreshAccount()">Actualiser mon suivi</button><button class="sgaBtn alt" onclick="window.open('https://wa.me/221786127985','_blank')">Contacter SNGAMER</button></div></section></div>`;
@@ -227,5 +248,11 @@
   }
   window.order=async function(){const ok=await me();if(!ok){if(typeof closeCheckout==='function')closeCheckout();if(typeof closeCart==='function')closeCart();if(typeof navigateStore==='function')navigateStore('profile');alert('Connecte-toi ou crée ton compte avant de passer une commande.');return}const cart=JSON.parse(localStorage.getItem('sg_cart')||'[]');if(!cart.length)return alert('Panier vide.');const payment=document.getElementById('pay')?.value||'Paiement à la livraison';try{const d=await api('/api/customer/orders',{method:'POST',body:JSON.stringify({payment,items:cart})});localStorage.removeItem('sg_cart');if(typeof cartItems!=='undefined')cartItems=[];if(typeof save==='function')save();if(typeof closeCheckout==='function')closeCheckout();if(typeof closeCart==='function')closeCart();alert('Commande #'+d.orderId+' enregistrée.');await renderAccount()}catch(e){alert(e.message)}};
   setInterval(refreshAccountTracking,10000);
-  document.addEventListener('DOMContentLoaded',()=>styles());
+  function bootCustomerAccount(){
+    styles();
+    const current=String(window.activeStoreSection||document.body?.dataset.storeSection||'home');
+    if(current==='profile') window.setTimeout(openProfile,0);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootCustomerAccount,{once:true});
+  else bootCustomerAccount();
 })();
