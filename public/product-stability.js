@@ -309,7 +309,7 @@
     style.textContent = `
       /* SNGAMER STORE — customer-facing stock privacy/status badge.
          The badge stays in the EXISTING .stock position. Only its visual content changes. */
-      #products .card.productCardClickable .info > .stock.sngStockStatus{
+      #products .card.productCardClickable .info > .stock.sngStockStatus:not(.onOrderStock){
         display:inline-flex!important;
         align-items:center!important;
         justify-content:flex-start!important;
@@ -334,7 +334,7 @@
         text-overflow:ellipsis!important;
         animation:none!important; opacity:1!important;
       }
-      #products .card.productCardClickable .info > .stock.sngStockStatus i{
+      #products .card.productCardClickable .info > .stock.sngStockStatus:not(.onOrderStock) i{
         display:block!important;
         width:7px!important;
         height:7px!important;
@@ -481,4 +481,28 @@
 
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init,{once:true});
   else init();
+})();
+
+
+/* On-order badges never inherit the green in-stock frame or pulse. */
+(function(){
+  if(document.getElementById("sng-on-order-pink-guard")) return;
+  const s=document.createElement("style");
+  s.id="sng-on-order-pink-guard";
+  s.textContent=`
+    #products .card.productCardClickable .info > .stock.onOrderStock,
+    #productDetail .stock.onOrderStock{
+      color:#ff4fa3!important;
+      border:1px solid rgba(255,79,163,.34)!important;
+      background:rgba(255,79,163,.09)!important;
+      box-shadow:none!important;
+      animation:none!important;
+      transition:none!important;
+    }
+    #products .card.productCardClickable .info > .stock.onOrderStock::before,
+    #products .card.productCardClickable .info > .stock.onOrderStock::after{
+      content:none!important;display:none!important;box-shadow:none!important;animation:none!important;
+    }
+  `;
+  document.head.appendChild(s);
 })();
