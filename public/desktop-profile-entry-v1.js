@@ -11,7 +11,16 @@
       return;
     }
     window.sessionStorage.setItem('sg_profile_return_section', target);
-    window.location.reload();
+    let attempts = 0;
+    const retryNavigation = function () {
+      attempts += 1;
+      if (typeof window.navigateStore === 'function') {
+        window.navigateStore(target);
+        return;
+      }
+      if (attempts < 10) window.setTimeout(retryNavigation, 50);
+    };
+    window.setTimeout(retryNavigation, 0);
   }
 
   function installStyles() {
