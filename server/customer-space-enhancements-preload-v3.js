@@ -136,7 +136,7 @@ function injectCustomerSpaceScript(app) {
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
       const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261021-footerfix1" defer></script>';
       const productSocialTag = '<script src="/product-social-v1.js?v=20261021-social1" defer></script>';
-      const productImageActionsTag = '<script src="/product-image-actions-v1.js?v=20261026-canonical-top2" defer></script>';
+      const productImageActionsTag = '<script src="/product-image-actions-v1.js?v=20261027-top-position-sourcefix1" defer></script>';
       const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261022-hier1" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
