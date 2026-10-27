@@ -230,3 +230,16 @@
   border-color:#3b95ff !important;
   box-shadow:0 0 0 2px rgba(59,149,255,.18) !important;
 }
+
+
+/* FINAL MAIN IMAGE CORNERS — clip the image itself to the complete rounded frame. */
+#productModal #productDetail .productMainImage{
+  border:1px solid rgba(255,255,255,.18)!important;
+  border-radius:20px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+#productModal #productDetail .productMainImage > img{
+  display:block!important;
+  border-radius:inherit!important;
+}
