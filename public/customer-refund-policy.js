@@ -13,10 +13,6 @@
       .sgaRefundPolicy p{margin:0;color:#aebbd0;font-size:11px;line-height:1.6}
       .sgaRefundPolicy b{color:#fff}
       .sgaClientCancelDisabled{display:none!important}
-      #products .card.productCardClickable .priceCurrent,
-      #products .card.productCardClickable .price--promo .priceCurrent,
-      #products .card.productCardClickable .price--regular .priceCurrent{color:#F4D58D !important;text-shadow:0 0 14px rgba(244,213,141,.16) !important}
-      #products .card.productCardClickable .priceCurrent small{color:#a9b9ca !important;text-shadow:none !important}
     `;
     document.head.appendChild(style);
   }
