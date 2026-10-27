@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261027-social-canonical2';
+const SNGAMER_SW_VERSION = '20261027-order-stock-privacy1';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -64,7 +64,8 @@ self.addEventListener('fetch', event => {
       #products .card.productCardClickable .info > .stock.sngStockStatus.onOrderStock.is-stock,
       #products .card.productCardClickable .info > .stock.onOrderStock {color:\${PINK}!important;border-color:rgba(255,79,163,.34)!important;background:rgba(255,79,163,.09)!important;box-shadow:none!important;}
       #products .card.productCardClickable .info > .stock.onOrderStock::before,
-      #products .card.productCardClickable .info > .stock.onOrderStock::after {border-color:transparent!important;background:transparent!important;box-shadow:none!important;}
+      #products .card.productCardClickable .info > .stock.onOrderStock::after {content:none!important;display:none!important;border-color:transparent!important;background:transparent!important;box-shadow:none!important;animation:none!important;}
+      #products .card.productCardClickable .info > .stock.onOrderStock {animation:none!important;transition:none!important;}
       #products .card.productCardClickable .info > .stock.onOrderStock > i,
       #products .card.productCardClickable .info > .stock.onOrderStock .sngOnOrderDot {background:\${PINK}!important;box-shadow:0 0 0 3px rgba(255,79,163,.08),0 0 10px \${PINK}!important;}
     \`;
