@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const state={customer:null,orders:[]};
+  const state={customer:null,orders:[],ordersLoaded:false};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const money=v=>new Intl.NumberFormat('fr-FR').format(Number(v||0))+' FCFA';
   const date=v=>{try{return new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(v))}catch(_){return ''}};
@@ -110,11 +110,73 @@
     document.head.appendChild(s)}
   function hideCatalog(){const p=document.getElementById('products'),c=document.getElementById('cats'),s=document.getElementById('navSubcategories');if(p){p.classList.add('sga-hide');p.style.setProperty('display','none','important')}if(c)c.style.display='none';if(s){s.style.display='none';s.hidden=true;s.innerHTML=''}}
   function area(){const a=document.getElementById('profileArea');if(a){a.hidden=false;a.classList.add('sga');a.style.display='block'}return a}
-  async function me(){try{const d=await api('/api/customer/me');state.customer=d.customer;return true}catch(_){state.customer=null;return false}}
+  async function me(){
+    try {
+      const response = await fetch('/api/customer/me', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (response.status === 401) {
+        state.customer = null;
+        return false;
+      }
+      if (!response.ok) throw new Error('profile_http_' + response.status);
+      const data = await response.json();
+      if (!data || !data.customer) throw new Error('Réponse du profil incomplète.');
+      state.customer = data.customer;
+      return true;
+    } catch (error) {
+      console.error('SNGAMER_CUSTOMER_PROFILE_LOAD_ERROR', error);
+      return null;
+    }
+  }
   function authView(mode='login'){const a=area();if(!a)return;hideCatalog();a.innerHTML=`<div class="sgaWrap"><section class="sgaCard sgaHero"><div class="sgaLogo">👤</div><h2 class="sgaTitle">Espace client</h2><p class="sgaSub">Connecte-toi pour retrouver tes commandes, suivre leur préparation et gérer tes demandes.</p></section><section class="sgaCard"><div class="sgaTabs"><button class="${mode==='login'?'on':''}" onclick="sngAuthView('login')">Se connecter</button><button class="${mode==='register'?'on':''}" onclick="sngAuthView('register')">Créer un compte</button></div><form id="sgaAuthForm" class="sgaForm"></form><div id="sgaError" class="sgaError"></div></section></div>`;const f=document.getElementById('sgaAuthForm');f.innerHTML=mode==='register'?`<input id="sgaName" placeholder="Nom complet" autocomplete="name" required><input id="sgaEmail" type="email" placeholder="Adresse e-mail" autocomplete="email" required><input id="sgaPhone" placeholder="Téléphone" autocomplete="tel"><input id="sgaAddress" placeholder="Adresse de livraison" autocomplete="street-address"><input id="sgaPassword" type="password" placeholder="Mot de passe (6 caractères minimum)" autocomplete="new-password" required><button class="sgaBtn">Créer mon compte</button>`:`<input id="sgaEmail" type="email" placeholder="Adresse e-mail" autocomplete="email" required><input id="sgaPassword" type="password" placeholder="Mot de passe" autocomplete="current-password" required><button class="sgaBtn">Se connecter</button>`;f.onsubmit=async e=>{e.preventDefault();const err=document.getElementById('sgaError');err.textContent='';try{let d;if(mode==='register')d=await api('/api/customer/register',{method:'POST',body:JSON.stringify({name:sgaName.value,email:sgaEmail.value,phone:sgaPhone.value,address:sgaAddress.value,password:sgaPassword.value})});else d=await api('/api/customer/login',{method:'POST',body:JSON.stringify({email:sgaEmail.value,password:sgaPassword.value})});state.customer=d.customer;await renderAccount()}catch(x){err.textContent=x.message}}}
   async function cancelOrder(id){const o=state.orders.find(x=>Number(x.id)===Number(id));if(!o)return;const paid=o.payment_status==='Payé';const text=paid?`Annuler la commande #${id} et enregistrer une demande de remboursement de ${money(o.total)} ?\n\nLe remboursement ne sera considéré comme effectué qu'après traitement par SNGAMER STORE via PayTech.`:`Annuler la commande #${id} ?`;if(!confirm(text))return;try{const d=await api('/api/customer/orders/'+encodeURIComponent(id)+'/cancel',{method:'POST'});alert(d.message||'Commande annulée.');await renderAccount()}catch(e){alert(e.message)}}
-  async function renderAccount(){styles();const ok=await me();if(!ok)return authView('login');const a=area();hideCatalog();let orders=[];try{orders=(await api('/api/customer/orders'))||[]}catch(_){orders=[]}state.orders=orders;const c=state.customer,n=firstName(c.name),count=orders.length,active=orders.filter(o=>!['Livrée','Annulée'].includes(o.status)).length;a.innerHTML=`<div class="sgaWrap"><section class="sgaCard"><div class="sgaHead"><div><div class="sgaSmall">SNGAMER STORE · ESPACE CLIENT</div><h2>Bonjour ${esc(n)} 👋</h2></div><button class="sgaLogout" onclick="sngLogout()">Déconnexion</button></div><div class="sgaIdentity"><button type="button" class="sgaAvatar" onclick="sngPickProfilePhoto()" title="Changer ma photo de profil" aria-label="Modifier la photo de profil"><span class="sgaAvatarInitial">${esc(n.charAt(0).toUpperCase())}</span><img class="sgaAvatarImage" alt="Photo de profil" hidden><span class="sgaAvatarCamera" aria-hidden="true">📷</span></button><input id="sgaProfilePhotoInput" class="sgaPhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><div><strong>${esc(c.name)}</strong></div></div><div class="sgaStatGrid"><div class="sgaStat"><b>${count}</b><span>Commandes</span></div><div class="sgaStat"><b>${active}</b><span>En cours</span></div><div class="sgaStat"><b>${orders.filter(o=>o.status==='Livrée').length}</b><span>Livrées</span></div></div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Mes commandes</h3>${orders.length?orders.map(o=>{const items=Array.isArray(o.items)?o.items:[];const cancellable=!['Livrée','Annulée'].includes(o.status)&&o.refund_status!=='Demandé'&&o.refund_status!=='Remboursé';const refund=o.refund_status&&o.refund_status!=='Aucun';return `<div class="sgaOrder" data-order-id="${Number(o.id)||0}"><div class="sgaOrderTop"><strong>Commande #${Number(o.id)||0}</strong><span class="sgaStatus" data-current-order-status="1">${esc(o.status||'Nouvelle')}</span></div><p>${date(o.created_at)} · ${items.length} produit(s) · <b>${money(o.total)}</b></p>${o.payment_status?`<p>💳 Paiement : <b>${esc(o.payment_status)}</b></p>`:''}${refund?`<div class="sgaRefund">↩️ Remboursement : ${esc(o.refund_status)}</div>`:''}${o.tracking_code?`<p>🚚 Suivi : <b>${esc(o.tracking_code)}</b></p>`:''}${o.customer_message?`<p>💬 ${esc(o.customer_message)}</p>`:''}${renderAccountOrderTracking(o)}${cancellable?`<div class="sgaActions"><button class="sgaBtn danger" onclick="sngCancelOrder(${Number(o.id)})">↩️ ${o.payment_status==='Payé'?'Annuler et demander un remboursement':'Annuler la commande'}</button></div>`:''}</div>`}).join(''):`<div class="sgaEmpty">Aucune commande pour le moment.</div>`}</section><section class="sgaCard"><h3 class="sgaSectionTitle">Mes informations</h3><div class="sgaRow"><span>Nom</span><b>${esc(c.name)}</b></div><div class="sgaRow"><span>E-mail</span><b>${esc(c.email)}</b></div><div class="sgaRow"><span>Téléphone</span><b>${esc(c.phone||'—')}</b></div><div class="sgaRow"><span>Adresse</span><b>${esc(c.address||'—')}</b></div><div class="sgaActions"><button class="sgaBtn" onclick="sngEditProfile()">Modifier mes informations</button><button class="sgaBtn alt" onclick="navigateStore('home')">Continuer mes achats</button></div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Suivi & assistance</h3><p class="sgaSub">Les statuts de commande et les demandes de remboursement sont synchronisés avec SNGAMER STORE.</p><div class="sgaActions"><button class="sgaBtn" onclick="sngRefreshAccount()">Actualiser mon suivi</button><button class="sgaBtn alt" onclick="window.open('https://wa.me/221786127985','_blank')">Contacter SNGAMER</button></div></section></div>`;
+
+  function renderAccountOrders(orders){ return orders.length?orders.map(o=>{const items=Array.isArray(o.items)?o.items:[];const cancellable=!['Livrée','Annulée'].includes(o.status)&&o.refund_status!=='Demandé'&&o.refund_status!=='Remboursé';const refund=o.refund_status&&o.refund_status!=='Aucun';return `<div class="sgaOrder" data-order-id="${Number(o.id)||0}"><div class="sgaOrderTop"><strong>Commande #${Number(o.id)||0}</strong><span class="sgaStatus" data-current-order-status="1">${esc(o.status||'Nouvelle')}</span></div><p>${date(o.created_at)} · ${items.length} produit(s) · <b>${money(o.total)}</b></p>${o.payment_status?`<p>💳 Paiement : <b>${esc(o.payment_status)}</b></p>`:''}${refund?`<div class="sgaRefund">↩️ Remboursement : ${esc(o.refund_status)}</div>`:''}${o.tracking_code?`<p>🚚 Suivi : <b>${esc(o.tracking_code)}</b></p>`:''}${o.customer_message?`<p>💬 ${esc(o.customer_message)}</p>`:''}${renderAccountOrderTracking(o)}${cancellable?`<div class="sgaActions"><button class="sgaBtn danger" onclick="sngCancelOrder(${Number(o.id)})">↩️ ${o.payment_status==='Payé'?'Annuler et demander un remboursement':'Annuler la commande'}</button></div>`:''}</div>`}).join(''):`<div class="sgaEmpty">Aucune commande pour le moment.</div>`; }
+  async function loadAccountOrders(profileRoot) {
+    const content = profileRoot && profileRoot.querySelector('#sgaOrdersContent');
+    if (!content || content.dataset.loading === '1') return;
+    content.dataset.loading = '1';
+    try {
+      const result = await api('/api/customer/orders');
+      if (!Array.isArray(result)) throw new Error('Réponse des commandes invalide.');
+      state.orders = result;
+      state.ordersLoaded = true;
+      if (!profileRoot.isConnected || document.body.dataset.storeSection !== 'profile') return;
+      content.innerHTML = renderAccountOrders(result);
+      const stats = profileRoot.querySelectorAll('.sgaStat b');
+      if (stats[0]) stats[0].textContent = String(result.length);
+      if (stats[1]) stats[1].textContent = String(result.filter(o => !['Livrée','Annulée'].includes(o.status)).length);
+      if (stats[2]) stats[2].textContent = String(result.filter(o => o.status === 'Livrée').length);
+    } catch (error) {
+      console.error('SNGAMER_CUSTOMER_ORDERS_LOAD_ERROR', error);
+      if (profileRoot.isConnected && document.body.dataset.storeSection === 'profile') {
+        content.innerHTML = '<div class="sgaEmpty">Impossible de charger les commandes pour le moment. <button type="button" class="sgaBtn alt" onclick="sngRefreshAccount()">Réessayer</button></div>';
+      }
+    } finally {
+      delete content.dataset.loading;
+    }
+  }
+
+  async function renderAccount(){
+    styles();
+    const a=area();
+    hideCatalog();
+    const ok=await me();
+    if(ok===false) return authView('login');
+    if(ok===null&&!state.customer) {
+      a.innerHTML=`<div class="sgaWrap"><section class="sgaCard"><h2 class="sgaTitle">Espace client</h2><p class="sgaSub">Impossible de vérifier ta session pour le moment. Tu n’as pas été déconnecté. Réessaie sans ressaisir tes identifiants.</p><button type="button" class="sgaBtn" onclick="sngRefreshAccount()">Réessayer</button></section></div>`;
+      return;
+    }
+    const orders=Array.isArray(state.orders)?state.orders:[];
+    const c=state.customer,n=firstName(c.name),
+      count=state.ordersLoaded?orders.length:'…',
+      active=state.ordersLoaded?orders.filter(o=>!['Livrée','Annulée'].includes(o.status)).length:'…',
+      deliveredCount=state.ordersLoaded?orders.filter(o=>o.status==='Livrée').length:'…';a.innerHTML=`<div class="sgaWrap"><section class="sgaCard"><div class="sgaHead"><div><div class="sgaSmall">SNGAMER STORE · ESPACE CLIENT</div><h2>Bonjour ${esc(n)} 👋</h2></div><button class="sgaLogout" onclick="sngLogout()">Déconnexion</button></div><div class="sgaIdentity"><button type="button" class="sgaAvatar" onclick="sngPickProfilePhoto()" title="Changer ma photo de profil" aria-label="Modifier la photo de profil"><span class="sgaAvatarInitial">${esc(n.charAt(0).toUpperCase())}</span><img class="sgaAvatarImage" alt="Photo de profil" hidden><span class="sgaAvatarCamera" aria-hidden="true">📷</span></button><input id="sgaProfilePhotoInput" class="sgaPhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><div><strong>${esc(c.name)}</strong></div></div><div class="sgaStatGrid"><div class="sgaStat"><b>${count}</b><span>Commandes</span></div><div class="sgaStat"><b>${active}</b><span>En cours</span></div><div class="sgaStat"><b>${deliveredCount}</b><span>Livrées</span></div></div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Mes commandes</h3><div id="sgaOrdersContent">${state.ordersLoaded?renderAccountOrders(orders):`<div class="sgaEmpty">Chargement de tes commandes…</div>`}</div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Mes informations</h3><div class="sgaRow"><span>Nom</span><b>${esc(c.name)}</b></div><div class="sgaRow"><span>E-mail</span><b>${esc(c.email)}</b></div><div class="sgaRow"><span>Téléphone</span><b>${esc(c.phone||'—')}</b></div><div class="sgaRow"><span>Adresse</span><b>${esc(c.address||'—')}</b></div><div class="sgaActions"><button class="sgaBtn" onclick="sngEditProfile()">Modifier mes informations</button><button class="sgaBtn alt" onclick="navigateStore('home')">Continuer mes achats</button></div></section><section class="sgaCard"><h3 class="sgaSectionTitle">Suivi & assistance</h3><p class="sgaSub">Les statuts de commande et les demandes de remboursement sont synchronisés avec SNGAMER STORE.</p><div class="sgaActions"><button class="sgaBtn" onclick="sngRefreshAccount()">Actualiser mon suivi</button><button class="sgaBtn alt" onclick="window.open('https://wa.me/221786127985','_blank')">Contacter SNGAMER</button></div></section></div>`;
     setupAccountPhotoPicker();
+    loadAccountOrders(a);
   }
   async function refreshAccountTracking(){
     const profile=document.getElementById('profileArea');
@@ -142,7 +204,7 @@
     }catch(_){}finally{accountTrackingBusy=false;}
   }
   window.sngAuthView=authView;window.sngRefreshAccount=renderAccount;window.sngCancelOrder=cancelOrder;
-  window.sngLogout=async()=>{try{await api('/api/customer/logout',{method:'POST'});state.customer=null;authView('login')}catch(e){alert(e.message)}};
+  window.sngLogout=async()=>{try{await api('/api/customer/logout',{method:'POST'});state.customer=null;state.orders=[];state.ordersLoaded=false;authView('login')}catch(e){alert(e.message)}};
   window.sngEditProfile=()=>{const c=state.customer||{},m=document.createElement('div');m.className='sgaModal';m.innerHTML=`<div class="sgaModalBox"><button class="sgaModalClose" onclick="this.closest('.sgaModal').remove()">×</button><h3>Modifier mes informations</h3><form id="sgaEdit" class="sgaForm"><input id="eName" value="${esc(c.name)}" placeholder="Nom complet" required><input id="ePhone" value="${esc(c.phone)}" placeholder="Téléphone"><input id="eAddress" value="${esc(c.address)}" placeholder="Adresse"><button class="sgaBtn">Enregistrer</button></form><div id="eErr" class="sgaError"></div></div>`;document.body.appendChild(m);document.getElementById('sgaEdit').onsubmit=async e=>{e.preventDefault();try{await api('/api/customer/me',{method:'PATCH',body:JSON.stringify({name:eName.value,phone:ePhone.value,address:eAddress.value})});m.remove();renderAccount()}catch(x){document.getElementById('eErr').textContent=x.message}}};
   async function openProfile(){styles();await renderAccount()}
   const originalNavigateStore=window.navigateStore;
