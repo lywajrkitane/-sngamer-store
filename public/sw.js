@@ -1,5 +1,5 @@
 const SNGAMER_NOTIFICATION_ICON = '/sngamer-notification-icon.svg';
-const SNGAMER_SW_VERSION = '20261027-social-top-only1';
+const SNGAMER_SW_VERSION = '20261027-social-canonical2';
 
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
@@ -23,13 +23,6 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
-  // The storefront has exactly one social-action implementation now.
-  // The old image-actions file is intercepted and replaced by the top-only implementation.
-  if (url.pathname.endsWith('/product-image-actions-v1.js')) {
-    event.respondWith(fetch('/product-social-top-only-v1.js', { cache: 'no-store' }));
-    return;
-  }
-
   if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('/index.html')) {
     event.respondWith((async () => {
       const response = await fetch(request, { cache: 'no-store' });
@@ -40,7 +33,7 @@ self.addEventListener('fetch', event => {
         const source = await response.text();
         const headers = new Headers(response.headers);
         headers.set('Cache-Control', 'no-store');
-        headers.set('X-SNGAMER-Product-Actions', 'top-only-v1');
+        headers.set('X-SNGAMER-Product-Actions', 'canonical-top-only');
         return new Response(source, { status: response.status, statusText: response.statusText, headers });
       } catch (_) { return response; }
     })());
