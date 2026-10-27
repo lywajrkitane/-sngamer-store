@@ -130,13 +130,13 @@ function injectCustomerSpaceScript(app) {
     try {
       let html = fs.readFileSync(indexPath, "utf8");
       const paytechTag = '<script src="/paytech-checkout.js?v=20261021-stockcancel1"></script>';
-      const customerTag = '<script src="/customer-space-enhancements.js?v=20261026-profile-source1" defer></script>';
+      const customerTag = '<script src="/customer-space-enhancements.js?v=20261027-profile-catalog-stability1" defer></script>';
       const pushTag = '<script src="/customer-push.js?v=20261024-stock-rootcause2" defer></script>';
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
-      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261021-footerfix1" defer></script>';
+      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261027-profile-catalog-stability1" defer></script>';
       const productSocialTag = '<script src="/product-social-v1.js?v=20261027-social-canonical2" defer></script>';
-      const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261022-hier1" defer></script>';
+      const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261027-profile-catalog-stability1" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
       if (!html.includes("/customer-push.js")) html = html.replace(/<\/body>/i, `${pushTag}</body>`);
