@@ -29,7 +29,6 @@
     style.id = 'sngDesktopProfileStyles';
     style.textContent = `
       @media (min-width: 769px) {
-        /* Keep the brand on the left and the navigation controls as one compact group on the far right. */
         .siteHeader .nav { justify-content:flex-start !important; }
         .siteHeader .nav > .sngDesktopProfileButton { margin-left:auto !important; }
         .siteHeader .nav > .searchPremiumButton,
@@ -121,9 +120,23 @@
         .sngDesktopStoreIcon { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center; }
         .sngDesktopStoreIcon svg { width:22px;height:22px; }
 
+        /* Desktop-only price and hero corrections. Mobile rules remain untouched. */
+        #products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent {
+          color:#FFD21A !important;
+          text-shadow:0 0 12px rgba(255,210,26,.12) !important;
+        }
+        #products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small {
+          color:#aebacc !important;
+          text-shadow:none !important;
+        }
+        .professional-hero .heroIn { align-items:stretch !important; }
+        .professional-hero .heroIn > div:first-child,
+        .professional-hero .heroVisual.has-default-hero {
+          min-height:360px !important;
+          height:100% !important;
+        }
+
         #profileArea.sngDesktopProfileArea { width:100%; max-width:none; }
-        /* The shared storefront footer is part of the public site shell and
-           remains visible in Profile exactly as it is on other sections. */
         body.sngDesktopProfileMode .hero { display:none !important; }
         body.sngDesktopProfileMode #shop { padding-top:30px; padding-bottom:70px; }
         body.sngDesktopProfileMode #products { display:none !important; }
