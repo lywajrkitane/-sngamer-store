@@ -66,7 +66,7 @@ function installCustomerSpaceRoutes() {
       if (!owned.rows.length) return res.status(404).json({ error: "Commande introuvable dans votre espace client." });
       await enhancementPool.query(`INSERT INTO customer_hidden_orders (customer_id, order_id) VALUES ($1,$2) ON CONFLICT (customer_id, order_id) DO UPDATE SET hidden_at=NOW()`, [req.session.customerId, orderId]);
       res.json({ success: true, message: "Commande supprimée de votre espace client." });
-    } catch (error) { console.error("CUSTOMER_HIDE_ORDER_ERROR:", error); res.status(500).json({ error: "Impossible de supprimer la commande de votre espace client." }); }
+    } catch (error) { console.error("CUSTOMER_HIDE_ORDER_ERROR:", error); res.status(500).json({ error: "Impossible de supprimer la commande." }); }
   });
   router.get("/api/customer/favorites", async (req, res) => {
     try {
@@ -93,7 +93,7 @@ function installCustomerSpaceRoutes() {
       if(!Number.isInteger(productId)||productId<=0)return res.status(400).json({error:"Produit invalide."});
       await enhancementPool.query(`DELETE FROM customer_favorites WHERE customer_id=$1 AND product_id=$2`,[req.session.customerId,productId]);
       res.json({success:true,favorite:false});
-    } catch(error){console.error("CUSTOMER_FAVORITE_REMOVE_ERROR:",error);res.status(500).json({error:"Impossible de retirer ce produit des favoris."});}
+    } catch(error){console.error("CUSTOMER_FAVORITE_REMOVE_ERROR",error);res.status(500).json({error:"Impossible de retirer ce produit."});}
   });
   router.get("/api/products/:id/reviews", async (req, res) => {
     try {
@@ -104,7 +104,7 @@ function installCustomerSpaceRoutes() {
       let myRating=null;
       if(req.session?.customerId){const mine=await enhancementPool.query(`SELECT rating FROM product_reviews WHERE product_id=$1 AND customer_id=$2 LIMIT 1`,[productId,req.session.customerId]);if(mine.rows.length)myRating=Number(mine.rows[0].rating);}
       res.json({average:Number(summary.rows[0]?.average||0),count:Number(summary.rows[0]?.count||0),myRating,reviews:rows.rows.map(r=>({id:Number(r.id),rating:Number(r.rating),comment:r.comment||"",created_at:r.created_at,name:r.name||"Client"}))});
-    } catch(error){console.error("PRODUCT_REVIEWS_GET_ERROR:",error);res.status(500).json({error:"Impossible de charger les avis."});}
+    } catch(error){console.error("PRODUCT_REVIEWS_GET_ERROR",error);res.status(500).json({error:"Impossible de charger les avis."});}
   });
   router.post("/api/products/:id/reviews", async (req, res) => {
     try {
@@ -117,7 +117,7 @@ function installCustomerSpaceRoutes() {
       await enhancementPool.query(`INSERT INTO product_reviews(product_id,customer_id,rating) VALUES($1,$2,$3) ON CONFLICT(product_id,customer_id) DO UPDATE SET rating=EXCLUDED.rating,updated_at=NOW()`,[productId,req.session.customerId,rating]);
       const summary=await enhancementPool.query(`SELECT COALESCE(AVG(rating),0)::numeric(3,1) AS average,COUNT(*)::int AS count FROM product_reviews WHERE product_id=$1`,[productId]);
       res.json({success:true,average:Number(summary.rows[0]?.average||0),count:Number(summary.rows[0]?.count||0),myRating:rating});
-    } catch(error){console.error("PRODUCT_REVIEW_POST_ERROR:",error);res.status(500).json({error:"Impossible d'enregistrer la note."});}
+    } catch(error){console.error("PRODUCT_REVIEW_POST_ERROR",error);res.status(500).json({error:"Impossible d'enregistrer la note."});}
   });
   return router;
 }
@@ -134,7 +134,7 @@ function injectCustomerSpaceScript(app) {
       const pushTag = '<script src="/customer-push.js?v=20261024-stock-rootcause2" defer></script>';
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
-      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261027-profile-catalog-stability1" defer></script>';
+      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261027-desktop-final2" defer></script>';
       const productSocialTag = '<script src="/product-social-v1.js?v=20261027-social-canonical2" defer></script>';
       const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261027-profile-catalog-stability1" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
@@ -149,7 +149,7 @@ function injectCustomerSpaceScript(app) {
       html = html.replace(/if\s*\(!confirm\(([^;]*?)\)\)\s*return;/g, 'if (!(await window.sngPremiumConfirm($1))) return;');
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); res.set("Pragma", "no-cache"); res.set("Expires", "0");
       return res.type("html").send(html);
-    } catch (error) { console.error("CUSTOMER_SPACE_HTML_INJECTION_ERROR:", error); return next(); }
+    } catch (error) { console.error("CUSTOMER_SPACE_HTML_INJECTION_ERROR",error); return next(); }
   });
   const stack = app._router && app._router.stack;
   if (!stack) return;
@@ -176,12 +176,12 @@ express.application.listen = function customerSpaceListenPatched(...args) {
         if (catchAllIndex >= 0) stack.splice(catchAllIndex, 0, ...(customerRouter.stack || []));
         else stack.push(...(customerRouter.stack || []));
         injectCustomerSpaceScript(app);
-        try { initPushDatabase(); installPushRoutes(app); } catch (pushError) { console.error("CUSTOMER_PUSH_BOOT_ERROR:", pushError); }
-        try { installOrderStatusObserver(app); } catch (statusError) { console.error("ORDER_STATUS_OBSERVER_BOOT_ERROR:", statusError); }
+        try { initPushDatabase(); installPushRoutes(app); } catch (pushError) { console.error("CUSTOMER_PUSH_BOOT_ERROR",pushError); }
+        try { installOrderStatusObserver(app); } catch (statusError) { console.error("ORDER_STATUS_OBSERVER_BOOT_ERROR",statusError); }
       }
       return originalListen.apply(app, args);
     } catch (error) {
-      console.error("CUSTOMER_SPACE_ENHANCEMENTS_BOOT_ERROR:", error);
+      console.error("CUSTOMER_SPACE_ENHANCEMENTS_BOOT_ERROR",error);
       process.exit(1);
     }
   };
