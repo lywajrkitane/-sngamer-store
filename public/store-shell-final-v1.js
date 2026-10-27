@@ -172,6 +172,7 @@
       }
 
       @media(max-width:700px){
+        #sngPublicPolicies{padding-bottom:110px!important}
         .sngFavoritesCard{padding:14px!important}
         .sngFavoritesCarousel{position:relative!important;width:100%!important}
         .sngFavoritesGrid{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:10px!important;margin:0!important;padding:2px 34px 8px!important;scroll-snap-type:x proximity!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
