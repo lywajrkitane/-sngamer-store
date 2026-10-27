@@ -148,6 +148,80 @@
     };
   }
 
+  /*
+   * Catalog reliability guard.
+   * app.js currently treats one transient /api/products failure as a permanent
+   * catalog outage. That is what produces the "catalogue temporairement
+   * indisponible" screen after returning from the customer profile.
+   *
+   * Keep the existing catalog renderer untouched. We only serialize calls to
+   * the existing load() function and retry the same request when the catalog
+   * is still empty. Existing products are never cleared by this guard.
+   */
+  function installCatalogReliability() {
+    if (window.__sngamerCatalogReliabilityInstalled) return;
+    if (typeof window.load !== "function") return;
+    window.__sngamerCatalogReliabilityInstalled = true;
+
+    const nativeLoad = window.load;
+    let activeLoad = null;
+
+    const wait = function(ms) {
+      return new Promise(function(resolve){ setTimeout(resolve, ms); });
+    };
+
+    const catalogReady = function() {
+      const catalog = window.storeProducts || window.products;
+      return Array.isArray(catalog) && catalog.length > 0;
+    };
+
+    const hasCatalogCards = function() {
+      const grid = document.getElementById("products");
+      return !!(grid && grid.querySelector(".productCardClickable"));
+    };
+
+    const clearTemporaryFailure = function() {
+      const grid = document.getElementById("products");
+      if (!grid || hasCatalogCards()) return;
+      const text = String(grid.textContent || "").toLowerCase();
+      if (text.includes("catalogue est temporairement indisponible") || text.includes("catalogue temporairement indisponible")) {
+        grid.replaceChildren();
+      }
+    };
+
+    window.load = function() {
+      if (activeLoad) return activeLoad;
+
+      activeLoad = (async function() {
+        let lastError = null;
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+          try {
+            clearTemporaryFailure();
+            await nativeLoad();
+            if (catalogReady() || hasCatalogCards()) return;
+          } catch (error) {
+            lastError = error;
+            console.error("SNGAMER_CATALOG_LOAD_RETRY_ERROR", error);
+          }
+          if (attempt < 4) await wait(250 * Math.pow(2, attempt));
+        }
+        if (lastError) console.error("SNGAMER_CATALOG_LOAD_FAILED_AFTER_RETRIES", lastError);
+      })().finally(function(){ activeLoad = null; });
+
+      return activeLoad;
+    };
+
+    // app.js invokes its first load() before this file is evaluated. If that
+    // first request failed, recover it immediately without a page refresh.
+    [0, 300, 900, 1800].forEach(function(delay){
+      setTimeout(function(){
+        if (window.activeStoreSection !== "profile" && !catalogReady() && !hasCatalogCards()) {
+          window.load();
+        }
+      }, delay);
+    });
+  }
+
   function loadPremiumSearch() {
     const ensure = function () {
       const source = document.querySelector(".siteHeader .search");
@@ -198,6 +272,7 @@
     injectPremiumCoinIcon();
     installVisibilityGuard();
     installCustomerAccountCache();
+    installCatalogReliability();
     loadPremiumSearch();
     loadCompactOrders();
     loadAdminWorkspace();
