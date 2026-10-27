@@ -133,7 +133,7 @@ function patchPackageScripts() {
 function patchHtml(fileName) {
   const file = path.join(ROOT, "public", fileName);
   patchFile(file, text => {
-    const tag = '<script src="/stock-mode.js?v=20261019-0835"></script>';
+    const tag = '<script src="/stock-mode.js?v=20261027-order-stock-privacy1"></script>';
     if (text.includes("/stock-mode.js")) {
       return text.replace(/<script\b[^>]*src="[^"]*stock-mode\.js(?:\?[^"]*)?"[^>]*><\/script>/i, tag);
     }
