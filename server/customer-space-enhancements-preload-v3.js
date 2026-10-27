@@ -84,7 +84,7 @@ function installCustomerSpaceRoutes() {
       if(!product.rows.length)return res.status(404).json({error:"Produit introuvable."});
       await enhancementPool.query(`INSERT INTO customer_favorites(customer_id,product_id) VALUES($1,$2) ON CONFLICT(customer_id,product_id) DO NOTHING`,[req.session.customerId,productId]);
       res.json({success:true,favorite:true});
-    } catch(error){console.error("CUSTOMER_FAVORITE_ADD_ERROR:",error);res.status(500).json({error:"Impossible d'ajouter ce produit aux favoris."});}
+    } catch(error){console.error("CUSTOMER_FAVORITE_ADD_ERROR",error);res.status(500).json({error:"Impossible d'ajouter ce produit aux favoris."});}
   });
   router.delete("/api/customer/favorites/:id", async (req, res) => {
     try {
@@ -134,7 +134,7 @@ function injectCustomerSpaceScript(app) {
       const pushTag = '<script src="/customer-push.js?v=20261024-stock-rootcause2" defer></script>';
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
-      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261027-desktop-final2" defer></script>';
+      const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261027-desktop-final3" defer></script>';
       const productSocialTag = '<script src="/product-social-v1.js?v=20261027-social-canonical2" defer></script>';
       const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261027-profile-catalog-stability1" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
