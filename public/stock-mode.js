@@ -104,7 +104,7 @@
       if (label.textContent !== LABEL) label.textContent = LABEL;
     }
 
-    el.classList.remove("outOfStock");
+    el.classList.remove("outOfStock","sngStockStatus","is-stock","is-limited","is-last","is-out");
     el.classList.add("onOrderStock");
     el.style.setProperty("color", PINK, "important");
     el.style.setProperty("font-weight", "700", "important");
@@ -112,22 +112,6 @@
     el.style.setProperty("animation", "none", "important");
     el.style.setProperty("opacity", "1", "important");
     el.style.setProperty("transform", "none", "important");
-  }
-
-  function normalizeProducts() {
-    const list = Array.isArray(window.storeProducts) ? window.storeProducts : [];
-
-    for (const product of list) {
-      if (!isOnOrder(product)) continue;
-
-      if (product.__realStock === undefined) {
-        product.__realStock = Number(product.stock) || 0;
-      }
-
-      product.stock = 999999;
-    }
-
-    return list;
   }
 
   function cardProductId(card) {
@@ -326,7 +310,6 @@
       return false;
     }
 
-    normalizeProducts();
     installObserver();
 
     if (typeof window.render === "function") {
