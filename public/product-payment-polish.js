@@ -20,6 +20,60 @@
     .paymentRadio{width:18px;height:18px;border:2px solid rgba(190,205,224,.65);border-radius:50%;position:relative}.paymentMethodCard.is-selected .paymentRadio{border-color:#5ab8ff}.paymentMethodCard.is-selected .paymentRadio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:#5ab8ff;box-shadow:0 0 10px rgba(90,184,255,.55)}
     #checkout .paymentHint{margin:9px 2px 0;color:#8191a7;font-size:11px;line-height:1.5}#checkout .paymentHint strong{color:#b9c7da}#checkout .box.hasSummary .hint{margin-top:12px}
     @media(max-width:560px){.paymentMethodCard{min-height:62px;grid-template-columns:42px 1fr auto;padding:9px 10px;gap:10px}.paymentBrand{width:42px;height:42px}.paymentMethodName{font-size:13px}}
+
+    /* SNGAMER — compact commercial delivery notice: one clean line. */
+    #productModal #productDetail .sngProductDeliveryNotice{
+      grid-template-columns:20px minmax(0,1fr)!important;
+      gap:6px!important;
+      padding:8px 10px!important;
+      margin-top:9px!important;
+      min-height:0!important;
+      align-items:center!important;
+    }
+    #productModal #productDetail .sngProductDeliveryIcon{
+      width:18px!important;
+      height:18px!important;
+      font-size:15px!important;
+      line-height:1!important;
+    }
+    #productModal #productDetail .sngProductDeliveryNotice p{
+      min-width:0!important;
+      margin:0!important;
+      font-size:11px!important;
+      line-height:1.15!important;
+      font-weight:750!important;
+      white-space:nowrap!important;
+      overflow:hidden!important;
+      text-overflow:clip!important;
+      letter-spacing:-.1px!important;
+    }
+    #productModal #productDetail .sngProductDeliveryNotice strong{
+      font-weight:900!important;
+      white-space:nowrap!important;
+    }
+    @media(max-width:700px){
+      #productModal #productDetail .sngProductDeliveryNotice{
+        grid-template-columns:20px minmax(0,1fr)!important;
+        gap:5px!important;
+        padding:7px 9px!important;
+        margin-top:8px!important;
+        border-radius:10px!important;
+      }
+      #productModal #productDetail .sngProductDeliveryIcon{
+        width:17px!important;
+        height:17px!important;
+        font-size:14px!important;
+      }
+      #productModal #productDetail .sngProductDeliveryNotice p{
+        font-size:10px!important;
+        line-height:1.1!important;
+        letter-spacing:-.15px!important;
+      }
+    }
+    @media(max-width:380px){
+      #productModal #productDetail .sngProductDeliveryNotice p{font-size:9.5px!important;letter-spacing:-.2px!important}
+      #productModal #productDetail .sngProductDeliveryIcon{font-size:13px!important}
+    }
   `;
   document.head.appendChild(style);
 
