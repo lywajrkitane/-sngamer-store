@@ -235,7 +235,6 @@ function buildRouter() {
       await customerPool.query("UPDATE customers SET last_login_at = NOW(), updated_at = NOW() WHERE id = $1", [customer.id]);
       req.session.customerId = customer.id;
       req.session.customerName = customer.name;
-      await linkCustomerOrders(customer.id);
       res.json({ success: true, customer: cleanCustomer(customer) });
     } catch (error) {
       console.error("CUSTOMER_LOGIN_ERROR:", error);
@@ -259,7 +258,6 @@ function buildRouter() {
         delete req.session.customerId;
         return res.status(401).json({ error: "Compte client introuvable." });
       }
-      await linkCustomerOrders(req.session.customerId);
       res.json({ authenticated: true, customer: cleanCustomer(result.rows[0]) });
     } catch (error) {
       console.error("CUSTOMER_ME_ERROR:", error);
