@@ -73,6 +73,28 @@
     document.body.classList.toggle("sngProfileView", isProfile);
   }
 
+  function scheduleHomeCatalogRecovery() {
+    const attempt = function () {
+      if (window.activeStoreSection !== "home") return;
+      const grid = document.getElementById("products");
+      if (!grid || grid.querySelector(".productCardClickable")) return;
+      const catalog = window.storeProducts;
+      if (Array.isArray(catalog) && catalog.length) {
+        if (typeof window.filterBy === "function") window.filterBy("Tous");
+        else if (typeof window.render === "function") window.render();
+        return;
+      }
+      if (typeof window.load === "function" && !window.__sngHomeCatalogRecoveryInFlight) {
+        window.__sngHomeCatalogRecoveryInFlight = true;
+        Promise.resolve(window.load())
+          .catch(error => console.error("SNG_HOME_CATALOG_RECOVERY_ERROR", error))
+          .finally(() => { window.__sngHomeCatalogRecoveryInFlight = false; });
+      }
+    };
+    requestAnimationFrame(attempt);
+    window.setTimeout(attempt, 180);
+  }
+
   function installStoreNavigation() {
     if (window.__sngamerStoreNavigationV2) return;
     window.navigateStore = function (section) {
@@ -121,6 +143,8 @@
         sessionStorage.setItem("sngamer_store_section_v1", section);
         sessionStorage.setItem("sngamer_store_opened_v1", "1");
       } catch (_) {}
+
+      if (section === "home") scheduleHomeCatalogRecovery();
 
       const shop = document.getElementById("shop");
       if (shop && !window.__sngamerNavigationRestoring) requestAnimationFrame(function () { shop.scrollIntoView({ behavior: "smooth", block: "start" }); });
