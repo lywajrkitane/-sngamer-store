@@ -114,26 +114,30 @@
           display:none !important;
           border:1px solid rgba(132,188,255,.42) !important;
           color:#f4f8ff; font:inherit; cursor:pointer;
-          transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease;
+          transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease;
         }
         .sngDesktopStoreButton.is-visible { display:inline-flex !important; }
         .sngDesktopStoreIcon { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center; }
         .sngDesktopStoreIcon svg { width:22px;height:22px; }
 
-        /* Desktop-only price and hero corrections. Mobile rules remain untouched. */
+        /* Desktop-only: numeric product prices use the approved SNGAMER yellow. FCFA remains muted. */
         #products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent {
-          color:#FFD21A !important;
-          text-shadow:0 0 12px rgba(255,210,26,.12) !important;
+          color:#FFD300 !important;
+          text-shadow:0 0 12px rgba(255,211,0,.12) !important;
         }
         #products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small {
           color:#aebacc !important;
           text-shadow:none !important;
         }
+
+        /* Desktop-only: both hero panels share one height. Mobile rules remain untouched. */
         .professional-hero .heroIn { align-items:stretch !important; }
         .professional-hero .heroIn > div:first-child,
         .professional-hero .heroVisual.has-default-hero {
           min-height:360px !important;
-          height:100% !important;
+          height:360px !important;
+          align-self:stretch !important;
+          box-sizing:border-box !important;
         }
 
         #profileArea.sngDesktopProfileArea { width:100%; max-width:none; }
