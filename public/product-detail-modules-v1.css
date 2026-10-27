@@ -256,8 +256,8 @@
   #productModal #productDetail .sngProductCurrentPrice small{margin-left:3px!important;font-size:.34em!important}
   #productModal #productDetail .sngProductDiscountBadge{min-height:27px!important;padding:6px 7px!important;border-radius:8px!important;font-size:10px!important}
   #productModal #productDetail .sngProductDeliveryNotice{grid-template-columns:25px minmax(0,1fr)!important;gap:8px!important;margin-top:11px!important;padding:10px!important;border-radius:11px!important}
-  #productModal #productDetail .sngProductDeliveryIcon{width:24px!important;height:24px!important;font-size:20px!important}
-  #productModal #productDetail .sngProductDeliveryNotice p{font-size:13px!important;line-height:1.4!important}
+  #productModal #productDetail .sngProductDeliveryIcon{width:24px!important;height:24px!important;font-size:17px!important}
+  #productModal #productDetail .sngProductDeliveryNotice p{font-size:11px!important;line-height:1.3!important}
 }
 @media(max-width:360px){
   #productModal #productDetail .sngProductCommercialPanel{padding:9px!important}
