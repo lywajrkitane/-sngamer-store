@@ -11,7 +11,9 @@ function shuffleProductGroup(items){
 function mixHomeProductsByCategory(items){
   const groups=new Map();
   for(const product of items){
-    const category=String(storeCategory(product)||product.category||"Autres");
+    const fallbackCategory=String(product?.category||"Autres");
+    let category=fallbackCategory;
+    try { if(typeof storeCategory==="function") category=String(storeCategory(product)||fallbackCategory); } catch (_) {}
     if(!groups.has(category)) groups.set(category,[]);
     groups.get(category).push(product);
   }
@@ -33,32 +35,47 @@ function mixHomeProductsByCategory(items){
 window.activeStoreSection=window.activeStoreSection||"home";
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
 async function load(){
+  let data;
   try {
-    const response = await fetch("/api/products", { cache: "no-store" });
+    const response = await fetch("/api/products", { cache: "no-store", headers: { "Accept": "application/json" } });
     if (!response.ok) throw new Error("products_http_" + response.status);
-    const data = await response.json();
+    data = await response.json();
     if (!Array.isArray(data)) throw new Error("products_response_not_array");
-    products = data;
-    homeMixedProducts = mixHomeProductsByCategory(products);
-    window.storeProducts = products;
-    cats();
-    render();
-    update();
-    window.__sngamerStoreReady = true;
   } catch (error) {
-    console.error("SNGAMER_STORE_LOAD_ERROR", error);
+    console.error("SNGAMER_PRODUCTS_FETCH_ERROR", error);
     const grid = document.getElementById("products");
     if (grid && !grid.querySelector(".productCardClickable")) {
-      grid.innerHTML = '<div role="status" style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca">Impossible de charger les produits. Vérifie ta connexion puis réessaie.</div>';
+      grid.innerHTML = '<div role="status" style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca">Le catalogue est temporairement indisponible. Réessaie dans un instant.</div>';
     }
-    // The app can reveal its own current error state rather than the stale pre-render shell.
     window.__sngamerStoreReady = true;
+    return;
   }
+
+  products = data.filter(item => item && typeof item === "object" && Number.isFinite(Number(item.id)) && Number(item.id) > 0);
+  window.products = products;
+  window.storeProducts = products;
+  homeMixedProducts = products.slice();
+
+  try {
+    homeMixedProducts = mixHomeProductsByCategory(products);
+  } catch (error) {
+    console.error("SNGAMER_HOME_MIX_ERROR", error);
+    homeMixedProducts = products.slice();
+  }
+  try { cats(); } catch (error) { console.error("SNGAMER_CATEGORIES_RENDER_ERROR", error); }
+  try { render(); } catch (error) { console.error("SNGAMER_CATALOG_RENDER_ERROR", error); }
+  try { update(); } catch (error) { console.error("SNGAMER_CART_REFRESH_ERROR", error); }
+
+  const grid = document.getElementById("products");
+  if (grid && products.length && !grid.querySelector(".productCardClickable")) {
+    console.error("SNGAMER_CATALOG_EMPTY_AFTER_RENDER", { products: products.length });
+  }
+  window.__sngamerStoreReady = true;
 }
 
 /* SNGAMER — RUBRIQUES ET NAVIGATION */
 function productText(p) {
-  return [p.name, p.category, p.description].filter(Boolean).join(" ").toLowerCase();
+  return [p?.name, p?.category, p?.description].filter(Boolean).map(value=>String(value)).join(" ").toLowerCase();
 }
 function isCoinProduct(p) { return /(coins?|e-?football|fc mobile|fc points|mobile legends|diamants?|diamonds?|gems?|myclub|top[- ]?up|recharge de jeu)/i.test(productText(p)); }
 function isPhoneProduct(p) { return !isCoinProduct(p) && /(gaming phone|téléphone|telephone|smartphone|phone|iphone|samsung galaxy|redmi note|poco|rog phone|nubia|redmagic|red magic|infinix gt|tecno pova|black shark)/i.test(productText(p)); }
@@ -71,7 +88,7 @@ function matchesStoreSection(p) {
   return true;
 }
 function storeCategory(p) {
-  const category=(p.category||"").trim().toLowerCase();
+  const category=String(p?.category||"").trim().toLowerCase();
   if(category==="coins"||isCoinProduct(p)) return "Coins";
   if(category==="gaming phone"||isPhoneProduct(p)) return "Gaming Phone";
   if(category==="accessoires"||isAccessoryProduct(p)) return "Accessoires";
@@ -90,6 +107,7 @@ function render(){
   const sourceList=(window.activeStoreSection==="home"&&filter==="Tous")?homeMixedProducts:products;
   const list=sourceList.filter(p=>matchesStoreSection(p)&&(window.activeStoreSection!=="home"||filter==="Tous"||storeCategory(p)===filter)&&(p.name||"").toLowerCase().includes(q));
   productGrid.innerHTML=list.map(p=>{
+    try {
     const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
     const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
     const inStock=Number(p.stock)>0;
@@ -103,6 +121,10 @@ function render(){
       : `<div class="price price--regular"><div class="priceOldRow priceOldRow--placeholder" aria-hidden="true"></div><div class="pricePromoMain"><strong class="${currentPriceClass}">${currentPriceText}<small>FCFA</small></strong></div></div>`;
     const category=storeCategory(p),categoryLabel=category==="Coins"&&p.platform?`${category} ${p.platform}`:category;
     return `<article class="card productCardClickable" onclick="openProduct(${Number(p.id)})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProduct(${Number(p.id)});}"><div class="pic">${(p.main_image_url||p.image1_url)?`<img class="productCardImage" src="${escapeHtml(p.image1_url)}" alt="${escapeHtml(p.name||"")}" loading="lazy">`:`<div class="productCardEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div><div class="info"><div class="cat">${escapeHtml(categoryLabel||"")}</div><h3>${escapeHtml(p.name||"")}</h3><div class="stock ${!inStock?"outOfStock":""}" data-stock-count="${Math.max(0,Math.floor(Number(p.stock)||0))}">${inStock?`${p.stock} disponible(s)`:"Rupture de stock"}</div><div class="productCardPurchaseRow">${priceHtml}<div class="productCardBottom ${inStock?"":"is-placeholder"}">${inStock?`<button type="button" class="addToCartIcon" aria-label="Ajouter au panier" onclick="event.stopPropagation();add(${Number(p.id)});">＋</button>`:""}</div></div></div></article>`;
+    } catch(error) {
+      console.error("SNGAMER_PRODUCT_CARD_RENDER_ERROR", p?.id, error);
+      return "";
+    }
   }).join("");
   if(list.length===0&&window.activeStoreSection!=="home"&&window.activeStoreSection!=="profile"){productGrid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca;border:1px dashed #2a4262;border-radius:16px"><div style="font-size:32px">🎮</div><p>Aucun produit dans cette rubrique pour le moment.</p></div>`;}
 }
@@ -215,8 +237,8 @@ function openProduct(id){
     : "";
   const fullDescriptionHtml=escapeHtml(descriptionText).replace(/\n/g,"<br>");
   const descriptionHtml=needsDescriptionToggle
-    ? `<p class="productDescription sngDescriptionPreview">${escapeHtml(previewText).replace(/\n/g,"<br>")}</p><p class="productDescription sngDescriptionFull" hidden>${fullDescriptionHtml}</p><button type="button" class="sngDescriptionToggle" aria-expanded="false" onclick="toggleProductDescription(this)">Voir plus ↓</button>`
-    : `<p class="productDescription">${fullDescriptionHtml}</p>`;
+    ? `<div class="sngDescriptionContent"><p class="productDescription sngDescriptionPreview">${escapeHtml(previewText).replace(/\\n/g,"<br>")}</p><p class="productDescription sngDescriptionFull" hidden>${fullDescriptionHtml}</p><button type="button" class="sngDescriptionToggle" aria-expanded="false" onclick="toggleProductDescription(this)">Voir plus ↓</button></div>`
+    : `<div class="sngDescriptionContent"><p class="productDescription">${fullDescriptionHtml}</p></div>`;
 
   const assuranceHtml=`
     <section class="sngProductAssuranceGrid" aria-label="Informations de livraison et du produit">
