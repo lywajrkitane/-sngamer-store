@@ -10,7 +10,7 @@ const CLIENT_SCRIPT = [
   '    if(document.getElementById("sngPremiumPriceStyle")) return;',
   '    const style=document.createElement("style");',
   '    style.id="sngPremiumPriceStyle";',
-  '    style.textContent="#products .card.productCardClickable .priceCurrent{color:#FFD300 !important;text-shadow:0 0 14px rgba(255,211,0,.16) !important}#products .card.productCardClickable .priceCurrent small{color:#a9b9ca !important;text-shadow:none !important}";',
+  '    style.textContent="#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent{color:#FFD300 !important;text-shadow:0 0 12px rgba(255,211,0,.12) !important}#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small{color:#aebacc !important;text-shadow:none !important}";',
   '    document.head.appendChild(style);',
   '  }',
   '  function cleanCategories(){',
