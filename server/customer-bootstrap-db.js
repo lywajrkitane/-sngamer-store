@@ -11,15 +11,29 @@ const pool = new Pool({
 const CUSTOMER_MIGRATION_LOCK = 781234567890123;
 
 async function withCustomerMigrationLock(work) {
-  const client = await pool.connect();
-  try {
-    await client.query("SELECT pg_advisory_lock($1)", [CUSTOMER_MIGRATION_LOCK]);
-    return await work(client);
-  } finally {
+  // PostgreSQL can still report a transient 40P01 deadlock during a rolling
+  // Render deploy when another old instance is finishing startup DDL. Retry the
+  // whole locked migration instead of killing the new service.
+  const maxAttempts = 4;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const client = await pool.connect();
+    let lockHeld = false;
     try {
-      await client.query("SELECT pg_advisory_unlock($1)", [CUSTOMER_MIGRATION_LOCK]);
+      await client.query("SELECT pg_advisory_lock($1)", [CUSTOMER_MIGRATION_LOCK]);
+      lockHeld = true;
+      return await work(client);
+    } catch (error) {
+      const isDeadlock = error?.code === "40P01";
+      if (!isDeadlock || attempt === maxAttempts) throw error;
+      const delayMs = attempt * 750;
+      console.warn(`CUSTOMER_MIGRATION_DEADLOCK_RETRY: attempt ${attempt}/${maxAttempts}, retrying in ${delayMs}ms`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
     } finally {
-      client.release();
+      try {
+        if (lockHeld) await client.query("SELECT pg_advisory_unlock($1)", [CUSTOMER_MIGRATION_LOCK]);
+      } finally {
+        client.release();
+      }
     }
   }
 }
