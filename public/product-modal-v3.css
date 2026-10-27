@@ -191,3 +191,42 @@
   width:0 !important;
   height:0 !important;
 }
+
+/* PRODUCT SOCIAL / MEDIA FRAME — finition uniquement.
+   Les actions restent visibles au-dessus de l'image sans masquer le produit.
+   Spécificité volontairement supérieure à celle du module social canonique. */
+#productModal #productDetail .productMainImage .sngSocialBtn{
+  background:rgba(5,12,25,.58) !important;
+  box-shadow:0 5px 14px rgba(0,0,0,.22),0 0 0 1px rgba(5,12,25,.10),inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+
+#productModal #productDetail .productMainImage .sngFavBtn.isFavorite{
+  background:linear-gradient(135deg,rgba(130,18,72,.70),rgba(196,35,112,.64)) !important;
+  box-shadow:0 5px 14px rgba(0,0,0,.22),0 0 0 1px rgba(196,35,112,.12),inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+
+/* Cadre principal : bordure complète sur les quatre côtés + coins conservés. */
+#productModal #productDetail .productMainImage{
+  border:1px solid rgba(255,255,255,.16) !important;
+  border-radius:20px !important;
+  box-sizing:border-box !important;
+}
+
+/* Cadres des miniatures : bordure complète + coins arrondis sur chaque image. */
+#productModal #productDetail .productThumb{
+  border:2px solid rgba(255,255,255,.14) !important;
+  border-radius:12px !important;
+  overflow:hidden !important;
+  box-sizing:border-box !important;
+  background:#0c1422 !important;
+}
+
+#productModal #productDetail .productThumb img{
+  border-radius:9px !important;
+  display:block !important;
+}
+
+#productModal #productDetail .productThumb.isActive{
+  border-color:#3b95ff !important;
+  box-shadow:0 0 0 2px rgba(59,149,255,.18) !important;
+}
