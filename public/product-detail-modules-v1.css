@@ -163,3 +163,32 @@
   }
   #productModal #productDetail .productInfo>.sngProductAvailability>i{width:6px!important;height:6px!important;min-width:6px!important;min-height:6px!important;flex-basis:6px!important}
 }
+
+/* FINAL WIDTH ALIGNMENT — description frame matches the characteristics table. */
+#productModal #productDetail .productInfo > .productDescriptionSection.sngProductDescriptionV1{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  align-self:stretch!important;
+  box-sizing:border-box!important;
+  padding:0!important;
+  margin:16px 0 10px!important;
+}
+#productModal #productDetail .productInfo > .productDescriptionSection.sngProductDescriptionV1 > .productDescriptionTitle{
+  box-sizing:border-box!important;
+  padding-inline:14px!important;
+}
+#productModal #productDetail .productInfo > .productDescriptionSection.sngProductDescriptionV1 > .productDescription{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+}
+@media(max-width:700px){
+  #productModal #productDetail .productInfo > .productDescriptionSection.sngProductDescriptionV1{
+    padding:0!important;
+    margin-top:12px!important;
+  }
+}
