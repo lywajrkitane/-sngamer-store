@@ -18,7 +18,6 @@
 #productModal .similarProductBottom{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-top:12px}
 #productModal .similarProductPrice{font-size:16px;font-weight:850;color:#f3d77b;white-space:nowrap}
 #productModal .similarProductPrice small{font-size:10px;color:#91a0b5;font-weight:700}
-#productModal .similarProductStock{font-size:10px;color:#57d68a;font-weight:700;text-align:right}
 #productModal .similarProductsHint{display:flex;align-items:center;gap:6px;color:#708097;font-size:11px;margin-top:2px}
 #productModal .similarProductsHint span{font-size:16px}
 #productModal .similarBackToProduct{position:sticky;bottom:14px;margin:10px 0 0 auto;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:1px solid rgba(100,150,220,.42);border-radius:14px;background:linear-gradient(135deg,#2563eb,#7c3aed 58%,#db2777);color:#fff;font-size:23px;line-height:1;box-shadow:0 10px 28px rgba(37,99,235,.25);cursor:pointer;z-index:8}
