@@ -222,9 +222,21 @@ function openProduct(id){
   const warrantyDisplay=warrantyConfigured?(warrantyText||"Aucune garantie"):"À définir";
   window.productImages=images;
 
-  const priceHtml=promoActive
-    ? `<div class="price price--promo"><div class="priceOldRow"><span class="priceOld">${money(p.price)}</span></div><div class="pricePromoMain"><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.promo_price)}<small>FCFA</small></strong><span class="discountBadge">-${Math.round((1-Number(p.promo_price)/Number(p.price))*100)}%</span></div></div>`
-    : `<div class="price price--regular"><strong class="priceCurrent">${new Intl.NumberFormat("fr-FR").format(p.price)}<small>FCFA</small></strong></div>`;
+  const formattedNormalPrice=new Intl.NumberFormat("fr-FR").format(Number(p.price)||0);
+  const formattedCurrentPrice=new Intl.NumberFormat("fr-FR").format(promoActive?Number(p.promo_price):Number(p.price));
+  const discountPercent=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
+  const priceHtml=`
+    <section class="sngProductCommercialPanel ${promoActive?"has-promo":"no-promo"}" aria-label="Prix et livraison">
+      <div class="sngProductPriceRow ${promoActive?"is-promo":"is-regular"}">
+        ${promoActive?`<span class="sngProductOldPrice">${formattedNormalPrice} FCFA</span>`:""}
+        <strong class="sngProductCurrentPrice">${formattedCurrentPrice}<small>FCFA</small></strong>
+        ${promoActive?`<span class="sngProductDiscountBadge">-${discountPercent}%</span>`:""}
+      </div>
+      <div class="sngProductDeliveryNotice" aria-label="Livraison">
+        <span class="sngProductDeliveryIcon" aria-hidden="true">🚚</span>
+        <p>Reçois cet article dans <strong>2 heures maximum</strong> chez toi</p>
+      </div>
+    </section>`;
 
   const descriptionText=String(p.description||"Aucune description disponible.").replace(/\r\n?/g,"\n").trim();
   const previewText=productDescriptionPreview(descriptionText);
