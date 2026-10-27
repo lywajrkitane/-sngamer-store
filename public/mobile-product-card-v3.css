@@ -44,7 +44,6 @@
     box-shadow:0 0 18px rgba(49,148,255,.32);
   }
 
-  /* The product image is the visual priority: preserve the wide product area. */
   #products .card.productCardClickable .pic{
     flex:0 0 auto;
     width:100%;
@@ -98,7 +97,6 @@
     z-index:1;
   }
 
-  /* Keep price + stock together at the bottom, without changing their markup/order. */
   #products .card.productCardClickable .price{
     margin-top:auto !important;
   }
@@ -198,11 +196,18 @@
     min-height:0 !important;
     margin:0 !important;
     padding:0 !important;
-    color:#ffffff !important;
+    color:#FFD21A !important;
     font-size:17px !important;
     line-height:1.15 !important;
     white-space:nowrap !important;
     letter-spacing:-.15px !important;
+  }
+
+  /* Final high-specificity home-price color override. The runtime stability layer
+     injects its own price rule after this stylesheet, so this selector deliberately
+     wins without touching the FCFA <small> element. */
+  html body #products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent{
+    color:#FFD21A !important;
   }
 
   #products .card.productCardClickable .price--promo .priceCurrent small,
@@ -271,7 +276,6 @@
     outline-offset:2px;
   }
 
-  /* Category pills: retain the SNGAMER look on mobile instead of browser buttons. */
   main#shop .bar{
     display:block !important;
     margin-bottom:16px !important;
