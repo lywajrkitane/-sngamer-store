@@ -28,7 +28,7 @@
     const style = document.createElement('style');
     style.id = 'sngDesktopProfileStyles';
     style.textContent = `
-      @media (min-width: 769px) {
+      @media (min-width: 701px) {
         .siteHeader .nav { justify-content:flex-start !important; }
         .siteHeader .nav > .sngDesktopProfileButton { margin-left:auto !important; }
         .siteHeader .nav > .searchPremiumButton,
@@ -149,7 +149,7 @@
         body.sngDesktopProfileMode #sectionTitle { font-size:clamp(28px,3vw,42px); margin:0; }
         body.sngDesktopProfileMode #profileArea { display:block !important; visibility:visible !important; }
       }
-      @media (max-width: 768px) {
+      @media (max-width: 700px) {
         .sngDesktopProfileButton,.sngDesktopStoreButton { display:none !important; }
       }
     `;
