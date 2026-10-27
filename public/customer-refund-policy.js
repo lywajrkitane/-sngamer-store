@@ -73,17 +73,19 @@
     if(!document.getElementById('sngPublicPolicyStyles')){
       const style=document.createElement('style');style.id='sngPublicPolicyStyles';
       style.textContent=`
-        #sngPublicPolicies{width:min(980px,calc(100% - 32px));margin:26px auto 18px;padding:0 0 145px;box-sizing:border-box;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;position:relative;z-index:20}
+        #sngPublicPolicies{width:min(980px,calc(100% - 32px));margin:18px auto 10px;padding:0;box-sizing:border-box;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;position:relative;z-index:20}
         #sngPublicPolicies::before{content:'INFORMATIONS & POLITIQUES';grid-column:1/-1;color:#6daeff;font-size:12px;font-weight:800;letter-spacing:2.5px;margin:0 2px 3px}
         #sngPublicPolicies a{min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 12px;box-sizing:border-box;border:1px solid rgba(87,164,255,.28);border-radius:14px;background:linear-gradient(145deg,#101d32,#0b1424);color:#b8d1ed;text-decoration:none;font-size:12px;font-weight:700;line-height:1.25;box-shadow:0 8px 24px rgba(0,0,0,.16);transition:transform .16s ease,border-color .16s ease,background .16s ease,color .16s ease}
         #sngPublicPolicies a:hover,#sngPublicPolicies a:focus-visible{transform:translateY(-2px);border-color:rgba(80,170,255,.65);background:linear-gradient(145deg,#132746,#0d1a2e);color:#fff;outline:none}
         #sngPublicPolicies a:last-child{grid-column:span 2}
-        footer{padding-bottom:150px!important}
-        @media(max-width:760px){#sngPublicPolicies{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding-bottom:135px}#sngPublicPolicies a:last-child{grid-column:span 2}}
+        html body > .store-footer-content{margin-bottom:18px!important}
+        html body > footer{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important}
+        @media(max-width:760px){#sngPublicPolicies{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}#sngPublicPolicies a:last-child{grid-column:span 2}}
       `;
       document.head.appendChild(style);
     }
     container.innerHTML=links.map(([href,label])=>`<a href="${href}">${label}</a>`).join('');
+    footer.remove();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount,{once:true}); else mount();
 })();
