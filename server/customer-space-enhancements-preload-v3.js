@@ -135,8 +135,7 @@ function injectCustomerSpaceScript(app) {
       const premiumCssTag = '<link rel="stylesheet" href="/premium-dialogs-v1.css?v=20261018-1525">';
       const premiumJsTag = '<script src="/premium-dialogs-v1.js?v=20261018-1525"></script>';
       const desktopProfileTag = '<script src="/desktop-profile-entry-v1.js?v=20261021-footerfix1" defer></script>';
-      const productSocialTag = '<script src="/product-social-v1.js?v=20261021-social1" defer></script>';
-      const productImageActionsTag = '<script src="/product-image-actions-v1.js?v=20261027-top-position-sourcefix1" defer></script>';
+      const productSocialTag = '<script src="/product-social-v1.js?v=20261027-social-canonical2" defer></script>';
       const finalShellTag = '<script src="/store-shell-final-v1.js?v=20261022-hier1" defer></script>';
       if (!html.includes("/paytech-checkout.js")) html = html.replace(/<\/body>/i, `${paytechTag}</body>`);
       if (!html.includes("/customer-space-enhancements.js")) html = html.replace(/<\/body>/i, `${customerTag}</body>`);
@@ -147,8 +146,6 @@ function injectCustomerSpaceScript(app) {
       html = html.replace(/<script\b[^>]*src=["'][^"']*customer-profile-premium-v1\.js[^"']*["'][^>]*>\s*<\/script>/gi, "");
       if (!html.includes("/product-social-v1.js")) html = html.replace(/<\/body>/i, `${productSocialTag}</body>`);
       html = html.replace(/<script\b[^>]*src=["'][^"']*\/product-image-actions-[^"']+\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script>/gi, "");
-      html = html.replace(/<\/body>/i, `${productImageActionsTag}</body>`);
-      html = html.replace(/<\/body>/i, `${finalShellTag}</body>`);
       html = html.replace(/if\s*\(!confirm\(([^;]*?)\)\)\s*return;/g, 'if (!(await window.sngPremiumConfirm($1))) return;');
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); res.set("Pragma", "no-cache"); res.set("Expires", "0");
       return res.type("html").send(html);
