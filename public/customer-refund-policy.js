@@ -80,7 +80,7 @@
         #sngPublicPolicies a:last-child{grid-column:span 2}
         html body > .store-footer-content{margin-bottom:18px!important}
         html body > footer{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important}
-        @media(max-width:760px){#sngPublicPolicies{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}#sngPublicPolicies a:last-child{grid-column:span 2}}
+        @media(max-width:760px){#sngPublicPolicies{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding-bottom:110px}#sngPublicPolicies a:last-child{grid-column:span 2}}
       `;
       document.head.appendChild(style);
     }
