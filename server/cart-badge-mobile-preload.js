@@ -4,7 +4,7 @@ const path = require("path");
 
 const originalReadFileSync = fs.readFileSync;
 const INDEX_NAME = path.join("public", "index.html");
-const SCRIPT_TAG = '<script src="cart-badge-mobile-fix.js?v=20261028-cartbadge1"></script>';
+const SCRIPT_TAG = '<script src="cart-badge-mobile-fix.js?v=20261028-cartbadge2"></script>';
 
 fs.readFileSync = function patchedReadFileSync(file, options) {
   const result = originalReadFileSync.apply(fs, arguments);

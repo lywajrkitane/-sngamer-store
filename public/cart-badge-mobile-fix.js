@@ -21,7 +21,7 @@
   }
 
   function isMobile() {
-    return window.matchMedia("(max-width:700px), (hover:none) and (pointer:coarse)").matches;
+    return window.matchMedia("(max-width:700px)").matches;
   }
 
   function isProductDetailOpen() {
