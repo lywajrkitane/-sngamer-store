@@ -3,8 +3,10 @@ const path = require("path");
 const express = require("express");
 
 /*
- * Single owner for the customer-facing header controls and desktop hero layout.
- * Keep customer account, catalog, cart state, and checkout logic in their existing files.
+ * SNGAMER STORE — single customer storefront UI authority.
+ * Desktop: Search -> Cart -> Profile, all on the right.
+ * Mobile: Search -> Cart only; profile remains in the bottom navigation.
+ * The desktop promo card is the sole source of truth for the second hero height.
  */
 const originalStatic = express.static;
 const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
@@ -14,7 +16,7 @@ function buildHeader(html) {
   const profileButton = '<button type="button" class="profilePremiumButton" id="profilePremiumButton" aria-label="Mon profil" title="Mon profil" onclick="navigateStore(\'profile\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.8-3.4 3.1-5.2 6.5-5.2s5.7 1.8 6.5 5.2"></path></svg></button>';
   const cartButton = '<button type="button" class="cartButton" aria-label="Panier" title="Panier" onclick="cart()"><span class="cartIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4h2l1.7 10.2a2 2 0 0 0 2 1.7h7.9a2 2 0 0 0 1.9-1.4L21 8H7"></path><circle cx="10" cy="19" r="1.2"></circle><circle cx="18" cy="19" r="1.2"></circle></svg></span><b id="count">0</b></button>';
 
-  /* Canonical order: Search, Cart, Profile. Replace the source cart markup rather than layering a new button over it. */
+  /* Canonical desktop order: Search -> Cart -> Profile. */
   html = html.replace(/<button\s+class="cartButton"[^>]*>[\s\S]*?<\/button>/i, cartButton);
   html = html.replace(/<button\s+type="button"\s+class="profilePremiumButton"[^>]*>[\s\S]*?<\/button>/i, '');
   if (!html.includes('id="profilePremiumButton"')) {
@@ -33,7 +35,7 @@ function buildHeader(html) {
     '.siteHeader .cartButton .cartIcon{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;font-size:0!important;line-height:0!important}',
     '.siteHeader .cartButton .cartIcon svg{width:22px!important;height:22px!important;display:block!important}',
     '.siteHeader .cartButton>span:not(.cartIcon){display:none!important}',
-    '.siteHeader .cartButton b{position:absolute!important;right:-5px!important;top:-5px!important;transform:none!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:transparent!important;border:0!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:18px!important;box-sizing:border-box!important}',
+    '.siteHeader .cartButton b{position:absolute!important;right:-5px!important;top:-5px!important;transform:none!important;min-width:18px!important;height:18px!important;padding:0 4px!important;border-radius:999px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:transparent!important;border:0!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:18px!important;box-sizing:border-box!important}',
     '#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#D4A017!important;text-shadow:0 0 10px rgba(212,160,23,.10)!important}',
     '#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small,#products .card.productCardClickable .info .priceCurrent small{color:#aebacc!important;text-shadow:none!important}',
     '@media(min-width:701px){',
@@ -46,8 +48,12 @@ function buildHeader(html) {
     'main#shop{position:relative!important;z-index:1!important;margin-top:0!important;padding-top:36px!important}',
     '}',
     '@media(max-width:700px){',
-    '.siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;max-width:48px!important;max-height:48px!important;flex-basis:48px!important;border-radius:15px!important}',
-    '.siteHeader .cartButton b{right:-4px!important;top:-4px!important}',
+    '.siteHeader .searchPremiumButton,.siteHeader .cartButton{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;max-width:40px!important;max-height:40px!important;flex:0 0 40px!important;border-radius:13px!important}',
+    '.siteHeader .profilePremiumButton{display:none!important}',
+    '.siteHeader .searchPremiumButton svg{width:20px!important;height:20px!important}',
+    '.siteHeader .cartButton .cartIcon,.siteHeader .cartButton .cartIcon svg{width:20px!important;height:20px!important}',
+    '.siteHeader .cartButton b{right:-4px!important;top:-4px!important;min-width:17px!important;height:17px!important;font-size:9px!important;line-height:17px!important}',
+    '.siteHeader .wrap.nav{gap:7px!important}',
     '}'
   ].join('\n');
 
@@ -58,24 +64,28 @@ function buildHeader(html) {
   const layoutScript = [
     '(function(){',
     '  "use strict";',
+    '  function findDesktopHeroCard(heroIn){',
+    '    if(!heroIn)return null;',
+    '    var card=heroIn.querySelector(":scope > div:first-child .promoArea .promoSlide");',
+    '    if(!card)card=heroIn.querySelector(":scope > div:first-child .promoCarousel .promoSlide");',
+    '    if(!card)card=heroIn.querySelector(":scope > div:first-child .heroAnnouncement");',
+    '    return card||null;',
+    '  }',
     '  function layoutHero(){',
     '    var hero=document.querySelector(".hero");',
     '    if(!hero)return;',
     '    var heroIn=hero.querySelector(".heroIn");',
-    '    var leftColumn=heroIn&&heroIn.querySelector(":scope > div:first-child");',
-    '    var leftCard=leftColumn&&leftColumn.querySelector(".promoArea .promoSlide");',
-    '    if(!leftCard) leftCard=leftColumn&&leftColumn.querySelector(".promoCarousel .promoSlide");',
-    '    if(!leftCard) leftCard=leftColumn&&leftColumn.querySelector(".sngPromoAnnouncement");',
     '    var visual=heroIn&&heroIn.querySelector(":scope > .heroVisual");',
-    '    if(!heroIn||!leftCard||!visual)return;',
+    '    if(!heroIn||!visual)return;',
     '    if(window.innerWidth<701){',
     '      visual.style.removeProperty("height");visual.style.removeProperty("min-height");visual.style.removeProperty("max-height");',
-    '      var inner=visual.querySelector(".defaultHeroContent");if(inner){inner.style.removeProperty("height");inner.style.removeProperty("min-height");inner.style.removeProperty("max-height");}',
+    '      var mobileInner=visual.querySelector(".defaultHeroContent");if(mobileInner){mobileInner.style.removeProperty("height");mobileInner.style.removeProperty("min-height");mobileInner.style.removeProperty("max-height");}',
     '      return;',
     '    }',
-    '    leftCard.style.removeProperty("height");leftCard.style.removeProperty("min-height");leftCard.style.removeProperty("max-height");',
+    '    var leftCard=findDesktopHeroCard(heroIn);',
+    '    if(!leftCard)return;',
     '    var h=Math.ceil(leftCard.getBoundingClientRect().height);',
-    '    if(!h||!Number.isFinite(h))return;',
+    '    if(!h||!Number.isFinite(h)||h<120)return;',
     '    visual.style.setProperty("height",h+"px","important");',
     '    visual.style.setProperty("min-height",h+"px","important");',
     '    visual.style.setProperty("max-height",h+"px","important");',
@@ -84,16 +94,24 @@ function buildHeader(html) {
     '  }',
     '  function installFinalPriceColor(){',
     '    var id="sngamer-final-price-color";',
-    '    if(document.getElementById(id))return;',
-    '    var style=document.createElement("style");style.id=id;',
-    '    style.textContent="#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent{color:#D4A017!important;text-shadow:0 0 10px rgba(212,160,23,.10)!important}#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small{color:#aebacc!important}";',
-    '    document.head.appendChild(style);',
+    '    var style=document.getElementById(id);',
+    '    if(!style){style=document.createElement("style");style.id=id;document.head.appendChild(style);}',
+    '    style.textContent="#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#D4A017!important;text-shadow:0 0 10px rgba(212,160,23,.10)!important}#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small,#products .card.productCardClickable .info .priceCurrent small{color:#aebacc!important;text-shadow:none!important}";',
     '  }',
     '  var scheduled=false;',
     '  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(function(){scheduled=false;layoutHero();});}',
-    '  function boot(){schedule();installFinalPriceColor();[120,400,900,1800,3000].forEach(function(ms){setTimeout(function(){schedule();installFinalPriceColor();},ms);});window.addEventListener("load",function(){schedule();installFinalPriceColor();},{once:true});window.addEventListener("resize",schedule,{passive:true});',
-    '    if(window.ResizeObserver){var left=document.querySelector(".hero .promoArea .promoSlide") || document.querySelector(".hero .promoCarousel .promoSlide") || document.querySelector(".hero .sngPromoAnnouncement");if(left){var ro=new ResizeObserver(schedule);ro.observe(left);}}',
-    '    var hero=document.querySelector(".hero");if(hero&&!window.__sngAuthoritativeHeroObserver){window.__sngAuthoritativeHeroObserver=new MutationObserver(schedule);window.__sngAuthoritativeHeroObserver.observe(hero,{subtree:true,childList:true,characterData:true});}',
+    '  function boot(){',
+    '    schedule();installFinalPriceColor();',
+    '    [120,400,900,1800,3000].forEach(function(ms){setTimeout(function(){schedule();installFinalPriceColor();},ms);});',
+    '    window.addEventListener("load",function(){schedule();installFinalPriceColor();},{once:true});',
+    '    window.addEventListener("resize",schedule,{passive:true});',
+    '    if(window.ResizeObserver){',
+    '      var hero=document.querySelector(".hero");',
+    '      if(hero&&!window.__sngAuthoritativeHeroObserver){',
+    '        window.__sngAuthoritativeHeroObserver=new MutationObserver(schedule);',
+    '        window.__sngAuthoritativeHeroObserver.observe(hero,{subtree:true,childList:true,characterData:true});',
+    '      }',
+    '    }',
     '  }',
     '  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();',
     '})();'
