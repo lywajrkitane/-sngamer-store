@@ -91,6 +91,43 @@ express.static = function paytechAwareStatic(root, options) {
     });
   }
 
+  function applyAuthoritativeStorefrontUi(html) {
+    /* The header is defined here, at the final server-render boundary. This prevents
+       older client-side UI patches from deciding whether Profile/Cart are visible. */
+    const profileButton = '<button type="button" class="profilePremiumButton" id="profilePremiumButton" aria-label="Mon profil" title="Mon profil" onclick="navigateStore(\'profile\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.8-3.4 3.1-5.2 6.5-5.2s5.7 1.8 6.5 5.2"></path></svg></button>';
+    const iconCartButton = '<button type="button" class="cartButton" aria-label="Panier" title="Panier" onclick="cart()"><span class="cartIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 4h2l1.7 10.2a2 2 0 0 0 2 1.7h7.9a2 2 0 0 0 1.9-1.4L21 8H7"></path><circle cx="10" cy="19" r="1.2"></circle><circle cx="18" cy="19" r="1.2"></circle></svg></span><b id="count">0</b></button>';
+
+    html = html.replace(/<button\s+class="cartButton"[^>]*>.*?<\/button>/i, iconCartButton);
+    if (!html.includes('id="profilePremiumButton"')) {
+      html = html.replace(iconCartButton, profileButton + iconCartButton);
+    }
+
+    const authoritativeStyle = `<style id="sngamer-authoritative-storefront-ui">
+.siteHeader .nav{display:flex!important;align-items:center!important;gap:10px!important}
+.siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;flex:0 0 52px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border-radius:16px!important;box-sizing:border-box!important}
+.siteHeader .profilePremiumButton,.siteHeader .cartButton{border:1px solid rgba(70,150,255,.55)!important;color:#fff!important;background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%)!important;box-shadow:0 0 22px rgba(42,111,255,.24),inset 0 1px 0 rgba(255,255,255,.2)!important;cursor:pointer!important}
+.siteHeader .profilePremiumButton svg{width:23px!important;height:23px!important}
+.siteHeader .cartButton .cartIcon{display:inline-flex!important;align-items:center!important;justify-content:center!important}
+.siteHeader .cartButton .cartIcon svg{width:22px!important;height:22px!important}
+.siteHeader .cartButton b{position:absolute!important;transform:translate(17px,-17px)!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:#7c3aed!important;color:#fff!important;font-size:10px!important;line-height:18px!important;box-sizing:border-box!important}
+#products .card.productCardClickable .priceCurrent{color:#FFD21A!important}
+#products .card.productCardClickable .priceCurrent small{color:#aebacc!important}
+@media (min-width:701px){
+  .heroIn{align-items:stretch!important}
+  .heroIn>div:first-child,.heroIn>.heroVisual{height:256px!important;min-height:256px!important;max-height:256px!important;box-sizing:border-box!important}
+}
+@media (max-width:700px){
+  .siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;flex-basis:48px!important;border-radius:15px!important}
+  .siteHeader .cartButton b{transform:translate(16px,-16px)!important}
+}
+</style>`;
+
+    if (!html.includes('id="sngamer-authoritative-storefront-ui"')) {
+      html = html.replace(/<\/head>/i, authoritativeStyle + '</head>');
+    }
+    return html;
+  }
+
   return function serveStatic(req, res, next) {
     const pathname = String(req.path || req.url || "").split("?")[0];
     const isHome = req.method === "GET" && (pathname === "/" || pathname === "/index.html");
@@ -142,6 +179,7 @@ express.static = function paytechAwareStatic(root, options) {
         html = html.replace(/<\/body>/i, `${refreshRecoveryTag}</body>`);
       }
 
+      html = applyAuthoritativeStorefrontUi(html);
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
       res.set("Pragma", "no-cache");
       res.set("Expires", "0");
