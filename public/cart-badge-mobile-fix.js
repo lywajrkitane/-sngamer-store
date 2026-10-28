@@ -24,6 +24,11 @@
     return window.matchMedia("(max-width:700px), (hover:none) and (pointer:coarse)").matches;
   }
 
+  function isProductDetailOpen() {
+    var modal = document.getElementById("productModal");
+    return !!(modal && modal.classList.contains("show"));
+  }
+
   function ensureBadge() {
     var cart = document.querySelector(".siteHeader .cartButton");
     if (!cart) return null;
@@ -46,11 +51,12 @@
     var cart = found.cart;
     var badge = found.badge;
     var count = getCount();
+    var productDetailOpen = isProductDetailOpen();
 
     badge.textContent = String(count);
     badge.style.cssText = [
       "position:fixed",
-      "display:" + (isMobile() && count > 0 ? "inline-flex" : "none"),
+      "display:" + (isMobile() && count > 0 && !productDetailOpen ? "inline-flex" : "none"),
       "align-items:center",
       "justify-content:center",
       "box-sizing:border-box",
@@ -70,7 +76,7 @@
       "opacity:1"
     ].join(";");
 
-    if (isMobile() && count > 0) {
+    if (isMobile() && count > 0 && !productDetailOpen) {
       var rect = cart.getBoundingClientRect();
       var left = Math.round(rect.right - 4);
       var top = Math.round(rect.top - 5);
@@ -80,14 +86,23 @@
     }
   }
 
+  function watchProductModal() {
+    var modal = document.getElementById("productModal");
+    if (!modal || modal.__sngCartBadgeObserver) return;
+    var observer = new MutationObserver(paint);
+    observer.observe(modal, { attributes: true, attributeFilter: ["class"] });
+    modal.__sngCartBadgeObserver = observer;
+  }
+
   function boot() {
     paint();
-    [100, 300, 700, 1200, 2000, 4000].forEach(function (delay) { setTimeout(paint, delay); });
+    watchProductModal();
+    [100, 300, 700, 1200, 2000, 4000].forEach(function (delay) { setTimeout(function () { paint(); watchProductModal(); }, delay); });
     window.addEventListener("resize", paint, { passive: true });
     window.addEventListener("orientationchange", paint, { passive: true });
     window.addEventListener("scroll", paint, { passive: true });
     window.addEventListener("storage", paint);
-    setInterval(paint, 800);
+    setInterval(function () { paint(); watchProductModal(); }, 800);
   }
 
   if (document.readyState === "loading") {
