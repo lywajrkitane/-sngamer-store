@@ -75,6 +75,7 @@
   #products .card.productCardClickable .priceCurrent{
     font-size:18px !important;
     line-height:1.1;
+    color:#F8E070 !important;
   }
 
   /* IMPORTANT: remove the previous absolute/negative-margin behavior. */
