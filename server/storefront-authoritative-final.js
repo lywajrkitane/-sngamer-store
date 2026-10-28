@@ -18,9 +18,9 @@ function buildHeader(html) {
 
   /* Canonical desktop order: Search -> Cart -> Profile. */
   html = html.replace(/<button\s+class="cartButton"[^>]*>[\s\S]*?<\/button>/i, cartButton);
-  html = html.replace(/<button\s+type="button"\s+class="profilePremiumButton"[^>]*>[\s\S]*?<\/button>/i, '');
-  if (!html.includes('id="profilePremiumButton"')) {
-    html = html.replace(cartButton, cartButton + profileButton);
+  html = html.replace(/<button\b[^>]*class=["'][^"']*\bprofilePremiumButton\b[^"']*["'][^>]*>[\s\S]*?<\/button>/gi, '');
+  if (!/<button\b[^>]*id=["']profilePremiumButton["']/i.test(html)) {
+    html = html.replace(/(<button\b[^>]*class="cartButton"[^>]*>[\s\S]*?<\/button>)/i, '$1' + profileButton);
   }
 
   const css = [
@@ -57,7 +57,7 @@ function buildHeader(html) {
     '.siteHeader .wrap.nav{gap:7px!important}',
     '}',
     /* Touch-first browsers can expose a desktop-sized CSS viewport when Desktop site is enabled. */
-    '@media(hover:none) and (pointer:coarse){',
+    '@media(max-width:700px) and (hover:none) and (pointer:coarse){',
     'html,body{width:100%!important;max-width:100%!important;overflow-x:clip!important;overscroll-behavior-x:none!important}',
     '.siteHeader .nav>.searchPremiumButton,.siteHeader .nav>.cartButton{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;max-width:40px!important;max-height:40px!important;flex:0 0 40px!important;border-radius:13px!important}',
     '.siteHeader .nav>.profilePremiumButton{display:none!important;visibility:hidden!important;pointer-events:none!important}',

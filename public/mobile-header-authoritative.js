@@ -97,7 +97,7 @@
     installStyles();
 
     /* Hide the top profile only on mobile/touch devices; desktop must keep it. */
-    var isMobileMode = window.matchMedia("(max-width:700px), (hover:none) and (pointer:coarse)").matches;
+    var isMobileMode = window.matchMedia("(max-width:700px)").matches;
     nav.querySelectorAll("#sngamerProfileEntry,.sngamerProfileEntry,#profilePremiumButton,.profilePremiumButton,[data-sngamer-profile-entry='1']").forEach(function (node) {
       if (isMobileMode) {
         node.style.setProperty("display", "none", "important");

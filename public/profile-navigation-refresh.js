@@ -165,60 +165,92 @@
 
     const nativeLoad = window.load;
     let activeLoad = null;
+    let retryTimer = null;
+    let retryDelay = 2500;
 
-    const wait = function(ms) {
-      return new Promise(function(resolve){ setTimeout(resolve, ms); });
-    };
-
-    const catalogReady = function() {
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const catalogReady = () => {
       const catalog = window.storeProducts || window.products;
       return Array.isArray(catalog) && catalog.length > 0;
     };
-
-    const hasCatalogCards = function() {
+    const hasCatalogCards = () => {
       const grid = document.getElementById("products");
       return !!(grid && grid.querySelector(".productCardClickable"));
     };
-
-    const clearTemporaryFailure = function() {
+    const clearTemporaryFailure = () => {
       const grid = document.getElementById("products");
       if (!grid || hasCatalogCards()) return;
       const text = String(grid.textContent || "").toLowerCase();
-      if (text.includes("catalogue est temporairement indisponible") || text.includes("catalogue temporairement indisponible")) {
+      if (text.includes("catalogue est temporairement indisponible") ||
+          text.includes("catalogue temporairement indisponible") ||
+          text.includes("reconnexion au catalogue")) {
         grid.replaceChildren();
       }
+    };
+    const stopRetry = () => {
+      retryDelay = 2500;
+      if (retryTimer) clearTimeout(retryTimer);
+      retryTimer = null;
+    };
+    const scheduleRetry = () => {
+      if (retryTimer || catalogReady() || hasCatalogCards() || window.activeStoreSection === "profile") return;
+      const grid = document.getElementById("products");
+      if (grid && !hasCatalogCards()) {
+        grid.innerHTML = '<div role="status" aria-live="polite" style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca">Reconnexion au catalogue en cours…</div>';
+      }
+      retryTimer = setTimeout(() => {
+        retryTimer = null;
+        retryDelay = Math.min(Math.round(retryDelay * 1.4), 12000);
+        if (!catalogReady() && !hasCatalogCards() && window.activeStoreSection !== "profile") window.load();
+      }, retryDelay);
     };
 
     window.load = function() {
       if (activeLoad) return activeLoad;
-
       activeLoad = (async function() {
-        let lastError = null;
         for (let attempt = 0; attempt < 5; attempt += 1) {
           try {
             clearTemporaryFailure();
             await nativeLoad();
-            if (catalogReady() || hasCatalogCards()) return;
+            if (catalogReady() || hasCatalogCards()) {
+              stopRetry();
+              return;
+            }
           } catch (error) {
-            lastError = error;
             console.error("SNGAMER_CATALOG_LOAD_RETRY_ERROR", error);
           }
-          if (attempt < 4) await wait(250 * Math.pow(2, attempt));
+          if (attempt < 4) await wait(350 * Math.pow(2, attempt));
         }
-        if (lastError) console.error("SNGAMER_CATALOG_LOAD_FAILED_AFTER_RETRIES", lastError);
-      })().finally(function(){ activeLoad = null; });
-
+        if (!catalogReady() && !hasCatalogCards()) scheduleRetry();
+      })().finally(function() {
+        activeLoad = null;
+        if (catalogReady() || hasCatalogCards()) stopRetry();
+      });
       return activeLoad;
     };
 
-    // app.js invokes its first load() before this file is evaluated. If that
-    // first request failed, recover it immediately without a page refresh.
-    [0, 300, 900, 1800].forEach(function(delay){
-      setTimeout(function(){
-        if (window.activeStoreSection !== "profile" && !catalogReady() && !hasCatalogCards()) {
-          window.load();
-        }
-      }, delay);
+    // Recover the first app.js request after Render cold starts and continue
+    // at a capped interval until the live API has successfully populated cards.
+    [0, 350, 1000, 2200].forEach(delay => setTimeout(function() {
+      if (!catalogReady() && !hasCatalogCards() && window.activeStoreSection !== "profile") window.load();
+    }, delay));
+    window.addEventListener("online", function() {
+      if (!catalogReady() && !hasCatalogCards() && window.activeStoreSection !== "profile") {
+        stopRetry();
+        window.load();
+      }
+    });
+    window.addEventListener("focus", function() {
+      if (!catalogReady() && !hasCatalogCards() && window.activeStoreSection !== "profile") {
+        stopRetry();
+        window.load();
+      }
+    });
+    document.addEventListener("visibilitychange", function() {
+      if (document.visibilityState === "visible" && !catalogReady() && !hasCatalogCards() && window.activeStoreSection !== "profile") {
+        stopRetry();
+        window.load();
+      }
     });
   }
 
