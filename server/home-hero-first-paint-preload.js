@@ -4,22 +4,27 @@ const express = require("express");
 
 const PUBLIC_DIR = path.join(__dirname, "..", "public");
 const INDEX_FILE = path.join(PUBLIC_DIR, "index.html");
-const HERO_GUARD = `<style id="sngamer-home-hero-first-paint">.hero .heroIn > div:first-child > p.heroAnnouncement:not(.sngHomeHeroBody),.hero .heroIn > div:first-child > p.heroSlogan{visibility:hidden!important;opacity:0!important;pointer-events:none!important}</style>`;
-const HERO_SCRIPT = `<script src="/home-hero.js?v=20261024-firstpaint1" defer data-sngamer-home-hero="true"></script>`;
+
+/*
+ * SNGAMER STORE — hero must never disappear while the dynamic carousel loads.
+ * The previous first-paint guard hid the only visible mobile hero paragraph and
+ * left a large empty block whenever home-hero.js was delayed, cached or failed.
+ * We now keep the fallback content visible and only inject the carousel script.
+ */
+const HERO_SCRIPT = `<script src="/home-hero.js?v=20261028-stable1" defer data-sngamer-home-hero="true"></script>`;
+
+function ensureScript(html) {
+  if (!html.includes('data-sngamer-home-hero="true"')) {
+    html = html.replace(/<\/head>/i, HERO_SCRIPT + "</head>");
+  }
+  html = html.replace(/<style[^>]*id=["']sngamer-home-hero-first-paint["'][^>]*>[\s\S]*?<\/style>/gi, "");
+  return html;
+}
 
 function prepareIndex() {
   if (!fs.existsSync(INDEX_FILE)) return;
   const original = fs.readFileSync(INDEX_FILE, "utf8");
-  let html = original;
-
-  if (!html.includes('id="sngamer-home-hero-first-paint"')) {
-    html = html.replace(/<\/head>/i, HERO_GUARD + "</head>");
-  }
-
-  if (!html.includes('data-sngamer-home-hero="true"')) {
-    html = html.replace(/<\/head>/i, HERO_SCRIPT + "</head>");
-  }
-
+  const html = ensureScript(original);
   if (html !== original) fs.writeFileSync(INDEX_FILE, html, "utf8");
 }
 
@@ -29,9 +34,6 @@ try {
   console.error("HOME_HERO_FIRST_PAINT_PRELOAD_ERROR:", error);
 }
 
-// Also patch already-read HTML responses in case another preload has already
-// loaded index.html before this preload runs. This keeps the first paint guard
-// server-side and does not alter the announcement audio control.
 const originalStatic = express.static;
 express.static = function patchedStatic(root, options) {
   const middleware = originalStatic(root, options);
@@ -39,23 +41,22 @@ express.static = function patchedStatic(root, options) {
   const expectedRoot = path.resolve(PUBLIC_DIR);
   if (publicRoot !== expectedRoot) return middleware;
 
-  return function sngamerHomeHeroFirstPaintStatic(req, res, next) {
+  return function sngamerHomeHeroStatic(req, res, next) {
     if (req.method !== "GET" && req.method !== "HEAD") return middleware(req, res, next);
-    const requestPath = req.path || req.url || "";
+    const requestPath = String(req.path || req.url || "").split("?")[0];
     if (requestPath !== "/" && requestPath !== "/index.html") return middleware(req, res, next);
 
     try {
-      let html = fs.readFileSync(INDEX_FILE, "utf8");
-      if (!html.includes('id="sngamer-home-hero-first-paint"')) html = html.replace(/<\/head>/i, HERO_GUARD + "</head>");
-      if (!html.includes('data-sngamer-home-hero="true"')) html = html.replace(/<\/head>/i, HERO_SCRIPT + "</head>");
+      const html = ensureScript(fs.readFileSync(INDEX_FILE, "utf8"));
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
       res.set("Pragma", "no-cache");
       res.set("Expires", "0");
+      res.set("Surrogate-Control", "no-store");
       res.type("html");
       if (req.method === "HEAD") return res.end();
       return res.send(html);
     } catch (error) {
-      console.error("HOME_HERO_FIRST_PAINT_RESPONSE_ERROR:", error);
+      console.error("HOME_HERO_RESPONSE_ERROR:", error);
       return middleware(req, res, next);
     }
   };
