@@ -2,27 +2,99 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 
-/* Single customer-facing UI authority. This preload must run last. */
+/*
+ * Single owner for the customer-facing header controls and desktop hero layout.
+ * Keep customer account, catalog, cart state, and checkout logic in their existing files.
+ */
 const originalStatic = express.static;
 const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
 const INDEX_FILE = path.join(PUBLIC_DIR, "index.html");
 
 function buildHeader(html) {
-  const profileButton = '<button type="button" class="profilePremiumButton" id="profilePremiumButton" aria-label="Mon profil" title="Mon profil" onclick="navigateStore(\'profile\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.8-3.4 3.1-5.2 6.5-5.2s5.7 1.8 6.5 5.2"></path></svg></button>';
-  const cartButton = '<button type="button" class="cartButton" aria-label="Panier" title="Panier" onclick="cart()"><span class="cartIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 4h2l1.7 10.2a2 2 0 0 0 2 1.7h7.9a2 2 0 0 0 1.9-1.4L21 8H7"></path><circle cx="10" cy="19" r="1.2"></circle><circle cx="18" cy="19" r="1.2"></circle></svg></span><b id="count">0</b></button>';
+  const profileButton = '<button type="button" class="profilePremiumButton" id="profilePremiumButton" aria-label="Mon profil" title="Mon profil" onclick="navigateStore(\\'profile\\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.8-3.4 3.1-5.2 6.5-5.2s5.7 1.8 6.5 5.2"></path></svg></button>';
+  const cartButton = '<button type="button" class="cartButton" aria-label="Panier" title="Panier" onclick="cart()"><span class="cartIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4h2l1.7 10.2a2 2 0 0 0 2 1.7h7.9a2 2 0 0 0 1.9-1.4L21 8H7"></path><circle cx="10" cy="19" r="1.2"></circle><circle cx="18" cy="19" r="1.2"></circle></svg></span><b id="count">0</b></button>';
+
+  /* Canonical order: Search, Cart, Profile. Replace the source cart markup rather than layering a new button over it. */
   html = html.replace(/<button\s+class="cartButton"[^>]*>[\s\S]*?<\/button>/i, cartButton);
-  if (!html.includes('id="profilePremiumButton"')) html = html.replace(cartButton, profileButton + cartButton);
-  const css = `<style id="sngamer-storefront-authoritative-final">
-.siteHeader .wrap.nav{display:flex!important;align-items:center!important;gap:10px!important}
-.siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;flex:0 0 52px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;box-sizing:border-box!important;border-radius:16px!important}
-.siteHeader .profilePremiumButton,.siteHeader .cartButton{position:relative!important;border:1px solid rgba(70,150,255,.55)!important;color:#fff!important;background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%)!important;box-shadow:0 0 22px rgba(42,111,255,.24),inset 0 1px 0 rgba(255,255,255,.2)!important;cursor:pointer!important}
-.siteHeader .profilePremiumButton svg{width:23px!important;height:23px!important}.siteHeader .cartButton .cartIcon{display:inline-flex!important;align-items:center!important;justify-content:center!important}.siteHeader .cartButton .cartIcon svg{width:22px!important;height:22px!important}
-.siteHeader .cartButton b{position:absolute!important;right:-5px!important;top:-5px!important;transform:none!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:#7c3aed!important;color:#fff!important;font-size:10px!important;line-height:18px!important;box-sizing:border-box!important}
-#products .card.productCardClickable .priceCurrent{color:#FFD21A!important}#products .card.productCardClickable .priceCurrent small{color:#aebacc!important}
-@media (min-width:701px){.hero .heroIn{align-items:stretch!important}.hero .heroIn>div:first-child,.hero .heroIn>.heroVisual{height:256px!important;min-height:256px!important;max-height:256px!important;box-sizing:border-box!important}}
-@media (max-width:700px){.siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;flex-basis:48px!important;border-radius:15px!important}.siteHeader .cartButton b{right:-4px!important;top:-4px!important}}
-</style>`;
-  if (!html.includes('id="sngamer-storefront-authoritative-final"')) html = html.replace(/<\/head>/i, css + "</head>");
+  if (!html.includes('id="profilePremiumButton"')) {
+    html = html.replace(cartButton, cartButton + profileButton);
+  }
+
+  const css = [
+    '.siteHeader .wrap.nav{display:flex!important;align-items:center!important;gap:10px!important;width:100%!important;box-sizing:border-box!important}',
+    '.siteHeader .nav>.logo{order:0!important;flex:0 0 auto!important}',
+    '.siteHeader .nav>.searchPremiumButton{order:1!important;margin-left:auto!important;margin-right:0!important}',
+    '.siteHeader .nav>.cartButton{order:2!important;margin-left:0!important;margin-right:0!important}',
+    '.siteHeader .nav>.profilePremiumButton{order:3!important;margin-left:0!important;margin-right:0!important}',
+    '.siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;max-width:52px!important;max-height:52px!important;flex:0 0 52px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;box-sizing:border-box!important;border-radius:16px!important;position:relative!important}',
+    '.siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{border:1px solid rgba(70,150,255,.55)!important;color:#fff!important;background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%)!important;box-shadow:0 0 22px rgba(42,111,255,.24),inset 0 1px 0 rgba(255,255,255,.2)!important;cursor:pointer!important}',
+    '.siteHeader .searchPremiumButton svg,.siteHeader .profilePremiumButton svg{width:23px!important;height:23px!important;display:block!important}',
+    '.siteHeader .cartButton .cartIcon{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;font-size:0!important;line-height:0!important}',
+    '.siteHeader .cartButton .cartIcon svg{width:22px!important;height:22px!important;display:block!important}',
+    '.siteHeader .cartButton>span:not(.cartIcon){display:none!important}',
+    '.siteHeader .cartButton b{position:absolute!important;right:-5px!important;top:-5px!important;transform:none!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:#7c3aed!important;border:1px solid rgba(255,255,255,.25)!important;color:#fff!important;font-size:10px!important;font-weight:900!important;line-height:18px!important;box-sizing:border-box!important}',
+    '#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#FFD21A!important;text-shadow:0 0 12px rgba(255,210,26,.10)!important}',
+    '#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small,#products .card.productCardClickable .info .priceCurrent small{color:#aebacc!important;text-shadow:none!important}',
+    '@media(min-width:701px){',
+    '.hero .heroIn{display:grid!important;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr)!important;grid-template-rows:auto auto!important;align-items:start!important;min-height:0!important;height:auto!important;max-height:none!important;padding-top:36px!important;padding-bottom:36px!important;column-gap:26px!important;row-gap:20px!important}',
+    '.hero .heroIn>div:first-child{grid-column:1!important;grid-row:1!important;align-self:start!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;box-sizing:border-box!important}',
+    '.hero .heroIn>div:first-child p.heroAnnouncement{height:auto!important;min-height:0!important;max-height:none!important;box-sizing:border-box!important}',
+    '.hero .heroIn>.heroVisual{grid-column:2!important;grid-row:1!important;display:flex!important;visibility:visible!important;align-self:start!important;width:100%!important;max-width:none!important;min-height:0!important;max-height:none!important;overflow:hidden!important;box-sizing:border-box!important}',
+    '.hero .heroIn>.heroVisual>.defaultHeroContent{width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;padding:clamp(18px,2.5vw,32px)!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important}',
+    '.hero .heroIn>.primary,.hero .heroIn>.sngPromoHeroCta{grid-column:1!important;grid-row:2!important;justify-self:start!important;align-self:start!important;margin:0!important;position:relative!important;z-index:2!important}',
+    'main#shop{position:relative!important;z-index:1!important;margin-top:0!important;padding-top:36px!important}',
+    '}',
+    '@media(max-width:700px){',
+    '.siteHeader .searchPremiumButton,.siteHeader .profilePremiumButton,.siteHeader .cartButton{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;max-width:48px!important;max-height:48px!important;flex-basis:48px!important;border-radius:15px!important}',
+    '.siteHeader .cartButton b{right:-4px!important;top:-4px!important}',
+    '}'
+  ].join('\n');
+
+  if (!html.includes('id="sngamer-storefront-authoritative-final"')) {
+    html = html.replace(/<\/head>/i, '<style id="sngamer-storefront-authoritative-final">' + css + '</style></head>');
+  }
+
+  const layoutScript = [
+    '(function(){',
+    '  "use strict";',
+    '  function layoutHero(){',
+    '    var hero=document.querySelector(".hero");',
+    '    if(!hero)return;',
+    '    var heroIn=hero.querySelector(".heroIn");',
+    '    var left=heroIn&&heroIn.querySelector(":scope > div:first-child");',
+    '    var card=left&&left.querySelector("p.heroAnnouncement");',
+    '    var visual=heroIn&&heroIn.querySelector(":scope > .heroVisual");',
+    '    if(!heroIn||!left||!card||!visual)return;',
+    '    if(window.innerWidth<701){',
+    '      visual.style.removeProperty("height");visual.style.removeProperty("min-height");visual.style.removeProperty("max-height");visual.style.removeProperty("margin-top");',
+    '      var inner=visual.querySelector(".defaultHeroContent");if(inner){inner.style.removeProperty("height");inner.style.removeProperty("min-height");inner.style.removeProperty("max-height");}',
+    '      return;',
+    '    }',
+    '    left.style.removeProperty("height");left.style.removeProperty("min-height");left.style.removeProperty("max-height");',
+    '    var rect=card.getBoundingClientRect();var wrapRect=left.getBoundingClientRect();',
+    '    var cardHeight=Math.ceil(rect.height);var topOffset=Math.max(0,Math.ceil(rect.top-wrapRect.top));',
+    '    if(!cardHeight||!Number.isFinite(cardHeight))return;',
+    '    visual.style.setProperty("height",cardHeight+"px","important");',
+    '    visual.style.setProperty("min-height",cardHeight+"px","important");',
+    '    visual.style.setProperty("max-height",cardHeight+"px","important");',
+    '    visual.style.setProperty("margin-top",topOffset+"px","important");',
+    '    var inner=visual.querySelector(".defaultHeroContent");',
+    '    if(inner){inner.style.setProperty("height","100%","important");inner.style.setProperty("min-height","0","important");inner.style.setProperty("max-height","100%","important");}',
+    '  }',
+    '  var scheduled=false;',
+    '  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(function(){scheduled=false;layoutHero();});}',
+    '  function boot(){schedule();[120,400,900,1800].forEach(function(ms){setTimeout(schedule,ms);});window.addEventListener("resize",schedule,{passive:true});',
+    '    if(window.ResizeObserver){var left=document.querySelector(".hero .heroIn>div:first-child");var card=left&&left.querySelector("p.heroAnnouncement");if(card){var ro=new ResizeObserver(schedule);ro.observe(card);ro.observe(left);}}',
+    '    var hero=document.querySelector(".hero");if(hero&&!window.__sngAuthoritativeHeroObserver){window.__sngAuthoritativeHeroObserver=new MutationObserver(schedule);window.__sngAuthoritativeHeroObserver.observe(hero,{subtree:true,childList:true,characterData:true});}',
+    '  }',
+    '  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();',
+    '})();'
+  ].join('\n');
+
+  if (!html.includes('id="sngamer-authoritative-hero-layout"')) {
+    html = html.replace(/<\/body>/i, '<script id="sngamer-authoritative-hero-layout">' + layoutScript + '</script></body>');
+  }
+
   return html;
 }
 
