@@ -64,29 +64,16 @@
 
         /* Keep the cart quantity visible and independent from the cart button size. */
         .siteHeader .nav > .cartButton b#count{
-          position:absolute !important;
-          top:-4px !important;
-          right:-4px !important;
-          min-width:16px !important;
-          width:auto !important;
-          height:16px !important;
-          padding:0 4px !important;
-          border-radius:999px !important;
-          display:flex !important;
-          align-items:center !important;
-          justify-content:center !important;
-          box-sizing:border-box !important;
-          background:#101827 !important;
-          border:1px solid rgba(255,255,255,.85) !important;
-          color:#fff !important;
-          font-size:9px !important;
-          font-weight:800 !important;
-          line-height:1 !important;
-          z-index:20 !important;
-          opacity:1 !important;
-          visibility:visible !important;
+          position:absolute!important;top:-4px!important;right:-3px!important;
+          display:inline-flex!important;align-items:center!important;justify-content:center!important;
+          min-width:18px!important;height:18px!important;padding:0 5px!important;
+          border-radius:999px!important;box-sizing:border-box!important;
+          background:linear-gradient(135deg,#101827 0%,#30345c 55%,#7c3aed 100%)!important;
+          color:#fff!important;border:1px solid rgba(255,255,255,.95)!important;
+          box-shadow:0 0 0 2px rgba(7,10,16,.95),0 3px 10px rgba(91,53,255,.38)!important;
+          font-size:9px!important;font-weight:900!important;line-height:1!important;
+          opacity:1!important;visibility:visible!important;z-index:60!important;pointer-events:none!important;
         }
-
         /* Do not show the text label "Panier" in the compact mobile header. */
         .siteHeader .nav > .cartButton > span:not(.cartIcon){
           display:none !important;
@@ -109,11 +96,18 @@
     if (!nav) return;
     installStyles();
 
-    /* Remove any desktop profile control from the mobile header only. */
+    /* Hide the top profile only on mobile/touch devices; desktop must keep it. */
+    var isMobileMode = window.matchMedia("(max-width:700px), (hover:none) and (pointer:coarse)").matches;
     nav.querySelectorAll("#sngamerProfileEntry,.sngamerProfileEntry,#profilePremiumButton,.profilePremiumButton,[data-sngamer-profile-entry='1']").forEach(function (node) {
-      node.style.setProperty("display", "none", "important");
-      node.style.setProperty("visibility", "hidden", "important");
-      node.style.setProperty("pointer-events", "none", "important");
+      if (isMobileMode) {
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+        node.style.setProperty("pointer-events", "none", "important");
+      } else {
+        node.style.removeProperty("display");
+        node.style.removeProperty("visibility");
+        node.style.removeProperty("pointer-events");
+      }
     });
 
     var cart = nav.querySelector(".cartButton");
@@ -139,6 +133,9 @@
       if (headerNav) {
         window.__sngamerMobileHeaderAuthorityObserver.observe(headerNav, { childList:true, subtree:true });
       }
+      /* Re-evaluate desktop-site mode changes and never watch the whole page. */
+      window.addEventListener("orientationchange", sync);
+      window.addEventListener("resize", sync, { passive:true });
     }
     window.addEventListener("storage", sync);
     window.addEventListener("resize", sync);
