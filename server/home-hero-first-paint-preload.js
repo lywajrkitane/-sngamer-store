@@ -9,15 +9,14 @@ const INDEX_FILE = path.join(PUBLIC_DIR, "index.html");
  * SNGAMER STORE — hero must never disappear while the dynamic carousel loads.
  * The previous first-paint guard hid the only visible mobile hero paragraph and
  * left a large empty block whenever home-hero.js was delayed, cached or failed.
- * We now keep the fallback content visible and only inject the carousel script.
  */
 const HERO_SCRIPT = `<script src="/home-hero.js?v=20261028-stable1" defer data-sngamer-home-hero="true"></script>`;
 
 function ensureScript(html) {
-  if (!html.includes('data-sngamer-home-hero="true"')) {
-    html = html.replace(/<\/head>/i, HERO_SCRIPT + "</head>");
-  }
   html = html.replace(/<style[^>]*id=["']sngamer-home-hero-first-paint["'][^>]*>[\s\S]*?<\/style>/gi, "");
+  html = html.replace(/<script[^>]*data-sngamer-home-hero=["']true["'][^>]*><\/script>/gi, "");
+  html = html.replace(/<script[^>]*src=["'][^"']*\/home-hero\.js[^"']*["'][^>]*><\/script>/gi, "");
+  html = html.replace(/<\/head>/i, HERO_SCRIPT + "</head>");
   return html;
 }
 
