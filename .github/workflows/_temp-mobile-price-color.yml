@@ -1,0 +1,38 @@
+name: _temp_mobile_price_color
+
+on:
+  push:
+    paths:
+      - '.github/workflows/_temp-mobile-price-color.yml'
+      - 'server/storefront-authoritative-final.js'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Change mobile price color only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('server/storefront-authoritative-final.js')
+          s = p.read_text()
+          old = 'style.textContent="#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#D4A017!important;text-shadow:0 0 10px rgba(212,160,23,.10)!important}#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small,#products .card.productCardClickable .info .priceCurrent small{color:#aebacc!important;text-shadow:none!important}";'
+          new = 'style.textContent="#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#D4A017!important;text-shadow:0 0 10px rgba(212,160,23,.10)!important}#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small,#products .card.productCardClickable .info .priceCurrent small{color:#aebacc!important;text-shadow:none!important}@media(max-width:700px){#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#FAC42F!important;text-shadow:0 0 10px rgba(250,196,47,.12)!important}}";'
+          if old not in s:
+              raise SystemExit('Expected authoritative mobile price-color code was not found; no change made.')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          if git diff --quiet -- server/storefront-authoritative-final.js; then
+            echo 'No source change needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add server/storefront-authoritative-final.js
+          git commit -m 'Fix mobile product price color only'
+          git push
