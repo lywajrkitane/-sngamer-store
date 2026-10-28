@@ -123,7 +123,7 @@ function buildHeader(html) {
     '    var id="sngamer-final-price-color";',
     '    var style=document.getElementById(id);',
     '    if(!style){style=document.createElement("style");style.id=id;document.head.appendChild(style);}',
-    '    style.textContent="#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#D4A017!important;text-shadow:0 0 10px rgba(212,160,23,.10)!important}#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small,#products .card.productCardClickable .info .priceCurrent small{color:#aebacc!important;text-shadow:none!important}";',
+    '    style.textContent="#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#D4A017!important;text-shadow:0 0 10px rgba(212,160,23,.10)!important}#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent small,#products .card.productCardClickable .info .priceCurrent small{color:#aebacc!important;text-shadow:none!important}@media(max-width:700px){#products .card.productCardClickable .info .productCardPurchaseRow .priceCurrent,#products .card.productCardClickable .info .priceCurrent{color:#FAC42F!important;text-shadow:0 0 10px rgba(250,196,47,.12)!important}}";',
     '  }',
     '  var scheduled=false;',
     '  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(function(){scheduled=false;layoutHero();syncCartBadge();});}',
