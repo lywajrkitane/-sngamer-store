@@ -124,7 +124,8 @@
       count.id = "count";
       cart.appendChild(count);
     }
-    count.textContent = String(cartCount());
+    var nextCount = String(cartCount());
+    if (count.textContent !== nextCount) count.textContent = nextCount;
     count.style.setProperty("display", "flex", "important");
   }
 
@@ -134,7 +135,10 @@
     [100, 400, 900, 1800].forEach(function (delay) { setTimeout(sync, delay); });
     if (!window.__sngamerMobileHeaderAuthorityObserver) {
       window.__sngamerMobileHeaderAuthorityObserver = new MutationObserver(function () { sync(); });
-      window.__sngamerMobileHeaderAuthorityObserver.observe(document.body, { childList:true, subtree:true });
+      var headerNav = document.querySelector(".siteHeader .nav");
+      if (headerNav) {
+        window.__sngamerMobileHeaderAuthorityObserver.observe(headerNav, { childList:true, subtree:true });
+      }
     }
     window.addEventListener("storage", sync);
     window.addEventListener("resize", sync);
