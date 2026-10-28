@@ -97,7 +97,9 @@
   /* Catalog recovery: Render's free instance can sleep for a long time.
      app.js currently paints a permanent outage message after one failed
      /api/products request. Retry the existing loader until the catalog is
-     actually available, without changing products or storefront rendering. */
+     actually available, without changing products or storefront rendering.
+     A timeout is mandatory here: a sleeping backend can leave fetch() pending
+     long enough to block the recovery loop forever. */
   function catalogHasProducts() {
     var products = window.storeProducts || window.products;
     return Array.isArray(products) && products.length > 0;
@@ -121,18 +123,32 @@
     return new Promise(function (resolve) { setTimeout(resolve, ms); });
   }
 
+  function runLoadWithTimeout(timeoutMs) {
+    if (typeof window.load !== "function") return Promise.reject(new Error("catalog_loader_unavailable"));
+    var timedOut = false;
+    return Promise.race([
+      Promise.resolve().then(function () { return window.load(); }),
+      wait(timeoutMs).then(function () {
+        timedOut = true;
+        throw new Error("catalog_load_timeout");
+      })
+    ]).finally(function () {
+      if (timedOut) console.warn("SNGAMER_CATALOG_RECOVERY_TIMEOUT", timeoutMs);
+    });
+  }
+
   async function recoverCatalog() {
-    for (var attempt = 0; attempt < 12; attempt += 1) {
+    for (var attempt = 0; attempt < 18; attempt += 1) {
       if (catalogHasProducts() || catalogHasCards()) return;
       clearCatalogFailure();
       try {
-        if (typeof window.load === "function") await window.load();
+        await runLoadWithTimeout(8000);
       } catch (error) {
         console.error("SNGAMER_CATALOG_RECOVERY_ERROR", error);
       }
       if (catalogHasProducts() || catalogHasCards()) return;
       clearCatalogFailure();
-      await wait(Math.min(2500 + attempt * 1500, 10000));
+      await wait(Math.min(1500 + attempt * 1000, 8000));
     }
     if (!catalogHasProducts() && !catalogHasCards()) {
       console.error("SNGAMER_CATALOG_RECOVERY_EXHAUSTED");
