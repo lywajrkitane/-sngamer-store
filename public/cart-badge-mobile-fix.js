@@ -94,9 +94,55 @@
     modal.__sngCartBadgeObserver = observer;
   }
 
+  /* Catalog recovery: Render's free instance can sleep for a long time.
+     app.js currently paints a permanent outage message after one failed
+     /api/products request. Retry the existing loader until the catalog is
+     actually available, without changing products or storefront rendering. */
+  function catalogHasProducts() {
+    var products = window.storeProducts || window.products;
+    return Array.isArray(products) && products.length > 0;
+  }
+
+  function catalogHasCards() {
+    var grid = document.getElementById("products");
+    return !!(grid && grid.querySelector(".productCardClickable"));
+  }
+
+  function clearCatalogFailure() {
+    var grid = document.getElementById("products");
+    if (!grid || catalogHasCards()) return;
+    var text = String(grid.textContent || "").toLowerCase();
+    if (text.indexOf("catalogue") >= 0 && text.indexOf("indisponible") >= 0) {
+      grid.replaceChildren();
+    }
+  }
+
+  function wait(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  async function recoverCatalog() {
+    for (var attempt = 0; attempt < 12; attempt += 1) {
+      if (catalogHasProducts() || catalogHasCards()) return;
+      clearCatalogFailure();
+      try {
+        if (typeof window.load === "function") await window.load();
+      } catch (error) {
+        console.error("SNGAMER_CATALOG_RECOVERY_ERROR", error);
+      }
+      if (catalogHasProducts() || catalogHasCards()) return;
+      clearCatalogFailure();
+      await wait(Math.min(2500 + attempt * 1500, 10000));
+    }
+    if (!catalogHasProducts() && !catalogHasCards()) {
+      console.error("SNGAMER_CATALOG_RECOVERY_EXHAUSTED");
+    }
+  }
+
   function boot() {
     paint();
     watchProductModal();
+    recoverCatalog();
     [100, 300, 700, 1200, 2000, 4000].forEach(function (delay) { setTimeout(function () { paint(); watchProductModal(); }, delay); });
     window.addEventListener("resize", paint, { passive: true });
     window.addEventListener("orientationchange", paint, { passive: true });
