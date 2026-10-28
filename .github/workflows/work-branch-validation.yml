@@ -1,0 +1,35 @@
+name: SNGAMER work branch validation
+
+on:
+  push:
+    branches:
+      - work/clean-architecture-2026-10-28
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate server JavaScript
+        shell: bash
+        run: |
+          set -e
+          for file in server/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+
+      - name: Validate storefront JavaScript
+        shell: bash
+        run: |
+          set -e
+          for file in public/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
