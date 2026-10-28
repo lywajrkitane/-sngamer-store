@@ -4,6 +4,7 @@ const session = require("express-session");
 const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
 const { normalizeProductColors, resolveSelectedProductColor } = require("./product-colors");
+const { fetchCatalog } = require("./catalog-service");
 const { v2: cloudinary } = require("cloudinary");
 const multer = require("multer");
 cloudinary.config({
@@ -344,38 +345,8 @@ app.get("/healthz", async (req, res) => {
 
 app.get("/api/products", async (req, res) => {
   try {
-    const result = await db(`
-      SELECT
-  p.id,
-  p.name,
-  p.category,
-  p.platform,
-  p.product_condition,
-  p.warranty,
-  p.warranty_configured,
-  p.price,
-  p.stock,
-  p.emoji,
-  p.description,
-  p.characteristics,
-  p.colors,
-  p.image1_url,
-  p.image2_url,
-  p.image3_url,
-  p.video_url,
-  p.promo_price,
-  p.promo_active,
-  p.campaign_id,
-  c.name AS campaign_name,
-  c.sticker AS campaign_sticker,
-  c.right_sticker AS campaign_right_sticker,
-  c.active AS campaign_active,
-  p.created_at
-FROM products p
-LEFT JOIN campaigns c ON c.id = p.campaign_id
-    `);
-
-    res.json(result.rows);
+    const rows = await fetchCatalog(db);
+    res.json(rows);
   } catch (error) {
     console.error("PRODUCTS_ERROR:", error);
 
