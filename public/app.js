@@ -1,4 +1,31 @@
-let products=[],cartItems=JSON.parse(localStorage.getItem("sg_cart")||"[]"),filter="Tous",selectedCoinPlatform=null;
+function normalizeCartItems(input){
+  if(!Array.isArray(input))return [];
+  const normalized=[];
+  for(const raw of input){
+    if(!raw||typeof raw!=="object")continue;
+    const id=Number(raw.id),qty=Math.floor(Number(raw.qty));
+    if(!Number.isSafeInteger(id)||id<=0||!Number.isSafeInteger(qty)||qty<=0)continue;
+    const colorName=String(raw.color&&raw.color.name||"").trim();
+    const color=colorName?{name:colorName.slice(0,80),hex:String(raw.color.hex||"").slice(0,32)}:null;
+    const existing=normalized.find(item=>Number(item.id)===id&&String(item.color?.name||"").trim().toLowerCase()===String(color?.name||"").trim().toLowerCase());
+    if(existing)existing.qty+=qty;
+    else normalized.push(color?{id,qty,color}:{id,qty});
+  }
+  return normalized;
+}
+function readCartItems(){
+  try{return normalizeCartItems(JSON.parse(localStorage.getItem("sg_cart")||"[]"));}
+  catch(_){return [];}
+}
+let products=[],cartItems=readCartItems(),filter="Tous",selectedCoinPlatform=null;
+try{
+  Object.defineProperty(window,"cartItems",{
+    configurable:true,enumerable:true,
+    get(){return cartItems;},
+    set(value){cartItems=normalizeCartItems(value);}
+  });
+}catch(_){window.cartItems=cartItems;}
+
 let homeMixedProducts=[];
 function shuffleProductGroup(items){
   const shuffled=items.slice();
@@ -132,9 +159,9 @@ function render(){
   }).join("");
   if(list.length===0&&window.activeStoreSection!=="home"&&window.activeStoreSection!=="profile"){productGrid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca;border:1px dashed #2a4262;border-radius:16px"><div style="font-size:32px">🎮</div><p>Aucun produit dans cette rubrique pour le moment.</p></div>`;}
 }
-function save(){localStorage.setItem("sg_cart",JSON.stringify(cartItems));update();}
+function save(){cartItems=normalizeCartItems(cartItems);localStorage.setItem("sg_cart",JSON.stringify(cartItems));update();}
 function add(id){const product=products.find(x=>Number(x.id)===Number(id));const isOnOrder=String(product?.stock_mode||"")==="on_order";if(!product||(!isOnOrder&&Number(product.stock)<=0)){alert("Ce produit est en rupture de stock.");return false;}const item=cartItems.find(x=>Number(x.id)===Number(id));if(item&&!isOnOrder&&Number(item.qty)>=Number(product.stock)){alert("La quantité demandée dépasse le stock disponible.");return false;}if(item)item.qty++;else cartItems.push({id:product.id,qty:1});save();return true;}
-function update(){const validItems=cartItems.filter(x=>products.some(p=>Number(p.id)===Number(x.id)));if(validItems.length!==cartItems.length){cartItems=validItems;localStorage.setItem("sg_cart",JSON.stringify(cartItems));}document.querySelector("#count").textContent=cartItems.reduce((s,x)=>s+x.qty,0);document.querySelector("#items").innerHTML=cartItems.length?cartItems.map(x=>{const p=products.find(p=>Number(p.id)===Number(x.id));return `<div class="cartItem"><div class="em">${p.image1_url?`<img src="${p.image1_url}" alt="${escapeHtml(p.name)}">`:p.emoji}</div><div><b>${escapeHtml(p.name)}</b><br><small>${money(Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?Number(p.promo_price):Number(p.price))} × ${x.qty}</small></div><div class="qty"><button onclick="chg(${p.id},-1)">−</button>${x.qty}<button onclick="chg(${p.id},1)">+</button></div></div>`}).join(""):"<p style='color:#8190a2'>Panier vide.</p>";const total=cartItems.reduce((s,x)=>{const p=products.find(p=>Number(p.id)===Number(x.id));return s+(p?(Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?Number(p.promo_price):Number(p.price))*x.qty:0)},0);document.querySelector("#total").textContent=money(total);}
+function update(){const validItems=cartItems.filter(x=>products.some(p=>Number(p.id)===Number(x.id)));if(validItems.length!==cartItems.length){cartItems=validItems;localStorage.setItem("sg_cart",JSON.stringify(cartItems));}const cartTotal=cartItems.reduce((s,x)=>s+Number(x.qty||0),0);const countBadges=Array.from(document.querySelectorAll(".cartButton #count"));if(countBadges.length){countBadges[0].textContent=String(cartTotal);countBadges.slice(1).forEach(node=>node.remove());}else{const countBadge=document.querySelector("#count");if(countBadge)countBadge.textContent=String(cartTotal);}document.querySelector("#items").innerHTML=cartItems.length?cartItems.map(x=>{const p=products.find(p=>Number(p.id)===Number(x.id));return `<div class="cartItem"><div class="em">${p.image1_url?`<img src="${p.image1_url}" alt="${escapeHtml(p.name)}">`:p.emoji}</div><div><b>${escapeHtml(p.name)}</b><br><small>${money(Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?Number(p.promo_price):Number(p.price))} × ${x.qty}</small></div><div class="qty"><button onclick="chg(${p.id},-1)">−</button>${x.qty}<button onclick="chg(${p.id},1)">+</button></div></div>`}).join(""):"<p style='color:#8190a2'>Panier vide.</p>";const total=cartItems.reduce((s,x)=>{const p=products.find(p=>Number(p.id)===Number(x.id));return s+(p?(Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price)?Number(p.promo_price):Number(p.price))*x.qty:0)},0);document.querySelector("#total").textContent=money(total);}
 function chg(id,n){const item=cartItems.find(x=>Number(x.id)===Number(id));if(!item)return;const product=products.find(p=>Number(p.id)===Number(id));if(!product)return;if(n>0&&String(product.stock_mode||"")!=="on_order"&&Number(item.qty)>=Number(product.stock)){alert("Stock maximum atteint pour ce produit.");return;}item.qty+=n;if(item.qty<=0)cartItems=cartItems.filter(x=>Number(x.id)!==Number(id));save();}
 function cart(){document.querySelector("#drawer").classList.add("show");update();}
 function closeCart(){document.querySelector("#drawer").classList.remove("show");}
