@@ -68,9 +68,9 @@
           display:inline-flex!important;align-items:center!important;justify-content:center!important;
           min-width:18px!important;height:18px!important;padding:0 5px!important;
           border-radius:999px!important;box-sizing:border-box!important;
-          background:linear-gradient(135deg,#101827 0%,#30345c 55%,#7c3aed 100%)!important;
-          color:#fff!important;border:1px solid rgba(255,255,255,.95)!important;
-          box-shadow:0 0 0 2px rgba(7,10,16,.95),0 3px 10px rgba(91,53,255,.38)!important;
+          background:linear-gradient(135deg,#ff4fa3 0%,#e11d8d 48%,#7c3aed 100%)!important;
+          color:#fff!important;border:1.5px solid rgba(255,255,255,.98)!important;
+          box-shadow:0 0 0 2px rgba(7,10,16,.98),0 0 13px rgba(236,72,153,.72),0 3px 10px rgba(91,53,255,.5)!important;
           font-size:9px!important;font-weight:900!important;line-height:1!important;
           opacity:1!important;visibility:visible!important;z-index:60!important;pointer-events:none!important;
         }
@@ -120,7 +120,14 @@
     }
     var nextCount = String(cartCount());
     if (count.textContent !== nextCount) count.textContent = nextCount;
-    count.style.setProperty("display", "flex", "important");
+    count.setAttribute("aria-label", nextCount + (nextCount === "1" ? " produit dans le panier" : " produits dans le panier"));
+    count.style.setProperty("position", "absolute", "important");
+    count.style.setProperty("top", "-4px", "important");
+    count.style.setProperty("right", "-3px", "important");
+    count.style.setProperty("display", "inline-flex", "important");
+    count.style.setProperty("opacity", "1", "important");
+    count.style.setProperty("visibility", "visible", "important");
+    count.style.setProperty("z-index", "999", "important");
   }
 
   function boot() {
