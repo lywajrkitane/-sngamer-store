@@ -10,7 +10,7 @@ Le projet fonctionne comme une application Node.js / Express avec une interface 
 
 ## Mesures observées
 
-- Répertoire `public/` : 105 entrées au total, dont de nombreux fichiers JS, CSS et HTML.
+- Répertoire `public/` : 112 fichiers dans l'arbre Git inspecté le 2026-10-31, dont de nombreux fichiers JS, CSS et HTML.
 - Répertoire `server/` : 40 fichiers.
 - Démarrage Node : 27 préchargements `-r` exécutés avant `server/bootstrap.js`.
 - Page principale `public/index.html` : 21 balises de scripts externes et 19 feuilles CSS externes.
