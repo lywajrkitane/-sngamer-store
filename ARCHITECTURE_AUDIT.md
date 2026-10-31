@@ -71,3 +71,33 @@ Le HTML contient déjà un badge statique `#count` dans le bouton panier. La cr�
 
 ### Limites et prochaine étape
 Aucun test navigateur ni test d'intégration automatisé n'a encore été exécuté. Aucun déploiement Render n'a été déclenché. La migration doit être validée sur la branche de travail avant de passer au domaine suivant.
+
+## Mise à jour — audit du catalogue et des API produits (2026-10-31)
+
+### Autorité de lecture du catalogue public
+- `server/server.js` déclare `GET /api/products`.
+- Cette route délègue la lecture à `fetchCatalog(db)`, importé depuis `server/catalog-service.js`.
+- `server/catalog-service.js` est actuellement l'unique service de lecture du catalogue public ; il effectue une requête SQL avec jointure sur `campaigns` et renvoie les lignes.
+- Le fichier `server/catalog-service.test.js` contient un test smoke avec une base simulée, mais son exécution n'a pas été effectuée pendant cet audit.
+
+### Écriture et administration des produits
+- La création (`POST /api/admin/products`), la modification (`PATCH /api/admin/products/:id`) et la suppression (`DELETE /api/admin/products/:id`) sont encore directement implémentées dans `server/server.js`.
+- Les validations de catégorie, plateforme, état, garantie, caractéristiques, couleurs et promotions sont donc couplées au fichier serveur principal.
+- Les médias produits disposent d'une route d'envoi dans `server/server.js` ; `server/product-media-delete-preload.js` injecte une route de suppression en modifiant le fichier source avant son chargement.
+- Aucune route distincte de lecture admin des produits n'a été identifiée dans les sections inspectées ; le dashboard doit être vérifié côté client pour confirmer sa source de données.
+
+### Récupération et couches de démarrage
+- `server/cart-badge-mobile-preload.js` est mal nommé : il patche globalement `fs.readFileSync` pour ajouter `public/catalog-recovery-v1.js` au HTML de la boutique.
+- `public/catalog-recovery-v1.js` peut rappeler `window.load()` jusqu'à 12 fois si les produits ou cartes ne sont pas présents. Cette couche relance le chargement côté navigateur, en plus du chargement normal réalisé par `public/app.js`.
+- `server/catalog-api-retry-preload.js` patche le handler Express de `GET /api/products`, mais il n'est référencé ni dans les scripts `start` ni `dev` de `package.json` au commit inspecté. Il est donc considéré comme inactif dans le démarrage courant, sous réserve d'un chargement indirect non encore identifié.
+- `server/catalog-admin-ui-preload.js` injecte les scripts d'interface d'administration du catalogue ; il ne détient pas la lecture ou l'écriture des données produits.
+- `server/product-meta-create-preload.js` modifie à l'exécution plusieurs fichiers sources (serveur, formulaire admin et storefront) pour ajouter la valeur « Produit numérique ». Cette responsabilité devra être intégrée dans les sources canoniques avant toute suppression du preload.
+- `server/bootstrap.js` contient `patchCampaignSource()`, qui tente de réécrire des requêtes SQL dans `server/server.js` au démarrage. La requête historique de lecture des produits qu'il cible ne correspond plus à la route actuelle basée sur `fetchCatalog(db)`; l'effet réel des autres substitutions doit être audité séparément.
+
+### Décision de migration
+Aucun fichier du catalogue n'est supprimé ou désactivé à ce stade. La lecture publique est déjà partiellement centralisée, mais les écritures, validations et injections de compatibilité restent couplées. La prochaine migration devra extraire les opérations CRUD et validations produits dans un domaine dédié, après caractérisation des appels du dashboard et des routes médias.
+
+### Limites de vérification
+- Vérification statique des fichiers et routes sur la branche de travail uniquement.
+- Aucun test Node, test de base de données, test navigateur ou test d'intégration n'a été exécuté.
+- Aucun déploiement Render n'a été déclenché.
