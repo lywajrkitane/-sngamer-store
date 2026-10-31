@@ -115,7 +115,6 @@
       window.addEventListener("orientationchange", sync);
       window.addEventListener("resize", sync, { passive:true });
     }
-    window.addEventListener("storage", sync);
     window.addEventListener("resize", sync);
   }
 
