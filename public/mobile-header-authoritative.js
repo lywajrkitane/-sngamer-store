@@ -1,21 +1,10 @@
 /* SNGAMER STORE — mobile header authority
    Mobile keeps Profile exclusively in the bottom navigation.
-   Header controls are compact and the cart count always reflects sg_cart.
+   Header controls remain compact; cart quantity is owned by app.js.
 */
 (function () {
   "use strict";
   var STYLE_ID = "sngamerMobileHeaderAuthority";
-
-  function cartCount() {
-    try {
-      var raw = JSON.parse(localStorage.getItem("sg_cart") || "[]");
-      if (!Array.isArray(raw)) return 0;
-      return raw.reduce(function (sum, item) {
-        var qty = Number(item && item.qty);
-        return sum + (Number.isFinite(qty) && qty > 0 ? Math.floor(qty) : 0);
-      }, 0);
-    } catch (_) { return 0; }
-  }
 
   function installStyles() {
     if (document.getElementById(STYLE_ID)) return;
@@ -110,24 +99,6 @@
       }
     });
 
-    var cart = nav.querySelector(".cartButton");
-    if (!cart) return;
-    var count = cart.querySelector("#count");
-    if (!count) {
-      count = document.createElement("b");
-      count.id = "count";
-      cart.appendChild(count);
-    }
-    var nextCount = String(cartCount());
-    if (count.textContent !== nextCount) count.textContent = nextCount;
-    count.setAttribute("aria-label", nextCount + (nextCount === "1" ? " produit dans le panier" : " produits dans le panier"));
-    count.style.setProperty("position", "absolute", "important");
-    count.style.setProperty("top", "-4px", "important");
-    count.style.setProperty("right", "-3px", "important");
-    count.style.setProperty("display", "inline-flex", "important");
-    count.style.setProperty("opacity", "1", "important");
-    count.style.setProperty("visibility", "visible", "important");
-    count.style.setProperty("z-index", "999", "important");
   }
 
   function boot() {
