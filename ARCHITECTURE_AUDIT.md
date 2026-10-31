@@ -47,3 +47,27 @@ Ne pas supprimer de fichiers dans cette première étape. Migrer progressivement
 - Ne pas toucher à `main`, aux données réelles, aux clés ou aux variables d'environnement.
 - Aucun déploiement avant tests et validation du comportement.
 - Les fichiers historiques restent en place tant que leurs dépendances ne sont pas comprises.
+
+## Mise à jour — première migration du compteur panier (2026-10-31)
+
+### Constat avant migration
+Le compteur était écrit par trois couches :
+- `public/app.js` mettait à jour le compteur dans le flux normal du panier ;
+- `public/mobile-header-authoritative.js` relisait `localStorage`, créait éventuellement un badge et le resynchronisait ;
+- `server/storefront-authoritative-final.js` relisait aussi `localStorage` et lançait un polling toutes les 500 ms.
+
+Le HTML contient déjà un badge statique `#count` dans le bouton panier. La création dynamique du badge par le script mobile était donc une responsabilité concurrente.
+
+### Migration effectuée sur cette branche
+- `public/app.js` devient l'unique propriétaire de la valeur du compteur ; il la met à jour à l'initialisation, lors des mises à jour du panier et lors d'un événement `storage` provenant d'un autre onglet.
+- `public/mobile-header-authoritative.js` conserve uniquement les responsabilités de présentation et de profil mobile ; sa lecture du panier, la création du badge et son écouteur `storage` ont été retirés.
+- `server/storefront-authoritative-final.js` conserve la mise en page du Hero et la couleur des prix ; sa synchronisation du compteur et son intervalle de 500 ms ont été retirés.
+
+### Vérifications statiques
+- Une seule fonction `syncCartBadge` subsiste, dans `public/app.js`.
+- Aucun lecteur de `sg_cart` ni créateur de badge ne subsiste dans le script du header mobile.
+- Aucun appel de synchronisation du compteur ni polling ne subsiste dans l'injecteur storefront.
+- Les responsabilités de profil mobile et de mise en page du Hero sont conservées.
+
+### Limites et prochaine étape
+Aucun test navigateur ni test d'intégration automatisé n'a encore été exécuté. Aucun déploiement Render n'a été déclenché. La migration doit être validée sur la branche de travail avant de passer au domaine suivant.
