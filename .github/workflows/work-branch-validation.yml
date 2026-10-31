@@ -25,8 +25,8 @@ jobs:
             node --check "$file"
           done
 
-      - name: Test centralized catalogue service
-        run: node server/catalog-service.test.js
+      - name: Test catalogue and product validation
+        run: npm test
 
       - name: Validate storefront JavaScript
         shell: bash
