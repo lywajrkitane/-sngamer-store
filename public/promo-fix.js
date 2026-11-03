@@ -10,6 +10,14 @@
   function injectProfessionalHeroStyles(){
     if(document.getElementById("sngamerProfessionalHeroStyles")) return;
 
+    if(!document.getElementById("sngamerHeroInterFont")){
+      const font=document.createElement("link");
+      font.id="sngamerHeroInterFont";
+      font.rel="stylesheet";
+      font.href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
+      document.head.appendChild(font);
+    }
+
     const style = document.createElement("style");
     style.id = "sngamerProfessionalHeroStyles";
     style.textContent = `
@@ -68,9 +76,12 @@
 
       .professional-hero .heroAnnouncement .announcementCopy span{
         color:#f4f7ff;
-        font-size:15px;
-        line-height:1.35;
-        font-weight:800;
+        font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+        font-size:clamp(14px,1.05vw,16px);
+        line-height:1.55;
+        font-weight:500;
+        letter-spacing:.08px;
+        text-wrap:pretty;
       }
 
       .professional-hero .heroAnnouncement .announcementDots{
@@ -136,7 +147,7 @@
         .professional-hero .heroIn > div:first-child p.heroAnnouncement{width:100%;margin:18px 0 22px;padding:13px 12px;gap:11px;border-radius:16px}
         .professional-hero .heroAnnouncement .announcementIcon{flex-basis:42px;width:42px;height:42px;border-radius:12px;font-size:21px}
         .professional-hero .heroAnnouncement .announcementCopy strong{font-size:9px;letter-spacing:1.5px}
-        .professional-hero .heroAnnouncement .announcementCopy span{font-size:13px;line-height:1.32}
+        .professional-hero .heroAnnouncement .announcementCopy span{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45;font-weight:500;letter-spacing:.08px}
         .professional-hero .heroAnnouncement .announcementDots{gap:5px}
         .professional-hero .heroAnnouncement .announcementDots i{width:6px;height:6px}
         .professional-hero .heroAnnouncement .announcementDots i.active{width:20px}
