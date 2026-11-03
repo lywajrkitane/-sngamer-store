@@ -86,9 +86,12 @@
       if (categoryPage) catsArea.replaceChildren();
     }
     if (subcats) {
-      subcats.hidden = true;
-      subcats.style.display = "none";
-      if (subcats.childElementCount) subcats.replaceChildren();
+      const supportsSubcategories = section === "coins" || section === "phones";
+      if (!supportsSubcategories) {
+        subcats.hidden = true;
+        subcats.style.display = "none";
+        if (subcats.childElementCount) subcats.replaceChildren();
+      }
     }
     document.body.classList.toggle("sngStrictCategoryPage", categoryPage);
   }
@@ -100,7 +103,6 @@
     style.textContent = `
       /* Category pages: no horizontal category selector and no Home hero. */
       body.sngStrictCategoryPage #cats,
-      body.sngStrictCategoryPage #navSubcategories,
       body.sngStrictCategoryPage > .hero { display:none !important; }
 
       /* Do not let an empty/uninitialized promo slot reserve hundreds of pixels. */
