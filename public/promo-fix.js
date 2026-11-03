@@ -227,60 +227,13 @@
       style.textContent = `
         .hero.professional-hero .heroIn > div:first-child > h1{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
         .hero.professional-hero .heroIn > div:first-child > label{display:block!important;margin:0 0 7px!important;color:#55a8ff!important;letter-spacing:3px!important}
-        .hero.professional-hero .sngPromoAnnouncement{width:auto!important;min-height:40px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;margin:0 0 11px!important;position:relative!important;z-index:30!important}
-        .hero.professional-hero .sngPromoAnnouncementButton{width:38px!important;height:38px!important;min-width:38px!important;flex:0 0 38px!important;padding:0!important;border:1px solid rgba(93,167,255,.55)!important;border-radius:12px!important;color:#fff!important;background:linear-gradient(135deg,#147dff 0%,#5b35ff 55%,#d326a8 100%)!important;box-shadow:0 0 18px rgba(42,111,255,.2),inset 0 1px 0 rgba(255,255,255,.2)!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;position:relative!important}
-        .hero.professional-hero .sngPromoAnnouncementButton svg{width:20px!important;height:20px!important;display:block!important}
-        .hero.professional-hero .sngPromoAnnouncementButton::after{content:"";position:absolute;inset:-4px;border-radius:15px;border:1px solid rgba(82,179,255,.38);animation:sngPromoAnnouncementPulse 2.2s ease-out infinite;pointer-events:none}
-        .hero.professional-hero .sngPromoAnnouncementButton.is-playing::after{animation:sngPromoAnnouncementPlaying 1s ease-in-out infinite}
         .hero.professional-hero .heroIn > div:first-child p.heroAnnouncement{margin:0 0 14px!important}
         .hero.professional-hero .heroIn > .sngPromoHeroCta{display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:185px!important;max-width:185px!important;height:42px!important;min-height:42px!important;max-height:42px!important;margin:12px 0 0 0!important;padding:8px 12px!important;border:1px solid rgba(110,169,255,.3)!important;border-radius:12px!important;background:linear-gradient(108deg,#287eff 0%,#6448ef 53%,#ce2b91 100%)!important;color:#fff!important;font-size:13px!important;font-weight:850!important;line-height:1.1!important;text-align:center!important;white-space:nowrap!important;box-shadow:0 7px 18px rgba(36,116,255,.12),0 4px 14px rgba(198,40,145,.07)!important;grid-column:1!important;justify-self:start!important;align-self:start!important}
-        @media(max-width:560px){.hero.professional-hero .sngPromoAnnouncement{min-height:38px!important;margin:0 0 10px!important}.hero.professional-hero .sngPromoAnnouncementButton{width:36px!important;height:36px!important;min-width:36px!important;flex-basis:36px!important}.hero.professional-hero .heroIn > div:first-child p.heroAnnouncement{margin:0 0 12px!important}.hero.professional-hero .heroIn > .sngPromoHeroCta{width:185px!important;max-width:185px!important;height:42px!important;min-height:42px!important;max-height:42px!important;margin:10px 0 0 0!important}}
-        @media(prefers-reduced-motion:reduce){.hero.professional-hero .sngPromoAnnouncementButton::after{animation:none!important}}
       `;
       document.head.appendChild(style);
     }
 
-    const label = copy.querySelector(":scope > label") || copy.querySelector("label");
-    const description = copy.querySelector(":scope > p.heroAnnouncement") || copy.querySelector(":scope > p.heroSlogan");
-    if(!label) return;
-
-    let row = heroIn.querySelector(".sngPromoAnnouncement");
-    if(!row){
-      row = document.createElement("div");
-      row.className = "sngPromoAnnouncement";
-      row.innerHTML = '<button type="button" class="sngPromoAnnouncementButton" aria-label="Écouter l’annonce SNGAMER STORE" title="Écouter l’annonce SNGAMER STORE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.8 8.5H4.5A1.5 1.5 0 0 0 3 10v4a1.5 1.5 0 0 0 1.5 1.5h2.3L11 19V5Z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></button>';
-    }
-    // The sound button always stays between the small brand label and the welcome card.
-    if(description && description.parentElement === copy){
-      if(row.parentElement !== copy || row.nextElementSibling !== description) copy.insertBefore(row, description);
-    }else if(row.parentElement !== copy){
-      copy.insertBefore(row, label.nextSibling);
-    }else if(row.previousElementSibling !== label){
-      copy.insertBefore(row, label.nextSibling);
-    }
-
-    const audioButton = row.querySelector(".sngPromoAnnouncementButton");
-    if(audioButton && audioButton.dataset.audioReady !== "1"){
-      audioButton.dataset.audioReady = "1";
-      const audio = new Audio("/audio/annonce-sngamer.mp3?v=20261022-herofinal2");
-      audio.preload = "none";
-      const reset = () => audioButton.classList.remove("is-playing");
-      audio.addEventListener("play", () => audioButton.classList.add("is-playing"));
-      audio.addEventListener("ended", reset);
-      audio.addEventListener("pause", reset);
-      audio.addEventListener("error", () => console.error("SNGAMER hero announcement audio could not load"));
-      audioButton.addEventListener("click", () => {
-        if(audio.paused){
-          audio.currentTime = 0;
-          const promise = audio.play();
-          if(promise && promise.catch) promise.catch(error => console.warn("Hero audio playback failed", error));
-        }else{
-          audio.pause();
-          audio.currentTime = 0;
-          reset();
-        }
-      });
-    }
+    // Legacy announcement/audio control removed: home-hero.js is the only hero content owner.
   }
 
 
