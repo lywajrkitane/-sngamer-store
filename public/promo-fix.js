@@ -304,9 +304,11 @@
     const activeSlides=slides.filter(slide=>getComputedStyle(slide).display!=="none" && slide.children.length>0);
     const hasActivePromo=activeSlides.length>0;
 
-    area.style.display=hasActivePromo ? "flex" : "none";
+    /* Keep the second Hero panel populated when no campaign is active. */
+    area.style.display="flex";
     carousel.style.display=hasActivePromo ? "block" : "none";
-    fallback.style.display="none";
+    fallback.hidden=false;
+    fallback.style.display=hasActivePromo ? "none" : "flex";
 
     if(hero){
       hero.classList.toggle("has-active-promo",hasActivePromo);
@@ -316,7 +318,7 @@
     if(title) title.style.display=hasActivePromo && title.textContent.trim() ? "flex" : "none";
     dots.style.display=hasActivePromo && activeSlides.length>1 ? "flex" : "none";
     area.classList.toggle("has-active-promo",hasActivePromo);
-    area.classList.remove("has-default-hero");
+    area.classList.toggle("has-default-hero",!hasActivePromo);
     window.__sngamerPromoHeroReady = true;
   }
 
