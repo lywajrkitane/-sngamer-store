@@ -107,23 +107,6 @@
 
   function loadPaytechBridge(){if(document.querySelector('script[data-paytech-checkout="1"],script[src*="paytech-checkout.js"]'))return;const script=document.createElement("script");script.src="/paytech-checkout.js?v=20261017-2125";script.dataset.paytechCheckout="1";document.body.appendChild(script)}
 
-  function enrichProductPurchaseMeta(){
-    const modal=document.getElementById("productModal"),detail=document.getElementById("productDetail");
-    if(!modal||!detail||!modal.classList.contains("show")||!Array.isArray(window.products))return;
-    const title=detail.querySelector(".productInfo h2,.productInfo h1,h2,h1"),name=title?title.textContent.trim():"";if(!name)return;
-    const p=window.products.find(x=>String(x.name||"").trim()===name)||window.products.find(x=>String(x.name||"").trim().toLowerCase()===name.toLowerCase());if(!p)return;
-    const normal=Number(p.price)||0,promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<normal;
-    let box=detail.querySelector(".sngProductPurchaseMeta");
-    if(!promoActive){box?.remove();return;}
-    const saving=normal-Number(p.promo_price),percent=Math.round((saving/normal)*100),fmt=v=>new Intl.NumberFormat("fr-FR").format(Math.round(v))+" FCFA";
-    if(!box){box=document.createElement("div");box.className="sngProductPurchaseMeta";const info=detail.querySelector(".productInfo")||detail;const add=info.querySelector(".sngProductAddButton,.add");if(add)info.insertBefore(box,add);else info.appendChild(box);}
-    const nextMarkup=`<div class="sngPurchaseMetaRow"><span class="sngSavingPill">Économie ${fmt(saving)} · -${percent}%</span></div>`;
-    if(box.innerHTML!==nextMarkup)box.innerHTML=nextMarkup;
-  }
-
-  function installProductMetaStyle(){if(document.getElementById("sngProductMetaStyle"))return;const s=document.createElement("style");s.id="sngProductMetaStyle";s.textContent=`#productModal .sngProductPurchaseMeta{margin:14px 0 2px;padding:0}#productModal .sngPurchaseMetaRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}#productModal .sngSavingPill{display:inline-flex;align-items:center;min-height:34px;padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;line-height:1.15;border:1px solid rgba(255,190,70,.22);background:rgba(255,170,40,.08);color:#ffe8a6}@media(max-width:700px){#productModal .sngSavingPill{font-size:12px;min-height:32px;padding:6px 10px}}`;document.head.appendChild(s)}
-
-  function startProductEnhancement(){installProductMetaStyle();const modal=document.getElementById("productModal");if(modal&&!modal.dataset.sngMetaObserver){modal.dataset.sngMetaObserver="1";new MutationObserver(()=>requestAnimationFrame(enrichProductPurchaseMeta)).observe(modal,{attributes:true,attributeFilter:["class"]});}setTimeout(enrichProductPurchaseMeta,80);setTimeout(enrichProductPurchaseMeta,300)}
 
   document.addEventListener("DOMContentLoaded",()=>{polishPaymentUI();loadPaytechBridge();startProductEnhancement()});setTimeout(()=>{polishPaymentUI();loadPaytechBridge();startProductEnhancement()},250);
 })();
