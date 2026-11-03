@@ -160,7 +160,6 @@
       body.sngCategoryView > .hero,
       body.sngProfileView > .hero { display:none !important; }
       body.sngCategoryView #cats,
-      body.sngCategoryView #navSubcategories,
       body.sngProfileView #cats,
       body.sngProfileView #navSubcategories,
       body.sngProfileView #products { display:none !important; }
