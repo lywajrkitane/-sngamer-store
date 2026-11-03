@@ -12,6 +12,13 @@
 
   function addStyles() {
     if (document.getElementById("sngHomeHeroStylesV4")) return;
+    if (!document.getElementById("sngHomeHeroInterFont")) {
+      const font = document.createElement("link");
+      font.id = "sngHomeHeroInterFont";
+      font.rel = "stylesheet";
+      font.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
+      document.head.appendChild(font);
+    }
     const style = document.createElement("style");
     style.id = "sngHomeHeroStylesV4";
     style.textContent = [
@@ -26,7 +33,7 @@
       ".sngHomeHeroEyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid rgba(128,190,255,.38);border-radius:999px;background:rgba(5,14,29,.72);color:#9bcfff;font:900 10px/1 Inter,Arial,sans-serif;letter-spacing:1.8px;text-transform:uppercase;box-shadow:0 8px 20px rgba(0,0,0,.2)}",
       ".sngHomeHeroEyebrow:before{content:'';display:block;width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#5bb8ff;box-shadow:0 0 12px rgba(91,184,255,.9)}",
       ".sngHomeHeroTitle{max-width:100%;margin:0;color:#fff;font:900 clamp(21px,2.3vw,28px)/1.12 Montserrat,Inter,Arial,sans-serif;letter-spacing:-.45px;text-wrap:pretty;text-shadow:0 4px 24px rgba(0,0,0,.55)}",
-      ".sngHomeHeroBody{max-width:100%;margin:0;color:#e3ebf8;font:650 14px/1.45 Inter,Arial,sans-serif;text-shadow:0 2px 14px rgba(0,0,0,.65)}",
+      ".sngHomeHeroBody{max-width:100%;margin:0;color:#e3ebf8;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:500!important;line-height:1.55!important;letter-spacing:.08px!important;text-shadow:0 2px 14px rgba(0,0,0,.65)}",
       ".sngHomeHeroSlide.is-active .sngHomeHeroEyebrow{animation:sngHomeHeroTextReveal .72s cubic-bezier(.22,1,.36,1) both;animation-delay:.02s}",
       ".sngHomeHeroSlide.is-active .sngHomeHeroTitle{animation:sngHomeHeroTextReveal .78s cubic-bezier(.22,1,.36,1) both;animation-delay:.13s}",
       ".sngHomeHeroSlide.is-active .sngHomeHeroBody{animation:sngHomeHeroTextReveal .8s cubic-bezier(.22,1,.36,1) both;animation-delay:.28s}",
