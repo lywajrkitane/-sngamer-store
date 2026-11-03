@@ -16,6 +16,7 @@ async function run() {
         warranty_configured: false,
         price: 1000,
         stock: 2,
+        stock_mode: "stock",
         emoji: "🎮",
         description: "Test",
         characteristics: [],
@@ -43,6 +44,8 @@ async function run() {
   assert.ok(calls[0].includes("LEFT JOIN campaigns"));
   assert.ok(calls[0].includes("p.promo_price"));
   assert.ok(calls[0].includes("p.colors"));
+  assert.ok(calls[0].includes("p.stock_mode"));
+  assert.strictEqual(rows[0].stock_mode, "stock");
 
   console.log("catalog-service smoke test: OK");
 }
