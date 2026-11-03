@@ -14,6 +14,7 @@ async function fetchCatalog(db) {
       p.warranty_configured,
       p.price,
       p.stock,
+      p.stock_mode,
       p.emoji,
       p.description,
       p.characteristics,
