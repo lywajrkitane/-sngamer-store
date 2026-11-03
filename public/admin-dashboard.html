@@ -1143,29 +1143,9 @@ async function login() {
       .getElementById("logoutBtn")
       .classList.remove("hidden");
 
+    // One initial load only. The central admin-data-fix controller owns
+    // the low-frequency refresh; do not start a competing 10-second poll here.
     void loadAll();
-    // Retry after the session cookie and admin view have settled; no manual refresh needed.
-    [600, 1600, 3500, 6500].forEach(delay => setTimeout(() => {
-      const adminBox = document.getElementById("adminBox");
-      if (adminBox && !adminBox.classList.contains("hidden")) void loadAll();
-    }, delay));
-
-    // Core automatic refresh: do not depend on an extra script finding the
-    // Orders button or on the workspace's delayed initialization.
-    if (!window.__sngAdminOrdersAutoRefreshTimer) {
-      const refreshAdminOrders = () => {
-        const box = document.getElementById("adminBox");
-        if (!box || box.classList.contains("hidden")) return;
-        if (document.visibilityState === "hidden") return;
-        void loadAll();
-      };
-
-      window.__sngAdminOrdersAutoRefreshTimer = window.setInterval(refreshAdminOrders, 10000);
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") refreshAdminOrders();
-      });
-      window.addEventListener("focus", refreshAdminOrders);
-    }
 loadPromoMedia();
     loadPromoProductSelectors();
   }
@@ -1183,10 +1163,19 @@ loadPromoMedia();
   async function loadProducts() {
 
     const response =
-      await fetch("/api/products");
+      await fetch("/api/products", { credentials: "same-origin", cache: "no-store" });
 
-    const products =
-      await response.json();
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      const error = new Error(detail.error || "Impossible de charger les produits.");
+      error.status = response.status;
+      throw error;
+    }
+
+    const products = await response.json();
+    if (!Array.isArray(products)) {
+      throw new Error("La réponse du serveur pour les produits est invalide.");
+    }
 
     document.getElementById("productCount")
       .textContent = products.length;
@@ -3086,7 +3075,9 @@ async function loadAll() {
 
   const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
   const retryTask = async (label, task) => {
-    const delays = [250, 500, 900, 1500, 2200];
+    // Retry only transient failures. Never multiply requests after 429/401/403
+    // or another client error; those need a real fix, not repeated polling.
+    const delays = [1000, 4000];
     let lastError;
     for (let attempt = 0; attempt <= delays.length; attempt++) {
       try {
@@ -3094,8 +3085,10 @@ async function loadAll() {
         return true;
       } catch (error) {
         lastError = error;
+        const status = Number(error && error.status) || 0;
+        if ((status >= 400 && status < 500) || attempt >= delays.length) break;
         console.warn(`ADMIN_LOAD_RETRY [${label}] ${attempt + 1}/${delays.length + 1}:`, error);
-        if (attempt < delays.length) await pause(delays[attempt]);
+        await pause(delays[attempt]);
       }
     }
     console.error(`ADMIN_LOAD_FAILED [${label}]:`, lastError);
@@ -3990,8 +3983,8 @@ async function loadAll() {
 
   }
 </style>
-<script src="/admin-v24-workspace.js?v=20261018-1220"></script>
-<script src="/admin-data-fix.js?v=20261018-1220"></script>
+<script src="/admin-v24-workspace.js?v=20261103-request-stability1"></script>
+<script src="/admin-data-fix.js?v=20261103-request-stability1"></script>
 <script src="/premium-dialogs-v1.js?v=20261018-1835"></script>
 <script src="/premium-select-guard-v1.js?v=20261018-1835"></script>
 <script id="sng-admin-modal-close-guard-v1">
