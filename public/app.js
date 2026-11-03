@@ -104,8 +104,16 @@ async function load(){
 function productText(p) {
   return [p?.name, p?.category, p?.description].filter(Boolean).map(value=>String(value)).join(" ").toLowerCase();
 }
-function isCoinProduct(p) { return /(coins?|e-?football|fc mobile|fc points|mobile legends|diamants?|diamonds?|gems?|myclub|top[- ]?up|recharge de jeu)/i.test(productText(p)); }
-function isPhoneProduct(p) { return !isCoinProduct(p) && /(gaming phone|téléphone|telephone|smartphone|phone|iphone|samsung galaxy|redmi note|poco|rog phone|nubia|redmagic|red magic|infinix gt|tecno pova|black shark)/i.test(productText(p)); }
+function isCoinProduct(p) {
+  const category = String(p?.category || "").trim().toLowerCase();
+  if (["coins", "pièces efootball", "piece efootball", "pieces efootball"].includes(category)) return true;
+  return /(coins?|e-?football|fc mobile|fc points|mobile legends|diamants?|diamonds?|gems?|myclub|top[- ]?up|recharge de jeu)/i.test(productText(p));
+}
+function isPhoneProduct(p) {
+  const category = String(p?.category || "").trim().toLowerCase();
+  if (["univers gaming", "gaming phone", "gaming phones"].includes(category)) return true;
+  return !isCoinProduct(p) && /(gaming phone|téléphone|telephone|smartphone|phone|iphone|samsung galaxy|redmi note|poco|rog phone|nubia|redmagic|red magic|infinix gt|tecno pova|black shark)/i.test(productText(p));
+}
 function isAccessoryProduct(p) { return !isCoinProduct(p) && !isPhoneProduct(p) && /(accessoire|accessory|accessories|clavier|keyboard|manette|controller|gamepad|casque|headset|écouteur|ecouteur|souris|mouse|refroidisseur|cooler|ventilateur|chargeur|charger|câble|cable|support|stand|coque|étui|etui|microphone|adaptateur|hub usb|gâchette|gachette|trigger|tapis|mousepad|power bank|batterie|joystick|webcam|dock|carte mémoire|carte memoire)/i.test(productText(p)); }
 function matchesStoreSection(p) {
   if (window.activeStoreSection === "home") return true;
