@@ -110,8 +110,10 @@
     const button=announcement.querySelector(".sngPromoAnnouncementButton");
     if(button&&!button.dataset.audioReady){
       button.dataset.audioReady="1";
-      const audio=new Audio("/audio/annonce-sngamer.mp3?v=20261022-nativebanners");
-      audio.preload="none";
+      const audio=new Audio("/audio/annonce-sngamer.mp3?v=20261103-audio-preload1");
+      // Précharger dès l'affichage du Hero, pas au premier clic.
+      audio.preload="auto";
+      audio.load();
       const reset=()=>button.classList.remove("is-playing");
       audio.addEventListener("play",()=>button.classList.add("is-playing"));
       audio.addEventListener("ended",reset);
