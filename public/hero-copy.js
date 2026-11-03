@@ -11,7 +11,7 @@
   }
   function start(){
     loadOnce('script[data-sngamer-customer-account]','/customer-account.js?v=20261027-profile-catalog-stability1','sngamerCustomerAccount');
-    loadOnce('script[data-sngamer-home-hero]','/home-hero.js?v=20261024-dynamic-home-hero3','sngamerHomeHero');
+    loadOnce('script[data-sngamer-home-hero]','/home-hero.js?v=20261103-inter-body2','sngamerHomeHero');
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
   else start();
