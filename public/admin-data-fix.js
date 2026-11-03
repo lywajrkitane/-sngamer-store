@@ -58,7 +58,7 @@
   function loadAnalyticsAdmin() {
     if (window.__sngAnalyticsAdminLoaded || document.querySelector('script[data-sng-site-analytics-admin]')) return;
     const script = document.createElement('script');
-    script.src = '/site-analytics-admin.js?v=20261019-analytics3';
+    script.src = '/site-analytics-admin.js?v=20261103-request-stability1';
     script.async = false;
     script.dataset.sngSiteAnalyticsAdmin = '1';
     script.onload = () => {
@@ -72,7 +72,7 @@
   function loadProductPerformanceAdmin() {
     if (window.__sngProductPerformanceAdminLoaded || document.querySelector('script[data-sng-product-performance-admin]')) return;
     const script = document.createElement('script');
-    script.src = '/product-analytics-admin.js?v=20261020-products4';
+    script.src = '/product-analytics-admin.js?v=20261103-request-stability1';
     script.async = false;
     script.dataset.sngProductPerformanceAdmin = '1';
     script.onload = () => {
