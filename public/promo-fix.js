@@ -3,48 +3,8 @@
   "use strict";
 
   function applyProfessionalHero(){
-    const hero = document.querySelector(".hero");
-    if(!hero) return;
-
-    const label = hero.querySelector(".heroIn > div:first-child > label");
-    const title = hero.querySelector(".heroIn > div:first-child h1");
-    const description = hero.querySelector(".heroIn > div:first-child > p.heroAnnouncement") || hero.querySelector(".heroIn > div:first-child > p.heroSlogan");
-    const button = hero.querySelector(".heroIn .primary");
-    const fallback = document.getElementById("defaultHeroContent");
-
-    if(label) label.textContent = "SNGAMER STORE";
-    if(title){ title.textContent = ""; title.style.setProperty("display","none","important"); title.setAttribute("aria-hidden","true"); }
-
-    if(description){
-      description.classList.remove("heroSlogan");
-      description.classList.add("heroAnnouncement");
-      // Build the announcement markup once. Repeated promo synchronization must not reset its slide.
-      if(description.dataset.sngWelcomeMarkupReady !== "1"){
-        description.innerHTML = `
-          <span class="announcementIcon" aria-hidden="true">👋</span>
-          <span class="announcementCopy">
-            <strong>BIENVENUE CHEZ SNGAMER</strong>
-            <span>Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.</span>
-          </span>
-          <span class="announcementDots" aria-hidden="true"><i class="active"></i><i></i><i></i></span>
-        `;
-        description.dataset.sngWelcomeMarkupReady = "1";
-      }
-      description.setAttribute("aria-label","Bienvenue chez SNGAMER. Merci de nous rendre visite aujourd’hui.");
-    }
-
-    if(button){ button.textContent = "Découvrir les produits"; button.classList.add("sngPromoHeroCta"); }
-
-    if(fallback){
-      fallback.innerHTML = `
-        <div class="heroTrustBadge">✨ SÉLECTION DU MOMENT</div>
-        <h2>TON SETUP. TON GAME.<br>TON STYLE.</h2>
-        <p class="heroTrustProducts">Univers Gaming <span>•</span> Accessoires gaming <span>•</span> Pièces eFootball</p>
-        <div class="heroDelivery"><span class="heroDeliveryIcon">🚚</span><span>Livraison au Sénégal et dans toute la sous-région</span></div>
-      `;
-    }
-
-    hero.classList.add("professional-hero");
+    const hero=document.querySelector(".hero");
+    if(hero)hero.classList.add("professional-hero");
   }
 
   function injectProfessionalHeroStyles(){
@@ -323,72 +283,6 @@
     }
   }
 
-  function installWelcomeAnnouncementCarousel(){
-    const description = document.querySelector(".hero .heroIn > div:first-child > p.heroAnnouncement");
-    if(!description || description.dataset.sngWelcomeRotatorReady === "1") return;
-
-    const icon = description.querySelector(".announcementIcon");
-    const copy = description.querySelector(".announcementCopy");
-    const heading = copy && copy.querySelector("strong");
-    const body = copy && copy.querySelector("span");
-    const dots = Array.from(description.querySelectorAll(".announcementDots i"));
-    if(!icon || !heading || !body || dots.length !== 3) return;
-
-    const slides = [
-      {icon:"👋", title:"BIENVENUE CHEZ SNGAMER", text:"Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui."},
-      {icon:"⚡", title:"COMMANDE RAPIDE", text:"Choisis ton produit et commande simplement en quelques secondes."},
-      {icon:"🚚", title:"LIVRAISON", text:"Livraison partout au Sénégal et dans toute la sous-région."}
-    ];
-    let index = Math.max(0, dots.findIndex(dot => dot.classList.contains("active")));
-    let timer = null;
-    let transitionTimer = null;
-
-    if(!document.getElementById("sngWelcomeCarouselStylesV2")){
-      const style = document.createElement("style");
-      style.id = "sngWelcomeCarouselStylesV2";
-      style.textContent = `
-        .professional-hero .heroAnnouncement .announcementCopy{transition:opacity .22s ease,transform .22s ease}
-        .professional-hero .heroAnnouncement .announcementCopy.is-changing{opacity:0;transform:translateY(4px)}
-        .professional-hero .heroAnnouncement .announcementDots i{transition:width .25s ease,background .25s ease}
-        @media(prefers-reduced-motion:reduce){.professional-hero .heroAnnouncement .announcementCopy{transition:none!important}.professional-hero .heroAnnouncement .announcementDots i{transition:none!important}}
-      `;
-      document.head.appendChild(style);
-    }
-
-    function render(nextIndex, animate){
-      index = (nextIndex + slides.length) % slides.length;
-      const slide = slides[index];
-      if(transitionTimer) clearTimeout(transitionTimer);
-      const update = () => {
-        icon.textContent = slide.icon;
-        heading.textContent = slide.title;
-        body.textContent = slide.text;
-        dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === index));
-        description.setAttribute("aria-label", slide.title + ". " + slide.text);
-        copy.classList.remove("is-changing");
-      };
-      if(animate && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-        copy.classList.add("is-changing");
-        transitionTimer = setTimeout(update, 180);
-      }else{
-        update();
-      }
-    }
-    const stop = () => { if(timer){clearInterval(timer);timer=null;} };
-    const start = () => {
-      stop();
-      if(!document.hidden) timer = setInterval(() => render(index + 1, true), 6000);
-    };
-    description.addEventListener("mouseenter", stop);
-    description.addEventListener("mouseleave", start);
-    description.addEventListener("focusin", stop);
-    description.addEventListener("focusout", start);
-    document.addEventListener("visibilitychange", () => document.hidden ? stop() : start());
-
-    description.dataset.sngWelcomeRotatorReady = "1";
-    render(index, false);
-    start();
-  }
 
   function syncPromoHero(){
     const area=document.getElementById("promoArea");
@@ -400,7 +294,6 @@
 
     applyProfessionalHero();
     installPersistentHeroLayout();
-    installWelcomeAnnouncementCarousel();
     injectProfessionalHeroStyles();
     injectProductDetailTransition();
     installOrderSuccessHook();

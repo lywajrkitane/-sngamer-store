@@ -11,52 +11,6 @@ function patchCampaignSource(){
   try{
     const file=path.join(__dirname,"server.js");
     let text=fs.readFileSync(file,"utf8");
-    const oldProducts=`const result = await db(\`
-      SELECT
-  id,
-  name,
-  category,
-  platform,
-  price,
-  stock,
-  emoji,
-  description,
-  image1_url,
-  image2_url,
-  image3_url,
-  video_url,
-  promo_price,
-  promo_active,
-  campaign_id,
-  created_at
-FROM products
-    \`);`;
-    const newProducts=`const result = await db(\`
-      SELECT
-  p.id,
-  p.name,
-  p.category,
-  p.platform,
-  p.price,
-  p.stock,
-  p.emoji,
-  p.description,
-  p.image1_url,
-  p.image2_url,
-  p.image3_url,
-  p.video_url,
-  p.promo_price,
-  p.promo_active,
-  p.campaign_id,
-  p.created_at,
-  c.name AS campaign_name,
-  c.sticker AS campaign_sticker,
-  c.right_sticker AS campaign_right_sticker,
-  c.active AS campaign_active
-FROM products p
-LEFT JOIN campaigns c
-  ON c.id = p.campaign_id
-    \`);`;
     const oldPromo=`  SELECT
     pm.slot,
     pm.media_type,
@@ -167,7 +121,6 @@ LEFT JOIN campaigns c
 
   ORDER BY pm.slot ASC`;
     let changed=false;
-    if(text.includes(oldProducts)){text=text.replace(oldProducts,newProducts);changed=true;}
     if(text.includes(oldPromo)){text=text.replace(oldPromo,newPromo);changed=true;}
     if(changed)fs.writeFileSync(file,text,"utf8");
   }catch(error){
