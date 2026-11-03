@@ -62,7 +62,7 @@
       cats.style.display = isHome ? "" : "none";
       if (!isHome) cats.innerHTML = "";
     }
-    if (subcats) {
+    if (subcats && section !== "coins" && section !== "phones") {
       subcats.hidden = true;
       subcats.style.display = "none";
       subcats.innerHTML = "";
@@ -123,7 +123,7 @@
         if (profile) { profile.hidden = false; profile.style.display = "block"; }
       } else {
         if (profile) { profile.hidden = true; profile.style.display = "none"; profile.replaceChildren(); delete profile.dataset.sngProfileLoading; }
-        if (subcats) { subcats.hidden = true; subcats.style.display = "none"; }
+        if (subcats && section !== "coins" && section !== "phones") { subcats.hidden = true; subcats.style.display = "none"; }
         if (title) title.textContent = section === "home" ? "Collection" : section === "accessories" ? "Accessoires" : section === "phones" ? "Univers Gaming" : "Pièces eFootball";
 
         if (typeof window.filterBy === "function") {
@@ -135,7 +135,7 @@
 
         if (section !== "home") {
           if (cats) { cats.innerHTML = ""; cats.hidden = true; cats.style.display = "none"; }
-          if (subcats) { subcats.innerHTML = ""; subcats.hidden = true; subcats.style.display = "none"; }
+          if (subcats && section !== "coins" && section !== "phones") { subcats.innerHTML = ""; subcats.hidden = true; subcats.style.display = "none"; }
         }
       }
 
