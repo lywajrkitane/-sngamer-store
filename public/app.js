@@ -148,8 +148,8 @@ function render(){
   if(window.activeStoreSection==="profile"){productGrid.replaceChildren();return;}
   const q=(document.querySelector("#q")?.value||"").toLowerCase();
   const sourceList=(window.activeStoreSection==="home"&&filter==="Tous")?homeMixedProducts:products;
-  const selectedPlatform=String(window.activeStoreSubcategory||"").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
-  const list=sourceList.filter(p=>matchesStoreSection(p)&&(window.activeStoreSection!=="home"||filter==="Tous"||storeCategory(p)===filter)&&(!selectedPlatform||String(p.platform||"").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")===selectedPlatform||(selectedPlatform==="gaming phone"&&String(p.category||"").trim().toLowerCase()==="gaming phone"))&&(p.name||"").toLowerCase().includes(q));
+  const selectedPlatform=String(window.activeStoreSubcategory||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const list=sourceList.filter(p=>matchesStoreSection(p)&&(window.activeStoreSection!=="home"||filter==="Tous"||storeCategory(p)===filter)&&(!selectedPlatform||String(p.platform||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")===selectedPlatform||(selectedPlatform==="gaming phone"&&String(p.category||"").trim().toLowerCase()==="gaming phone"))&&(p.name||"").toLowerCase().includes(q));
   productGrid.innerHTML=list.map(p=>{
     try {
     const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
