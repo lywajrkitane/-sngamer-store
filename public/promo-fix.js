@@ -273,8 +273,10 @@
     const audioButton = row.querySelector(".sngPromoAnnouncementButton");
     if(audioButton && audioButton.dataset.audioReady !== "1"){
       audioButton.dataset.audioReady = "1";
-      const audio = new Audio("/audio/annonce-sngamer.mp3?v=20261022-herofinal2");
-      audio.preload = "none";
+      const audio = new Audio("/audio/annonce-sngamer.mp3?v=20261103-audio-preload1");
+      // Précharger dès l'affichage du Hero, pas au premier clic.
+      audio.preload = "auto";
+      audio.load();
       const reset = () => audioButton.classList.remove("is-playing");
       audio.addEventListener("play", () => audioButton.classList.add("is-playing"));
       audio.addEventListener("ended", reset);
