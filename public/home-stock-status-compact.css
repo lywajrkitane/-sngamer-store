@@ -1,0 +1,33 @@
+/* SNGAMER — compact, authoritative stock labels on Home product cards */
+#products .card.productCardClickable > .info > .stock{
+  display:inline-flex !important;align-items:center !important;justify-content:flex-start !important;
+  gap:7px !important;width:max-content !important;max-width:100% !important;
+  min-height:25px !important;height:25px !important;margin:5px 0 7px !important;
+  padding:4px 9px !important;box-sizing:border-box !important;
+  border:1px solid rgba(85,217,139,.25) !important;border-radius:9px !important;
+  background:rgba(45,190,116,.08) !important;color:#62df99 !important;
+  font-size:10px !important;line-height:1 !important;font-weight:750 !important;
+  white-space:nowrap !important;box-shadow:none !important;
+}
+#products .card.productCardClickable > .info > .stock > i{
+  display:block !important;flex:0 0 7px !important;width:7px !important;height:7px !important;
+  margin:0 !important;border-radius:50% !important;background:currentColor !important;box-shadow:0 0 7px currentColor !important;
+}
+#products .card.productCardClickable > .info > .stock.is-limited{
+  color:#f4c75e !important;border-color:rgba(244,199,94,.28) !important;background:rgba(244,199,94,.08) !important;
+}
+#products .card.productCardClickable > .info > .stock.is-last{
+  color:#ffad55 !important;border-color:rgba(255,173,85,.30) !important;background:rgba(255,173,85,.09) !important;
+}
+#products .card.productCardClickable > .info > .stock.is-out,
+#products .card.productCardClickable > .info > .stock.outOfStock{
+  color:#ff7188 !important;border-color:rgba(255,113,136,.28) !important;background:rgba(255,113,136,.08) !important;
+}
+#products .card.productCardClickable > .info > .stock.onOrderStock{
+  min-height:24px !important;height:24px !important;margin:3px 0 6px !important;padding:4px 8px !important;font-size:10px !important;
+}
+@media(max-width:700px){
+  #products .card.productCardClickable > .info > .stock{
+    min-height:23px !important;height:23px !important;margin:4px 0 6px !important;padding:3px 8px !important;font-size:9px !important;
+  }
+}
