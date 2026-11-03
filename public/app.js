@@ -154,11 +154,22 @@ function render(){
     try {
     const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
     const discount=promoActive?Math.round((1-Number(p.promo_price)/Number(p.price))*100):0;
-    const isOnOrder=String(p.stock_mode||"stock")==="on_order";
-    const inStock=isOnOrder||Number(p.stock)>0;
-    const availabilityClass=isOnOrder?"stock onOrderStock":`stock ${!inStock?"outOfStock":""}`;
-    const availabilityAttribute=isOnOrder?`role="status" aria-label="Sur commande"`:`data-stock-count="${Math.max(0,Math.floor(Number(p.stock)||0))}"`;
-    const availabilityLabel=isOnOrder?"Sur commande":inStock?`${p.stock} disponible(s)`:"Rupture de stock";
+    const stockMode=String(p.stock_mode||"stock").trim().toLowerCase();
+    const stockCount=Math.max(0,Math.floor(Number(p.stock)||0));
+    const isOnOrder=stockMode==="on_order";
+    const isOutOfStock=stockMode==="out"||(!isOnOrder&&stockCount<=0);
+    const inStock=isOnOrder||!isOutOfStock;
+    let availabilityState,availabilityLabel;
+    if(isOnOrder){availabilityState="on-order";availabilityLabel="Sur commande";}
+    else if(isOutOfStock){availabilityState="is-out";availabilityLabel="Rupture de stock";}
+    else if(stockCount>5){availabilityState="is-stock";availabilityLabel="En stock";}
+    else if(stockCount===1){availabilityState="is-last";availabilityLabel="Dernier article !";}
+    else{availabilityState="is-limited";availabilityLabel="Stock limité";}
+    const availabilityClass=isOnOrder?"stock onOrderStock":`stock sngStockStatus ${availabilityState}`;
+    const availabilityAttribute=`role="status" aria-label="${availabilityLabel}"`;
+    const availabilityHtml=isOnOrder
+      ? `${availabilityHtml}`
+      : `<div class="${availabilityClass}" ${availabilityAttribute}><i aria-hidden="true"></i><span>${availabilityLabel}</span></div>`;
     const normalPriceText = new Intl.NumberFormat("fr-FR").format(p.price);
     const currentPriceValue = promoActive ? Number(p.promo_price) : Number(p.price);
     const currentPriceText = new Intl.NumberFormat("fr-FR").format(currentPriceValue);
