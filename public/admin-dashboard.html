@@ -1143,29 +1143,9 @@ async function login() {
       .getElementById("logoutBtn")
       .classList.remove("hidden");
 
+    // One initial load only. The central admin-data-fix controller owns
+    // the low-frequency refresh; do not start a competing 10-second poll here.
     void loadAll();
-    // Retry after the session cookie and admin view have settled; no manual refresh needed.
-    [600, 1600, 3500, 6500].forEach(delay => setTimeout(() => {
-      const adminBox = document.getElementById("adminBox");
-      if (adminBox && !adminBox.classList.contains("hidden")) void loadAll();
-    }, delay));
-
-    // Core automatic refresh: do not depend on an extra script finding the
-    // Orders button or on the workspace's delayed initialization.
-    if (!window.__sngAdminOrdersAutoRefreshTimer) {
-      const refreshAdminOrders = () => {
-        const box = document.getElementById("adminBox");
-        if (!box || box.classList.contains("hidden")) return;
-        if (document.visibilityState === "hidden") return;
-        void loadAll();
-      };
-
-      window.__sngAdminOrdersAutoRefreshTimer = window.setInterval(refreshAdminOrders, 10000);
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") refreshAdminOrders();
-      });
-      window.addEventListener("focus", refreshAdminOrders);
-    }
 loadPromoMedia();
     loadPromoProductSelectors();
   }
@@ -1183,10 +1163,19 @@ loadPromoMedia();
   async function loadProducts() {
 
     const response =
-      await fetch("/api/products");
+      await fetch("/api/products", { credentials: "same-origin", cache: "no-store" });
 
-    const products =
-      await response.json();
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      const error = new Error(detail.error || "Impossible de charger les produits.");
+      error.status = response.status;
+      throw error;
+    }
+
+    const products = await response.json();
+    if (!Array.isArray(products)) {
+      throw new Error("La réponse du serveur pour les produits est invalide.");
+    }
 
     document.getElementById("productCount")
       .textContent = products.length;
