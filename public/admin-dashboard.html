@@ -3075,7 +3075,9 @@ async function loadAll() {
 
   const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
   const retryTask = async (label, task) => {
-    const delays = [250, 500, 900, 1500, 2200];
+    // Retry only transient failures. Never multiply requests after 429/401/403
+    // or another client error; those need a real fix, not repeated polling.
+    const delays = [1000, 4000];
     let lastError;
     for (let attempt = 0; attempt <= delays.length; attempt++) {
       try {
@@ -3083,8 +3085,10 @@ async function loadAll() {
         return true;
       } catch (error) {
         lastError = error;
+        const status = Number(error && error.status) || 0;
+        if ((status >= 400 && status < 500) || attempt >= delays.length) break;
         console.warn(`ADMIN_LOAD_RETRY [${label}] ${attempt + 1}/${delays.length + 1}:`, error);
-        if (attempt < delays.length) await pause(delays[attempt]);
+        await pause(delays[attempt]);
       }
     }
     console.error(`ADMIN_LOAD_FAILED [${label}]:`, lastError);
