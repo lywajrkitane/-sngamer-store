@@ -124,8 +124,8 @@ function matchesStoreSection(p) {
 }
 function storeCategory(p) {
   const category=String(p?.category||"").trim().toLowerCase();
-  if(category==="coins"||isCoinProduct(p)) return "Coins";
-  if(category==="gaming phone"||isPhoneProduct(p)) return "Gaming Phone";
+  if(category==="coins"||isCoinProduct(p)) return "Pièces eFootball";
+  if(category==="univers gaming"||category==="gaming phone"||category==="gaming phones"||isPhoneProduct(p)) return "Univers Gaming";
   if(category==="accessoires"||isAccessoryProduct(p)) return "Accessoires";
   return p.category||"Accessoires";
 }
@@ -133,14 +133,23 @@ function cats(){
   const categories=["Tous",...new Set(products.map(p=>storeCategory(p)))];
   document.querySelector("#cats").innerHTML=categories.map(c=>`<button class="catbtn ${c===filter?"on":""}" onclick="filterBy('${c}')">${c}</button>`).join("");
 }
-function filterBy(c){filter=c;cats();render();}
+function filterBy(c){
+  filter=c;
+  window.activeStoreCategoryFilter=c;
+  window.activeStoreSubcategory=null;
+  document.body.dataset.storeCategoryFilter=(c==="Tous"?"":c);
+  cats();
+  render();
+  if(typeof window.updateStoreSubcategories==="function") window.updateStoreSubcategories();
+}
 function render(){
   const productGrid=document.getElementById("products");
   if(!productGrid)return;
   if(window.activeStoreSection==="profile"){productGrid.replaceChildren();return;}
   const q=(document.querySelector("#q")?.value||"").toLowerCase();
   const sourceList=(window.activeStoreSection==="home"&&filter==="Tous")?homeMixedProducts:products;
-  const list=sourceList.filter(p=>matchesStoreSection(p)&&(window.activeStoreSection!=="home"||filter==="Tous"||storeCategory(p)===filter)&&(p.name||"").toLowerCase().includes(q));
+  const selectedPlatform=String(window.activeStoreSubcategory||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const list=sourceList.filter(p=>matchesStoreSection(p)&&(window.activeStoreSection!=="home"||filter==="Tous"||storeCategory(p)===filter)&&(!selectedPlatform||String(p.platform||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")===selectedPlatform||(selectedPlatform==="gaming phone"&&String(p.category||"").trim().toLowerCase()==="gaming phone"))&&(p.name||"").toLowerCase().includes(q));
   productGrid.innerHTML=list.map(p=>{
     try {
     const promoActive=Boolean(p.promo_active)&&Number(p.promo_price)>0&&Number(p.promo_price)<Number(p.price);
