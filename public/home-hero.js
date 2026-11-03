@@ -31,7 +31,7 @@
       ".sngHomeHeroSlide.is-active .sngHomeHeroTitle{animation:sngHomeHeroTextReveal .78s cubic-bezier(.22,1,.36,1) both;animation-delay:.13s}",
       ".sngHomeHeroSlide.is-active .sngHomeHeroBody{animation:sngHomeHeroTextReveal .8s cubic-bezier(.22,1,.36,1) both;animation-delay:.28s}",
       ".sngHomeHeroDots{position:absolute;top:50%;right:12px;left:auto;bottom:auto;z-index:5;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;min-height:0;margin:0;transform:translateY(-50%);padding:5px 4px;border:1px solid rgba(126,174,231,.16);border-radius:999px;background:rgba(5,12,24,.38);backdrop-filter:blur(7px);box-shadow:0 6px 16px rgba(0,0,0,.18)}",
-      ".sngHomeHeroDots button{display:block!important;width:8px!important;height:8px!important;min-width:8px!important;max-width:8px!important;min-height:0!important;max-height:8px!important;flex:0 0 8px!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(255,255,255,.30)!important;box-shadow:none!important;cursor:pointer;transition:width .25s ease,background .25s ease,box-shadow .25s ease}",
+      ".sngHomeHeroDots button{display:block!important;width:8px!important;height:8px!important;min-width:8px!important;max-width:8px!important;min-height:0!important;max-height:8px!important;flex:0 0 8px!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(91,184,255,.42)!important;border:1px solid rgba(91,184,255,.42)!important;box-shadow:none!important;cursor:pointer;transition:width .25s ease,background .25s ease,box-shadow .25s ease}",
       ".sngHomeHeroDots button.is-active{width:24px!important;min-width:24px!important;max-width:24px!important;height:8px!important;flex:0 0 24px!important;border-radius:10px!important;background:linear-gradient(90deg,#2f8cff,#d62cff)!important;box-shadow:none!important}",
       "@keyframes sngHomeHeroTextReveal{0%{opacity:0;transform:translateY(13px);filter:blur(3px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}",
       "@media(max-width:700px){.sngHomeHeroWrap{width:100%;margin:12px 0 20px}.sngHomeHeroCard{height:clamp(290px,70vw,315px);border-radius:21px}.sngHomeHeroCopy{gap:8px;padding:20px 48px 31px 18px}.sngHomeHeroEyebrow{font-size:9px;letter-spacing:1.4px;padding:6px 9px}.sngHomeHeroTitle{font-size:clamp(19px,5.5vw,24px);line-height:1.12}.sngHomeHeroBody{font-size:13px;line-height:1.42}.sngHomeHeroDots{top:50%;right:9px;left:auto;bottom:auto;gap:8px;padding:0;border:0;background:transparent;backdrop-filter:none;box-shadow:none;transform:translateY(-50%)}.sngHomeHeroDots button{width:8px!important;height:8px!important;min-width:8px!important;max-width:8px!important;min-height:0!important;max-height:8px!important;flex-basis:8px!important}.sngHomeHeroDots button.is-active{width:24px!important;min-width:24px!important;max-width:24px!important;height:8px!important;flex-basis:24px!important}}",
@@ -54,7 +54,7 @@
     return DEFAULTS.map(function (fallback) {
       const savedText = textBySlot.get(fallback.slot);
       return { slot:fallback.slot, title:savedText && savedText.title ? String(savedText.title) : fallback.title, body:savedText && savedText.body ? String(savedText.body) : fallback.body, url:mediaBySlot.get(fallback.slot) || "" };
-    });
+    }).filter(function (slide){return slide.url.indexOf("https://")===0 || slide.url.indexOf("http://")===0;});
   }
 
   function makeSlide(slide,index){
@@ -62,10 +62,9 @@
     if(slide.url && /^(https?:)\/\//.test(slide.url)){ const image=document.createElement("img"); image.className="sngHomeHeroImage"; image.src=slide.url; image.alt=""; image.decoding="async"; image.draggable=false; panel.appendChild(image); }
     const shade=document.createElement("div"); shade.className="sngHomeHeroShade"; shade.setAttribute("aria-hidden","true");
     const copy=document.createElement("div"); copy.className="sngHomeHeroCopy";
-    const eyebrow=document.createElement("span"); eyebrow.className="sngHomeHeroEyebrow"; eyebrow.textContent=slide.slot===1?"BIENVENUE CHEZ SNGAMER":slide.slot===2?"COMMANDE EN LIGNE":"LIVRAISON AU SÉNÉGAL";
     const title=document.createElement("h2"); title.className="sngHomeHeroTitle"; title.textContent=slide.title;
     const body=document.createElement("p"); body.className="sngHomeHeroBody"; body.textContent=slide.body;
-    copy.append(eyebrow,title,body); panel.append(shade,copy); return panel;
+    copy.append(title,body); panel.append(shade,copy); return panel;
   }
 
   function mount(placeholder){
@@ -77,6 +76,7 @@
     card.appendChild(dots); wrap.appendChild(card); placeholder.replaceWith(wrap);
     if(hostColumn){hostColumn.querySelectorAll(":scope > p.heroAnnouncement, :scope > p.heroSlogan").forEach(function(oldCard){if(oldCard!==placeholder)oldCard.remove();});}
     loadSlides().then(function(slides){
+      if(!slides.length){wrap.remove();return;}
       card.replaceChildren(); const panels=slides.map(makeSlide);
       const dotButtons=slides.map(function(slide,index){ const button=document.createElement("button"); button.type="button"; button.className=index===0?"is-active":""; button.setAttribute("aria-label","Afficher le slide "+(index+1)+" : "+slide.title); button.title=slide.title; button.addEventListener("click",function(){show(index,true);}); return button; });
       panels.forEach(function(panel){card.appendChild(panel);}); dots.replaceChildren(); dots.style.position="absolute"; card.appendChild(dots); dotButtons.forEach(function(button){dots.appendChild(button);});
