@@ -61,20 +61,74 @@ function mixHomeProductsByCategory(items){
 }
 window.activeStoreSection=window.activeStoreSection||"home";
 const money=n=>new Intl.NumberFormat("fr-FR").format(n)+" FCFA";
+
+function waitForCatalogRetry(ms){
+  return new Promise(resolve=>window.setTimeout(resolve,ms));
+}
+
+async function fetchProductsWithRetry(){
+  const delays=[900,2200,5000,9000];
+  let lastError=null;
+  for(let attempt=0;attempt<=delays.length;attempt++){
+    try{
+      const response=await fetch("/api/products",{cache:"no-store",headers:{"Accept":"application/json"}});
+      if(!response.ok){
+        const error=new Error("products_http_"+response.status);
+        error.status=response.status;
+        const retryAfter=Number(response.headers.get("Retry-After"));
+        error.retryDelay=Number.isFinite(retryAfter)&&retryAfter>0
+          ?Math.min(15000,Math.max(1000,retryAfter*1000)):8000;
+        throw error;
+      }
+      const data=await response.json();
+      if(!Array.isArray(data)){
+        const error=new Error("products_response_not_array");
+        error.status=502;
+        throw error;
+      }
+      return data;
+    }catch(error){
+      lastError=error;
+      const status=Number(error&&error.status)||0;
+      const retryable=status===0||status===429||status>=500;
+      if(!retryable||attempt>=delays.length)break;
+      const delay=status===429?error.retryDelay:delays[attempt];
+      console.warn("SNGAMER_CATALOG_RETRY",attempt+1,"/",delays.length+1,"after",delay+"ms",error);
+      await waitForCatalogRetry(delay);
+    }
+  }
+  throw lastError||new Error("products_unavailable");
+}
+
 async function load(){
+  if(window.__sngamerCatalogLoading)return;
+  window.__sngamerCatalogLoading=true;
   let data;
   try {
-    const response = await fetch("/api/products", { cache: "no-store", headers: { "Accept": "application/json" } });
-    if (!response.ok) throw new Error("products_http_" + response.status);
-    data = await response.json();
-    if (!Array.isArray(data)) throw new Error("products_response_not_array");
-  } catch (error) {
-    console.error("SNGAMER_PRODUCTS_FETCH_ERROR", error);
-    const grid = document.getElementById("products");
-    if (grid && !grid.querySelector(".productCardClickable")) {
-      grid.innerHTML = '<div role="status" style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca">Le catalogue est temporairement indisponible. Réessaie dans un instant.</div>';
+    data=await fetchProductsWithRetry();
+    if(window.__sngamerCatalogRecoveryTimer){
+      window.clearTimeout(window.__sngamerCatalogRecoveryTimer);
+      window.__sngamerCatalogRecoveryTimer=null;
     }
-    window.__sngamerStoreReady = true;
+  } catch (error) {
+    window.__sngamerCatalogLoading=false;
+    console.error("SNGAMER_PRODUCTS_FETCH_ERROR",error);
+    const grid=document.getElementById("products");
+    if(grid&&!grid.querySelector(".productCardClickable")){
+      grid.innerHTML='<div role="status" style="grid-column:1/-1;text-align:center;padding:35px 15px;color:#aab8ca">Connexion au catalogue en cours de rétablissement…</div>';
+    }
+    window.__sngamerStoreReady=true;
+
+    // A short Render restart or network interruption must not strand the
+    // storefront on an empty catalogue until the visitor reloads manually.
+    const status=Number(error&&error.status)||0;
+    if((status===0||status===429||status>=500)&&!window.__sngamerCatalogRecoveryTimer){
+      window.__sngamerCatalogRecoveryTimer=window.setTimeout(()=>{
+        window.__sngamerCatalogRecoveryTimer=null;
+        window.__sngamerStoreReady=false;
+        void load();
+      },15000);
+    }
     return;
   }
 
@@ -98,6 +152,7 @@ async function load(){
     console.error("SNGAMER_CATALOG_EMPTY_AFTER_RENDER", { products: products.length });
   }
   window.__sngamerStoreReady = true;
+  window.__sngamerCatalogLoading=false;
 }
 
 /* SNGAMER — RUBRIQUES ET NAVIGATION */
