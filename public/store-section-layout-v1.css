@@ -44,7 +44,7 @@ body[data-store-section="profile"] #navSubcategories {
   display: none !important;
 }
 
-body[data-store-section]:not([data-store-section="coins"]) #navSubcategories {
+body[data-store-section]:not([data-store-section="coins"]):not([data-store-section="phones"]) #navSubcategories {
   display: none !important;
 }
 
