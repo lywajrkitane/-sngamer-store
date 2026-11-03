@@ -168,7 +168,7 @@ function render(){
     const availabilityClass=isOnOrder?"stock onOrderStock":`stock sngStockStatus ${availabilityState}`;
     const availabilityAttribute=`role="status" aria-label="${availabilityLabel}"`;
     const availabilityHtml=isOnOrder
-      ? `${availabilityHtml}`
+      ? `<div class="${availabilityClass}" ${availabilityAttribute}>${availabilityLabel}</div>`
       : `<div class="${availabilityClass}" ${availabilityAttribute}><i aria-hidden="true"></i><span>${availabilityLabel}</span></div>`;
     const normalPriceText = new Intl.NumberFormat("fr-FR").format(p.price);
     const currentPriceValue = promoActive ? Number(p.promo_price) : Number(p.price);
@@ -179,7 +179,7 @@ function render(){
       ? `<div class="price price--promo"><div class="priceOldRow"><span class="priceOld">${normalPriceText} FCFA</span><span class="discountBadge">-${discount}%</span></div><div class="pricePromoMain"><strong class="${currentPriceClass}">${currentPriceText}<small>FCFA</small></strong></div></div>`
       : `<div class="price price--regular"><div class="priceOldRow priceOldRow--placeholder" aria-hidden="true"></div><div class="pricePromoMain"><strong class="${currentPriceClass}">${currentPriceText}<small>FCFA</small></strong></div></div>`;
     const category=storeCategory(p),categoryLabel=category==="Coins"&&p.platform?`${category} ${p.platform}`:category;
-    return `<article class="card productCardClickable" onclick="openProduct(${Number(p.id)})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProduct(${Number(p.id)});}"><div class="pic">${(p.main_image_url||p.image1_url)?`<img class="productCardImage" src="${escapeHtml(p.image1_url)}" alt="${escapeHtml(p.name||"")}" loading="lazy">`:`<div class="productCardEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div><div class="info"><div class="cat">${escapeHtml(categoryLabel||"")}</div><h3>${escapeHtml(p.name||"")}</h3><div class="${availabilityClass}" ${availabilityAttribute}>${availabilityLabel}</div><div class="productCardPurchaseRow">${priceHtml}<div class="productCardBottom ${inStock?"":"is-placeholder"}">${inStock?`<button type="button" class="addToCartIcon" aria-label="Ajouter au panier" onclick="event.stopPropagation();add(${Number(p.id)});">＋</button>`:""}</div></div></div></article>`;
+    return `<article class="card productCardClickable" onclick="openProduct(${Number(p.id)})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProduct(${Number(p.id)});}"><div class="pic">${(p.main_image_url||p.image1_url)?`<img class="productCardImage" src="${escapeHtml(p.image1_url)}" alt="${escapeHtml(p.name||"")}" loading="lazy">`:`<div class="productCardEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div><div class="info"><div class="cat">${escapeHtml(categoryLabel||"")}</div><h3>${escapeHtml(p.name||"")}</h3>${availabilityHtml}<div class="productCardPurchaseRow">${priceHtml}<div class="productCardBottom ${inStock?"":"is-placeholder"}">${inStock?`<button type="button" class="addToCartIcon" aria-label="Ajouter au panier" onclick="event.stopPropagation();add(${Number(p.id)});">＋</button>`:""}</div></div></div></article>`;
     } catch(error) {
       console.error("SNGAMER_PRODUCT_CARD_RENDER_ERROR", p?.id, error);
       return "";
