@@ -437,13 +437,21 @@
       if(!card) return;
       const raw=stockEl.textContent||'';
       if(stockEl.classList.contains('onOrderStock') || /sur commande/i.test(raw)) return;
-      const countText=stockEl.getAttribute('data-stock-count');
-      const hasSourceCount=countText!==null && countText.trim()!=='' && Number.isFinite(Number(countText));
-      const match=raw.match(/(\d+)/);
-      const parsed=hasSourceCount ? Number(countText) : (match ? Number(match[1]) : 0);
-      const stock=Math.max(0,Math.floor(Number.isFinite(parsed) ? parsed : 0));
+
+      // Use the same catalogue record as the product detail. Never infer
+      // availability from badge text or a missing data-stock-count attribute.
+      const onclick=String(card.getAttribute('onclick')||'');
+      const idMatch=onclick.match(/openProduct\\((\\d+)\\)/);
+      const productId=idMatch?Number(idMatch[1]):null;
+      const product=(Array.isArray(window.storeProducts)?window.storeProducts:[])
+        .find(item=>Number(item.id)===productId);
+      if(!product) return;
+      const mode=String(product.stock_mode||'stock').trim().toLowerCase();
+      if(mode==='on_order') return;
+      const stock=Math.max(0,Math.floor(Number(product.stock)||0));
       let state,label;
-      if(stock>5){ state='is-stock'; label='En stock'; }
+      if(mode==='out'){ state='is-out'; label='Rupture de stock'; }
+      else if(stock>5){ state='is-stock'; label='En stock'; }
       else if(stock>1){ state='is-limited'; label=stock+' en stock'; }
       else if(stock===1){ state='is-last'; label='Dernier article !'; }
       else { state='is-out'; label='Rupture de stock'; }
