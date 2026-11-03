@@ -44,9 +44,7 @@ body[data-store-section="profile"] #navSubcategories {
   display: none !important;
 }
 
-body[data-store-section]:not([data-store-section="coins"]):not([data-store-section="phones"]) #navSubcategories {
-  display: none !important;
-}
+/* Subcategory visibility is controlled by the active category context. */
 
 /* Keep every section compact: no artificial 60vh block before the shared footer. */
 body[data-store-section] #shop {
