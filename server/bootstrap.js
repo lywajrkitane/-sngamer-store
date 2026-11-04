@@ -203,11 +203,11 @@ express.application.listen = function patchedListen(...args) {
         html=html.replace(/<script[^>]+(?:admin-v2|admin-v21|admin-v23-orders|admin-section-workspace-v24|admin-v25-workspace|admin-final-fix)\.js[^>]*><\/script>/gi,"");
         html=html.replace(/<link[^>]+(?:admin-v2|admin-v21)\.css[^>]*>/gi,"");
 
-        if(!html.includes("/admin-v24-workspace.js"))html=html.replace("</body>",'<script src="/admin-v24-workspace.js?v=20261104-admin-shell1"></script></body>');
-        else html=html.replace(/(<script[^>]+\/admin-v24-workspace\.js)(?:\?[^\"]*)?(\"[^>]*><\/script>)/i,'$1?v=20261104-admin-shell1$2');
+        if(!html.includes("/admin-v24-workspace.js"))html=html.replace("</body>",'<script src="/admin-v24-workspace.js?v=20261104-admin-shell2"></script></body>');
+        else html=html.replace(/(<script[^>]+\/admin-v24-workspace\.js)(?:\?[^\"]*)?(\"[^>]*><\/script>)/i,'$1?v=20261104-admin-shell2$2');
 
-        if(!html.includes("/admin-data-fix.js"))html=html.replace("</body>",'<script src="/admin-data-fix.js?v=20261104-admin-shell1"></script></body>');
-        else html=html.replace(/(<script[^>]+\/admin-data-fix\.js)(?:\?[^\"]*)?(\"[^>]*><\/script>)/i,'$1?v=20261104-admin-shell1$2');
+        if(!html.includes("/admin-data-fix.js"))html=html.replace("</body>",'<script src="/admin-data-fix.js?v=20261104-admin-shell2"></script></body>');
+        else html=html.replace(/(<script[^>]+\/admin-data-fix\.js)(?:\?[^\"]*)?(\"[^>]*><\/script>)/i,'$1?v=20261104-admin-shell2$2');
 
         res.set("Cache-Control","no-store, no-cache, must-revalidate, proxy-revalidate");
         res.set("Pragma","no-cache");
