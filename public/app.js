@@ -287,11 +287,17 @@ else syncCartBadge();
 if(!window.__sngamerCartBadgeObserver){
   window.__sngamerCartBadgeObserver=new MutationObserver(syncCartBadge);
   const observeCartButton=()=>{
+    let addedButton=false;
     document.querySelectorAll(".siteHeader .cartButton, .cartButton").forEach(button=>{
       if(button.__sngamerBadgeObserved)return;
       button.__sngamerBadgeObserved=true;
       window.__sngamerCartBadgeObserver.observe(button,{childList:true,subtree:true});
+      addedButton=true;
     });
+    // On touch/mobile layouts the header can finish mounting after app.js.
+    // Re-sync only when a new cart button appears; leave the working desktop
+    // header and its already-synchronized badge untouched.
+    if(addedButton&&window.matchMedia("(max-width:700px)").matches)syncCartBadge();
   };
   observeCartButton();
   new MutationObserver(observeCartButton).observe(document.querySelector(".siteHeader .nav")||document.body,{childList:true,subtree:true});
