@@ -51,7 +51,38 @@
           margin-left:auto !important;
         }
 
-        /* Keep the cart quantity visible and independent from the cart button size. */
+        /* Render the mobile quantity with a button pseudo-element. This avoids
+           conflicts with legacy #count rules while leaving desktop untouched. */
+        .siteHeader .nav > .cartButton{
+          position:relative!important;
+          overflow:visible!important;
+        }
+        .siteHeader .nav > .cartButton::after{
+          content:attr(data-cart-count)!important;
+          position:absolute!important;
+          top:-5px!important;
+          right:-5px!important;
+          display:inline-flex!important;
+          align-items:center!important;
+          justify-content:center!important;
+          min-width:19px!important;
+          height:19px!important;
+          padding:0 5px!important;
+          box-sizing:border-box!important;
+          border-radius:999px!important;
+          background:linear-gradient(135deg,#ff4fa3 0%,#e11d8d 48%,#7c3aed 100%)!important;
+          color:#fff!important;
+          border:1.5px solid rgba(255,255,255,.98)!important;
+          box-shadow:0 0 0 2px rgba(7,10,16,.98),0 0 13px rgba(236,72,153,.72),0 3px 10px rgba(91,53,255,.5)!important;
+          font-size:9px!important;
+          font-weight:900!important;
+          line-height:1!important;
+          z-index:100!important;
+          opacity:1!important;
+          visibility:visible!important;
+          pointer-events:none!important;
+        }
+        /* Keep the legacy element for desktop; mobile displays the pseudo badge. */
         .siteHeader .nav > .cartButton b#count{
           position:absolute!important;top:-4px!important;right:-3px!important;
           display:inline-flex!important;align-items:center!important;justify-content:center!important;
