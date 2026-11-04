@@ -244,17 +244,58 @@ function render(){
 }
 function syncCartBadge(){
   const total=cartItems.reduce((sum,item)=>sum+Math.max(0,Math.floor(Number(item&&item.qty)||0)),0);
-  const badges=Array.from(document.querySelectorAll(".cartButton #count"));
-  if(badges.length){
-    badges[0].textContent=String(total);
-    badges.slice(1).forEach(node=>node.remove());
-  }else{
-    const badge=document.querySelector("#count");
-    if(badge)badge.textContent=String(total);
-  }
+  const cartButtons=Array.from(document.querySelectorAll(".siteHeader .cartButton, .cartButton"));
+  cartButtons.forEach(button=>{
+    let badge=button.querySelector("#count");
+    if(!badge){
+      badge=document.createElement("b");
+      badge.id="count";
+      button.appendChild(badge);
+    }
+    badge.textContent=String(total);
+    // Keep the quantity visible even if another header script rebuilds the button
+    // after the storefront initially synchronizes the cart.
+    button.style.setProperty("position","relative","important");
+    button.style.setProperty("overflow","visible","important");
+    badge.style.setProperty("position","absolute","important");
+    badge.style.setProperty("top","-4px","important");
+    badge.style.setProperty("right","-4px","important");
+    badge.style.setProperty("display","inline-flex","important");
+    badge.style.setProperty("align-items","center","important");
+    badge.style.setProperty("justify-content","center","important");
+    badge.style.setProperty("min-width","19px","important");
+    badge.style.setProperty("height","19px","important");
+    badge.style.setProperty("padding","0 5px","important");
+    badge.style.setProperty("box-sizing","border-box","important");
+    badge.style.setProperty("border-radius","999px","important");
+    badge.style.setProperty("background","linear-gradient(135deg,#ff4fa3 0%,#e11d8d 48%,#7c3aed 100%)","important");
+    badge.style.setProperty("color","#fff","important");
+    badge.style.setProperty("border","1.5px solid #fff","important");
+    badge.style.setProperty("font-size","9px","important");
+    badge.style.setProperty("font-weight","900","important");
+    badge.style.setProperty("line-height","1","important");
+    badge.style.setProperty("z-index","60","important");
+    badge.style.setProperty("opacity","1","important");
+    badge.style.setProperty("visibility","visible","important");
+    badge.style.setProperty("pointer-events","none","important");
+  });
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",syncCartBadge,{once:true});
 else syncCartBadge();
+// Header modules can rebuild the cart button asynchronously. Recreate and refresh
+// the badge whenever that specific button's contents change.
+if(!window.__sngamerCartBadgeObserver){
+  window.__sngamerCartBadgeObserver=new MutationObserver(syncCartBadge);
+  const observeCartButton=()=>{
+    document.querySelectorAll(".siteHeader .cartButton, .cartButton").forEach(button=>{
+      if(button.__sngamerBadgeObserved)return;
+      button.__sngamerBadgeObserved=true;
+      window.__sngamerCartBadgeObserver.observe(button,{childList:true,subtree:true});
+    });
+  };
+  observeCartButton();
+  new MutationObserver(observeCartButton).observe(document.querySelector(".siteHeader .nav")||document.body,{childList:true,subtree:true});
+}
 window.addEventListener("storage",function(event){
   if(event.key!=="sg_cart")return;
   try{cartItems=normalizeCartItems(JSON.parse(event.newValue||"[]"));}
