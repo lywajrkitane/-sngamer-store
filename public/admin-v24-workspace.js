@@ -623,6 +623,10 @@
     // Restoring the saved "Commandes" tab also loads orders automatically.
     refreshViewData(active);
 
+    // Reveal the authenticated dashboard only after the current workspace has been applied.
+    // This prevents the legacy, unformatted HTML from flashing during first paint.
+    root.classList.add('sg-v26-ready');
+
     if (scroll) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }
 
