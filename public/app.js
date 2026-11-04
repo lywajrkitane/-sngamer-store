@@ -252,7 +252,7 @@ function syncCartBadge(){
       badge.id="count";
       button.appendChild(badge);
     }
-    badge.textContent=String(total);
+    if(badge.textContent!==String(total))badge.textContent=String(total);
     // Keep the quantity visible even if another header script rebuilds the button
     // after the storefront initially synchronizes the cart.
     button.style.setProperty("position","relative","important");
