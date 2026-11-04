@@ -153,7 +153,24 @@
     } catch (error) {
       console.error('SNGAMER_CUSTOMER_ORDERS_LOAD_ERROR', error);
       if (profileRoot.isConnected && document.body.dataset.storeSection === 'profile') {
-        content.innerHTML = '<div class="sgaEmpty">Impossible de charger les commandes pour le moment. <button type="button" class="sgaBtn alt" onclick="sngRefreshAccount()">Réessayer</button></div>';
+        // A failed refresh must never erase the last successfully loaded order
+        // history or its tracking cards. Keep the cached orders visible.
+        if (state.ordersLoaded && Array.isArray(state.orders) && state.orders.length) {
+          content.innerHTML = renderAccountOrders(state.orders);
+          const stats = profileRoot.querySelectorAll('.sgaStat b');
+          if (stats[0]) stats[0].textContent = String(state.orders.length);
+          if (stats[1]) stats[1].textContent = String(state.orders.filter(o => !['Livrée','Annulée'].includes(o.status)).length);
+          if (stats[2]) stats[2].textContent = String(state.orders.filter(o => o.status === 'Livrée').length);
+          if (!content.querySelector('[data-orders-refresh-warning]')) {
+            const warning = document.createElement('p');
+            warning.dataset.ordersRefreshWarning = '1';
+            warning.className = 'sgaSub';
+            warning.textContent = 'Actualisation temporairement indisponible. Tes dernières commandes restent affichées.';
+            content.appendChild(warning);
+          }
+        } else {
+          content.innerHTML = '<div class="sgaEmpty">Impossible de charger les commandes pour le moment. <button type="button" class="sgaBtn alt" onclick="sngRefreshAccount()">Réessayer</button></div>';
+        }
       }
     } finally {
       delete content.dataset.loading;
