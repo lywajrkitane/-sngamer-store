@@ -53,6 +53,20 @@
       #${HOST_ID} .campaignDot{display:block;width:8px !important;height:8px !important;min-width:8px !important;min-height:8px !important;max-width:8px !important;max-height:8px !important;padding:0 !important;margin:0;border:0;border-radius:999px;background:#43526a;cursor:pointer;transition:all .25s ease;box-sizing:border-box}
       #${HOST_ID} .campaignDot.active{width:28px !important;min-width:28px !important;max-width:28px !important;height:8px !important;min-height:8px !important;max-height:8px !important;background:linear-gradient(90deg,#4da3ff,#d92aa8)}
       @keyframes sngCampaignIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+      /* Desktop only: the hero uses a two-column grid. Make the promotion
+         section span a dedicated full-width row below the CTA instead of
+         occupying the empty right-hand cell beside the CTA. */
+      @media(min-width:701px){
+        .sngCampaignSection{
+          grid-column:1 / -1 !important;
+          grid-row:3 !important;
+          justify-self:center !important;
+          align-self:start !important;
+          width:100% !important;
+          max-width:960px !important;
+          margin:8px auto 28px !important;
+        }
+      }
       @media(max-width:700px){
         .sngCampaignSection{margin:28px 0 34px}
         .sngCampaignSectionHeading{font-size:clamp(30px,6.5vw,36px);gap:9px;letter-spacing:-.035em;line-height:1.08;margin-bottom:18px}
