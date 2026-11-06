@@ -28,7 +28,7 @@
     style.id = STYLE_ID;
     style.textContent = `
       .sngCampaignSection{display:block;width:100%;max-width:100%;margin:34px 0 42px;box-sizing:border-box;position:relative;z-index:5}
-      .sngCampaignSectionHeading{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:12px;margin:0 0 22px;padding:0;color:#fff;font-family:inherit;font-size:clamp(38px,7.2vw,54px);font-weight:900;letter-spacing:-.045em;line-height:1.02;text-transform:none;text-wrap:balance;-webkit-font-smoothing:antialiased}
+      .sngCampaignSectionHeading{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:10px;margin:0 0 20px;padding:0;color:#fff;font-family:inherit;font-size:clamp(30px,5vw,40px);font-weight:900;letter-spacing:-.04em;line-height:1.08;text-transform:none;text-wrap:balance;-webkit-font-smoothing:antialiased}
       .sngCampaignSectionHeading:after{content:"";display:block;width:52px;height:4px;flex:0 0 4px;border:0;border-radius:999px;background:linear-gradient(90deg,#28a9ff 0%,#6846ff 56%,#e332b3 100%);box-shadow:0 0 12px rgba(76,118,255,.2)}
       #${HOST_ID}{width:100%;margin:0;box-sizing:border-box;position:relative;z-index:5}
       #${HOST_ID} .campaignViewport{position:relative;width:100%;min-height:132px;overflow:hidden}
@@ -55,7 +55,7 @@
       @keyframes sngCampaignIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
       @media(max-width:700px){
         .sngCampaignSection{margin:28px 0 34px}
-        .sngCampaignSectionHeading{font-size:clamp(38px,8vw,49px);gap:10px;letter-spacing:-.04em;margin-bottom:18px}
+        .sngCampaignSectionHeading{font-size:clamp(30px,6.5vw,36px);gap:9px;letter-spacing:-.035em;line-height:1.08;margin-bottom:18px}
         .sngCampaignSectionHeading:after{width:44px;height:3px;flex-basis:3px}
       }
       @media(prefers-reduced-motion:reduce){.sngCampaignSectionHeading:after{box-shadow:none}}
