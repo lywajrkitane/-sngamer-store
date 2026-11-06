@@ -27,6 +27,9 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
+      .sngCampaignSection{display:block;width:100%;max-width:100%;margin:34px 0 42px;box-sizing:border-box;position:relative;z-index:5}
+      .sngCampaignSectionHeading{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:12px;margin:0 0 22px;padding:0;color:#fff;font-family:inherit;font-size:clamp(38px,7.2vw,54px);font-weight:900;letter-spacing:-.045em;line-height:1.02;text-transform:none;text-wrap:balance;-webkit-font-smoothing:antialiased}
+      .sngCampaignSectionHeading:after{content:"";display:block;width:52px;height:4px;flex:0 0 4px;border:0;border-radius:999px;background:linear-gradient(90deg,#28a9ff 0%,#6846ff 56%,#e332b3 100%);box-shadow:0 0 12px rgba(76,118,255,.2)}
       #${HOST_ID}{width:100%;margin:0;box-sizing:border-box;position:relative;z-index:5}
       #${HOST_ID} .campaignViewport{position:relative;width:100%;min-height:132px;overflow:hidden}
       #${HOST_ID} .campaignSlide{display:none;width:100%;box-sizing:border-box;cursor:pointer}
@@ -50,6 +53,12 @@
       #${HOST_ID} .campaignDot{display:block;width:8px !important;height:8px !important;min-width:8px !important;min-height:8px !important;max-width:8px !important;max-height:8px !important;padding:0 !important;margin:0;border:0;border-radius:999px;background:#43526a;cursor:pointer;transition:all .25s ease;box-sizing:border-box}
       #${HOST_ID} .campaignDot.active{width:28px !important;min-width:28px !important;max-width:28px !important;height:8px !important;min-height:8px !important;max-height:8px !important;background:linear-gradient(90deg,#4da3ff,#d92aa8)}
       @keyframes sngCampaignIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+      @media(max-width:700px){
+        .sngCampaignSection{margin:28px 0 34px}
+        .sngCampaignSectionHeading{font-size:clamp(38px,8vw,49px);gap:10px;letter-spacing:-.04em;margin-bottom:18px}
+        .sngCampaignSectionHeading:after{width:44px;height:3px;flex-basis:3px}
+      }
+      @media(prefers-reduced-motion:reduce){.sngCampaignSectionHeading:after{box-shadow:none}}
       @media(max-width:560px){
         #${HOST_ID} .campaignViewport{min-height:126px}
         #${HOST_ID} .campaignCard{min-height:116px;gap:11px;padding:12px;border-radius:17px}
@@ -238,15 +247,27 @@
       }
     });
 
-    const announcement = document.querySelector(".professional-hero .heroAnnouncement");
-    const button = document.querySelector(".professional-hero .heroIn > div:first-child .primary");
+    // Keep the carousel itself intact; only place it in a titled section
+    // immediately after the existing "Découvrir les produits" CTA.
+    const section = document.createElement("section");
+    section.className = "sngCampaignSection";
+    section.setAttribute("aria-labelledby", "sngCampaignSectionHeading");
+    const heading = document.createElement("h2");
+    heading.id = "sngCampaignSectionHeading";
+    heading.className = "sngCampaignSectionHeading";
+    heading.textContent = "En promotion";
+    section.appendChild(heading);
+    section.appendChild(host);
 
-    if (announcement?.parentNode) {
-      announcement.parentNode.insertBefore(host, button || announcement.nextSibling);
+    const button = document.querySelector(".hero .heroIn .sngPromoHeroCta") ||
+      document.querySelector(".hero .heroIn .primary");
+    const heroIn = document.querySelector(".hero .heroIn");
+    if (button?.parentNode) {
+      button.insertAdjacentElement("afterend", section);
+    } else if (heroIn) {
+      heroIn.appendChild(section);
     } else {
-      const first = document.querySelector(".hero .heroIn > div:first-child");
-      if (first) first.insertBefore(host, button || null);
-      else return;
+      return;
     }
 
     let current = 0;
