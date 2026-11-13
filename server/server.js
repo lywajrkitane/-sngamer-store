@@ -1718,6 +1718,24 @@ app.get("/api/promo-media", async (req, res) => {
   }
 });
 /* =========================
+   ADMIN DASHBOARD RE-AUTHENTICATION
+   A full page load of the admin dashboard must require credentials again.
+   Keep the shared customer session intact; remove only the admin identity.
+========================= */
+app.get(["/admin-dashboard.html", "/admin.html"], (req, res, next) => {
+  if (!req.session || !req.session.admin) return next();
+
+  delete req.session.admin;
+  req.session.save((error) => {
+    if (error) {
+      console.error("SNGAMER_ADMIN_REAUTH_SAVE_ERROR:", error);
+      return res.status(503).send("Impossible de sécuriser la session administrateur. Réessayez.");
+    }
+    return next();
+  });
+});
+
+/* =========================
    FRONTEND
 ========================= */
 
