@@ -4,9 +4,11 @@ const express = require('express');
 const originalListen = express.application.listen;
 const buckets = new Map();
 const WINDOW_MS = 60_000;
-// Keep legitimate multi-tab/admin browsing from tripping the global API limiter.
-// Mutating/authenticated operations remain much stricter below.
+// Separate read traffic by endpoint so one busy/public route (or shared mobile
+// carrier IP) cannot block unrelated dashboard/catalog requests. Mutations and
+// authentication keep their tighter IP-based limits.
 const MAX_API = 600;
+const MAX_READ_API = 1800;
 const MAX_AUTH = 30;
 const MAX_PAYTECH_CREATE = 12;
 
@@ -126,13 +128,19 @@ function securityMiddleware(req, res, next) {
     const ip = clientIp(req);
     const authRoute = /^\/api\/(admin\/login|customer\/(login|register)|login|register)/.test(requestPath);
     const paytechCreate = requestPath === '/api/paytech/create';
-    const limit = paytechCreate ? MAX_PAYTECH_CREATE : authRoute ? MAX_AUTH : MAX_API;
+    const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
+    const rateKey = authRoute
+      ? `${ip}:auth`
+      : paytechCreate
+        ? `${ip}:paytech`
+        : mutating
+          ? `${ip}:write`
+          : `${ip}:read:${requestPath}`;
+    const limit = paytechCreate ? MAX_PAYTECH_CREATE : authRoute ? MAX_AUTH : mutating ? MAX_API : MAX_READ_API;
 
-    if (!allowRate(`${ip}:${authRoute ? 'auth' : paytechCreate ? 'paytech' : 'api'}`, limit)) {
+    if (!allowRate(rateKey, limit)) {
       return sendSecurityJson(res, 429, { error: 'Trop de requêtes. Réessaie dans un moment.' });
     }
-
-    const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
     const webhook = requestPath === '/api/paytech/ipn' || requestPath === '/api/paytech/refund-ipn';
     if (mutating && !webhook && !sameOrigin(req)) {
       return sendSecurityJson(res, 403, { error: 'Origine de requête non autorisée.' });
