@@ -379,7 +379,29 @@ app.get("/produit/:id", async (req, res) => {
     const fs = require("fs");
     const indexPath = path.join(__dirname, "..", "public", "index.html");
     let page = await fs.promises.readFile(indexPath, "utf8");
-    const boot = `<script>try{history.replaceState({}, "", "/#product=${id}");}catch(e){}window.addEventListener("load",function(){var open=function(){if(typeof window.openProduct==="function"){window.openProduct(${id});return true;}return false;};if(!open()){var n=0,t=setInterval(function(){n++;if(open()||n>40)clearInterval(t);},100);}});</script>`;
+    const metaTags = [
+      `<title>${esc(title)}</title>`,
+      `<meta name="description" content="${esc(description)}">`,
+      '<meta property="og:type" content="product">',
+      '<meta property="og:site_name" content="SNGAMER STORE">',
+      `<meta property="og:title" content="${esc(title)}">`,
+      `<meta property="og:description" content="${esc(description)}">`,
+      `<meta property="og:url" content="${esc(canonical)}">`,
+      image ? `<meta property="og:image" content="${esc(image)}"><meta property="og:image:secure_url" content="${esc(image)}"><meta property="og:image:alt" content="${esc(product.name || "Produit SNGAMER STORE")}">` : "",
+      '<meta name="twitter:card" content="summary_large_image">',
+      `<meta name="twitter:title" content="${esc(title)}">`,
+      `<meta name="twitter:description" content="${esc(description)}">`,
+      image ? `<meta name="twitter:image" content="${esc(image)}">` : "",
+      `<link rel="canonical" href="${esc(canonical)}">`
+    ].join("");
+    page = page
+      .replace(/<title>[\\s\\S]*?<\\/title>/i, "")
+      .replace(/<meta\\s+name=["']description["'][^>]*>/i, "")
+      .replace(/<meta\\s+property=["']og:[^"']+["'][^>]*>/gi, "")
+      .replace(/<meta\\s+name=["']twitter:[^"']+["'][^>]*>/gi, "")
+      .replace(/<link\\s+rel=["']canonical["'][^>]*>/i, "");
+    page = page.replace("</head>", metaTags + "</head>");
+    const boot = `<script>window.addEventListener("load",function(){var n=0,t=setInterval(function(){n++;var list=window.storeProducts||window.products||[];var found=list.some(function(p){return Number(p.id)===${id};});if(found&&typeof window.openProduct==="function"){clearInterval(t);window.openProduct(${id});}else if(n>100){clearInterval(t);}},150);});</script>`;
     page = page.replace("</body>", boot + "</body>");
     res.set("Cache-Control", "no-store, no-cache, must-revalidate");
     return res.type("html").send(page);
