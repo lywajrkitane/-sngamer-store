@@ -342,7 +342,7 @@ app.get("/produit/:id", async (req, res) => {
     const esc = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     })[ch]);
-    const origin = `${req.protocol}://${req.get("host")}`;
+    const origin = "https://sngamer-store.onrender.com";
     const imageValue = product.main_image_url || product.image1_url || "";
     const image = /^https:\/\//i.test(String(imageValue)) ? String(imageValue) : "";
     const regularPrice = Number(product.price) || 0;
