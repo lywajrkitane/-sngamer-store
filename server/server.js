@@ -395,11 +395,11 @@ app.get("/produit/:id", async (req, res) => {
       `<link rel="canonical" href="${esc(canonical)}">`
     ].join("");
     page = page
-      .replace(/<title>[\\s\\S]*?<\\/title>/i, "")
-      .replace(/<meta\\s+name=["']description["'][^>]*>/i, "")
-      .replace(/<meta\\s+property=["']og:[^"']+["'][^>]*>/gi, "")
-      .replace(/<meta\\s+name=["']twitter:[^"']+["'][^>]*>/gi, "")
-      .replace(/<link\\s+rel=["']canonical["'][^>]*>/i, "");
+      .replace(/<title>[\s\S]*?<\/title>/i, "")
+      .replace(/<meta\s+name=["']description["'][^>]*>/i, "")
+      .replace(/<meta\s+property=["']og:[^"']+["'][^>]*>/gi, "")
+      .replace(/<meta\s+name=["']twitter:[^"']+["'][^>]*>/gi, "")
+      .replace(/<link\s+rel=["']canonical["'][^>]*>/i, "");
     page = page.replace("</head>", metaTags + "</head>");
     const boot = `<script>window.addEventListener("load",function(){var n=0,t=setInterval(function(){n++;var list=window.storeProducts||window.products||[];var found=list.some(function(p){return Number(p.id)===${id};});if(found&&typeof window.openProduct==="function"){clearInterval(t);window.openProduct(${id});}else if(n>100){clearInterval(t);}},150);});</script>`;
     page = page.replace("</body>", boot + "</body>");
