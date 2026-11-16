@@ -325,6 +325,92 @@ app.get("/healthz", async (req, res) => {
    PRODUCTS
 ========================= */
 
+
+/* SNGAMER_PRODUCT_SOCIAL_SHARE_ROUTE
+   Server-rendered Open Graph metadata for social crawlers.
+   Human visitors receive the existing storefront and open the existing product modal.
+*/
+app.get("/produit/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0) return res.status(404).send("Produit introuvable");
+
+  try {
+    const result = await db("SELECT * FROM products WHERE id = $1 LIMIT 1", [id]);
+    const product = result.rows[0];
+    if (!product) return res.status(404).send("Produit introuvable");
+
+    const esc = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[ch]);
+    const origin = "https://sngamer-store.onrender.com";
+    const imageValue = product.main_image_url || product.image1_url || "";
+    const image = /^https:\/\//i.test(String(imageValue)) ? String(imageValue) : "";
+    const regularPrice = Number(product.price) || 0;
+    const promoPrice = Number(product.promo_price) || 0;
+    const hasPromo = Boolean(product.promo_active) && promoPrice > 0 && promoPrice < regularPrice;
+    const price = hasPromo ? promoPrice : regularPrice;
+    const money = new Intl.NumberFormat("fr-FR").format(price) + " FCFA";
+    const title = `${product.name || "Produit"} | SNGAMER STORE`;
+    const description = `${product.name || "Produit"} — ${money}. ${product.description || "Disponible sur SNGAMER STORE, boutique gaming au Sénégal."}`.slice(0, 300);
+    const canonical = `${origin}/produit/${id}`;
+    const bot = /WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Discordbot|Slackbot|LinkedInBot|Pinterest|Googlebot|bingbot|Applebot/i.test(String(req.get("user-agent") || ""));
+    const tags = [
+      '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
+      `<title>${esc(title)}</title>`,
+      `<meta name="description" content="${esc(description)}">`,
+      '<meta property="og:type" content="product">',
+      '<meta property="og:site_name" content="SNGAMER STORE">',
+      `<meta property="og:title" content="${esc(title)}">`,
+      `<meta property="og:description" content="${esc(description)}">`,
+      `<meta property="og:url" content="${esc(canonical)}">`,
+      image ? `<meta property="og:image" content="${esc(image)}"><meta property="og:image:secure_url" content="${esc(image)}"><meta property="og:image:alt" content="${esc(product.name || "Produit SNGAMER STORE")}">` : "",
+      '<meta name="twitter:card" content="summary_large_image">',
+      `<meta name="twitter:title" content="${esc(title)}">`,
+      `<meta name="twitter:description" content="${esc(description)}">`,
+      image ? `<meta name="twitter:image" content="${esc(image)}">` : "",
+      `<link rel="canonical" href="${esc(canonical)}">`,
+      '</head><body>'
+    ].join("");
+    if (bot) {
+      res.set("Cache-Control", "public, max-age=300, s-maxage=300");
+      return res.type("html").send(tags + `<main><h1>${esc(product.name)}</h1><p>${esc(description)}</p>${image ? `<img src="${esc(image)}" alt="${esc(product.name)}">` : ""}<a href="${esc(canonical)}">Voir le produit sur SNGAMER STORE</a></main></body></html>`);
+    }
+
+    const fs = require("fs");
+    const indexPath = path.join(__dirname, "..", "public", "index.html");
+    let page = await fs.promises.readFile(indexPath, "utf8");
+    const metaTags = [
+      `<title>${esc(title)}</title>`,
+      `<meta name="description" content="${esc(description)}">`,
+      '<meta property="og:type" content="product">',
+      '<meta property="og:site_name" content="SNGAMER STORE">',
+      `<meta property="og:title" content="${esc(title)}">`,
+      `<meta property="og:description" content="${esc(description)}">`,
+      `<meta property="og:url" content="${esc(canonical)}">`,
+      image ? `<meta property="og:image" content="${esc(image)}"><meta property="og:image:secure_url" content="${esc(image)}"><meta property="og:image:alt" content="${esc(product.name || "Produit SNGAMER STORE")}">` : "",
+      '<meta name="twitter:card" content="summary_large_image">',
+      `<meta name="twitter:title" content="${esc(title)}">`,
+      `<meta name="twitter:description" content="${esc(description)}">`,
+      image ? `<meta name="twitter:image" content="${esc(image)}">` : "",
+      `<link rel="canonical" href="${esc(canonical)}">`
+    ].join("");
+    page = page
+      .replace(/<title>[\s\S]*?<\/title>/i, "")
+      .replace(/<meta\s+name=["']description["'][^>]*>/i, "")
+      .replace(/<meta\s+property=["']og:[^"']+["'][^>]*>/gi, "")
+      .replace(/<meta\s+name=["']twitter:[^"']+["'][^>]*>/gi, "")
+      .replace(/<link\s+rel=["']canonical["'][^>]*>/i, "");
+    page = page.replace("</head>", '<base href="/">' + metaTags + "</head>");
+    const boot = `<script>window.addEventListener("load",function(){var n=0,t=setInterval(function(){n++;var list=window.storeProducts||window.products||[];var found=list.some(function(p){return Number(p.id)===${id};});if(found&&typeof window.openProduct==="function"){clearInterval(t);window.openProduct(${id});}else if(n>100){clearInterval(t);}},150);});</script>`;
+    page = page.replace("</body>", boot + "</body>");
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    return res.type("html").send(page);
+  } catch (error) {
+    console.error("PRODUCT_SOCIAL_PAGE_ERROR:", error);
+    return res.status(500).send("Impossible de charger ce produit pour le moment.");
+  }
+});
+
 app.get("/api/products", async (req, res) => {
   try {
     const rows = await fetchCatalog(db);
