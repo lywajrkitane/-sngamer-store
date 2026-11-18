@@ -2,10 +2,10 @@
 "use strict";
 if(window.__sngamerI18nLoaded)return;
 window.__sngamerI18nLoaded=true;
-var KEY="sngamer_store_locale_v1";
+var KEY="sngamer_store_locale_v1",STATE_KEY="sngamer_store_locale_state_v1";
 var flags={sn:"🇸🇳",ci:"🇨🇮",tg:"🇹🇬",bf:"🇧🇫",bj:"🇧🇯",ml:"🇲🇱",intl:"🌐"};
 var locale="fr",country="sn",originalText=new WeakMap();
-try{var l=localStorage.getItem(KEY),c=localStorage.getItem(KEY+"_country");if(["fr","wo","en"].includes(l))locale=l;if(flags[c])country=c;}catch(_){}
+function restoreSavedLocale(){try{var state=localStorage.getItem(STATE_KEY);if(state){var parts=state.split("|");if(["fr","wo","en"].includes(parts[0])&&flags[parts[1]]){locale=parts[0];country=parts[1];return;}}var l=localStorage.getItem(KEY),c=localStorage.getItem(KEY+"_country");if(["fr","wo","en"].includes(l))locale=l;if(flags[c])country=c;}catch(_){}}restoreSavedLocale();
 var dict={
 en:{
 "Accueil":"Home","Accessoires":"Accessories","Gaming Phone":"Gaming phones","Pièces eFootball":"eFootball coins","Profil":"Profile","Tous":"All","Collection":"Collection","Découvrir les produits":"Explore products","SÉLECTION DU MOMENT":"FEATURED SELECTION","TON SETUP. TON GAME.":"YOUR SETUP. YOUR GAME.","TON STYLE.":"YOUR STYLE.","Univers Gaming":"Gaming universe","Accessoires gaming":"Gaming accessories","Pièces eFootball":"eFootball coins","Livraison au Sénégal et dans toute la sous-région":"Delivery in Senegal and across West Africa","BIENVENUE CHEZ SNGAMER":"WELCOME TO SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"HELLO AND WELCOME TO SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"THANK YOU FOR VISITING US!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"We are delighted to welcome you to our store and introduce you to our gaming world.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Welcome to our store. Thank you for visiting us today.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Explore our gaming accessories, gaming phones, consoles and eFootball coins.","COMMANDE EN LIGNE":"ORDER ONLINE","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Choose your products, add them to your cart and place your order easily.","LIVRAISON AU SÉNÉGAL":"DELIVERY IN SENEGAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"We carefully prepare your order and make delivery easy.","En promotion":"On sale","Panier vide.":"Your cart is empty.","Aucun produit dans cette rubrique pour le moment.":"No products in this section yet.","Ajouter au panier":"Add to cart","Mon profil":"My profile","Panier":"Cart","Rechercher un produit":"Search products","Rechercher un produit...":"Search for a product...","À PROPOS":"ABOUT US","COMMENT COMMANDER ?":"HOW TO ORDER?","Choisis ton produit":"Choose your product","Sur commande":"Available to order","Rupture de stock":"Out of stock","En stock":"In stock","Stock limité":"Limited stock","Dernier article !":"Last item!","Découvrir mon panier":"View my cart"
@@ -53,7 +53,7 @@ function close(){var m=document.getElementById("sngLanguageMenu"),b=document.get
 function position(){var b=document.getElementById("sngLanguageButton"),m=document.getElementById("sngLanguageMenu");if(!b||!m||m.hidden)return;var r=b.getBoundingClientRect(),w=Math.min(320,Math.max(180,Math.floor(window.innerWidth*.5)));w=Math.min(w,window.innerWidth-24);m.style.setProperty("width",w+"px","important");m.style.setProperty("max-width",w+"px","important");m.style.setProperty("left","auto","important");m.style.setProperty("right","12px","important");m.style.setProperty("top",Math.min(r.bottom+10,window.innerHeight-80)+"px","important");}
 function setLocale(next,nextCountry){
 if(!["fr","wo","en"].includes(next))return;locale=next;if(flags[nextCountry])country=nextCountry;
-try{localStorage.setItem(KEY,locale);localStorage.setItem(KEY+"_country",country);}catch(_){}
+try{localStorage.setItem(STATE_KEY,locale+"|"+country);localStorage.setItem(KEY,locale);localStorage.setItem(KEY+"_country",country);}catch(_){}
 close();apply();
 }
 function apply(){
@@ -74,6 +74,7 @@ document.addEventListener("click",function(e){if(!m.hidden&&!m.contains(e.target
 document.addEventListener("keydown",function(e){if(e.key==="Escape")close();});
 window.addEventListener("resize",position,{passive:true});window.addEventListener("scroll",position,{passive:true});
 apply();
+window.addEventListener("pageshow",function(){restoreSavedLocale();apply();});
 if(window.MutationObserver&&!window.__sngamerI18nObserver){window.__sngamerI18nObserver=new MutationObserver(function(records){records.forEach(function(r){if(r.type==="characterData")translateNode(r.target);else r.addedNodes.forEach(walk);});});window.__sngamerI18nObserver.observe(document.body,{subtree:true,childList:true,characterData:true});}
 }
 window.SNGamerI18n={getLocale:function(){return locale;},setLocale:setLocale,t:function(fr){return locale==="fr"?fr:((dict[locale]||{})[fr]||fr);}};
