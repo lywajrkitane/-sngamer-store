@@ -1,4 +1,28 @@
+# Public storefront and social-preview assets
 User-agent: *
+Allow: /
+
+# Explicit permission for Meta link-preview crawlers (Facebook and WhatsApp)
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Other common social-preview crawlers
+User-agent: Twitterbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: LinkedInBot
 Allow: /
 
 Sitemap: https://sngamer-store.onrender.com/sitemap.xml
