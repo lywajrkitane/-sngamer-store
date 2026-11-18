@@ -50,7 +50,7 @@ countryRow("🇲🇱","Mali","ml","Bambara")+
 '<div class="sngLanguageMenuNote">Les langues locales marquées « Bientôt » seront activées après validation de leur qualité.</div></div>';
 }
 function close(){var m=document.getElementById("sngLanguageMenu"),b=document.getElementById("sngLanguageButton");if(m)m.hidden=true;if(b)b.setAttribute("aria-expanded","false");}
-function position(){var b=document.getElementById("sngLanguageButton"),m=document.getElementById("sngLanguageMenu");if(!b||!m||m.hidden)return;var r=b.getBoundingClientRect(),w=Math.min(360,window.innerWidth-24);m.style.width=w+"px";m.style.left=Math.max(12,window.innerWidth-w-12)+"px";m.style.top=Math.min(r.bottom+10,window.innerHeight-100)+"px";}
+function position(){var b=document.getElementById("sngLanguageButton"),m=document.getElementById("sngLanguageMenu");if(!b||!m||m.hidden)return;var r=b.getBoundingClientRect(),w=Math.min(260,Math.max(190,Math.floor(window.innerWidth*.56)));w=Math.min(w,window.innerWidth-24);m.style.width=w+"px";m.style.left=Math.max(12,window.innerWidth-w-12)+"px";m.style.top=Math.min(r.bottom+10,window.innerHeight-100)+"px";}
 function setLocale(next,nextCountry){
 if(!["fr","wo","en"].includes(next))return;locale=next;if(flags[nextCountry])country=nextCountry;
 try{localStorage.setItem(KEY,locale);localStorage.setItem(KEY+"_country",country);}catch(_){}
