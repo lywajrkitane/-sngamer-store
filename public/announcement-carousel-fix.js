@@ -60,8 +60,9 @@
         void copy.offsetWidth;
         copy.classList.add("is-changing");
       }
-      strong.textContent=slide.title;
-      text.textContent=slide.text;
+      const translator=window.SNGamerI18n;
+      strong.textContent=translator?translator.t(slide.title):slide.title;
+      text.textContent=translator?translator.t(slide.text):slide.text;
       dots.forEach((dot,i)=>dot.classList.toggle("active",i===index));
     };
 
@@ -69,6 +70,7 @@
     card.addEventListener("mouseenter",()=>clearInterval(timer));
     card.addEventListener("mouseleave",()=>{});
     render(0,false);
+    window.addEventListener("sngamer:localechange",()=>render(index,false));
     window.__sngamerAnnouncementReady = true;
     return true;
   }
