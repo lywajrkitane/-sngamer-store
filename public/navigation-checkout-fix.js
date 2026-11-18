@@ -124,7 +124,7 @@
       } else {
         if (profile) { profile.hidden = true; profile.style.display = "none"; profile.replaceChildren(); delete profile.dataset.sngProfileLoading; }
         if (subcats && section !== "coins" && section !== "phones") { subcats.hidden = true; subcats.style.display = "none"; }
-        if (title) title.textContent = section === "home" ? "Collection" : section === "accessories" ? "Accessoires" : section === "phones" ? "Univers Gaming" : "Pièces eFootball";
+        if (title) { const titleFr = section === "home" ? "Collection" : section === "accessories" ? "Accessoires" : section === "phones" ? "Univers Gaming" : "Pièces eFootball"; title.textContent = window.SNGamerI18n ? window.SNGamerI18n.t(titleFr) : titleFr; }
 
         if (typeof window.filterBy === "function") {
           const targetFilter = section === "home" ? "Tous" : section === "accessories" ? "Accessoires" : section === "phones" ? "Gaming Phone" : "Coins";

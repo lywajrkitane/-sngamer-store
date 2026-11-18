@@ -8,7 +8,7 @@ var locale="fr",country="sn",originalText=new WeakMap();
 function restoreSavedLocale(){try{var state=localStorage.getItem(STATE_KEY);if(state){var parts=state.split("|");if(["fr","wo","en"].includes(parts[0])&&flags[parts[1]]){locale=parts[0];country=parts[1];return;}}var l=localStorage.getItem(KEY),c=localStorage.getItem(KEY+"_country");if(["fr","wo","en"].includes(l))locale=l;if(flags[c])country=c;}catch(_){}}restoreSavedLocale();
 var dict={
 en:{
-"Accueil":"Home","Accessoires":"Accessories","Gaming Phone":"Gaming phones","Pièces eFootball":"eFootball coins","Profil":"Profile","Tous":"All","Collection":"Collection","Découvrir les produits":"Explore products","SÉLECTION DU MOMENT":"FEATURED SELECTION","TON SETUP. TON GAME.":"YOUR SETUP. YOUR GAME.","TON STYLE.":"YOUR STYLE.","Univers Gaming":"Gaming universe","Accessoires gaming":"Gaming accessories","Pièces eFootball":"eFootball coins","Livraison au Sénégal et dans toute la sous-région":"Delivery in Senegal and across West Africa","BIENVENUE CHEZ SNGAMER":"WELCOME TO SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"HELLO AND WELCOME TO SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"THANK YOU FOR VISITING US!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"We are delighted to welcome you to our store and introduce you to our gaming world.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Welcome to our store. Thank you for visiting us today.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Explore our gaming accessories, gaming phones, consoles and eFootball coins.","COMMANDE EN LIGNE":"ORDER ONLINE","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Choose your products, add them to your cart and place your order easily.","LIVRAISON AU SÉNÉGAL":"DELIVERY IN SENEGAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"We carefully prepare your order and make delivery easy.","En promotion":"On sale","Panier vide.":"Your cart is empty.","Aucun produit dans cette rubrique pour le moment.":"No products in this section yet.","Ajouter au panier":"Add to cart","Mon profil":"My profile","Panier":"Cart","Rechercher un produit":"Search products","Rechercher un produit...":"Search for a product...","À PROPOS":"ABOUT US","COMMENT COMMANDER ?":"HOW TO ORDER?","Choisis ton produit":"Choose your product","Sur commande":"Available to order","Rupture de stock":"Out of stock","En stock":"In stock","Stock limité":"Limited stock","Dernier article !":"Last item!","Découvrir mon panier":"View my cart"
+"Accueil":"Home","Accessoires":"Accessories","Gaming Phone":"Gaming phones","Pièces eFootball":"eFootball coins","Profil":"Profile","Tous":"All","Collection":"Collection","Découvrir les produits":"Explore products","SÉLECTION DU MOMENT":"FEATURED SELECTION","TON SETUP. TON GAME.":"YOUR SETUP. YOUR GAME.","TON STYLE.":"YOUR STYLE.","Univers Gaming":"Gaming universe","Accessoires gaming":"Gaming accessories","Pièces eFootball":"eFootball coins","Livraison au Sénégal et dans toute la sous-région":"Delivery in Senegal and across West Africa","BIENVENUE CHEZ SNGAMER":"WELCOME TO SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"HELLO AND WELCOME TO SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"THANK YOU FOR VISITING US!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"We are delighted to welcome you to our store and introduce you to our gaming world.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Welcome to our store. Thank you for visiting us today.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Explore our gaming accessories, gaming phones, consoles and eFootball coins.","COMMANDE EN LIGNE":"ORDER ONLINE","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Choose your products, add them to your cart and place your order easily.","LIVRAISON AU SÉNÉGAL":"DELIVERY IN SENEGAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"We carefully prepare your order and make delivery easy.","En promotion":"On sale","Profil":"Profile","Souris":"Mice","PC Gaming":"PC Gaming","Console":"Console","Pièces eFootball Android":"eFootball Coins for Android","Pièces eFootball iPhone":"eFootball Coins for iPhone","Ordinateurs et équipements PC":"PC computers and equipment","Smartphones dédiés au jeu":"Gaming smartphones","Consoles et accessoires console":"Consoles and console accessories","Mon espace client":"My account","CHOISIR PAYS & LANGUE":"CHOOSE COUNTRY & LANGUAGE","Remonter en haut":"Back to top","Panier vide.":"Your cart is empty.","Aucun produit dans cette rubrique pour le moment.":"No products in this section yet.","Ajouter au panier":"Add to cart","Mon profil":"My profile","Panier":"Cart","Rechercher un produit":"Search products","Rechercher un produit...":"Search for a product...","À PROPOS":"ABOUT US","COMMENT COMMANDER ?":"HOW TO ORDER?","Choisis ton produit":"Choose your product","Sur commande":"Available to order","Rupture de stock":"Out of stock","En stock":"In stock","Stock limité":"Limited stock","Dernier article !":"Last item!","Découvrir mon panier":"View my cart"
 },
 wo:{"Accueil":"Kër","Accessoires":"Jumtukaay yi","Gaming Phone":"Telefon yu gaming","Pièces eFootball":"Piis yu eFootball","Profil":"Profil","Tous":"Yépp","Collection":"Li ñu tànn","Découvrir les produits":"Seetal al yi","Panier vide.":"Sa panie amul dara.","SÉLECTION DU MOMENT":"Li ñu tànn tey","TON SETUP. TON GAME.":"Sa setup. Sa game.","TON STYLE.":"Sa style.","Univers Gaming":"Àdduna gaming","Accessoires gaming":"Jumtukaay yu gaming","Livraison au Sénégal et dans toute la sous-région":"Yóbbu al yi ci Senegaal ak réew yi ko wër","BIENVENUE CHEZ SNGAMER":"DALAL AK JÀMM CI SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"DALAL AK JÀMM CI SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"JËRËJËF CI SA ÑËW!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"Bég nanu la nuyu ci sunu boutique te won la sunu àdduna gaming.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Dalal ak jàmm ci sunu boutique. Jërëjëf ci sa ñëw.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Seetal sunuy jumtukaay gaming, telefon yu gaming, consoles ak pièces eFootball.","COMMANDE EN LIGNE":"JËND CI INTERNET","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Tànnal say al, yokk leen ci sa panie te defal sa commande ci yomb.","LIVRAISON AU SÉNÉGAL":"YÓBBU AL YI CI SENEGAAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"Nu ngi waajal sa commande ak teey, te yombal yóbbu gi."}
 };
@@ -63,21 +63,33 @@ var flag=document.querySelector("#sngLanguageButton span");if(flag)flag.textCont
 walk(document.body);
 window.dispatchEvent(new CustomEvent("sngamer:localechange",{detail:{locale:locale,country:country}}));
 }
-function boot(){
-var b=document.getElementById("sngLanguageButton");if(!b)return;
+function attachMenu(){
+var b=document.getElementById("sngLanguageButton");if(!b)return false;
 if(!document.getElementById("sngLanguageMenu"))document.body.insertAdjacentHTML("beforeend",menuHTML());
 var m=document.getElementById("sngLanguageMenu");
-b.setAttribute("aria-haspopup","dialog");b.setAttribute("aria-expanded","false");
+if(b.dataset.sngI18nBound==="1")return true;
+b.dataset.sngI18nBound="1";b.setAttribute("aria-haspopup","dialog");b.setAttribute("aria-expanded","false");
 b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();m.hidden=!m.hidden;b.setAttribute("aria-expanded",String(!m.hidden));if(!m.hidden)position();});
-m.addEventListener("click",function(e){var x=e.target.closest("[data-locale]");if(x)setLocale(x.dataset.locale,x.dataset.country);});
+m.addEventListener("click",function(e){var x=e.target.closest("[data-locale]");if(x&&!x.disabled)setLocale(x.dataset.locale,x.dataset.country);});
 document.addEventListener("click",function(e){if(!m.hidden&&!m.contains(e.target)&&!b.contains(e.target))close();});
 document.addEventListener("keydown",function(e){if(e.key==="Escape")close();});
 window.addEventListener("resize",position,{passive:true});window.addEventListener("scroll",position,{passive:true});
-apply();
-window.addEventListener("pageshow",function(){restoreSavedLocale();apply();});
-window.dispatchEvent(new CustomEvent("sngamer:i18nready",{detail:{locale:locale,country:country}}));
-if(window.MutationObserver&&!window.__sngamerI18nObserver){window.__sngamerI18nObserver=new MutationObserver(function(records){records.forEach(function(r){if(r.type==="characterData")translateNode(r.target);else r.addedNodes.forEach(walk);});});window.__sngamerI18nObserver.observe(document.body,{subtree:true,childList:true,characterData:true});}
+return true;
 }
-window.SNGamerI18n={getLocale:function(){return locale;},setLocale:setLocale,t:function(fr){return locale==="fr"?fr:((dict[locale]||{})[fr]||fr);}};
+function boot(){
+if(!document.body){window.setTimeout(boot,30);return;}
+attachMenu();
+apply();
+if(!window.__sngamerI18nPageshowBound){window.__sngamerI18nPageshowBound=true;window.addEventListener("pageshow",function(){restoreSavedLocale();attachMenu();apply();});}
+if(window.MutationObserver&&!window.__sngamerI18nObserver){
+window.__sngamerI18nObserver=new MutationObserver(function(records){
+records.forEach(function(r){if(r.type==="characterData")translateNode(r.target);else r.addedNodes.forEach(walk);});
+attachMenu();
+});
+window.__sngamerI18nObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
+}
+window.dispatchEvent(new CustomEvent("sngamer:i18nready",{detail:{locale:locale,country:country}}));
+}
+window.SNGamerI18n={getLocale:function(){return locale;},getCountry:function(){return country;},setLocale:setLocale,apply:apply,t:function(fr){return locale==="fr"?fr:((dict[locale]||{})[fr]||fr);}};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
