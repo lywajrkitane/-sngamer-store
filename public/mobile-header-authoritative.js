@@ -31,15 +31,15 @@
         }
         .siteHeader .nav > .searchPremiumButton,
         .siteHeader .nav > .cartButton{
-          width:42px !important;
-          height:42px !important;
-          min-width:42px !important;
-          min-height:42px !important;
-          max-width:42px !important;
-          max-height:42px !important;
-          flex:0 0 42px !important;
+          width:40px !important;
+          height:40px !important;
+          min-width:40px !important;
+          min-height:40px !important;
+          max-width:40px !important;
+          max-height:40px !important;
+          flex:0 0 40px !important;
           padding:0 !important;
-          border-radius:12px !important;
+          border-radius:50% !important;
           box-sizing:border-box !important;
         }
         .siteHeader .nav > .searchPremiumButton svg,
