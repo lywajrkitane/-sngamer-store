@@ -71,6 +71,7 @@
     card.addEventListener("mouseleave",()=>{});
     render(0,false);
     window.addEventListener("sngamer:localechange",()=>render(index,false));
+    window.addEventListener("sngamer:i18nready",()=>render(index,false));
     window.__sngamerAnnouncementReady = true;
     return true;
   }
