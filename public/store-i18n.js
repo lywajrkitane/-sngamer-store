@@ -75,6 +75,7 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape")close();});
 window.addEventListener("resize",position,{passive:true});window.addEventListener("scroll",position,{passive:true});
 apply();
 window.addEventListener("pageshow",function(){restoreSavedLocale();apply();});
+window.dispatchEvent(new CustomEvent("sngamer:i18nready",{detail:{locale:locale,country:country}}));
 if(window.MutationObserver&&!window.__sngamerI18nObserver){window.__sngamerI18nObserver=new MutationObserver(function(records){records.forEach(function(r){if(r.type==="characterData")translateNode(r.target);else r.addedNodes.forEach(walk);});});window.__sngamerI18nObserver.observe(document.body,{subtree:true,childList:true,characterData:true});}
 }
 window.SNGamerI18n={getLocale:function(){return locale;},setLocale:setLocale,t:function(fr){return locale==="fr"?fr:((dict[locale]||{})[fr]||fr);}};
