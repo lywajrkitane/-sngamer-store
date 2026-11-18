@@ -264,9 +264,9 @@
       button.className = 'sngStoreSubcategory' + (active ? ' is-active' : '');
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
       const label = document.createElement('span');
-      label.textContent = option.label;
+      label.textContent = window.SNGamerI18n ? window.SNGamerI18n.t(option.label) : option.label;
       const hint = document.createElement('small');
-      hint.textContent = option.hint;
+      hint.textContent = window.SNGamerI18n ? window.SNGamerI18n.t(option.hint) : option.hint;
       button.append(label, hint);
       button.addEventListener('click', function () {
         window.activeStoreSubcategory = active ? null : option.value;
@@ -278,6 +278,7 @@
   }
 
   window.updateStoreSubcategories = updateSubcategories;
+  window.addEventListener('sngamer:localechange', updateSubcategories);
   window.activeStoreCategoryFilter = window.activeStoreCategoryFilter || 'Tous';
   window.activeStoreSubcategory = null;
 
