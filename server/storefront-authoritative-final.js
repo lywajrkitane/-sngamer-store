@@ -17,7 +17,7 @@ function buildHeader(html) {
   const languageButton = '<button type="button" class="sngLanguageButton" id="sngLanguageButton" aria-label="Choisir pays et langue" title="Choisir pays et langue" aria-expanded="false"><span aria-hidden="true">🇸🇳</span><svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 4 4 4 4-4"></path></svg></button>';
   const cartButton = '<button type="button" class="cartButton" aria-label="Panier" title="Panier" onclick="cart()"><span class="cartIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 4h2l1.7 10.2a2 2 0 0 0 2 1.7h7.9a2 2 0 0 0 1.9-1.4L21 8H7"></path><circle cx="10" cy="19" r="1.2"></circle><circle cx="18" cy="19" r="1.2"></circle></svg></span><b id="count">0</b></button>';
 
-  /* Canonical desktop order: Search -> Cart -> Profile. */
+  /* Canonical desktop order: Search -> Language -> Cart -> Profile. */
   html = html.replace(/<button\s+class="cartButton"[^>]*>[\s\S]*?<\/button>/i, cartButton);
   html = html.replace(/<button\b[^>]*class=["'][^"']*\bprofilePremiumButton\b[^"']*["'][^>]*>[\s\S]*?<\/button>/gi, '');
   if (!html.includes('id="sngLanguageButton"')) {
@@ -46,7 +46,7 @@ function buildHeader(html) {
     '.sngLanguageCountryName{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:16px}',
     '.sngLanguageFlag{font-size:28px;line-height:1}',
     '.sngLanguageOptions{display:grid;grid-template-columns:1fr 1fr;gap:10px}',
-    '.sngLanguageChoice{min-height:42px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#1d1d1d;color:#ddd;font:700 14px inherit;cursor:pointer;padding:8px 12px}',
+    '.sngLanguageChoice{min-height:42px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#1d1d1d;color:#ddd;font:inherit;font-size:14px;font-weight:700;cursor:pointer;padding:8px 12px}',
     '.sngLanguageChoice[aria-pressed="true"]{background:#ffd400;color:#111;border-color:#ffd400}',
     '.sngLanguageChoice:disabled{opacity:.45;cursor:not-allowed}',
     '.sngLanguageChoice small{display:block;font-size:9px;letter-spacing:.5px}',
