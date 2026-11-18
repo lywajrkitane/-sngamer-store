@@ -76,7 +76,8 @@ document.documentElement.lang=locale;document.documentElement.dataset.storeLocal
 document.querySelectorAll(".sngLanguageChoice[data-locale]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.locale===locale&&b.dataset.country===country));});
 var flag=document.querySelector("#sngLanguageButton span");if(flag)flag.textContent=flags[country]||"🇸🇳";
 walk(document.body);
-window.dispatchEvent(new CustomEvent("sngamer:localechange",{detail:{locale:locale,country:country}}));\ndocument.documentElement.classList.remove("sng-locale-pending");
+window.dispatchEvent(new CustomEvent("sngamer:localechange",{detail:{locale:locale,country:country}}));
+document.documentElement.classList.remove("sng-locale-pending");
 }
 function attachMenu(){
 var b=document.getElementById("sngLanguageButton");if(!b)return false;
