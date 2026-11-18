@@ -103,7 +103,7 @@
       if(!key||!icon||!ICONS[key]) return;
       icon.innerHTML=ICONS[key];
       const label=button.querySelector(":scope > span:not(.bottomNavIcon)");
-      if(label) label.textContent=LABELS[key]||label.textContent;
+      if(label) label.textContent=window.SNGamerI18n?window.SNGamerI18n.t(LABELS[key]||label.textContent):(LABELS[key]||label.textContent);
     });
     ensureBackToTop();
     hideLegacyTopButtons();
@@ -124,6 +124,14 @@
     }
   }
 
+  window.addEventListener("sngamer:localechange",function(){
+    const nav=document.getElementById("mobileBottomNav");
+    if(!nav)return;
+    nav.querySelectorAll(".bottomNavItem").forEach(function(button){
+      const key=button.dataset.nav,label=button.querySelector(":scope > span:not(.bottomNavIcon)");
+      if(label&&LABELS[key])label.textContent=window.SNGamerI18n?window.SNGamerI18n.t(LABELS[key]):LABELS[key];
+    });
+  });
   start();
   window.addEventListener("scroll", updateBackToTopVisibility, {passive:true});
   window.addEventListener("resize", function(){setTimeout(ensureBackToTop,50);});
