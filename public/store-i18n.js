@@ -10,7 +10,7 @@ var dict={
 en:{
 "Accueil":"Home","Accessoires":"Accessories","Gaming Phone":"Gaming phones","Pièces eFootball":"eFootball coins","Profil":"Profile","Tous":"All","Collection":"Collection","Découvrir les produits":"Explore products","SÉLECTION DU MOMENT":"FEATURED SELECTION","TON SETUP. TON GAME.":"YOUR SETUP. YOUR GAME.","Livraison au Sénégal et dans toute la sous-région":"Delivery in Senegal and across West Africa","En promotion":"On sale","Panier vide.":"Your cart is empty.","Aucun produit dans cette rubrique pour le moment.":"No products in this section yet.","Ajouter au panier":"Add to cart","Mon profil":"My profile","Panier":"Cart","Rechercher un produit":"Search products","Rechercher un produit...":"Search for a product...","À PROPOS":"ABOUT US","COMMENT COMMANDER ?":"HOW TO ORDER?","Choisis ton produit":"Choose your product","Sur commande":"Available to order","Rupture de stock":"Out of stock","En stock":"In stock","Stock limité":"Limited stock","Dernier article !":"Last item!","Découvrir mon panier":"View my cart"
 },
-wo:{"Accueil":"Dalal","Accessoires":"Jumtukaay yi","Gaming Phone":"Telefon yu gaming","Pièces eFootball":"Piisi eFootball","Profil":"Profil","Tous":"Yépp","Collection":"Li ñu tànn","Découvrir les produits":"Seetal al yi","Panier vide.":"Sa panie amul dara."}
+wo:{"Accueil":"Kër","Accessoires":"Jumtukaay yi","Gaming Phone":"Telefon yu gaming","Pièces eFootball":"Piisi eFootball","Profil":"Profil","Tous":"Yépp","Collection":"Li ñu tànn","Découvrir les produits":"Seetal al yi","Panier vide.":"Sa panie amul dara."}
 };
 function protectedNode(node){var el=node&&node.parentElement;return !el||!!el.closest("h3,.productCardClickable,.productDetail,.productGallery,.cartItem,.price,[data-no-translate],input,textarea,select,script,style,code");}
 function translateNode(node){
@@ -33,7 +33,7 @@ if(el.closest("h3,.productCardClickable,.productDetail,[data-no-translate]"))ret
 function countryRow(flag,name,code,localLabel){
 return '<section class="sngLanguageCountry"><div class="sngLanguageCountryName"><span class="sngLanguageFlag">'+flag+'</span><strong>'+name+'</strong></div><div class="sngLanguageOptions">'+
 choice("fr",code,"Français")+
-(localLabel?'<button type="button" class="sngLanguageChoice isComingSoon" disabled>'+localLabel+' <small>Bientôt</small></button>':choice("wo",code,"Wolof"))+
+(localLabel?'<button type="button" class="sngLanguageChoice isComingSoon" disabled>'+localLabel+' <small>Bientôt</small></button>':choice("wo",code,"Wolof · bêta"))+
 '</div></section>';
 }
 function choice(lang,code,label){return '<button type="button" class="sngLanguageChoice" data-locale="'+lang+'" data-country="'+code+'" aria-pressed="'+(locale===lang&&country===code)+'">'+label+'</button>';}
