@@ -186,7 +186,7 @@ function storeCategory(p) {
 }
 function cats(){
   const categories=["Tous",...new Set(products.map(p=>storeCategory(p)))];
-  document.querySelector("#cats").innerHTML=categories.map(c=>`<button class="catbtn ${c===filter?"on":""}" onclick="filterBy('${c}')">${c}</button>`).join("");
+  document.querySelector("#cats").innerHTML=categories.map(c=>{const label=window.SNGamerI18n?window.SNGamerI18n.t(c):c;return '<button class="catbtn '+(c===filter?"on":"") + '" onclick="filterBy(\''+c+'\')">' + label + '</button>';}).join("");
 }
 function filterBy(c){
   filter=c;
