@@ -8,11 +8,11 @@ var locale="fr",country="sn",originalText=new WeakMap();
 function restoreSavedLocale(){try{var state=localStorage.getItem(STATE_KEY);if(state){var parts=state.split("|");if(["fr","wo","en"].includes(parts[0])&&flags[parts[1]]){locale=parts[0];country=parts[1];return;}}var l=localStorage.getItem(KEY),c=localStorage.getItem(KEY+"_country");if(["fr","wo","en"].includes(l))locale=l;if(flags[c])country=c;}catch(_){}}restoreSavedLocale();
 var dict={
 en:{
-"Accueil":"Home","Accessoires":"Accessories","Gaming Phone":"Gaming phones","Pièces eFootball":"eFootball coins","Profil":"Profile","Tous":"All","Collection":"Collection","Découvrir les produits":"Explore products","SÉLECTION DU MOMENT":"FEATURED SELECTION","TON SETUP. TON GAME.":"YOUR SETUP. YOUR GAME.","TON STYLE.":"YOUR STYLE.","Univers Gaming":"Gaming universe","Accessoires gaming":"Gaming accessories","Pièces eFootball":"eFootball coins","Livraison au Sénégal et dans toute la sous-région":"Delivery in Senegal and across West Africa","BIENVENUE CHEZ SNGAMER":"WELCOME TO SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"HELLO AND WELCOME TO SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"THANK YOU FOR VISITING US!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"We are delighted to welcome you to our store and introduce you to our gaming world.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Welcome to our store. Thank you for visiting us today.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Explore our gaming accessories, gaming phones, consoles and eFootball coins.","COMMANDE EN LIGNE":"ORDER ONLINE","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Choose your products, add them to your cart and place your order easily.","LIVRAISON AU SÉNÉGAL":"DELIVERY IN SENEGAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"We carefully prepare your order and make delivery easy.","En promotion":"On sale","OFFRE EXCLUSIVE":"EXCLUSIVE OFFER","Offre exclusive":"Exclusive offer","Profil":"Profile","Souris":"Mice","PC Gaming":"PC Gaming","Console":"Console","Pièces eFootball Android":"eFootball Coins for Android","Pièces eFootball iPhone":"eFootball Coins for iPhone","Ordinateurs et équipements PC":"PC computers and equipment","Smartphones dédiés au jeu":"Gaming smartphones","Consoles et accessoires console":"Consoles and console accessories","Mon espace client":"My account","CHOISIR PAYS & LANGUE":"CHOOSE COUNTRY & LANGUAGE","Remonter en haut":"Back to top","Panier vide.":"Your cart is empty.","Aucun produit dans cette rubrique pour le moment.":"No products in this section yet.","Ajouter au panier":"Add to cart","Mon profil":"My profile","Panier":"Cart","Rechercher un produit":"Search products","Rechercher un produit...":"Search for a product...","À PROPOS":"ABOUT US","COMMENT COMMANDER ?":"HOW TO ORDER?","Choisis ton produit":"Choose your product","Sur commande":"Available to order","Rupture de stock":"Out of stock","En stock":"In stock","Stock limité":"Limited stock","Dernier article !":"Last item!","Découvrir mon panier":"View my cart"
+"Accueil":"Home","Accessoires":"Accessories","Gaming Phone":"Gaming phones","Pièces eFootball":"eFootball coins","Profil":"Profile","Tous":"All","Collection":"Collection","Découvrir les produits":"Explore products","SÉLECTION DU MOMENT":"FEATURED SELECTION","TON SETUP. TON GAME.":"YOUR SETUP. YOUR GAME.","TON STYLE.":"YOUR STYLE.","Univers Gaming":"Gaming universe","Accessoires gaming":"Gaming accessories","Pièces eFootball":"eFootball coins","Livraison au Sénégal et dans toute la sous-région":"Delivery in Senegal and across West Africa","BIENVENUE CHEZ SNGAMER":"WELCOME TO SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"HELLO AND WELCOME TO SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"THANK YOU FOR VISITING US!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"We are delighted to welcome you to our store and introduce you to our gaming world.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Welcome to our store. Thank you for visiting us today.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Explore our gaming accessories, gaming phones, consoles and eFootball coins.","COMMANDE EN LIGNE":"ORDER ONLINE","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Choose your products, add them to your cart and place your order easily.","LIVRAISON AU SÉNÉGAL":"DELIVERY IN SENEGAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"We carefully prepare your order and make delivery easy.","En promotion":"On sale","Profil":"Profile","Souris":"Mice","PC Gaming":"PC Gaming","Console":"Console","Pièces eFootball Android":"eFootball Coins for Android","Pièces eFootball iPhone":"eFootball Coins for iPhone","Ordinateurs et équipements PC":"PC computers and equipment","Smartphones dédiés au jeu":"Gaming smartphones","Consoles et accessoires console":"Consoles and console accessories","Mon espace client":"My account","CHOISIR PAYS & LANGUE":"CHOOSE COUNTRY & LANGUAGE","Remonter en haut":"Back to top","Panier vide.":"Your cart is empty.","Aucun produit dans cette rubrique pour le moment.":"No products in this section yet.","Ajouter au panier":"Add to cart","Mon profil":"My profile","Panier":"Cart","Rechercher un produit":"Search products","Rechercher un produit...":"Search for a product...","À PROPOS":"ABOUT US","COMMENT COMMANDER ?":"HOW TO ORDER?","Choisis ton produit":"Choose your product","Sur commande":"Available to order","Rupture de stock":"Out of stock","En stock":"In stock","Stock limité":"Limited stock","Dernier article !":"Last item!","Découvrir mon panier":"View my cart"
 },
 wo:{"Accueil":"Kër","Accessoires":"Jumtukaay yi","Gaming Phone":"Telefon yu gaming","Pièces eFootball":"Piis yu eFootball","Profil":"Profil","Tous":"Yépp","Collection":"Li ñu tànn","Découvrir les produits":"Seetal al yi","Panier vide.":"Sa panie amul dara.","SÉLECTION DU MOMENT":"Li ñu tànn tey","TON SETUP. TON GAME.":"Sa setup. Sa game.","TON STYLE.":"Sa style.","Univers Gaming":"Àdduna gaming","Accessoires gaming":"Jumtukaay yu gaming","Livraison au Sénégal et dans toute la sous-région":"Yóbbu al yi ci Senegaal ak réew yi ko wër","BIENVENUE CHEZ SNGAMER":"DALAL AK JÀMM CI SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"DALAL AK JÀMM CI SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"JËRËJËF CI SA ÑËW!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"Bég nanu la nuyu ci sunu boutique te won la sunu àdduna gaming.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Dalal ak jàmm ci sunu boutique. Jërëjëf ci sa ñëw.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Seetal sunuy jumtukaay gaming, telefon yu gaming, consoles ak pièces eFootball.","COMMANDE EN LIGNE":"JËND CI INTERNET","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Tànnal say al, yokk leen ci sa panie te defal sa commande ci yomb.","LIVRAISON AU SÉNÉGAL":"YÓBBU AL YI CI SENEGAAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"Nu ngi waajal sa commande ak teey, te yombal yóbbu gi."}
 };
-function protectedNode(node){var el=node&&node.parentElement;return !el||!!el.closest("h3,.productCardClickable,.productDetail,.productGallery,.cartItem,.price,.sngHomeHeroTitle,.sngHomeHeroBody,.sngCampaignSectionHeading,.campaignEyebrow,[data-no-translate],input,textarea,select,script,style,code");}
+function protectedNode(node){var el=node&&node.parentElement;return !el||!!el.closest("h3,.productCardClickable,.productDetail,.productGallery,.cartItem,.price,[data-no-translate],input,textarea,select,script,style,code");}
 function translateNode(node){
 if(!node||node.nodeType!==Node.TEXT_NODE||protectedNode(node))return;
 if(!originalText.has(node))originalText.set(node,node.nodeValue);
@@ -23,7 +23,7 @@ if(node.nodeValue!==next)node.nodeValue=next;
 }
 function walk(root){
 if(!root)return;if(root.nodeType===Node.TEXT_NODE){translateNode(root);return;}
-if(root.nodeType===1&&root.closest&&root.closest("h3,.productCardClickable,.productDetail,.sngHomeHeroTitle,.sngHomeHeroBody,.sngCampaignSectionHeading,.campaignEyebrow,[data-no-translate]"))return;
+if(root.nodeType===1&&root.closest&&root.closest("h3,.productCardClickable,.productDetail,[data-no-translate]"))return;
 var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(translateNode);
 if(root.querySelectorAll)root.querySelectorAll("[placeholder],[aria-label],[title]").forEach(function(el){
 if(el.closest("h3,.productCardClickable,.productDetail,[data-no-translate]"))return;
@@ -56,58 +56,12 @@ if(!["fr","wo","en"].includes(next))return;locale=next;if(flags[nextCountry])cou
 try{localStorage.setItem(STATE_KEY,locale+"|"+country);localStorage.setItem(KEY,locale);localStorage.setItem(KEY+"_country",country);}catch(_){}
 close();apply();
 }
-
-function translateDynamicContent(root){
-var scope=root&&root.querySelectorAll?root:document;
-var selectors=".sngHomeHeroTitle,.sngHomeHeroBody,.sngCampaignSectionHeading,.campaignEyebrow";
-var nodes=[];
-if(root&&root.nodeType===1&&root.matches&&root.matches(selectors))nodes.push(root);
-if(scope.querySelectorAll)nodes=nodes.concat(Array.from(scope.querySelectorAll(selectors)));
-nodes.forEach(function(el){
-if(!el.dataset.sngI18nSource)el.dataset.sngI18nSource=el.textContent||"";
-var source=el.dataset.sngI18nSource;
-var translated=locale==="fr"?source:((dict[locale]||{})[source]||source);
-if(el.textContent!==translated)el.textContent=translated;
-});
-}
-
-function translateHeroCarousel(){
-var pairs={
-"MERCI DE NOUS RENDRE VISITE !":{en:"THANK YOU FOR VISITING US!",wo:"JËRËJËF CI SA ÑËW!"},
-"BONJOUR ET BIENVENUE SUR SNGAMER STORE":{en:"HELLO AND WELCOME TO SNGAMER STORE",wo:"DALAL AK JÀMM CI SNGAMER STORE"},
-"BIENVENUE CHEZ SNGAMER":{en:"WELCOME TO SNGAMER",wo:"DALAL AK JÀMM CI SNGAMER"},
-"SNGAMER STORE":{en:"SNGAMER STORE",wo:"SNGAMER STORE"},
-"COMMANDE EN LIGNE":{en:"ORDER ONLINE",wo:"JËND CI INTERNET"},
-"LIVRAISON AU SÉNÉGAL":{en:"DELIVERY IN SENEGAL",wo:"YÓBBU AL YI CI SENEGAAL"},
-"Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":{en:"Welcome to our store. Thank you for visiting us today.",wo:"Dalal ak jàmm ci sunu boutique. Jërëjëf ci sa ñëw."},
-"Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":{en:"We are delighted to welcome you to our store and introduce you to our gaming world.",wo:"Bég nanu la nuyu ci sunu boutique te won la sunu àdduna gaming."},
-"Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":{en:"Explore our gaming accessories, gaming phones, consoles and eFootball coins.",wo:"Seetal sunuy jumtukaay gaming, telefon yu gaming, consoles ak pièces eFootball."},
-"Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":{en:"Choose your products, add them to your cart and place your order easily.",wo:"Tànnal say al, yokk leen ci sa panie te defal sa commande ci yomb."},
-"Nous préparons ta commande avec soin et facilitons sa livraison.":{en:"We carefully prepare your order and make delivery easy.",wo:"Nu ngi waajal sa commande ak teey, te yombal yóbbu gi."}
-};
-var roots=document.querySelectorAll(".heroAnnouncement .announcementCopy, .professional-hero .heroAnnouncement .announcementCopy");
-roots.forEach(function(root){
-[root.querySelector("strong"),root.querySelector("span")].filter(Boolean).forEach(function(el){
-var raw=(el.dataset.sngHeroFrench||el.textContent||"").trim();
-if(!pairs[raw]){
-var found=Object.keys(pairs).find(function(k){return pairs[k].en===raw||pairs[k].wo===raw;});
-if(found)raw=found;
-}
-if(!pairs[raw])return;
-el.dataset.sngHeroFrench=raw;
-el.textContent=locale==="fr"?raw:(pairs[raw][locale]||raw);
-});
-});
-}
 function apply(){
 document.documentElement.lang=locale;document.documentElement.dataset.storeLocale=locale;
 document.querySelectorAll(".sngLanguageChoice[data-locale]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.locale===locale&&b.dataset.country===country));});
 var flag=document.querySelector("#sngLanguageButton span");if(flag)flag.textContent=flags[country]||"🇸🇳";
 walk(document.body);
-translateDynamicContent(document.body);
-translateHeroCarousel();
 window.dispatchEvent(new CustomEvent("sngamer:localechange",{detail:{locale:locale,country:country}}));
-document.documentElement.classList.remove("sng-locale-pending");
 }
 function attachMenu(){
 var b=document.getElementById("sngLanguageButton");if(!b)return false;
@@ -129,9 +83,7 @@ apply();
 if(!window.__sngamerI18nPageshowBound){window.__sngamerI18nPageshowBound=true;window.addEventListener("pageshow",function(){restoreSavedLocale();attachMenu();apply();});}
 if(window.MutationObserver&&!window.__sngamerI18nObserver){
 window.__sngamerI18nObserver=new MutationObserver(function(records){
-records.forEach(function(r){if(r.type==="characterData")translateNode(r.target);else r.addedNodes.forEach(function(n){walk(n);translateDynamicContent(n);});});
-translateDynamicContent(document.body);
-translateHeroCarousel();
+records.forEach(function(r){if(r.type==="characterData")translateNode(r.target);else r.addedNodes.forEach(walk);});
 attachMenu();
 });
 window.__sngamerI18nObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
