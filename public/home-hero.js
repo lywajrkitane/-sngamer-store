@@ -69,8 +69,8 @@
     if(slide.url && /^(https?:)\/\//.test(slide.url)){ const image=document.createElement("img"); image.className="sngHomeHeroImage"; image.src=slide.url; image.alt=""; image.decoding="async"; image.draggable=false; panel.appendChild(image); }
     const shade=document.createElement("div"); shade.className="sngHomeHeroShade"; shade.setAttribute("aria-hidden","true");
     const copy=document.createElement("div"); copy.className="sngHomeHeroCopy";
-    const title=document.createElement("h2"); title.className="sngHomeHeroTitle"; title.textContent=slide.title;
-    const body=document.createElement("p"); body.className="sngHomeHeroBody"; body.textContent=slide.body;
+    const title=document.createElement("h2"); title.className="sngHomeHeroTitle"; title.textContent=window.SNGamerI18n?window.SNGamerI18n.t(slide.title):slide.title; title.dataset.sngHeroSource=slide.title;
+    const body=document.createElement("p"); body.className="sngHomeHeroBody"; body.textContent=window.SNGamerI18n?window.SNGamerI18n.t(slide.body):slide.body; body.dataset.sngHeroSource=slide.body;
     copy.append(title,body); panel.append(shade,copy); return panel;
   }
 
@@ -85,8 +85,13 @@
     loadSlides().then(function(slides){
       if(!slides.length){wrap.remove();return;}
       card.replaceChildren(); const panels=slides.map(makeSlide);
-      const dotButtons=slides.map(function(slide,index){ const button=document.createElement("button"); button.type="button"; button.className=index===0?"is-active":""; button.setAttribute("aria-label","Afficher le slide "+(index+1)+" : "+slide.title); button.title=slide.title; button.addEventListener("click",function(){show(index,true);}); return button; });
-      panels.forEach(function(panel){card.appendChild(panel);}); dots.replaceChildren(); dots.style.position="absolute"; card.appendChild(dots); dotButtons.forEach(function(button){dots.appendChild(button);});
+      const dotButtons=slides.map(function(slide,index){ const button=document.createElement("button"); button.type="button"; button.className=index===0?"is-active":""; const t=window.SNGamerI18n?window.SNGamerI18n.t(slide.title):slide.title; button.setAttribute("aria-label",(window.SNGamerI18n&&window.SNGamerI18n.getLocale()==="en"?"Show slide ":"Afficher le slide ")+(index+1)+" : "+t); button.title=t; button.addEventListener("click",function(){show(index,true);}); return button; });
+      panels.forEach(function(panel){card.appendChild(panel);});
+      function applyHeroLocale(){panels.forEach(function(panel){const title=panel.querySelector(".sngHomeHeroTitle"),body=panel.querySelector(".sngHomeHeroBody");if(title){const source=title.dataset.sngHeroSource||title.textContent;title.textContent=window.SNGamerI18n?window.SNGamerI18n.t(source):source;}if(body){const source=body.dataset.sngHeroSource||body.textContent;body.textContent=window.SNGamerI18n?window.SNGamerI18n.t(source):source;}});dotButtons.forEach(function(button,index){const source=slides[index].title;const translated=window.SNGamerI18n?window.SNGamerI18n.t(source):source;button.title=translated;button.setAttribute("aria-label",(window.SNGamerI18n&&window.SNGamerI18n.getLocale()==="en"?"Show slide ":"Afficher le slide ")+(index+1)+" : "+translated);});}
+      window.addEventListener("sngamer:localechange",applyHeroLocale);
+      window.addEventListener("sngamer:i18nready",applyHeroLocale);
+      applyHeroLocale();
+      dots.replaceChildren(); dots.style.position="absolute"; card.appendChild(dots); dotButtons.forEach(function(button){dots.appendChild(button);});
       let activeIndex=0,timer=null;
       function show(nextIndex,resetTimer){ activeIndex=(nextIndex+panels.length)%panels.length; panels.forEach(function(panel,index){panel.classList.toggle("is-active",index===activeIndex);panel.setAttribute("aria-hidden",index===activeIndex?"false":"true");}); dotButtons.forEach(function(button,index){button.classList.toggle("is-active",index===activeIndex);if(index===activeIndex)button.setAttribute("aria-current","true");else button.removeAttribute("aria-current");}); if(resetTimer)startTimer(); }
       function pauseTimer(){if(timer)window.clearInterval(timer);timer=null;}
