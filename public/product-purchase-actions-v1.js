@@ -112,7 +112,7 @@
     buy.addEventListener('click',function(){if(buy.disabled)return;if(typeof window.add!=='function'||typeof window.openCheckout!=='function')return;buy.disabled=true;try{const added=window.add(id);if(added!==false){window.setTimeout(function(){window.openCheckout();buy.disabled=false},120)}else buy.disabled=false}catch(_){buy.disabled=false}});
     addButton.insertAdjacentElement('beforebegin',buy);
   }
-  function productIdFromDetail(detail){const social=detail.querySelector('.sngProductSocial[data-product-id]');const id=Number(social?.dataset.productId||0);if(id)return id;const hash=String(location.hash||'').match(/^#product=(\d+)$/);return hash?Number(hash[1]):0}
+  function productIdFromDetail(detail){const direct=Number(detail.dataset.productId||detail.querySelector('.sngProductSocial[data-product-id]')?.dataset.productId||0);if(direct)return direct;const hash=String(location.hash||'').match(/^#product=(\d+)$/);return hash?Number(hash[1]):0}
   function showCartToast(productName){
     let toast=document.getElementById('sngamer-cart-toast');
     if(!toast){toast=document.createElement('div');toast.id='sngamer-cart-toast';toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.innerHTML='<div class="toastIcon" aria-hidden="true">🛒</div><div class="toastContent"><p class="toastTitle">Ajouté au panier</p><p class="toastProduct"></p></div><button class="toastClose" type="button" aria-label="Fermer">×</button>';toast.querySelector('.toastClose').addEventListener('click',function(){toast.classList.remove('show')});document.body.appendChild(toast)}
