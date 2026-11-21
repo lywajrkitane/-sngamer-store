@@ -162,6 +162,13 @@ price INTEGER NOT NULL CHECK (price >= 0),
     ALTER TABLE orders
     ADD COLUMN IF NOT EXISTS total INTEGER DEFAULT 0
   `);
+  // Keep legacy order columns available on fresh databases before relaxing
+  // their constraints; older deployments may still write these fields.
+  await db(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS customer_name TEXT,
+    ADD COLUMN IF NOT EXISTS phone TEXT
+  `);
   await db(`
     ALTER TABLE orders
     ALTER COLUMN customer_name DROP NOT NULL
