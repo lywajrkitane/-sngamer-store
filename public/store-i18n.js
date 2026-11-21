@@ -12,18 +12,43 @@ en:{
 },
 wo:{"Accueil":"Kër","Accessoires":"Jumtukaay yi","Gaming Phone":"Telefon yu gaming","Pièces eFootball":"Piis yu eFootball","Profil":"Profil","Tous":"Yépp","Collection":"Li ñu tànn","Découvrir les produits":"Seetal al yi","Panier vide.":"Sa panie amul dara.","SÉLECTION DU MOMENT":"Li ñu tànn tey","TON SETUP. TON GAME.":"Sa setup. Sa game.","TON STYLE.":"Sa style.","Univers Gaming":"Àdduna gaming","Accessoires gaming":"Jumtukaay yu gaming","Livraison au Sénégal et dans toute la sous-région":"Yóbbu al yi ci Senegaal ak réew yi ko wër","BIENVENUE CHEZ SNGAMER":"DALAL AK JÀMM CI SNGAMER","BONJOUR ET BIENVENUE SUR SNGAMER STORE":"DALAL AK JÀMM CI SNGAMER STORE","MERCI DE NOUS RENDRE VISITE !":"JËRËJËF CI SA ÑËW!","Nous sommes heureux de vous accueillir dans notre boutique et de vous faire découvrir notre univers gaming.":"Bég nanu la nuyu ci sunu boutique te won la sunu àdduna gaming.","Bienvenue dans la boutique. Merci de nous rendre visite aujourd’hui.":"Dalal ak jàmm ci sunu boutique. Jërëjëf ci sa ñëw.","SNGAMER STORE":"SNGAMER STORE","Découvre nos accessoires gaming, Gaming Phone, consoles et pièces eFootball.":"Seetal sunuy jumtukaay gaming, telefon yu gaming, consoles ak pièces eFootball.","COMMANDE EN LIGNE":"JËND CI INTERNET","Choisis tes produits, ajoute-les au panier et passe ta commande facilement.":"Tànnal say al, yokk leen ci sa panie te defal sa commande ci yomb.","LIVRAISON AU SÉNÉGAL":"YÓBBU AL YI CI SENEGAAL","Nous préparons ta commande avec soin et facilitons sa livraison.":"Nu ngi waajal sa commande ak teey, te yombal yóbbu gi.","En promotion":"Promo yi","OFFRE EXCLUSIVE":"Xéewal bu bees","Offre exclusive":"Xéewal bu bees"}
 };
-function protectedNode(node){var el=node&&node.parentElement;return !el||!!el.closest("h3,.productCardClickable,.productDetail,.productGallery,.cartItem,.price,[data-no-translate],input,textarea,select,script,style,code");}
+var translationQueue=new Map(),translationTimer=null,translationRun=0;
+function protectedNode(node){var el=node&&node.parentElement;return !el||!!el.closest(".productCardClickable h3,.productDetail h2,.productGallery,.price,[data-no-translate],input,textarea,select,script,style,code");}
+function queueAutomaticTranslation(node,raw,value){
+if(locale==="fr"||value.length<4||/^[\\d\\W_]+$/.test(value)||!/[\\p{L}]/u.test(value))return;
+translationQueue.set(node,{raw:raw,value:value,locale:locale,run:translationRun});
+if(translationTimer)clearTimeout(translationTimer);
+translationTimer=setTimeout(flushAutomaticTranslations,180);
+}
+async function flushAutomaticTranslations(){
+translationTimer=null;
+var entries=Array.from(translationQueue.entries()).slice(0,30);
+entries.forEach(function(entry){translationQueue.delete(entry[0]);});
+if(!entries.length)return;
+var activeLocale=locale,run=translationRun;
+try{
+var response=await fetch("/api/translate",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({locale:activeLocale,texts:entries.map(function(entry){return entry[1].value;})})});
+if(!response.ok)return;
+var data=await response.json();
+if(locale!==activeLocale||run!==translationRun||!Array.isArray(data.translations))return;
+entries.forEach(function(entry,index){
+var node=entry[0],meta=entry[1],translated=data.translations[index];
+if(node&&node.isConnected&&originalText.get(node)===meta.raw&&typeof translated==="string"&&translated.trim())node.nodeValue=meta.raw.replace(meta.value,translated);
+});
+}catch(error){console.warn("SNGAMER_AUTO_TRANSLATION_UNAVAILABLE",error);}
+if(translationQueue.size&&locale!=="fr")translationTimer=setTimeout(flushAutomaticTranslations,180);
+}
 function translateNode(node){
 if(!node||node.nodeType!==Node.TEXT_NODE||protectedNode(node))return;
 if(!originalText.has(node))originalText.set(node,node.nodeValue);
 var raw=originalText.get(node),value=raw.trim();if(!value)return;
-var target=locale==="fr"?value:((dict[locale]||{})[value]||value);
+var known=(dict[locale]||{})[value],target=locale==="fr"?value:(known||value);if(locale!=="fr"&&!known)queueAutomaticTranslation(node,raw,value);
 var start=raw.match(/^\s*/)[0],end=raw.match(/\s*$/)[0],next=start+target+end;
 if(node.nodeValue!==next)node.nodeValue=next;
 }
 function walk(root){
 if(!root)return;if(root.nodeType===Node.TEXT_NODE){translateNode(root);return;}
-if(root.nodeType===1&&root.closest&&root.closest("h3,.productCardClickable,.productDetail,[data-no-translate]"))return;
+if(root.nodeType===1&&root.closest&&root.closest(".productCardClickable h3,.productDetail h2,.productGallery,[data-no-translate]"))return;
 var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(translateNode);
 if(root.querySelectorAll)root.querySelectorAll("[placeholder],[aria-label],[title]").forEach(function(el){
 if(el.closest("h3,.productCardClickable,.productDetail,[data-no-translate]"))return;
@@ -57,6 +82,7 @@ try{localStorage.setItem(STATE_KEY,locale+"|"+country);localStorage.setItem(KEY,
 close();apply();
 }
 function apply(){
+translationRun++;translationQueue.clear();if(translationTimer){clearTimeout(translationTimer);translationTimer=null;}
 document.documentElement.lang=locale;document.documentElement.dataset.storeLocale=locale;
 document.querySelectorAll(".sngLanguageChoice[data-locale]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.locale===locale&&b.dataset.country===country));});
 var flag=document.querySelector("#sngLanguageButton span");if(flag)flag.textContent=flags[country]||"🇸🇳";
