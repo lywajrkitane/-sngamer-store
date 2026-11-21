@@ -1921,11 +1921,66 @@ app.get("*", (req, res) => {
   );
 });
 
+/* SNGAMER SAFE TEST CATALOG SYNC V1 */
+async function syncProductionCatalogIntoTest() {
+  if (process.env.ENABLE_PRODUCTION_CATALOG_SYNC !== "true") return;
+  if (!process.env.SOURCE_READONLY_DATABASE_URL) {
+    throw new Error("SOURCE_READONLY_DATABASE_URL is required for the one-time test catalog sync.");
+  }
+
+  const sourcePool = new Pool({
+    connectionString: process.env.SOURCE_READONLY_DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+    options: "-c default_transaction_read_only=on",
+    max: 1,
+    connectionTimeoutMillis: 15000
+  });
+  const source = await sourcePool.connect();
+  const target = await pool.connect();
+  const copyTable = async (table, columns, conflictKey) => {
+    const result = await source.query("SELECT " + columns.join(", ") + " FROM " + table + " ORDER BY " + conflictKey);
+    for (const row of result.rows) {
+      const names = Object.keys(row);
+      const values = names.map((name) => row[name]);
+      const placeholders = names.map((_, index) => "$" + (index + 1));
+      const updates = names.filter((name) => name !== conflictKey).map((name) => name + " = EXCLUDED." + name);
+      const sql = "INSERT INTO " + table + " (" + names.join(", ") + ") VALUES (" + placeholders.join(", ") + ") ON CONFLICT (" + conflictKey + ") DO " + (updates.length ? "UPDATE SET " + updates.join(", ") : "NOTHING");
+      await target.query(sql, values);
+    }
+    return result.rows.length;
+  };
+
+  try {
+    await source.query("BEGIN READ ONLY");
+    await target.query("BEGIN");
+    const campaigns = await copyTable("campaigns", ["id","name","sticker","description","active","start_date","end_date","created_at","right_sticker"], "id");
+    const products = await copyTable("products", ["id","name","category","price","stock","description","image","created_at","emoji","image1_url","image2_url","image3_url","video_url","promo_price","promo_active","campaign_id","platform","main_image_url","stock_mode","product_specs","product_condition","warranty","warranty_configured","characteristics","colors"], "id");
+    const heroMedia = await copyTable("hero_media", ["slot","media_type","url","updated_at"], "slot");
+    const heroContent = await copyTable("hero_slide_content", ["slot","title","body","updated_at"], "slot");
+    const promoMedia = await copyTable("promo_media", ["slot","media_type","url","updated_at","campaign_id","product_id"], "slot");
+    await target.query("SELECT setval(pg_get_serial_sequence('products','id'), GREATEST(COALESCE((SELECT MAX(id) FROM products), 1), 1), true)");
+    await target.query("SELECT setval(pg_get_serial_sequence('campaigns','id'), GREATEST(COALESCE((SELECT MAX(id) FROM campaigns), 1), 1), true)");
+    await target.query("COMMIT");
+    await source.query("COMMIT");
+    console.log("SNGAMER_TEST_CATALOG_SYNC_SUCCESS", JSON.stringify({ campaigns, products, heroMedia, heroContent, promoMedia }));
+  } catch (error) {
+    try { await target.query("ROLLBACK"); } catch (_) {}
+    try { await source.query("ROLLBACK"); } catch (_) {}
+    console.error("SNGAMER_TEST_CATALOG_SYNC_FAILED", error.message);
+    throw error;
+  } finally {
+    source.release();
+    target.release();
+    await sourcePool.end();
+  }
+}
+
 /* =========================
    START SERVER
 ========================= */
 
 initDb()
+  .then(syncProductionCatalogIntoTest)
   .then(() => {
     app.listen(PORT, "0.0.0.0", () => {
       console.log(
