@@ -49,6 +49,9 @@
     cards.forEach((el,index)=>reveal(el,Math.min(index*34,340)));
     const footer=document.querySelector(".store-footer-content");
     if(footer)reveal(footer,0);
+    if(window.SNGamerI18n&&typeof window.SNGamerI18n.apply==="function")window.SNGamerI18n.apply();
+    await sleep(80);
+    if(window.SNGamerI18n&&typeof window.SNGamerI18n.apply==="function")window.SNGamerI18n.apply();
     root.classList.remove("sng-home-sequence-pending");
     window.__sngamerHomeSequenceComplete=true;
     window.dispatchEvent(new CustomEvent("sngamer:home-sequence-complete"));
