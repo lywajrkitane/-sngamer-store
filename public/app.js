@@ -459,7 +459,9 @@ function openProduct(id){
       </div>
     </section>`;
 
-  document.querySelector("#productDetail").innerHTML=`
+  const productDetailRoot=document.querySelector("#productDetail");
+  productDetailRoot.dataset.productId=String(p.id);
+  productDetailRoot.innerHTML=`
     <div class="productDetail sngProductDetailV1">
       <div class="productGallery">
         <div class="productMainImage">${images.length?`<img id="productMainImage" src="${escapeHtml(images[0])}" alt="${escapeHtml(p.name)}">`:`<div class="productEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div>
