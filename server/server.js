@@ -1941,10 +1941,11 @@ async function syncProductionCatalogIntoTest() {
     // The test database can have a slightly older schema than production.
     // Copy only columns that exist in BOTH databases; never alter production.
     const targetSchema = await target.query(
-      "SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = $1 AND is_generated = 'NEVER'",
+      "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = $1 AND is_generated = 'NEVER'",
       [table]
     );
-    const targetColumns = new Set(targetSchema.rows.map((row) => row.column_name));
+    const targetColumnTypes = new Map(targetSchema.rows.map((row) => [row.column_name, row.data_type]));
+    const targetColumns = new Set(targetColumnTypes.keys());
     const columns = sourceColumns.filter((column) => targetColumns.has(column));
     if (!columns.includes(conflictKey)) {
       throw new Error("Cannot sync " + table + ": conflict key " + conflictKey + " is missing from the test database.");
@@ -1953,8 +1954,17 @@ async function syncProductionCatalogIntoTest() {
     const result = await source.query("SELECT " + columns.join(", ") + " FROM " + table + " ORDER BY " + conflictKey);
     for (const row of result.rows) {
       const names = Object.keys(row);
-      const values = names.map((name) => row[name]);
-      const placeholders = names.map((_, index) => "$" + (index + 1));
+      const values = names.map((name) => {
+        const type = targetColumnTypes.get(name);
+        const value = row[name];
+        if (type !== "json" && type !== "jsonb") return value;
+        if (value == null) return null;
+        return JSON.stringify(value);
+      });
+      const placeholders = names.map((name, index) => {
+        const type = targetColumnTypes.get(name);
+        return "$" + (index + 1) + (type === "json" || type === "jsonb" ? "::" + type : "");
+      });
       const updates = names.filter((name) => name !== conflictKey).map((name) => name + " = EXCLUDED." + name);
       const sql = "INSERT INTO " + table + " (" + names.join(", ") + ") VALUES (" + placeholders.join(", ") + ") ON CONFLICT (" + conflictKey + ") DO " + (updates.length ? "UPDATE SET " + updates.join(", ") : "NOTHING");
       await target.query(sql, values);
