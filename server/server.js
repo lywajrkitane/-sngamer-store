@@ -1953,6 +1953,14 @@ async function syncProductionCatalogIntoTest() {
   try {
     await source.query("BEGIN READ ONLY");
     await target.query("BEGIN");
+    await target.query("CREATE TABLE IF NOT EXISTS sngamer_test_sync_runs (sync_key TEXT PRIMARY KEY, completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), details JSONB NOT NULL DEFAULT '{}'::jsonb)");
+    const priorRun = await target.query("SELECT sync_key FROM sngamer_test_sync_runs WHERE sync_key = 'production-catalog-v1' LIMIT 1");
+    if (priorRun.rowCount) {
+      await target.query("COMMIT");
+      await source.query("ROLLBACK");
+      console.log("SNGAMER_TEST_CATALOG_SYNC_ALREADY_COMPLETED");
+      return;
+    }
     const campaigns = await copyTable("campaigns", ["id","name","sticker","description","active","start_date","end_date","created_at","right_sticker"], "id");
     const products = await copyTable("products", ["id","name","category","price","stock","description","image","created_at","emoji","image1_url","image2_url","image3_url","video_url","promo_price","promo_active","campaign_id","platform","main_image_url","stock_mode","product_specs","product_condition","warranty","warranty_configured","characteristics","colors"], "id");
     const heroMedia = await copyTable("hero_media", ["slot","media_type","url","updated_at"], "slot");
@@ -1960,6 +1968,7 @@ async function syncProductionCatalogIntoTest() {
     const promoMedia = await copyTable("promo_media", ["slot","media_type","url","updated_at","campaign_id","product_id"], "slot");
     await target.query("SELECT setval(pg_get_serial_sequence('products','id'), GREATEST(COALESCE((SELECT MAX(id) FROM products), 1), 1), true)");
     await target.query("SELECT setval(pg_get_serial_sequence('campaigns','id'), GREATEST(COALESCE((SELECT MAX(id) FROM campaigns), 1), 1), true)");
+    await target.query("INSERT INTO sngamer_test_sync_runs (sync_key, details) VALUES ('production-catalog-v1', $1::jsonb)", [JSON.stringify({ campaigns, products, heroMedia, heroContent, promoMedia })]);
     await target.query("COMMIT");
     await source.query("COMMIT");
     console.log("SNGAMER_TEST_CATALOG_SYNC_SUCCESS", JSON.stringify({ campaigns, products, heroMedia, heroContent, promoMedia }));
