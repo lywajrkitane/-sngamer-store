@@ -140,7 +140,7 @@ translationTimer=setTimeout(flushAutomaticTranslations,180);
 }
 async function flushAutomaticTranslations(){
 translationTimer=null;
-var entries=Array.from(translationQueue.entries()).slice(0,30);
+var entries=[],totalChars=0;Array.from(translationQueue.entries()).some(function(entry){var size=entry[1].value.length;if(entries.length>=30||size>5000||totalChars+size>30000)return false;entries.push(entry);totalChars+=size;return false;});
 entries.forEach(function(entry){translationQueue.delete(entry[0]);});
 if(!entries.length)return;
 var activeLocale=locale,run=translationRun;
