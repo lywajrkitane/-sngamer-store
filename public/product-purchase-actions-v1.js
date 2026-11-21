@@ -102,7 +102,7 @@
     return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.84 8.72c0 5.1-8.84 10.02-8.84 10.02S3.16 13.82 3.16 8.72A4.62 4.62 0 0 1 7.78 4.1c1.75 0 3.27.98 4.22 2.38.95-1.4 2.47-2.38 4.22-2.38a4.62 4.62 0 0 1 4.62 4.62Z"></path></svg>';
   }
   function normalizeFavoriteButton(detail){const btn=detail.querySelector('.sngFavBtn');if(!btn)return;const icon=btn.querySelector('.sngFavIcon');if(!icon)return;icon.innerHTML=heartSvg();icon.setAttribute('aria-hidden','true');btn.setAttribute('title',btn.classList.contains('isFavorite')?'Retirer des favoris':'Ajouter aux favoris')}
-  function findAddToCartButton(detail){const buttons=Array.from(detail.querySelectorAll('button'));return buttons.find(b=>String(b.textContent||'').trim().toLowerCase().includes('ajouter au panier'))||null}
+  function findAddToCartButton(detail){return detail.querySelector('.sngProductAddButton,.sngAddToCartBtn')||Array.from(detail.querySelectorAll('button')).find(b=>/ajouter au panier|add to cart/i.test(String(b.textContent||'').trim()))||null}
   function normalizeAddToCartButton(detail){const btn=findAddToCartButton(detail);if(!btn)return;btn.classList.add('sngAddToCartBtn');if(btn.dataset.sngCartNormalized==='1')return;btn.innerHTML='<span class="sngCartIcon" aria-hidden="true">🛒</span><span>Ajouter au panier</span>';btn.setAttribute('aria-label','Ajouter au panier');btn.dataset.sngCartNormalized='1'}
   function injectBuyNow(detail){
     if(detail.querySelector('.sngBuyNowBtn'))return;
