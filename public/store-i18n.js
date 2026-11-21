@@ -144,6 +144,7 @@ var entries=[],totalChars=0;Array.from(translationQueue.entries()).forEach(funct
 entries.forEach(function(entry){translationQueue.delete(entry[0]);});
 if(!entries.length)return;
 var activeLocale=locale,run=translationRun;
+console.info("SNGAMER_TRANSLATION_CLIENT_BATCH",JSON.stringify({locale:activeLocale,count:entries.length}));
 function retryEntries(delay){
 entries.forEach(function(entry){
 var meta=entry[1];
