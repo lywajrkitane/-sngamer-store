@@ -425,7 +425,7 @@ function openProduct(id){
     ? `<section class="sngProductCharacteristics" aria-labelledby="sngProductCharacteristicsTitle">
         <h3 id="sngProductCharacteristicsTitle">Caractéristiques</h3>
         <dl class="sngProductCharacteristicsList">
-          ${productCharacteristics.map(item=>`<div class="sngProductCharacteristicRow"><dt>${escapeHtml(item.name)}</dt><dd>${escapeHtml(item.value).replace(/\\n/g,"<br>")}</dd></div>`).join("")}
+          ${productCharacteristics.map(item=>`<div class="sngProductCharacteristicRow"><dt>${escapeHtml(item.name)}</dt><dd data-no-translate>${escapeHtml(item.value).replace(/\\n/g,"<br>")}</dd></div>`).join("")}
         </dl>
       </section>`
     : "";
