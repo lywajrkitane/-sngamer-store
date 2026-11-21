@@ -482,6 +482,7 @@ function openProduct(id){
     </div>`;
 
   document.querySelector("#productModal").classList.add("show");
+  if(window.SNGamerI18n&&typeof window.SNGamerI18n.apply==="function")window.SNGamerI18n.apply();
   try{history.replaceState(null,"",location.pathname+"#product="+p.id)}catch(_){location.hash="product="+p.id}
 }
 function closeProduct(){document.querySelector("#productModal").classList.remove("show");try{history.replaceState(null,"",location.pathname)}catch(_){location.hash=""}}
