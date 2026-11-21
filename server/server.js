@@ -434,7 +434,7 @@ app.post("/api/translate", async (req, res) => {
   const cacheKeys = clean.map(value => locale + ":" + value);
   const missingIndexes = cacheKeys.map((key, index) => storeTranslationCache.has(key) ? -1 : index).filter(index => index >= 0);
   const now = Date.now();
-  const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+  const ip = String(req.ip || req.socket.remoteAddress || "unknown");
   const rate = storeTranslationRequests.get(ip) || { count: 0, start: now };
   if (now - rate.start > 60000) { rate.count = 0; rate.start = now; }
   if (rate.count >= 25) return res.status(429).json({ error: "Limite temporaire de traduction atteinte." });
@@ -457,6 +457,7 @@ app.post("/api/translate", async (req, res) => {
       ].join("\n");
       const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", {
         method: "POST",
+        signal: AbortSignal.timeout(20000),
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
