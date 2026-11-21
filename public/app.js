@@ -425,7 +425,7 @@ function openProduct(id){
     ? `<section class="sngProductCharacteristics" aria-labelledby="sngProductCharacteristicsTitle">
         <h3 id="sngProductCharacteristicsTitle">Caractéristiques</h3>
         <dl class="sngProductCharacteristicsList">
-          ${productCharacteristics.map(item=>`<div class="sngProductCharacteristicRow"><dt>${escapeHtml(item.name)}</dt><dd>${escapeHtml(item.value).replace(/\\n/g,"<br>")}</dd></div>`).join("")}
+          ${productCharacteristics.map(item=>`<div class="sngProductCharacteristicRow"><dt>${escapeHtml(item.name)}</dt><dd data-no-translate>${escapeHtml(item.value).replace(/\\n/g,"<br>")}</dd></div>`).join("")}
         </dl>
       </section>`
     : "";
@@ -459,7 +459,9 @@ function openProduct(id){
       </div>
     </section>`;
 
-  document.querySelector("#productDetail").innerHTML=`
+  const productDetailRoot=document.querySelector("#productDetail");
+  productDetailRoot.dataset.productId=String(p.id);
+  productDetailRoot.innerHTML=`
     <div class="productDetail sngProductDetailV1">
       <div class="productGallery">
         <div class="productMainImage">${images.length?`<img id="productMainImage" src="${escapeHtml(images[0])}" alt="${escapeHtml(p.name)}">`:`<div class="productEmoji">${escapeHtml(p.emoji||"🎮")}</div>`}</div>
@@ -482,6 +484,7 @@ function openProduct(id){
     </div>`;
 
   document.querySelector("#productModal").classList.add("show");
+  if(window.SNGamerI18n&&typeof window.SNGamerI18n.apply==="function")window.SNGamerI18n.apply();
   try{history.replaceState(null,"",location.pathname+"#product="+p.id)}catch(_){location.hash="product="+p.id}
 }
 function closeProduct(){document.querySelector("#productModal").classList.remove("show");try{history.replaceState(null,"",location.pathname)}catch(_){location.hash=""}}
