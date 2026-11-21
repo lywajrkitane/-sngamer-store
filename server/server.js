@@ -418,6 +418,7 @@ app.get("/produit/:id", async (req, res) => {
 const storeTranslationCache = new Map();
 const storeTranslationRequests = new Map();
 app.post("/api/translate", async (req, res) => {
+  console.info("SNGAMER_TRANSLATION_REQUEST", JSON.stringify({ locale: req.body?.locale || null, count: Array.isArray(req.body?.texts) ? req.body.texts.length : 0, keyConfigured: Boolean(process.env.GEMINI_API_KEY) }));
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(503).json({ error: "Traduction automatique non configurée." });
 
@@ -485,6 +486,7 @@ app.post("/api/translate", async (req, res) => {
       if (!Array.isArray(parsed) || parsed.length !== sourceTexts.length || parsed.some(value => typeof value !== "string")) {
         throw new Error("Invalid translation response shape");
       }
+      console.info("SNGAMER_TRANSLATION_PROVIDER_SUCCESS", JSON.stringify({ locale, translatedCount: parsed.length }));
       translated = parsed;
       missingIndexes.forEach((index, offset) => {
         const key = cacheKeys[index];
