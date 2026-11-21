@@ -122,4 +122,8 @@ window.dispatchEvent(new CustomEvent("sngamer:i18nready",{detail:{locale:locale,
 }
 window.SNGamerI18n={getLocale:function(){return locale;},getCountry:function(){return country;},setLocale:setLocale,apply:apply,t:function(fr){return locale==="fr"?fr:((dict[locale]||{})[fr]||fr);}};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
+window.addEventListener("load",function(){attachMenu();apply();});
+window.addEventListener("pageshow",function(){restoreSavedLocale();attachMenu();apply();});
+window.setTimeout(function(){if(document.body){attachMenu();apply();}},700);
+window.setTimeout(function(){if(document.body){attachMenu();apply();}},1800);
 })();
