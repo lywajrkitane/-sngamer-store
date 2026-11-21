@@ -179,7 +179,7 @@ if(el.closest("h3,.productCardClickable h3,.productDetail h2,.productGallery,[da
 }
 function countryRow(flag,name,code,localLocale,localLabel){
 return '<section class="sngLanguageCountry"><div class="sngLanguageCountryName"><span class="sngLanguageFlag">'+flag+'</span><strong>'+name+'</strong></div><div class="sngLanguageOptions">'+
-choice("fr",code,"Français")+choice(localLocale,code,localLabel+(localLocale==="wo"?" · bêta":""))+
+choice("fr",code,"Français")+choice(localLocale,code,localLabel)+
 '</div></section>';
 }
 function choice(lang,code,label){return '<button type="button" class="sngLanguageChoice" data-locale="'+lang+'" data-country="'+code+'" aria-pressed="'+(locale===lang&&country===code)+'">'+label+'</button>';}
@@ -198,7 +198,7 @@ countryRow("🇲🇱","Mali","ml","bm","Bambara")+
 function close(){var m=document.getElementById("sngLanguageMenu"),b=document.getElementById("sngLanguageButton");if(m)m.hidden=true;if(b)b.setAttribute("aria-expanded","false");}
 function position(){var b=document.getElementById("sngLanguageButton"),m=document.getElementById("sngLanguageMenu");if(!b||!m||m.hidden)return;var r=b.getBoundingClientRect(),w=Math.min(320,Math.max(180,Math.floor(window.innerWidth*.5)));w=Math.min(w,window.innerWidth-24);m.style.setProperty("width",w+"px","important");m.style.setProperty("max-width",w+"px","important");m.style.setProperty("left","auto","important");m.style.setProperty("right","12px","important");m.style.setProperty("top",Math.min(r.bottom+10,window.innerHeight-80)+"px","important");}
 function setLocale(next,nextCountry){
-if(!["fr","wo","en"].includes(next))return;locale=next;if(flags[nextCountry])country=nextCountry;
+if(!["fr","wo","en","man","ee","ff","fon","bm"].includes(next))return;locale=next;if(flags[nextCountry])country=nextCountry;
 try{localStorage.setItem(STATE_KEY,locale+"|"+country);localStorage.setItem(KEY,locale);localStorage.setItem(KEY+"_country",country);}catch(_){}
 close();apply();
 }
