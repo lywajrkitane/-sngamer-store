@@ -15,7 +15,7 @@ wo:{"Accueil":"Kër","Accessoires":"Jumtukaay yi","Gaming Phone":"Telefon yu gam
 var translationQueue=new Map(),translationTimer=null,translationRun=0,automaticText=new WeakMap();
 function protectedNode(node){var el=node&&node.parentElement;return !el||!!el.closest(".productCardClickable h3,.productDetail h2,.productGallery,.price,[data-no-translate],input,textarea,select,script,style,code");}
 function queueAutomaticTranslation(node,raw,value){
-if(locale==="fr"||value.length<4||/^[\\d\\W_]+$/.test(value)||!/[\\p{L}]/u.test(value))return;
+if(locale==="fr"||value.length<4||/^[\d\W_]+$/.test(value)||!/[\p{L}]/u.test(value))return;
 translationQueue.set(node,{raw:raw,value:value,locale:locale,run:translationRun});
 if(translationTimer)clearTimeout(translationTimer);
 translationTimer=setTimeout(flushAutomaticTranslations,180);
