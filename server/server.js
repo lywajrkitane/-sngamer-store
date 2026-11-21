@@ -494,7 +494,7 @@ app.post("/api/translate", async (req, res) => {
       }
       // Reject obvious French leftovers in English output and ask Gemini to translate those entries again.
       if (locale === "en") {
-        const frenchSignal = /\\b(?:le|la|les|des|du|au|aux|avec|pour|dans|sur|son|sa|ses|est|une|un|et|ainsi|bien|conçu|conçue|écran|résolution|processeur|stockage|batterie|mois|garantie|neuf|occasion|partout|livraison)\\b|[àâçéèêëîïôùûüÿœ]/i;
+        const frenchSignal = /\b(?:le|la|les|des|du|au|aux|avec|pour|dans|sur|son|sa|ses|est|une|un|et|ainsi|bien|conçu|conçue|écran|résolution|processeur|stockage|batterie|mois|garantie|neuf|occasion|partout|livraison)\b|[àâçéèêëîïôùûüÿœ]/i;
         const retryIndexes = parsed.map((value, index) => frenchSignal.test(value) && frenchSignal.test(sourceTexts[index]) ? index : -1).filter(index => index >= 0);
         if (retryIndexes.length) {
           const retrySources = retryIndexes.map(index => sourceTexts[index]);
@@ -504,7 +504,7 @@ app.post("/api/translate", async (req, res) => {
             "Preserve product names, brand names, model names, technical identifiers, numbers and measurement symbols, but translate all ordinary French wording and units such as mois to months and Go to GB.",
             "Return only a JSON array of strings with exactly the same order and number of entries.",
             "INPUT JSON: " + JSON.stringify(retrySources)
-          ].join("\\n");
+          ].join("\n");
           const retryResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", {
             method: "POST",
             signal: AbortSignal.timeout(20000),
