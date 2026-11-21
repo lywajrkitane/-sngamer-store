@@ -426,8 +426,8 @@ app.post("/api/translate", async (req, res) => {
   if (!["en", "wo", "man", "ee", "ff", "fon", "bm"].includes(locale) || !Array.isArray(texts) || texts.length < 1 || texts.length > 30) {
     return res.status(400).json({ error: "Demande de traduction invalide." });
   }
-  const clean = texts.map(value => String(value ?? "").slice(0, 1800));
-  if (clean.some(value => !value.trim()) || clean.reduce((sum, value) => sum + value.length, 0) > 12000) {
+  const clean = texts.map(value => String(value ?? "").slice(0, 5000));
+  if (clean.some(value => !value.trim()) || clean.reduce((sum, value) => sum + value.length, 0) > 30000) {
     return res.status(400).json({ error: "Textes trop longs ou invalides." });
   }
 
@@ -459,7 +459,8 @@ app.post("/api/translate", async (req, res) => {
           "If you are uncertain about a rare or regional term, prefer a simple widely understood expression or retain the technical term rather than inventing a translation."
         ] : []),
         "Return ONLY a valid JSON array of strings, with exactly the same number and order as the inputs.",
-        "Preserve product and brand names, model numbers, URLs, placeholders, prices, currency, measurements and technical specifications.",
+        "Translate category names, specification labels (for example Processor, Cooling, Memory) and explanatory specification values when they are ordinary descriptive words.",
+        "Preserve product and brand names, model numbers, chip names, exact technical identifiers, URLs, placeholders, prices, currency, measurements, numeric values and units. Do not translate a model or a value that is only a model number or measurement.",
         "Do not add explanations, quotation marks outside JSON, or extra items.",
         "If a phrase is already a proper name or should remain unchanged, keep it unchanged.",
         "INPUT JSON: " + JSON.stringify(sourceTexts)
