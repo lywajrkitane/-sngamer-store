@@ -144,9 +144,20 @@ var entries=[],totalChars=0;Array.from(translationQueue.entries()).forEach(funct
 entries.forEach(function(entry){translationQueue.delete(entry[0]);});
 if(!entries.length)return;
 var activeLocale=locale,run=translationRun;
+function retryEntries(delay){
+entries.forEach(function(entry){
+var meta=entry[1];
+meta.attempts=(meta.attempts||0)+1;
+if(meta.attempts<=3&&entry[0]&&entry[0].isConnected&&meta.locale===locale)translationQueue.set(entry[0],meta);
+});
+if(translationQueue.size&&locale===activeLocale&&run===translationRun){
+if(translationTimer)clearTimeout(translationTimer);
+translationTimer=setTimeout(flushAutomaticTranslations,delay);
+}
+}
 try{
 var response=await fetch("/api/translate",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({locale:activeLocale,texts:entries.map(function(entry){return entry[1].value;})})});
-if(!response.ok)return;
+if(!response.ok){console.warn("SNGAMER_AUTO_TRANSLATION_HTTP_ERROR",response.status);retryEntries(response.status===429?12000:2500);return;}
 var data=await response.json();
 if(locale!==activeLocale||run!==translationRun||!Array.isArray(data.translations))return;
 entries.forEach(function(entry,index){
@@ -155,8 +166,8 @@ if(node&&node.isConnected&&originalText.get(node)===meta.raw&&typeof translated=
 var rendered=meta.raw.replace(meta.value,translated);automaticText.set(node,{locale:activeLocale,text:rendered});node.nodeValue=rendered;
 }
 });
-}catch(error){console.warn("SNGAMER_AUTO_TRANSLATION_UNAVAILABLE",error);}
-if(translationQueue.size&&locale!=="fr")translationTimer=setTimeout(flushAutomaticTranslations,180);
+}catch(error){console.warn("SNGAMER_AUTO_TRANSLATION_UNAVAILABLE",error);retryEntries(3000);}
+if(translationQueue.size&&locale!=="fr"&&!translationTimer)translationTimer=setTimeout(flushAutomaticTranslations,180);
 }
 function translateNode(node){
 if(!node||node.nodeType!==Node.TEXT_NODE||protectedNode(node))return;
