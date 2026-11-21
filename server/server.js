@@ -1937,7 +1937,19 @@ async function syncProductionCatalogIntoTest() {
   });
   const source = await sourcePool.connect();
   const target = await pool.connect();
-  const copyTable = async (table, columns, conflictKey) => {
+  const copyTable = async (table, sourceColumns, conflictKey) => {
+    // The test database can have a slightly older schema than production.
+    // Copy only columns that exist in BOTH databases; never alter production.
+    const targetSchema = await target.query(
+      "SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = $1 AND is_generated = 'NEVER'",
+      [table]
+    );
+    const targetColumns = new Set(targetSchema.rows.map((row) => row.column_name));
+    const columns = sourceColumns.filter((column) => targetColumns.has(column));
+    if (!columns.includes(conflictKey)) {
+      throw new Error("Cannot sync " + table + ": conflict key " + conflictKey + " is missing from the test database.");
+    }
+
     const result = await source.query("SELECT " + columns.join(", ") + " FROM " + table + " ORDER BY " + conflictKey);
     for (const row of result.rows) {
       const names = Object.keys(row);
@@ -1947,6 +1959,7 @@ async function syncProductionCatalogIntoTest() {
       const sql = "INSERT INTO " + table + " (" + names.join(", ") + ") VALUES (" + placeholders.join(", ") + ") ON CONFLICT (" + conflictKey + ") DO " + (updates.length ? "UPDATE SET " + updates.join(", ") : "NOTHING");
       await target.query(sql, values);
     }
+    console.log("SNGAMER_TEST_CATALOG_SYNC_TABLE", table, JSON.stringify({ copiedColumns: columns, rows: result.rows.length }));
     return result.rows.length;
   };
 
