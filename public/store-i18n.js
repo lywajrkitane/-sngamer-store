@@ -140,7 +140,7 @@ translationTimer=setTimeout(flushAutomaticTranslations,180);
 }
 async function flushAutomaticTranslations(){
 translationTimer=null;
-var entries=[],totalChars=0;Array.from(translationQueue.entries()).some(function(entry){var size=entry[1].value.length;if(entries.length>=30||size>5000||totalChars+size>30000)return false;entries.push(entry);totalChars+=size;return false;});
+var entries=[],totalChars=0;Array.from(translationQueue.entries()).forEach(function(entry){if(entries.length>=30)return;var size=entry[1].value.length;if(size>5000||totalChars+size>30000)return;entries.push(entry);totalChars+=size;});
 entries.forEach(function(entry){translationQueue.delete(entry[0]);});
 if(!entries.length)return;
 var activeLocale=locale,run=translationRun;
